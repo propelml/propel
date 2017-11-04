@@ -1,5 +1,5 @@
 import {Tensor, TensorLike} from "./tensor";
-import {add} from './numprop';
+import {add} from './sigprop';
 
 let debug = false;
 
