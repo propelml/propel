@@ -27,6 +27,19 @@ export function assertEqual(actual: TensorLike, expected: number) {
   assert(actual == expected, `actual: ${actual} expected: ${expected}`);
 }
 
+export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
+  actual = Tensor.convert(actual);
+  expected = Tensor.convert(expected);
+
+  let a = actual.ndarray.getValues();
+  let e = expected.ndarray.getValues();
+
+  assertEqual(a.length, e.length);
+  for (let i = 0; i < e.length; ++i) {
+    assertEqual(a[i], e[i]);
+  }
+}
+
 export class GradientCollector {
   // Maps tensor id -> gradient tensor array
   private map = new Map<number, Tensor[]>();

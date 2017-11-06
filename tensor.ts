@@ -1,13 +1,17 @@
 import {NDArray} from './deeplearnjs/src/math/ndarray'
 export {NDArray} from './deeplearnjs/src/math/ndarray'
 import * as ops from './ops';
+import {RegularArray,inferShape,flatten} from './deeplearnjs/src/util';
 
-export type TensorLike = number | number[] | NDArray | Tensor;
+export type TensorLike = number | RegularArray<number> | NDArray | Tensor;
+type Shape = number[];
 
 export class Tensor {
   private static nextId: number = 1;
   id: number;
+  shape: Shape;
   ndarray: NDArray;
+  dtype: 'float32' | 'uint8';
 
   static ids(tensors: Tensor[]): number[] {
     return tensors.map(t => t.id);
@@ -22,21 +26,33 @@ export class Tensor {
   }
 
   constructor(x: TensorLike) {
-    if (typeof x == "number") {
+    if (x instanceof Array) {
+      // Argument is a JS array like [[1, 2], [3, 4]].
+      let shape = inferShape(x);
+      let data = flatten(x) as Array<number>;
+      this.ndarray = NDArray.make(shape, {values: new Float32Array(data)});
+      this.shape = shape;
+    } else if (typeof x == "number") {
+      // Scalar
       this.ndarray = NDArray.make([], {values: new Float32Array([x])});
-    } else if (x instanceof Array) {
-      this.ndarray = NDArray.make([], {values: new Float32Array(x)});
+      this.shape = [1];
     } else if (x instanceof NDArray) {
       this.ndarray = x;
+      this.shape = x.shape;
     }
+
+    this.dtype = 'float32'; // TODO Support other dtypes.
 
     this.id = Tensor.nextId;
     Tensor.nextId++;
   }
 
   toNumber(): number {
-    // TODO(scalar) 
-    return this.ndarray.getValues()[0];
+    let values = this.ndarray.getValues();
+    if (values.length != 1) {
+      throw new Error("toNumber() can only be used on scalar tensors.");
+    }
+    return values[0];
   }
 
   zerosLike(): Tensor {

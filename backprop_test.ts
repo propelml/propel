@@ -1,5 +1,5 @@
 import sp from './sigprop';
-import {assertClose} from './util';
+import {assertClose, assertAllEqual} from './util';
 
 function checkGrad(f, g, val=1.0) {
   let epsilon = 0.01;
@@ -41,6 +41,18 @@ function testSquared() {
   assertClose(g(1), 2);
   assertClose(g(10), 20);
   checkGrad(f, g, 1.0);
+}
+
+function testSquaredMatrix() {
+  // f(x) = x^2
+  function f(x) {
+    return sp(x).mul(x);
+  }
+  assertAllEqual(f([[1, 2], [3, 4]]), [[1, 4], [9, 16]]);
+  let g = sp.grad(f); // g(x) = f'(x) = 2x
+  let v = g([[1, 2], [3, 4]]);
+  assertAllEqual(v.shape, [2, 2]);
+  assertAllEqual(v, [[2, 4], [6, 8]]);
 }
 
 function testDiv() {
@@ -153,3 +165,4 @@ testDiv2();
 testDiv3();
 testTanh();
 testMultigrad();
+testSquaredMatrix();
