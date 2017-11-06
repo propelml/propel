@@ -1,7 +1,6 @@
-import {NDArrayMath} from './deeplearnjs/src/math/math'
 import {NDArray} from './deeplearnjs/src/math/ndarray'
 export {NDArray} from './deeplearnjs/src/math/ndarray'
-import {NDArrayMathCPU} from './deeplearnjs/src/math/math_cpu';
+import * as ops from './ops';
 
 export type TensorLike = number | number[] | NDArray | Tensor;
 
@@ -54,5 +53,33 @@ export class Tensor {
   toString(): string {
     // TODO(scalar) 
     return `[Tensor ${this.id} ${this.ndarray.getValues()}]`
+  }
+
+  exp(): Tensor {
+    return (new ops.Exp()).run(this);
+  }
+
+  neg(): Tensor {
+    return (new ops.Neg()).run(this);
+  }
+
+  add(a: TensorLike): Tensor {
+    a = Tensor.convert(a);
+    return (new ops.Add()).run(this, a);
+  }
+
+  sub(a: TensorLike): Tensor {
+    a = Tensor.convert(a);
+    return (new ops.Sub()).run(this, a);
+  }
+
+  div(a: TensorLike): Tensor {
+    a = Tensor.convert(a);
+    return (new ops.Div()).run(this, a);
+  }
+
+  mul(a: TensorLike): Tensor {
+    a = Tensor.convert(a);
+    return (new ops.Mul()).run(this, a);
   }
 }

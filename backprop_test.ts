@@ -1,17 +1,16 @@
-import * as sp from './sigprop';
+import sp from './sigprop';
 import {assertClose, log} from './util';
 
 function checkGrad(val, f, fGrad) {
   let epsilon = 0.0001;
-  let expected = sp.div(sp.sub(f(val + epsilon), f(val - epsilon)),
-                        2 * epsilon);
+  let expected = f(val + epsilon).sub(f(val - epsilon)).div(2 * epsilon);
   let actual = fGrad(val)[0];
   assertClose(actual, expected);
 }
 
 function testInc() {
   function inc(x) {
-    return sp.add(1.0, x);
+    return sp(x).add(1);
   }
 
   assertClose(inc(1), 2);
@@ -24,7 +23,7 @@ function testInc() {
 
 function testMul() {
   function f(x) {
-    return sp.mul(42, x);
+    return sp(42).mul(x);
   }
 
   assertClose(f(1), 42);
@@ -38,7 +37,7 @@ function testMul() {
 function testSquared() {
   // f(x) = x^2
   function f(x) {
-    return sp.mul(x, x);
+    return sp(x).mul(x);
   }
   assertClose(f(1), 1);
   assertClose(f(16), 256);
@@ -51,7 +50,8 @@ function testSquared() {
 function testDiv() {
   // f(x) = (1 + x) / x
   function f(x) {
-    return sp.div(sp.add(1, x), x);
+    x = sp(x);
+    return x.add(1).div(x);
   }
   assertClose(f(1), 2);
   assertClose(f(16), (1 + 16) / 16);
@@ -72,7 +72,7 @@ function testConstant() {
 function testExp() {
   // f(x) = exp(1+x)
   function f(x) {
-    return sp.exp(sp.add(1, x));
+    return sp(x).add(1).exp();
   }
   assertClose(f(1), 7.3890);
   assertClose(f(2), 20.0855);
@@ -83,7 +83,7 @@ function testExp() {
 
 function testSub() {
   function f(x) {
-    return sp.sub(1., x);
+    return sp(1).sub(x);
   }
   assertClose(f(1), 0);
   assertClose(f(2), -1);
@@ -94,7 +94,8 @@ function testSub() {
 
 function testDiv2() {
   function f(x) {
-    return sp.div(sp.sub(1.0, x), sp.add(1.0, x));
+    x = sp(x);
+    return sp(1).sub(x).div(x.add(1)); 
   }
   assertClose(f(1), 0);
   assertClose(f(2), -1/3);
@@ -105,9 +106,8 @@ function testDiv2() {
 
 function testDiv3() {
   function f(x) {
-    let y = sp.exp(x);
-    //return sp.div(y, sp.add(1.0, y));
-    return sp.div(y, y);
+    let y = sp(x).exp();
+    return y.div(y);
   }
   assertClose(f(1), 1.);
   assertClose(f(2), 1.);
@@ -119,12 +119,12 @@ function testDiv3() {
 
 function testTanh() {
   function tanh(x) {
-    let y = sp.exp(sp.mul(-2, x));
-    return sp.div(sp.sub(1, y), sp.add(1, y));
+    let y = sp(x).mul(-2).exp();
+    return sp(1).sub(y).div(y.add(1));
   }
 
-  sp.assertClose(tanh(1), 0.7615);
-  sp.assertClose(tanh(16), 0.9999);
+  assertClose(tanh(1), 0.7615);
+  assertClose(tanh(16), 0.9999);
 
   let gradTanh = sp.grad(tanh);
   assertClose(gradTanh(1)[0], 0.4199);

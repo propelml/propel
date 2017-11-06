@@ -1,5 +1,4 @@
 import {Tensor, TensorLike} from "./tensor";
-import {add} from './sigprop';
 
 let debug = false;
 
@@ -49,7 +48,7 @@ export class GradientCollector {
     //log('aggregate tid %d ngrads %d', tid, grads.length);
     let sum = grads[0];
     for (let i = 1; i < grads.length; i++) {
-      sum = add(sum, grads[i]);
+      sum = sum.add(grads[i]);
     }
     return sum;
   }
