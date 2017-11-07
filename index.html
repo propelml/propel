@@ -1,0 +1,8 @@
+<script src="dist/sigprop.min.js"></script>
+<script>
+  console.log("hello");
+  console.log("Sigprop", sigprop);
+  var sp = sigprop.default; // FIXME.
+  var r = sp(5).mul(5);
+  console.log("expect 25. actual: ", r.toNumber());
+</script>
