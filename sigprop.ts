@@ -11,5 +11,6 @@ export default sp;
 
 namespace sp {
   export const grad = backprop.grad;
+  export const multigrad = backprop.multigrad;
 }
 
