@@ -14,10 +14,11 @@ export function assert(expr: boolean, msg="") {
   }
 }
 
-export function assertClose(actual: TensorLike, expected: TensorLike) {
+export function assertClose(actual: TensorLike, expected: TensorLike,
+                            delta=0.001) {
   actual = Tensor.convert(actual).toNumber();
   expected = Tensor.convert(expected).toNumber();
-  assert(Math.abs(actual - expected) < 0.001,
+  assert(Math.abs(actual - expected) < delta,
          `actual: ${actual} expected: ${expected}`);
 }
 
