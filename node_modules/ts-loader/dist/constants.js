@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var os = require("os");
+exports.EOL = os.EOL;
+exports.CarriageReturnLineFeed = '\r\n';
+exports.LineFeed = '\n';
+exports.CarriageReturnLineFeedCode = 0;
+exports.LineFeedCode = 1;
+exports.ScriptTargetES2015 = 2;
+exports.ModuleKindNone = 0;
+exports.ModuleKindCommonJs = 1;
+exports.tsTsxRegex = /\.ts(x?)$/i;
+exports.dtsDtsxRegex = /\.d\.ts(x?)$/i;
+exports.dtsTsTsxRegex = /(\.d)?\.ts(x?)$/i;
+exports.dtsTsTsxJsJsxRegex = /((\.d)?\.ts(x?)|js(x?))$/i;
+exports.tsTsxJsJsxRegex = /\.tsx?$|\.jsx?$/i;
+exports.jsJsx = /\.js(x?)$/i;
+exports.jsJsxMap = /\.js(x?)\.map$/i;
