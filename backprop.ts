@@ -23,9 +23,9 @@ export abstract class Op {
 
   abstract forward(...inputs: Tensor[]): Tensor;
   abstract backward(grad: Tensor): Tensor[];
-  
+
   run(...inputs: Tensor[]): Tensor {
-    let output = this.forward.apply(this, inputs);
+    let output = this.forward(...inputs);
     let outputs = [output];
 
     this.inputIds = inputs.map(t => t.id);
@@ -79,30 +79,39 @@ export class Tape {
   }
 }
 
-// Returns a function which differentiates f with respect to params.
+// Returns a function which differentiates f with respect to the given
+// argnum indexes.
 //
 // Assumputions to be removed later:
-// - For now we only handle scalar valued f.
-// - For now we assume we're calculating the grad with respect to every input
-//   of f.
 // - User doesn't need the forward pass result of f. (Need gradAndVal func
 //   which returns both.)
 // - Tensors are scalars. This is only assumed in a few places and they're
 //   marked with TODO(scalar). Need to propigate shape_and_dtype (See
 //   backprop.py).
-export function grad(f) {
+export function multigrad(f, argnums: number[]) {
   return function(...args: TensorLike[]): Tensor[] {
     pushNewTape();
     let targs: Tensor[] = [];
-    // Watch all of the argument tensors.
-    for (let arg of args) {
-      let t = Tensor.convert(arg);
-      watch(t);
-      targs.push(t);
+    // Convert args to Tensors.
+    for (let i = 0; i < args.length; ++i) {
+      targs.push(Tensor.convert(args[i]));
+    }
+    // Watch the specified argnums.
+    for (let i of argnums) {
+      watch(targs[i]);
     }
     let result = f.apply(null, targs); // Do the forward pass.
     result = Tensor.convert(result);
     return imperativeGrad(result, targs);
+  };
+}
+
+// Returns the gradient with respect to a single input.
+export function grad(f, argnum=0) {
+  //return multigrad(f, [argnum])[0];
+  let g = multigrad(f, [argnum]);
+  return function(...args: TensorLike[]): Tensor {
+    return g(...args)[0];
   };
 }
 
@@ -173,7 +182,7 @@ function imperativeGrad(target: Tensor, sources: Tensor[]): Tensor[] {
     log('- result %s', r);
     result.push(r);
   }
- 
+
   return result;
 }
 
