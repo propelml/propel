@@ -1,37 +1,33 @@
 import sp from './sigprop';
-import {assertEqual, assertClose, log} from './util';
+import {assertClose} from './util';
 
-function checkGrad(val, f, fGrad) {
-  let epsilon = 0.0001;
-  let expected = f(val + epsilon).sub(f(val - epsilon)).div(2 * epsilon);
-  let actual = fGrad(val);
+function checkGrad(f, g, val=1.0) {
+  let epsilon = 0.01;
+  let a = sp(f(val + epsilon));
+  let b = sp(f(val - epsilon));
+  let expected = a.sub(b).div(2 * epsilon);
+  let actual = g(val);
   assertClose(actual, expected);
 }
 
 function testInc() {
-  function inc(x) {
+  function f(x) {
     return sp(x).add(1);
   }
-
-  assertClose(inc(1), 2);
-  assertClose(inc(-1), 0);
-
-  let gradInc = sp.grad(inc);
-  let r = gradInc(1.0);
-  assertClose(r, 1.);
+  assertClose(f(1), 2);
+  assertClose(f(-1), 0);
+  let g = sp.grad(f);
+  assertClose(g(1.0), 1.);
+  checkGrad(f, g, 1.0);
 }
 
 function testMul() {
-  function f(x) {
-    return sp(42).mul(x);
-  }
-
+  let f = (x) => sp(42).mul(x);
   assertClose(f(1), 42);
   assertClose(f(2), 84);
-
   let g = sp.grad(f);
-  let r = g(1.0);
-  assertClose(r, 42.);
+  assertClose(g(1.), 42.);
+  checkGrad(f, g, 1.0);
 }
 
 function testSquared() {
@@ -42,9 +38,9 @@ function testSquared() {
   assertClose(f(1), 1);
   assertClose(f(16), 256);
   let g = sp.grad(f); // g(x) = f'(x) = 2x
-
   assertClose(g(1), 2);
   assertClose(g(10), 20);
+  checkGrad(f, g, 1.0);
 }
 
 function testDiv() {
@@ -56,17 +52,18 @@ function testDiv() {
   assertClose(f(1), 2);
   assertClose(f(16), (1 + 16) / 16);
   let g = sp.grad(f); // g(x) = -1 / x^2
-
   assertClose(g(1), -1);
   assertClose(g(10), -1 / 100);
+  checkGrad(f, g, 1.0);
 }
 
 function testConstant() {
-  let c = (_) => 42;
-  assertClose(c(1), 42);
-  assertClose(c(-1), 42);
-  let g = sp.grad(c);
+  let f = (_) => 42;
+  assertClose(f(1), 42);
+  assertClose(f(-1), 42);
+  let g = sp.grad(f);
   assertClose(g(1.0), 0.);
+  checkGrad(f, g, 1.0);
 }
 
 function testExp() {
@@ -79,6 +76,7 @@ function testExp() {
   let g = sp.grad(f); // g == f
   assertClose(g(1), 7.3890);
   assertClose(g(2), 20.0855);
+  checkGrad(f, g, 1.0);
 }
 
 function testSub() {
@@ -90,6 +88,7 @@ function testSub() {
   let g = sp.grad(f);
   assertClose(g(1), -1);
   assertClose(g(2), -1);
+  checkGrad(f, g, 1.0);
 }
 
 function testDiv2() {
@@ -102,6 +101,7 @@ function testDiv2() {
   let g = sp.grad(f); // g(x) = -2 / (x + 1)^2
   assertClose(g(1), -2/4);
   assertClose(g(2), -2/9);
+  checkGrad(f, g, 1.0);
 }
 
 function testDiv3() {
@@ -112,22 +112,21 @@ function testDiv3() {
   assertClose(f(1), 1.);
   assertClose(f(2), 1.);
   let g = sp.grad(f);
-
   assertClose(g(1), 0.);
   assertClose(g(2), 0.);
+  checkGrad(f, g, 1.0);
 }
 
 function testTanh() {
-  function tanh(x) {
+  function f(x) {
     let y = sp(x).mul(-2).exp();
     return sp(1).sub(y).div(y.add(1));
   }
-
-  assertClose(tanh(1), 0.7615);
-  assertClose(tanh(16), 0.9999);
-
-  let gradTanh = sp.grad(tanh);
-  assertClose(gradTanh(1), 0.4199);
+  assertClose(f(1), 0.7615);
+  assertClose(f(16), 0.9999);
+  let g = sp.grad(f);
+  assertClose(g(1), 0.4199);
+  checkGrad(f, g, 1.0);
 }
 
 function testMultigrad() {
@@ -137,10 +136,10 @@ function testMultigrad() {
   assertClose(f(1, 1), 5);
   assertClose(f(1, 2), 8);
   let g = sp.multigrad(f, [0, 1]);
-  assertEqual(g(1, 1)[0], 2);
-  assertEqual(g(1, 1)[1], 3);
-  assertEqual(g(4, 2)[0], 2);
-  assertEqual(g(4, 2)[1], 3);
+  assertClose(g(1, 1)[0], 2);
+  assertClose(g(1, 1)[1], 3);
+  assertClose(g(4, 2)[0], 2);
+  assertClose(g(4, 2)[1], 3);
 }
 
 testInc();
