@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/ry/sigprop.git"
   },
-  "license": "Apache",
+  "license": "Apache-2.0",
   "dependencies": {
     "seedrandom": "^2.4.3",
     "ts-loader": "^3.1.1",
