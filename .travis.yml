@@ -1,7 +1,8 @@
 language: node_js
 node_js:
 - '8.8'
-before_install:
-- npm install -g typescript ts-node
 script:
-- ts-node *_test.ts
+- ./node_modules/typescript/bin/tsc --outDir dist/ --diagnostics
+- node dist/backprop_test.js
+- node dist/tensor_test.js
+- node dist/util_test.js
