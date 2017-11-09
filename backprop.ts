@@ -4,8 +4,9 @@
 import {Tensor, TensorLike} from "./tensor";
 import {NDArray} from './deeplearnjs/src/math/ndarray';
 import {log,GradientCollector,CounterMap} from './util';
+import {NDArrayMath} from './deeplearnjs/src/math/math';
 
-// The global tape stack.  The tape stack is used to support higher order
+// The global tape stack. The tape stack is used to support higher order
 // gradients.
 let tapeStack: Tape[] = []; 
 
@@ -16,7 +17,10 @@ export abstract class Op {
   outputIds: number[];
   static nextOpId: number = 1;
 
-  constructor() {
+  math: NDArrayMath;
+
+  constructor(math: NDArrayMath) {
+    this.math = math;
     this.id = Op.nextOpId;
     Op.nextOpId++;
   }

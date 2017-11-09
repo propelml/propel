@@ -2,6 +2,8 @@
   "compilerOptions": {
     "lib": ["es5", "dom", "es2015"],
     "sourceMap": true,
+    "outDir": "dist/",
+    "diagnostics": true,
     "target": "es5"
   },
   "include": [ "**/*.ts" ],
