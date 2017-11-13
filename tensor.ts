@@ -18,7 +18,7 @@ export class Tensor {
   math: NDArrayMath = cpuMath;
   id: number;
   shape: Shape;
-  ndarray: NDArray;
+  ndarray: NDArray; // TODO private
   dtype: 'float32' | 'uint8';
 
   static convert(x: TensorLike): Tensor {

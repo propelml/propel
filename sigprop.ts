@@ -17,6 +17,7 @@
 
 import {Tensor, TensorLike} from './tensor';
 import * as backprop from './backprop';
+import * as ops from './ops';
 
 function sp(x: TensorLike): Tensor {
   return Tensor.convert(x);

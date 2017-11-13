@@ -2,6 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
+    'repl': './repl.ts',
     'sigprop': './sigprop.ts',
     'sigprop.min': './sigprop.ts'
   },

@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="node_modules/highlight.js/styles/github.css"/>
+<script src="dist/repl.js"></script>
+
+<script type="repl">
+import sp from "sigprop";
+console.log("5*5 =", sp(5).mul(5));
+</script>
+
+<script type="repl">
+import plt from "matplotlib";
+
+function tanh(x) {
+  let y = sp(x).mul(-2).exp();
+  return sp(1).sub(y).div(y.add(1));
+}
+
+x = sp.linspace(-7, 7, 200);
+
+grad = sp.grad;
+plt.plot(x, tanh(x),
+         x, grad(tanh)(x));
+
+plt.show();
+</script>
+
+<!--  TODO
+<script type="repl">
+plt.plot(x, tanh(x),
+         x, grad(tanh)(x),                                // first  derivative
+         x, grad(grad(tanh))(x),                          // second derivative
+         x, grad(grad(grad(tanh)))(x),                    // third  derivative
+         x, grad(grad(grad(grad(tanh))))(x),              // fourth derivative
+         x, grad(grad(grad(grad(grad(tanh)))))(x),        // fifth  derivative
+         x, grad(grad(grad(grad(grad(grad(tanh))))))(x)); // sixth  derivative
+</script>
+-->
