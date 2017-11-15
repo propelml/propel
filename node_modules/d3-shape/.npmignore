@@ -1,0 +1,4 @@
+*.sublime-*
+build/*.zip
+img/
+test/

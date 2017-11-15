@@ -1,0 +1,27 @@
+{
+    "name": "d3-hierarchy",
+    "libraryName": "D3JS d3-hierarchy module",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "data": {
+        "authors": "Tom Wanzek <https://github.com/tomwanzek>, Alex Ford <https://github.com/gustavderdrache>, Boris Yankov <https://github.com/borisyankov>",
+        "dependencies": {},
+        "pathMappings": {},
+        "libraryMajorVersion": 1,
+        "libraryMinorVersion": 1,
+        "typeScriptVersion": "2.0",
+        "libraryName": "D3JS d3-hierarchy module",
+        "typingsPackageName": "d3-hierarchy",
+        "projectName": "https://github.com/d3/d3-hierarchy/",
+        "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+        "globals": [],
+        "declaredModules": [
+            "d3-hierarchy/."
+        ],
+        "files": [
+            "index.d.ts"
+        ],
+        "hasPackageJson": false,
+        "contentHash": "a0398b9d2fb34faf8e70f29579010fb9940cb6a9992420e942cc0843fdd11562"
+    },
+    "isLatest": true
+}

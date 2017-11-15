@@ -1,0 +1,40 @@
+{
+    "name": "d3-chord",
+    "libraryName": "D3JS d3-chord module",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "data": {
+        "contributors": [
+            {
+                "name": "Tom Wanzek",
+                "url": "https://github.com/tomwanzek"
+            },
+            {
+                "name": "Alex Ford",
+                "url": "https://github.com/gustavderdrache"
+            },
+            {
+                "name": "Boris Yankov",
+                "url": "https://github.com/borisyankov"
+            }
+        ],
+        "dependencies": {},
+        "pathMappings": {},
+        "libraryMajorVersion": 1,
+        "libraryMinorVersion": 0,
+        "typeScriptVersion": "2.0",
+        "libraryName": "D3JS d3-chord module",
+        "typingsPackageName": "d3-chord",
+        "projectName": "https://github.com/d3/d3-chord/",
+        "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+        "globals": [],
+        "declaredModules": [
+            "d3-chord/."
+        ],
+        "files": [
+            "index.d.ts"
+        ],
+        "hasPackageJson": false,
+        "contentHash": "eae1f79782e6107300cc60efea9ee64df5d070efbdb8072ccee7da5b1ea453ac"
+    },
+    "isLatest": true
+}
