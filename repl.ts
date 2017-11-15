@@ -1,6 +1,6 @@
 import * as hljs from "highlight.js";
 
-import sigprop from "./sigprop";
+import propel from "./propel";
 import matplotlib from "./matplotlib";
 
 let cellsElement = document.createElement('div');
@@ -30,7 +30,7 @@ window["define"] = function define(x) {
 window["require"] = function require(target) {
   //_log("require", target);
   let m = {
-    "sigprop": sigprop,
+    "propel": propel,
     "matplotlib": matplotlib
   }[target];
   if (m) {

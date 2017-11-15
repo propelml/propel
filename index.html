@@ -1,9 +1,9 @@
-<script src="dist/sigprop.js"></script>
+<script src="dist/propel.js"></script>
 <script>
-  var sp = sigprop.default; // FIXME.
+  var $ = propel.default; // FIXME.
 
-  console.log("sigprop", sigprop);
-  var r = sp(5).mul(5);
+  console.log("propel", propel);
+  var r = $(5).mul(5);
   console.assert(!r.inGPU());
   console.log("expect 25. actual:", r.toNumber());
   console.assert(25 == r.toNumber());
