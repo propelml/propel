@@ -43,7 +43,7 @@ window["exports"] = {};
 
 // TODO Yes, extremely hacky.
 function transpile(source: string): string {
-  return source.replace(/import (\w+) from ("[^"]+"|'[^']+')/g, (m, p1, p2) => {
+  return source.replace(/import ([$\w]+) from ("[^"]+"|'[^']+')/g, (m, p1, p2) => {
     let x = `${p1} = require(${p2})`;
     //_log("replace", p1, p2, x);
     return x;
