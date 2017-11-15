@@ -1,8 +1,8 @@
 {
-  "description": "sigprop",
+  "description": "propel",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ry/sigprop.git"
+    "url": "git+https://github.com/ry/propel.git"
   },
   "license": "Apache-2.0",
   "dependencies": {

@@ -1,6 +1,6 @@
 import * as repl from "./repl";
 import * as d3 from "d3";
-import sp from "./sigprop";
+import $ from "./propel";
 import {assertEqual} from "./util";
 
 let currentPlot = null;
@@ -67,7 +67,7 @@ function plot(...args) {
   assertEqual(xs.length, ys.length);
   let data = [];
   for (let i = 0; i < xs.length; ++i) {
-    // TODO line = sp.stack([xs[i], ys[i]], 1)
+    // TODO line = $.stack([xs[i], ys[i]], 1)
     let xv = xs[i].ndarray.getValues();
     let yv = ys[i].ndarray.getValues();
     assertEqual(xv.length, yv.length);

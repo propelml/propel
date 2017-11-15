@@ -2,21 +2,21 @@
 <script src="dist/repl.js"></script>
 
 <script type="repl">
-import sp from "sigprop";
-console.log("5*5 =", sp(5).mul(5));
+import $ from "propel";
+console.log("5*5 =", $(5).mul(5));
 </script>
 
 <script type="repl">
 import plt from "matplotlib";
 
 function tanh(x) {
-  let y = sp(x).mul(-2).exp();
-  return sp(1).sub(y).div(y.add(1));
+  let y = $(x).mul(-2).exp();
+  return $(1).sub(y).div(y.add(1));
 }
 
-x = sp.linspace(-7, 7, 200);
+x = $.linspace(-7, 7, 200);
 
-grad = sp.grad;
+grad = $.grad;
 plt.plot(x, tanh(x),
          x, grad(tanh)(x));
 

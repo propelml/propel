@@ -1,5 +1,5 @@
 /*
-   Copyright 2017 sigprop authors. All Rights Reserved.
+   Copyright 2017 propel authors. All Rights Reserved.
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -19,14 +19,14 @@ import {Tensor, TensorLike} from './tensor';
 import * as backprop from './backprop';
 import * as ops from './ops';
 
-function sp(x: TensorLike): Tensor {
+function $(x: TensorLike): Tensor {
   return Tensor.convert(x);
 }
 
 
-export default sp;
+export default $;
 
-namespace sp {
+namespace $ {
   export const grad = backprop.grad;
   export const multigrad = backprop.multigrad;
 

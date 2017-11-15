@@ -3,8 +3,8 @@ var webpack = require('webpack');
 module.exports = {
   entry: {
     'repl': './repl.ts',
-    'sigprop': './sigprop.ts',
-    'sigprop.min': './sigprop.ts'
+    'propel': './propel.ts',
+    'propel.min': './propel.ts'
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({
@@ -29,6 +29,6 @@ module.exports = {
     filename: '[name].js',
     path: __dirname + '/dist',
     libraryTarget: "var",
-    library: "sigprop"
+    library: "propel"
   }
 };
