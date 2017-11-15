@@ -99,8 +99,8 @@ export class Tensor {
   }
 
   toString(): string {
-    // TODO(scalar) 
-    return `[Tensor ${this.id} ${this.ndarray.getValues()}]`
+    // TODO This should pretty print the tensor.
+    return `[${this.ndarray.getValues()}]`
   }
 
   exp(): Tensor {
