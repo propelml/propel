@@ -1,14 +1,14 @@
 // This implementation closely follows gradients_function from TF Eager:
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
-import {Tensor, TensorLike} from "./tensor";
-import {NDArray} from './deeplearnjs/src/math/ndarray';
-import {log,GradientCollector,CounterMap} from './util';
-import {NDArrayMath} from './deeplearnjs/src/math/math';
+import { Tensor, TensorLike } from "./tensor";
+import { NDArray } from './deeplearnjs/src/math/ndarray';
+import { log, GradientCollector, CounterMap } from './util';
+import { NDArrayMath } from './deeplearnjs/src/math/math';
 
 // The global tape stack. The tape stack is used to support higher order
 // gradients.
-let tapeStack: Tape[] = []; 
+let tapeStack: Tape[] = [];
 
 // Base class for all operations. Specific ops are defined in ops.ts file.
 export abstract class Op {
@@ -111,7 +111,7 @@ export function multigrad(f, argnums: number[]) {
 }
 
 // Returns the gradient with respect to a single input.
-export function grad(f, argnum=0) {
+export function grad(f, argnum = 0) {
   //return multigrad(f, [argnum])[0];
   let g = multigrad(f, [argnum]);
   return function(...args: TensorLike[]): Tensor {
@@ -128,8 +128,8 @@ function imperativeGrad(target: Tensor, sources: Tensor[]): Tensor[] {
   // prepareBackprop, this potentially allows the VM to release all memory used
   // to keep traces that are irrelevant to the gradient computation we're
   // doing.
-  let [usageCounts, opMissingTensor, oidLookup] = prepareBackprop(target, tape, 
-                                                                  sourceIds);
+  let [usageCounts, opMissingTensor, oidLookup] = prepareBackprop(target, tape,
+    sourceIds);
   log("usageCounts", usageCounts);
   log("opMissingTensor", opMissingTensor);
 
@@ -164,7 +164,7 @@ function imperativeGrad(target: Tensor, sources: Tensor[]): Tensor[] {
       if (usageCounts.get(t) > 0) {
         usageCounts.dec(t);
         if (tape.tensorToOp.has(t) && usageCounts.get(t) == 0 &&
-            !sourceIds.has(t)) {
+          !sourceIds.has(t)) {
           let inOp = tape.tensorToOp.get(t);
           if (inOp > 0) {
             if (opMissingTensor.get(inOp) > 0) {
@@ -220,7 +220,7 @@ function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap, Map<
       // - if the input tensor has a registered op, and 
       // - it's not one of the source tensors, 
       if (usageCounts.get(inputId) == 1 && tape.tensorToOp.has(inputId) &&
-          !sourceIds.has(inputId)) {
+        !sourceIds.has(inputId)) {
         tensorStack.push(inputId);
       }
     }
@@ -239,11 +239,11 @@ function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap, Map<
 
 // Pushes a new tape onto the tape stack. 
 export function pushNewTape(): void {
-   tapeStack.push(new Tape());
+  tapeStack.push(new Tape());
 }
 
 export function popTape(): Tape {
-   return tapeStack.pop();
+  return tapeStack.pop();
 }
 
 // Marks this tensor to be watched by all tapes in the stack.

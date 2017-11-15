@@ -1,7 +1,7 @@
 import * as repl from "./repl";
 import * as d3 from "d3";
 import $ from "./propel";
-import {assertEqual} from "./util";
+import { assertEqual } from "./util";
 
 let currentPlot = null;
 
@@ -15,7 +15,7 @@ function plotLines(data) {
   let svg = d3.select(outputId).append("svg")
     .attr("width", 400)
     .attr("height", 200);
-  let margin = {top: 10, right: 10, bottom: 10, left: 10};
+  let margin = { top: 10, right: 10, bottom: 10, left: 10 };
   let width = +svg.attr("width") - margin.left - margin.right;
   let height = +svg.attr("height") - margin.top - margin.bottom;
   let g = svg.append("g")
@@ -37,11 +37,11 @@ function plotLines(data) {
     .enter()
     .append("path")
     .attr("d", <any>line)
-        .style("fill", "none" )
-        .style("stroke-width", "2px" )
-        .style("stroke", (d, i) => {
-          return color(<any>i);
-        })
+    .style("fill", "none")
+    .style("stroke-width", "2px")
+    .style("stroke", (d, i) => {
+      return color(<any>i);
+    })
 }
 
 function plot(...args) {
@@ -51,15 +51,15 @@ function plot(...args) {
   for (let i = 0; i < args.length; i++) {
     let arg = args[i];
     switch (state) {
-        case "x":
-          xs.push(arg);
-          state = "y";
-          break;
+      case "x":
+        xs.push(arg);
+        state = "y";
+        break;
 
-        case "y":
-          ys.push(arg);
-          state = "x";
-          break;
+      case "y":
+        ys.push(arg);
+        state = "x";
+        break;
 
     }
   }
@@ -73,7 +73,7 @@ function plot(...args) {
     assertEqual(xv.length, yv.length);
     let line = [];
     for (let j = 0; j < xv.length; ++j) {
-      line.push({x: xv[j], y: yv[j]});
+      line.push({ x: xv[j], y: yv[j] });
     }
     data.push(line);
   }

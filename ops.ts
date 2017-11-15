@@ -1,4 +1,4 @@
-import {Tensor} from "./tensor";
+import { Tensor } from "./tensor";
 import * as backprop from './backprop';
 
 export class Exp extends backprop.Op {

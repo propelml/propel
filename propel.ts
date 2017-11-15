@@ -15,7 +15,7 @@
 
 // Exports of this file is the only public API.
 
-import {Tensor, TensorLike} from './tensor';
+import { Tensor, TensorLike } from './tensor';
 import * as backprop from './backprop';
 import * as ops from './ops';
 
@@ -34,7 +34,7 @@ namespace $ {
   //
   // Returns num evenly spaced samples, calculated over the interval
   // [start, stop].
-  export const linspace = function(start, stop, num=50): Tensor {
+  export const linspace = function(start, stop, num = 50): Tensor {
     let a = [];
     let d = (stop - start) / num;
     for (let i = 0; i < num; ++i) {

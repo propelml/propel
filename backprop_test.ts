@@ -1,7 +1,7 @@
 import $ from './propel';
-import {assertClose, assertAllEqual} from './util';
+import { assertClose, assertAllEqual } from './util';
 
-function checkGrad(f, g, val=1.0) {
+function checkGrad(f, g, val = 1.0) {
   let epsilon = 0.01;
   let a = $(f(val + epsilon));
   let b = $(f(val - epsilon));
@@ -106,13 +106,13 @@ function testSub() {
 function testDiv2() {
   function f(x) {
     x = $(x);
-    return $(1).sub(x).div(x.add(1)); 
+    return $(1).sub(x).div(x.add(1));
   }
   assertClose(f(1), 0);
-  assertClose(f(2), -1/3);
+  assertClose(f(2), -1 / 3);
   let g = $.grad(f); // g(x) = -2 / (x + 1)^2
-  assertClose(g(1), -2/4);
-  assertClose(g(2), -2/9);
+  assertClose(g(1), -2 / 4);
+  assertClose(g(2), -2 / 9);
   checkGrad(f, g, 1.0);
 }
 
