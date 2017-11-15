@@ -1,5 +1,5 @@
 import $ from './propel';
-import {assertEqual, assertAllEqual} from './util';
+import { assertEqual, assertAllEqual } from './util';
 
 function testShapes() {
   let a = $([[1, 2], [3, 4]]);

@@ -102,7 +102,7 @@ class Cell {
   log(...args) {
     // messy
     let s = args.map(a => a.toString()).join(" ");
-    let last = this.output.lastChild; 
+    let last = this.output.lastChild;
     if (last && last.nodeType != Node.TEXT_NODE) {
       s = "\n" + s;
     }
@@ -114,7 +114,7 @@ class Cell {
   error(...args) {
     // messy
     let s = args.map(a => a.toString()).join(" ");
-    let last = this.output.lastChild; 
+    let last = this.output.lastChild;
     if (last && last.nodeType != Node.TEXT_NODE) {
       s = "\n" + s;
     }
@@ -150,7 +150,7 @@ class Cell {
       let rval = undefined;
       try {
         rval = globalEval(jsSource);
-      } catch(e) {
+      } catch (e) {
         this.error(e.stack);
       }
       if (rval) this.log(rval);

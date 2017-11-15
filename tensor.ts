@@ -1,11 +1,11 @@
-import {NDArray} from './deeplearnjs/src/math/ndarray'
-export {NDArray} from './deeplearnjs/src/math/ndarray'
+import { NDArray } from './deeplearnjs/src/math/ndarray'
+export { NDArray } from './deeplearnjs/src/math/ndarray'
 import * as ops from './ops';
-import {RegularArray,inferShape,flatten} from './deeplearnjs/src/util';
-import {NDArrayMathCPU} from './deeplearnjs/src/math/math_cpu';
-import {NDArrayMathGPU} from './deeplearnjs/src/math/math_gpu';
-import {NDArrayMath} from './deeplearnjs/src/math/math';
-import {assert} from './util';
+import { RegularArray, inferShape, flatten } from './deeplearnjs/src/util';
+import { NDArrayMathCPU } from './deeplearnjs/src/math/math_cpu';
+import { NDArrayMathGPU } from './deeplearnjs/src/math/math_gpu';
+import { NDArrayMath } from './deeplearnjs/src/math/math';
+import { assert } from './util';
 
 export type TensorLike = number | RegularArray<number> | NDArray | Tensor;
 type Shape = number[];
@@ -34,11 +34,11 @@ export class Tensor {
       // Argument is a JS array like [[1, 2], [3, 4]].
       let shape = inferShape(x);
       let data = flatten(x) as Array<number>;
-      this.ndarray = NDArray.make(shape, {values: new Float32Array(data)});
+      this.ndarray = NDArray.make(shape, { values: new Float32Array(data) });
       this.shape = shape;
     } else if (typeof x == "number") {
       // Scalar
-      this.ndarray = NDArray.make([], {values: new Float32Array([x])});
+      this.ndarray = NDArray.make([], { values: new Float32Array([x]) });
       this.shape = [1];
     } else if (x instanceof NDArray) {
       this.ndarray = x;

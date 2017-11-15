@@ -1,5 +1,5 @@
 import * as util from './util';
-import {assert, assertEqual} from './util';
+import { assert, assertEqual } from './util';
 
 function testCounterMap() {
   let m = new util.CounterMap();

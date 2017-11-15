@@ -1,4 +1,4 @@
-import {Tensor, TensorLike} from "./tensor";
+import { Tensor, TensorLike } from "./tensor";
 
 let debug = false;
 
@@ -8,18 +8,18 @@ export function log(...args: any[]) {
   }
 }
 
-export function assert(expr: boolean, msg="") {
+export function assert(expr: boolean, msg = "") {
   if (!expr) {
     throw new Error(msg);
   }
 }
 
 export function assertClose(actual: TensorLike, expected: TensorLike,
-                            delta=0.001) {
+  delta = 0.001) {
   actual = Tensor.convert(actual).toNumber();
   expected = Tensor.convert(expected).toNumber();
   assert(Math.abs(actual - expected) < delta,
-         `actual: ${actual} expected: ${expected}`);
+    `actual: ${actual} expected: ${expected}`);
 }
 
 export function assertEqual(actual: TensorLike, expected: number) {
