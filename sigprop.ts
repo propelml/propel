@@ -22,10 +22,24 @@ function sp(x: TensorLike): Tensor {
   return Tensor.convert(x);
 }
 
+
 export default sp;
 
 namespace sp {
   export const grad = backprop.grad;
   export const multigrad = backprop.multigrad;
+
+  // Return evenly spaced numbers over a specified interval.
+  //
+  // Returns num evenly spaced samples, calculated over the interval
+  // [start, stop].
+  export const linspace = function(start, stop, num=50): Tensor {
+    let a = [];
+    let d = (stop - start) / num;
+    for (let i = 0; i < num; ++i) {
+      a.push(start + i * d);
+    }
+    return Tensor.convert(a);
+  }
 }
 
