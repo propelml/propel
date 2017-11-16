@@ -40,6 +40,20 @@ export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
   }
 }
 
+export function assertAllClose(actual: TensorLike, expected: TensorLike, delta = 0.001) {
+  actual = Tensor.convert(actual);
+  expected = Tensor.convert(expected);
+
+  let a = actual.ndarray.getValues();
+  let e = expected.ndarray.getValues();
+
+  assertEqual(a.length, e.length);
+  for (let i = 0; i < e.length; ++i) {
+    assert(Math.abs(a[i] - e[i]) < delta,
+      `index ${i} actual: ${a[i]} expected: ${e[i]}`);
+  }
+}
+
 export class GradientCollector {
   // Maps tensor id -> gradient tensor array
   private map = new Map<number, Tensor[]>();
