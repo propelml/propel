@@ -104,30 +104,26 @@ export class Tensor {
   }
 
   exp(): Tensor {
-    return (new ops.Exp(this.math)).run(this);
+    return ops.exp(this);
   }
 
   neg(): Tensor {
-    return (new ops.Neg(this.math)).run(this);
+    return ops.neg(this);
   }
 
-  add(a: TensorLike): Tensor {
-    a = Tensor.convert(a);
-    return (new ops.Add(this.math)).run(this, a);
+  add(x: TensorLike): Tensor {
+    return ops.add(this, x);
   }
 
-  sub(a: TensorLike): Tensor {
-    a = Tensor.convert(a);
-    return (new ops.Sub(this.math)).run(this, a);
+  sub(x: TensorLike): Tensor {
+    return ops.sub(this, x);
   }
 
-  div(a: TensorLike): Tensor {
-    a = Tensor.convert(a);
-    return (new ops.Div(this.math)).run(this, a);
+  div(x: TensorLike): Tensor {
+    return ops.div(this, x);
   }
 
-  mul(a: TensorLike): Tensor {
-    a = Tensor.convert(a);
-    return (new ops.Mul(this.math)).run(this, a);
+  mul(x: TensorLike): Tensor {
+    return ops.mul(this, x);
   }
 }

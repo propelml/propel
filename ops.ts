@@ -1,86 +1,91 @@
-import { Tensor } from "./tensor";
-import * as backprop from './backprop';
+// Based loosely on AutoGrad's numpy_jvps.py
+// https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
+// Forward OPs only use NDArrayMath.
+// Backwards OPs must be defined in terms of forward OPs in order to support
+// higher order gradients.
+import { NDArrayMath } from './deeplearnjs/src/math/math';
+import { NDArray } from './deeplearnjs/src/math/ndarray';
+import { NDArrayMathCPU } from './deeplearnjs/src/math/math_cpu';
+import { Tensor, TensorLike } from "./tensor";
+import * as backprop from "./backprop";
 
-export class Exp extends backprop.Op {
-  input: Tensor;
+let cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
-  forward(a: Tensor): Tensor {
-    this.input = a;
-    return new Tensor(this.math.exp(a.ndarray));
-  }
+type FWFunc = (math: NDArrayMath, ...args: NDArray[]) => NDArray;
+type BWFunc = (grad: Tensor, ans: Tensor, ...args: Tensor[]) => Tensor;
+type OpFunc = (...args: TensorLike[]) => Tensor;
 
-  backward(grad: Tensor): Tensor[] {
-    let a = this.math.exp(this.input.ndarray);
-    let g = this.math.multiply(grad.ndarray, a);
-    return [new Tensor(g)];
-  }
+let nextOpId: number = 1;
+
+interface OpInfo {
+  name: string;
+  fwFunc: FWFunc;
+  bwFuncs: BWFunc[];
 }
 
-export class Neg extends backprop.Op {
-  forward(a: Tensor): Tensor {
-    return new Tensor(this.math.neg(a.ndarray));
-  }
+let ops = {}; // name -> OpInfo
 
-  backward(grad: Tensor): Tensor[] {
-    return [this.forward(grad)];
-  }
+function defFW(name: string, fwFunc: FWFunc): OpFunc {
+  let opFunc: OpFunc = (...args: TensorLike[]): Tensor => {
+    let tArgs = args.map(a => Tensor.convert(a));
+    let inputIds = tArgs.map(t => t.id);
+    let ndArgs = tArgs.map(t => t.ndarray);
+    let math = cpuMath; // TODO decide if we should use GPU math here.
+    let ndarrayAns = fwFunc(math, ...ndArgs);
+    let ans = new Tensor(ndarrayAns);
+    backprop.recordOp({
+      name: name,
+      oid: nextOpId++,
+      inputIds: inputIds,
+      outputIds: [ans.id],
+      ans: ans,
+      inputs: tArgs,
+    });
+    return ans;
+  };
+
+  ops[name] = {
+    name: name,
+    fwFunc: fwFunc,
+    bwFuncs: null
+  };
+
+  return opFunc;
 }
 
-export class Add extends backprop.Op {
-  forward(a: Tensor, b: Tensor): Tensor {
-    let x = this.math.add(a.ndarray, b.ndarray);
-    return new Tensor(x);
-  }
-
-  backward(grad: Tensor): Tensor[] {
-    return [grad, grad];
-  }
+export function getBackwardFuncs(name: string): BWFunc[] {
+  return ops[name].bwFuncs;
 }
 
-export class Sub extends backprop.Op {
-  forward(a: Tensor, b: Tensor): Tensor {
-    return new Tensor(this.math.sub(a.ndarray, b.ndarray));
-  }
-
-  backward(grad: Tensor): Tensor[] {
-    let ga = grad;
-    let gb = new Tensor(this.math.neg(grad.ndarray));
-    return [ga, gb];
-  }
+function defBW(name: string, ...bwFuncs: BWFunc[]) {
+  ops[name].bwFuncs = bwFuncs;
 }
 
-export class Mul extends backprop.Op {
-  inputs: Tensor[];
-
-  forward(a: Tensor, b: Tensor): Tensor {
-    this.inputs = [a, b];
-    return new Tensor(this.math.multiply(a.ndarray, b.ndarray));
-  }
-
-  backward(grad: Tensor): Tensor[] {
-    let ag = this.math.multiply(this.inputs[1].ndarray, grad.ndarray);
-    let bg = this.math.multiply(this.inputs[0].ndarray, grad.ndarray);
-    return [new Tensor(ag), new Tensor(bg)];
-  }
+// TODO Identity for now.
+function broadcast(x, target) {
+  return x;
 }
 
-export class Div extends backprop.Op {
-  inputs: Tensor[];
+export let mul = defFW("mul", (m, x, y) => m.multiply(x, y));
+defBW("mul",
+  (g, ans, x, y) => mul(g, y),
+  (g, ans, x, y) => mul(g, x))
 
-  forward(a: Tensor, b: Tensor): Tensor {
-    this.inputs = [a, b];
-    return new Tensor(this.math.divide(a.ndarray, b.ndarray));
-  }
+export let exp = defFW("exp", (m, x) => m.exp(x));
+defBW("exp", (g, ans, x) => mul(ans, g));
 
-  backward(grad: Tensor): Tensor[] {
-    // f(a, b) = a / b 
-    // df/da(a, b) = 1 / b 
-    // df/db(a, b) = -a / b^2
-    let a = this.inputs[0].ndarray;
-    let b = this.inputs[1].ndarray;
-    let ag = this.math.divide(grad.ndarray, b);
-    let b2 = this.math.multiply(b, b);
-    let bg = this.math.multiply(grad.ndarray, this.math.divide(this.math.neg(a), b2));
-    return [new Tensor(ag), new Tensor(bg)];
-  }
-}
+export let neg = defFW("neg", (m, x) => m.neg(x));
+defBW("neg", (g, ans, x) => neg(g));
+
+export let add = defFW("add", (m, x, y) => m.add(x, y));
+defBW("add", (g, ans, x, y) => broadcast(g, ans),
+  (g, ans, x, y) => broadcast(g, ans));
+
+export let sub = defFW("sub", (m, x, y) => m.sub(x, y));
+defBW("sub", (g, ans, x, y) => broadcast(g, ans),
+  (g, ans, x, y) => broadcast(neg(g), ans));
+
+export let div = defFW("div", (m, x, y) => m.divide(x, y));
+defBW("div",
+  (g, ans, x, y) => div(g, y),
+  (g, ans, x, y) => div(neg(mul(g, x)), mul(y, y)));

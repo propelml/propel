@@ -1,5 +1,5 @@
 import $ from './propel';
-import { assertClose, assertAllEqual } from './util';
+import { assertAllClose, assertClose, assertAllEqual } from './util';
 
 function checkGrad(f, g, val = 1.0) {
   let epsilon = 0.01;
@@ -130,10 +130,7 @@ function testDiv3() {
 }
 
 function testTanh() {
-  function f(x) {
-    let y = $(x).mul(-2).exp();
-    return $(1).sub(y).div(y.add(1));
-  }
+  let f = $.tanh;
   assertClose(f(1), 0.7615);
   assertClose(f(16), 0.9999);
   let g = $.grad(f);
@@ -154,6 +151,14 @@ function testMultigrad() {
   assertClose(g(4, 2)[1], 3);
 }
 
+function testGradGradTanh() {
+  let f = $.tanh;
+  assertAllClose(f([1, 16]), [0.7615, 0.9999]);
+  let g = $.grad($.grad(f));
+  // def g(x): return -2 * np.tanh(x) / np.square(np.cosh(x))
+  assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
+}
+
 testInc();
 testMul();
 testSquared();
@@ -166,3 +171,4 @@ testDiv3();
 testTanh();
 testMultigrad();
 testSquaredMatrix();
+testGradGradTanh();
