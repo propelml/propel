@@ -3,28 +3,21 @@
 
 <script type="repl">
 import $ from "propel";
+import plt from "matplotlib";
 console.log("5*5 =", $(5).mul(5));
 </script>
 
 <script type="repl">
-import plt from "matplotlib";
-
-function tanh(x) {
-  let y = $(x).mul(-2).exp();
-  return $(1).sub(y).div(y.add(1));
-}
-
-x = $.linspace(-7, 7, 200);
-
 grad = $.grad;
-plt.plot(x, tanh(x),
-         x, grad(tanh)(x));
-
+f = (x) => $(x).mul(x).mul(1/5).sub(.5);
+x = $.linspace(-7, 7, 200);
+plt.plot(x, f(x),
+         x, grad(f)(x));
 plt.show();
 </script>
 
-<!--  TODO
 <script type="repl">
+tanh = $.tanh;
 plt.plot(x, tanh(x),
          x, grad(tanh)(x),                                // first  derivative
          x, grad(grad(tanh))(x),                          // second derivative
@@ -33,4 +26,3 @@ plt.plot(x, tanh(x),
          x, grad(grad(grad(grad(grad(tanh)))))(x),        // fifth  derivative
          x, grad(grad(grad(grad(grad(grad(tanh))))))(x)); // sixth  derivative
 </script>
--->

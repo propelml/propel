@@ -23,10 +23,6 @@ export function outputId(): string {
   return _REPLOutputId();
 }
 
-window["define"] = function define(x) {
-  _log("define", x);
-}
-
 window["require"] = function require(target) {
   //_log("require", target);
   let m = {

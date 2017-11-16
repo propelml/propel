@@ -17,7 +17,6 @@
 
 import { Tensor, TensorLike } from './tensor';
 import * as backprop from './backprop';
-import * as ops from './ops';
 
 function $(x: TensorLike): Tensor {
   return Tensor.convert(x);
@@ -41,6 +40,11 @@ namespace $ {
       a.push(start + i * d);
     }
     return Tensor.convert(a);
-  }
+  };
+
+  export const tanh = function(x: TensorLike): Tensor {
+    let y = $(x).mul(-2).exp();
+    return $(1).sub(y).div(y.add(1));
+  };
 }
 

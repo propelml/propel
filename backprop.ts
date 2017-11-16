@@ -5,45 +5,30 @@ import { Tensor, TensorLike } from "./tensor";
 import { NDArray } from './deeplearnjs/src/math/ndarray';
 import { log, GradientCollector, CounterMap } from './util';
 import { NDArrayMath } from './deeplearnjs/src/math/math';
+import { assertEqual } from './util';
+import { getBackwardFuncs } from './ops';
 
 // The global tape stack. The tape stack is used to support higher order
 // gradients.
 let tapeStack: Tape[] = [];
 
-// Base class for all operations. Specific ops are defined in ops.ts file.
-export abstract class Op {
-  id: number;
+interface TapeEntry {
+  name: string;
+  oid: number;
   inputIds: number[];
   outputIds: number[];
-  static nextOpId: number = 1;
 
-  math: NDArrayMath;
+  // TODO These should not be set for, ops like exp or neg. Keeping references
+  // to all Tensors is very inefficient. 
+  inputs: Tensor[];
+  ans: Tensor;
+};
 
-  constructor(math: NDArrayMath) {
-    this.math = math;
-    this.id = Op.nextOpId;
-    Op.nextOpId++;
-  }
-
-  abstract forward(...inputs: Tensor[]): Tensor;
-  abstract backward(grad: Tensor): Tensor[];
-
-  run(...inputs: Tensor[]): Tensor {
-    let output = this.forward(...inputs);
-    let outputs = [output];
-
-    this.inputIds = inputs.map(t => t.id);
-    this.outputIds = outputs.map(t => t.id);
-
-    recordOperation(this);
-    return output;
-  }
-
-  toString(): string {
-    let i = this.inputIds.toString()
-    let o = this.outputIds.toString();
-    return `${this.constructor.name}(${this.id}) in ${i} out ${o}`;
-  }
+// Hacky. How does one define methods on interfaces?
+function tapeEntryToString(e: TapeEntry): string {
+  let i = e.inputIds.toString();
+  let o = e.outputIds.toString();
+  return `${e.name}(${e.oid}) in ${i} out ${o}`;
 }
 
 // Represents a gradient propagation trace.
@@ -51,7 +36,7 @@ export class Tape {
   // Maps from Tensor ids to their operation ids.
   tensorToOp = new Map<number, number>();
 
-  oidLookup = new Map<number, Op>(); // Maps from operation id to TapeEntry.
+  oidLookup = new Map<number, TapeEntry>(); // Maps from operation id to TapeEntry.
 
   // Returns true if any tensor should be recorded.
   shouldRecord(tids: number[]): boolean {
@@ -71,15 +56,15 @@ export class Tape {
     }
   }
 
-  recordOperation(op: Op): void {
-    if (!this.shouldRecord(op.inputIds)) {
+  recordOp(tapeEntry: TapeEntry): void {
+    if (!this.shouldRecord(tapeEntry.inputIds)) {
       return;
     }
-    log("recordOperation %s", op);
-    for (let tid of op.outputIds) {
-      this.tensorToOp.set(tid, op.id);
+    log("recordOp %s", tapeEntryToString(tapeEntry));
+    for (let tid of tapeEntry.outputIds) {
+      this.tensorToOp.set(tid, tapeEntry.oid);
     }
-    this.oidLookup.set(op.id, op);
+    this.oidLookup.set(tapeEntry.oid, tapeEntry);
   }
 }
 
@@ -147,12 +132,15 @@ function imperativeGrad(target: Tensor, sources: Tensor[]): Tensor[] {
     let op = oidLookup.get(oid);
 
     // TODO(scalar) Currently assuming ops have single output.
+    assertEqual(op.outputIds.length, 1)
     let outGrad = gradients.aggregate(op.outputIds[0]);
 
     log("backprop %s", op);
     log("- outGrad %s", outGrad);
 
-    let inGrads = op.backward(outGrad);
+    let inGrads = getBackwardFuncs(op.name).map(bwFunc => {
+      return bwFunc(outGrad, op.ans, ...op.inputs);
+    });
 
     log("- inGrad %s", inGrads);
 
@@ -196,9 +184,9 @@ function imperativeGrad(target: Tensor, sources: Tensor[]): Tensor[] {
 // imperativeGrad() to know when a tensor that is being used as input to
 // multiple operations has had all of its gradients calculated, and thus
 // that the algorithm can move on to the tensor's origin.
-function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap, Map<number, Op>] {
+function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap, Map<number, TapeEntry>] {
   let tensorStack = [target.id];
-  let oidLookup = new Map<number, Op>();
+  let oidLookup = new Map<number, TapeEntry>();
   let usageCounts = new CounterMap(); // tensor id -> count
 
   while (tensorStack.length > 0) {
@@ -253,9 +241,8 @@ function watch(t: Tensor) {
   }
 }
 
-// Records the operation on all tapes in the stack.
-export function recordOperation(op: Op) {
+export function recordOp(tapeEntry: TapeEntry) {
   for (let tape of tapeStack) {
-    tape.recordOperation(op);
+    tape.recordOp(tapeEntry);
   }
 }
