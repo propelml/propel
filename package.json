@@ -6,7 +6,9 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/codemirror": "0.0.51",
     "@types/d3": "^4.11.1",
+    "codemirror": "^5.31.0",
     "d3": "^4.11.0",
     "highlight.js": "^9.12.0",
     "seedrandom": "^2.4.3",
