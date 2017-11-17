@@ -40,7 +40,7 @@ export class Tensor {
     } else if (typeof x == "number") {
       // Scalar
       this.ndarray = NDArray.make([], { values: new Float32Array([x]) });
-      this.shape = [1];
+      this.shape = [];
     } else if (x instanceof NDArray) {
       this.ndarray = x;
       if (x.inGPU()) {
