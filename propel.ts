@@ -42,6 +42,14 @@ namespace $ {
     return Tensor.convert(a);
   };
 
+  export const arange = function(start, stop, step = 1): Tensor {
+    let a = [];
+    for (let i = start; i < stop; i += step) {
+      a.push(i);
+    }
+    return Tensor.convert(a);
+  };
+
   export const tanh = function(x: TensorLike): Tensor {
     let y = $(x).mul(-2).exp();
     return $(1).sub(y).div(y.add(1));
