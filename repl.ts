@@ -72,6 +72,10 @@ class Cell {
     cellsElement.appendChild(this.output);
   }
 
+  focus() {
+    this.editor.focus();
+  }
+
   onShiftEnter(cm) {
      _log("ShiftEnter");
     this.output.innerText = ""; // Clear output.
@@ -130,8 +134,9 @@ class Cell {
 
 function newCellClick() {
   _log("Button click");
-  new Cell();
+  let cell = new Cell();
   window.scrollBy(0, 500); // scroll down.
+  cell.focus();
 }
 
 window.onload = () => {
