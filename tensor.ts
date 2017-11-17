@@ -7,8 +7,9 @@ import { NDArrayMathGPU } from './deeplearnjs/src/math/math_gpu';
 import { NDArrayMath } from './deeplearnjs/src/math/math';
 import { assert } from './util';
 
-export type TensorLike = number | RegularArray<number> | NDArray | Tensor;
-type Shape = number[];
+export type TensorLike = boolean | number | RegularArray<boolean> |
+   RegularArray<number> | NDArray | Tensor;
+export type Shape = number[];
 
 let cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 let gpuMath: NDArrayMathGPU = null;
@@ -125,5 +126,9 @@ export class Tensor {
 
   mul(x: TensorLike): Tensor {
     return ops.mul(this, x);
+  }
+
+  reshape(newshape: Shape): Tensor {
+    return ops.reshape(this, newshape);
   }
 }
