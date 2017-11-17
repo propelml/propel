@@ -1,6 +1,7 @@
-import { Tensor, TensorLike } from "./tensor";
+import { Shape, Tensor, TensorLike } from "./tensor";
 
 let debug = false;
+let J = JSON.stringify;
 
 export function log(...args: any[]) {
   if (debug) {
@@ -22,19 +23,29 @@ export function assertClose(actual: TensorLike, expected: TensorLike,
     `actual: ${actual} expected: ${expected}`);
 }
 
-export function assertEqual(actual: TensorLike, expected: number) {
+export function assertEqual(actual: TensorLike, expected: number, msg = null) {
   actual = Tensor.convert(actual).toNumber();
-  assert(actual == expected, `actual: ${actual} expected: ${expected}`);
+  if (!msg) msg = `actual: ${actual} expected: ${expected}`;
+  assert(actual == expected, msg);
+}
+
+export function assertShapesEqual(actual: Shape, expected: Shape) {
+  let msg = `Shape mismatch. actual: ${J(actual)} expected ${J(expected)}`;
+  assertEqual(actual.length, expected.length, msg);
+  for (let i = 0; i < actual.length; ++i) {
+    assertEqual(actual[i], expected[i], msg)
+  }
 }
 
 export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
   actual = Tensor.convert(actual);
   expected = Tensor.convert(expected);
 
+  assertShapesEqual(actual.shape, expected.shape);
+
   let a = actual.ndarray.getValues();
   let e = expected.ndarray.getValues();
 
-  assertEqual(a.length, e.length);
   for (let i = 0; i < e.length; ++i) {
     assertEqual(a[i], e[i]);
   }
@@ -44,10 +55,11 @@ export function assertAllClose(actual: TensorLike, expected: TensorLike, delta =
   actual = Tensor.convert(actual);
   expected = Tensor.convert(expected);
 
+  assertShapesEqual(actual.shape, expected.shape);
+
   let a = actual.ndarray.getValues();
   let e = expected.ndarray.getValues();
 
-  assertEqual(a.length, e.length);
   for (let i = 0; i < e.length; ++i) {
     assert(Math.abs(a[i] - e[i]) < delta,
       `index ${i} actual: ${a[i]} expected: ${e[i]}`);
