@@ -1,5 +1,5 @@
 import $ from './propel';
-import { assertEqual, assertAllEqual } from './util';
+import { assertShapesEqual, assertEqual, assertAllEqual } from './util';
 
 function testShapes() {
   let a = $([[1, 2], [3, 4]]);
@@ -7,6 +7,9 @@ function testShapes() {
 
   let b = $([[[1, 2]]]);
   assertAllEqual(b.shape, [1, 1, 2]);
+
+  assertShapesEqual($(42).shape, []);
+  assertShapesEqual($([42]).shape, [1]);
 }
 
 function testMul() {
