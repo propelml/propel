@@ -20,7 +20,7 @@ interface TapeEntry {
 
   // TODO These should not be set for, ops like exp or neg. Keeping references
   // to all Tensors is very inefficient. 
-  inputs: Tensor[];
+  inputs: TensorLike[];
   ans: Tensor;
 };
 
