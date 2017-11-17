@@ -20,5 +20,27 @@ function testMul() {
   assertAllEqual(actual, expected);
 }
 
+function testReshape() {
+  let x = $.arange(0, 6).reshape([2, 3]);
+  assertAllEqual(x.shape, [2, 3]);
+  assertEqual(x.get(0, 0), 0);
+  assertEqual(x.get(0, 1), 1);
+  assertEqual(x.get(0, 2), 2);
+  assertEqual(x.get(1, 0), 3);
+  assertEqual(x.get(1, 1), 4);
+  assertEqual(x.get(1, 2), 5);
+}
+
+function testExpandDims() {
+  let x = $.arange(0, 6).reshape([2, 3]);
+  let y = x.expandDims(1);
+  let z = y.expandDims(0);
+  assertAllEqual(x.shape, [2, 3]);
+  assertAllEqual(y.shape, [2, 1, 3]);
+  assertAllEqual(z.shape, [1, 2, 1, 3]);
+}
+
 testShapes();
 testMul();
+testReshape();
+testExpandDims();

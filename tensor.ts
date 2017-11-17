@@ -6,9 +6,10 @@ import { NDArrayMathCPU } from './deeplearnjs/src/math/math_cpu';
 import { NDArrayMathGPU } from './deeplearnjs/src/math/math_gpu';
 import { NDArrayMath } from './deeplearnjs/src/math/math';
 import { assert } from './util';
+import { expandShapeToKeepDim } from './deeplearnjs/src/math/axis_util';
 
 export type TensorLike = boolean | number | RegularArray<boolean> |
-   RegularArray<number> | NDArray | Tensor;
+  RegularArray<number> | NDArray | Tensor;
 export type Shape = number[];
 
 let cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
@@ -88,6 +89,10 @@ export class Tensor {
     return values[0];
   }
 
+  get(...locs: number[]): number {
+    return this.ndarray.get(...locs);
+  }
+
   zerosLike(): Tensor {
     let zeros = NDArray.zerosLike(this.ndarray);
     return new Tensor(zeros);
@@ -128,7 +133,12 @@ export class Tensor {
     return ops.mul(this, x);
   }
 
-  reshape(newshape: Shape): Tensor {
-    return ops.reshape(this, newshape);
+  reshape(newShape: Shape): Tensor {
+    return ops.reshape(this, newShape);
+  }
+
+  expandDims(axis: number): Tensor {
+    let newShape = expandShapeToKeepDim(this.shape, [axis]);
+    return ops.reshape(this, newShape);
   }
 }
