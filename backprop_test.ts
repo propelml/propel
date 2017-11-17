@@ -159,6 +159,18 @@ function testGradGradTanh() {
   assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
 }
 
+function testExpandDims() {
+  function f(x) {
+    return $(x).mul(2).expandDims(0)
+  }
+  assertAllEqual(f(1), [2]);
+  assertAllEqual(f([3, 4]), [[6, 8]]);
+  let g = $.grad(f);
+  assertAllClose(g(1), 2.0);
+
+  assertAllClose(g([[1], [2], [3]]), [[2], [2], [2]]);
+}
+
 testInc();
 testMul();
 testSquared();
@@ -172,3 +184,4 @@ testTanh();
 testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
+testExpandDims();

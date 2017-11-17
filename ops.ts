@@ -6,7 +6,6 @@
 import { NDArrayMath } from './deeplearnjs/src/math/math';
 import { NDArray } from './deeplearnjs/src/math/ndarray';
 import { NDArrayMathCPU } from './deeplearnjs/src/math/math_cpu';
-import { expandShapeToKeepDim } from './deeplearnjs/src/math/axis_util';
 import { Shape, Tensor, TensorLike } from "./tensor";
 import * as backprop from "./backprop";
 
@@ -20,6 +19,7 @@ let nextOpId: number = 1;
 
 interface OpInfo {
   name: string;
+  opFunc: OpFunc;
   fwFunc: FWFunc;
   bwFuncs: BWFunc[];
 }
@@ -43,13 +43,12 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     });
     return ans;
   };
-
   ops[name] = {
     name: name,
+    opFunc: opFunc,
     fwFunc: fwFunc,
     bwFuncs: null
   };
-
   return opFunc;
 }
 
@@ -57,8 +56,14 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
-function defBW(name: string, ...bwFuncs: BWFunc[]) {
-  ops[name].bwFuncs = bwFuncs;
+function defBW(name: string, ...bwFuncs: (null | BWFunc)[]) {
+  ops[name].bwFuncs = bwFuncs.map(f => {
+    if (f == null) {
+      return (g, ans, ...args) => ans.zerosLike();
+    } else {
+      return f;
+    }
+  })
 }
 
 // TODO Identity for now.
@@ -96,15 +101,9 @@ defBW("div",
   (g, ans, x, y) => div(g, y),
   (g, ans, x, y) => div(neg(mul(g, x)), mul(y, y)));
 
-export let reshape = defFW("reshape", (m, x, newshape) => {
-  newshape = <Shape>newshape
-  return m.reshape(C(x), newshape);
+export let reshape = defFW("reshape", (m, x, newShape: Shape) => {
+  return C(x).reshape(newShape);
 });
-defBW("reshape", (g, ans, x, y) => g);
-
-export let expandDims = defFW("expandDims", (m, x, axis) => {
-  axis = <number>axis;
-  let newshape = expandShapeToKeepDim((<Tensor>x).shape, [axis]);
-  return m.reshape(C(x), newshape);
-});
-defBW("expandDims", (g, ans, x, y) => g);
+defBW("reshape",
+  (g, ans, x, newShape) => reshape(g, Tensor.convert(x).shape),
+  null);
