@@ -18,6 +18,18 @@
       border-left: 2px solid rgb(31, 119, 180);
     }
 
+    button.run-button {
+      visibility: hidden;
+      transition: visibility 0s .5s;
+      position: absolute;
+      right: 8px;
+    }
+
+    .CodeMirror-focused + button.run-button {
+      visibility: visible;
+      transition: none;
+    }
+
     .output {
       padding: 10px;
       font-family: monospace;
