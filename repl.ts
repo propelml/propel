@@ -51,6 +51,7 @@ class Cell {
   isLoad: boolean;
   output: HTMLElement;
   editor: CodeMirror.Editor;
+  runButton: HTMLElement;
   id: number;
   static nextId = 1;
 
@@ -63,8 +64,15 @@ class Cell {
       viewportMargin: Infinity
     });
     this.editor.setOption("extraKeys", {
-      "Shift-Enter": this.onShiftEnter.bind(this)
+      "Shift-Enter": this.update.bind(this)
     });
+
+    let runButton = document.createElement("button");
+    this.runButton = runButton;
+    runButton.innerText = "Run";
+    runButton.className = "run-button";
+    runButton.onclick = this.update.bind(this);
+    cellsElement.appendChild(runButton);
 
     this.output = document.createElement("div");
     this.output.className = 'output';
@@ -76,8 +84,8 @@ class Cell {
     this.editor.focus();
   }
 
-  onShiftEnter(cm) {
-     _log("ShiftEnter");
+  update(cm) {
+    _log("update");
     this.output.innerText = ""; // Clear output.
     this.execute();
     return false;
