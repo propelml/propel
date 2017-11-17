@@ -27,7 +27,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    path: __dirname + '/dist',
+    path: __dirname + '/website/dist',
     libraryTarget: "var",
     library: "propel"
   }

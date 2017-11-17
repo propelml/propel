@@ -2,7 +2,7 @@
   "description": "propel",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ry/propel.git"
+    "url": "git+https://github.com/propelml/propel.git"
   },
   "license": "Apache-2.0",
   "dependencies": {
