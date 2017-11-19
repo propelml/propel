@@ -2,6 +2,7 @@ language: node_js
 node_js:
 - '8.8'
 script:
+- node ./node_modules/webpack/bin/webpack.js
 - ./node_modules/typescript/bin/tsc
 - node dist/backprop_test.js
 - node dist/tensor_test.js
