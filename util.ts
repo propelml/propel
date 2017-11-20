@@ -15,6 +15,10 @@ export function assert(expr: boolean, msg = "") {
   }
 }
 
+export function assertFalse(expr: boolean, msg = "") {
+  assert(!expr, msg);
+}
+
 export function assertClose(actual: TensorLike, expected: TensorLike,
                             delta = 0.001) {
   actual = Tensor.convert(actual).toNumber();

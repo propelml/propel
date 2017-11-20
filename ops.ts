@@ -4,11 +4,15 @@
 // Forward OPs only use NDArrayMath.
 // Backwards OPs must be defined in terms of forward OPs in order to support
 // higher order gradients.
+import $ from "./propel";
 import * as backprop from "./backprop";
+import { Array1D, Array2D, Array3D, Array4D }
+  from "./deeplearnjs/src/math/ndarray";
 import { NDArrayMath } from "./deeplearnjs/src/math/math";
 import { NDArrayMathCPU } from "./deeplearnjs/src/math/math_cpu";
 import { NDArray } from "./deeplearnjs/src/math/ndarray";
 import { Shape, Tensor, TensorLike } from "./tensor";
+import { assert } from "./util";
 
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
@@ -108,3 +112,35 @@ export let reshape = defFW("reshape", (m, x, newShape: Shape) => {
 defBW("reshape",
   (g, ans, x, newShape) => reshape(g, Tensor.convert(x).shape),
   null);
+
+function concatFW(m, axis: number, ...tensors: TensorLike[]): NDArray {
+  const tensors_ = tensors.map(Tensor.convert);
+  const ndarrays = tensors_.map(t => t.ndarray);
+  const shapes = tensors_.map(t => t.shape);
+  assert($.allEqual(...shapes), "shapes not all equal");
+  const rank = shapes[0].length;
+  const r = ndarrays.reduce((a, b) => {
+    if (rank == 0) {
+      return m.concat1D(a.as1D(), b.as1D());
+    } else if (rank == 1) {
+      return m.concat1D(a.as1D(), b.as1D());
+    } else if (rank == 2) {
+      return m.concat2D(a as Array2D, b as Array2D, axis);
+    } else if (rank == 3) {
+      return m.concat3D(a as Array3D, b as Array3D, axis);
+    } else if (rank == 4) {
+      return m.concat4D(a as Array4D, b as Array4D, axis);
+    } else {
+      assert(false, 'Unsupported Tensor rank.');
+    }
+  });
+  return r;
+}
+
+export let concat = defFW("concat", concatFW);
+defBW("concat",
+  null,
+  (g, ans, axis, ...tensors: TensorLike[]) => {
+    // TODO return g.slice(axis))
+    return Tensor.convert(0);
+  });

@@ -1,15 +1,28 @@
 import $ from "./propel";
-import { assertAllEqual, assertEqual, assertShapesEqual } from "./util";
+import { assert, assertFalse, assertShapesEqual, assertEqual, assertAllEqual }
+  from "./util";
 
 function testShapes() {
   const a = $([[1, 2], [3, 4]]);
-  assertAllEqual(a.shape, [2, 2]);
+  assertShapesEqual(a.shape, [2, 2]);
 
   const b = $([[[1, 2]]]);
-  assertAllEqual(b.shape, [1, 1, 2]);
+  assertShapesEqual(b.shape, [1, 1, 2]);
 
   assertShapesEqual($(42).shape, []);
   assertShapesEqual($([42]).shape, [1]);
+  assertShapesEqual($([]).shape, []);
+}
+
+function testAllEqual() {
+  assert($.allEqual([1, 2, 3], [1, 2, 3]));
+  assert($.allEqual([[1], [2]], [[1], [2]]));
+  const t = $([[1], [3]]);
+  const s = $([[1], [2]]);
+  assertFalse(t.equals(s));
+  assertFalse($.allEqual(s, t));
+  assert($.allEqual([], []));
+  assertFalse($(0).equals([]));
 }
 
 function testLinspace() {
@@ -45,8 +58,31 @@ function testExpandDims() {
   assertAllEqual(z.shape, [1, 2, 1, 3]);
 }
 
+function testConcat() {
+  const x = $.arange(0, 6).reshape([2, 3]);
+  const y = $.arange(6, 12).reshape([2, 3]);
+  const r = $.concat([x, y], 1);
+  assertShapesEqual(r.shape, [2, 6]);
+  assertEqual(r.get(0, 0), 0);
+  assertEqual(r.get(0, 3), 6);
+  assertEqual(r.get(0, 4), 7);
+  assertEqual(r.get(1, 4), 10);
+}
+
+function testStack() {
+  const x = $.arange(0, 6).reshape([2, 3]);
+  const y = $.arange(6, 12).reshape([2, 3]);
+  const r = $.stack([x, y], 0);
+  assertShapesEqual(r.shape, [2, 2, 3]);
+  assertEqual(r.get(0, 0, 0), 0);
+  assertEqual(r.get(1, 0, 0), 6);
+}
+
 testShapes();
+testAllEqual();
 testMul();
 testReshape();
 testExpandDims();
 testLinspace();
+testConcat();
+testStack();
