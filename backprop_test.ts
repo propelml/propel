@@ -167,8 +167,17 @@ function testExpandDims() {
   assertAllEqual(f([3, 4]), [[6, 8]]);
   let g = $.grad(f);
   assertAllClose(g(1), 2.0);
-
   assertAllClose(g([[1], [2], [3]]), [[2], [2], [2]]);
+}
+
+function testConcat() {
+  function f(x) {
+    let y = $(x).mul(2);
+    return $.concat([y, y], 0);
+  }
+  assertAllEqual(f(1), [2, 2]);
+  let g = $.grad(f);
+  // TODO Test backwards pass for concat and stack.
 }
 
 testInc();
@@ -185,3 +194,4 @@ testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
 testExpandDims();
+testConcat();

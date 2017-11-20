@@ -35,9 +35,15 @@ export class Tensor {
     if (x instanceof Array) {
       // Argument is a JS array like [[1, 2], [3, 4]].
       let shape = inferShape(x);
-      let data = flatten(x) as Array<number>;
-      this.ndarray = NDArray.make(shape, { values: new Float32Array(data) });
-      this.shape = shape;
+      if (shape.length == 1 && shape[0] == 0) {
+        // Special case the empty tensor...
+        this.shape = [];
+        this.ndarray = null;
+      } else {
+        let data = flatten(x) as Array<number>;
+        this.ndarray = NDArray.make(shape, { values: new Float32Array(data) });
+        this.shape = shape;
+      }
     } else if (typeof x == "number") {
       // Scalar
       this.ndarray = NDArray.make([], { values: new Float32Array([x]) });
@@ -140,5 +146,21 @@ export class Tensor {
   expandDims(axis: number): Tensor {
     let newShape = expandShapeToKeepDim(this.shape, [axis]);
     return ops.reshape(this, newShape);
+  }
+
+  // Messy. TF's reduce_all could be used here for example. We will revisit
+  // this op after the bindings are in place.
+  equals(t: TensorLike): boolean {
+    let a = this.ndarray;
+    let b = Tensor.convert(t).ndarray;
+    if (!a) {
+      return !b;
+    }
+    let r = this.math.equalStrict(a, b);
+    let v = r.getValues();
+    for (let i = 0; i < v.length; ++i) {
+      if (v[i] === 0) return false
+    }
+    return true;
   }
 }
