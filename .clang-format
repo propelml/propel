@@ -1,0 +1,22 @@
+---
+Language:      Cpp
+BasedOnStyle:  Google
+
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Attach
+ColumnLimit: 79
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+IndentWrappedFunctionNames: true
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Left
+SpaceAfterCStyleCast: true
+SpacesInContainerLiterals: false
+
+# Alas, not supported:
+# ForceEmptyLineAtEOF: true
