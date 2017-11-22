@@ -1,9 +1,9 @@
 {
   'variables': {
-    'tensorflow_include_dir': '<(module_root_dir)/libtensorflow/include',
+    'tensorflow_include_dir': '<(module_root_dir)/deps/libtensorflow/include',
     'tensorflow_headers': [
-      '<@(tensorflow_include_dir)/c_api.h',
-      '<@(tensorflow_include_dir)/eager_c_api.h'
+      '<@(tensorflow_include_dir)/tensorflow/c/c_api.h',
+      '<@(tensorflow_include_dir)/tensorflow/c/eager/c_api.h',
     ]
   },
   'targets': [
@@ -17,9 +17,9 @@
           'library_dirs': [ '<(INTERMEDIATE_DIR)' ],
           'actions': [
             {
-              'action_name': 'generate-def',
+              'action_name': 'generate_def',
               'inputs': [
-                '<(module_root_dir)/libtensorflow/generate-def.js',
+                '<(module_root_dir)/tools/generate_def.js',
                 '<@(tensorflow_headers)'
               ],
               'outputs': [
@@ -46,9 +46,9 @@
               ]
             },
             {
-              'action_name': 'download-dll',
+              'action_name': 'extract_dll',
               'inputs': [
-                '<(module_root_dir)/libtensorflow/download-dll.js'
+                '<(module_root_dir)/tools/extract_dll.js'
               ],
               'outputs': [
                 '<(PRODUCT_DIR)/tensorflow.dll'
@@ -65,9 +65,9 @@
           'library_dirs': [ '<(PRODUCT_DIR)' ],
           'actions': [
             {
-              'action_name': 'download-so',
+              'action_name': 'extract_so',
               'inputs': [
-                '<(module_root_dir)/libtensorflow/download-so.js'
+                '<(module_root_dir)/tools/extract_so.js'
               ],
               'outputs': [
                 '<(PRODUCT_DIR)/libtensorflow.so',

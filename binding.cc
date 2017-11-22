@@ -19,8 +19,8 @@
 
 #include <node_api.h>
 
-#include "libtensorflow/include/c_api.h"
-#include "libtensorflow/include/eager_c_api.h"
+#include "deps/libtensorflow/include/tensorflow/c/c_api.h"
+#include "deps/libtensorflow/include/tensorflow/c/eager/c_api.h"
 
 #define COUNT_OF(array) (sizeof(array) / sizeof(array[0]))
 
