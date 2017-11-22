@@ -1,0 +1,4 @@
+[submodule "deps"]
+	path = deps
+	url = git@github.com:propelml/propel_deps
+	shallow = true

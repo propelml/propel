@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - '8.8'
 script:
-- ./tools/cpplint.py *.cc
+- ./deps/cpplint/cpplint.py *.cc
 - npm install .
 - node ./node_modules/webpack/bin/webpack.js
 - ./node_modules/typescript/bin/tsc
