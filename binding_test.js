@@ -9,3 +9,5 @@ try {
 let typedArray = new Uint16Array([1, 2, 3, 4, 5, 6]);
 let tensor = new tf.Tensor(typedArray, [2, 3]);
 console.assert(tensor.device == "CPU:0");
+
+console.log("PASS");
