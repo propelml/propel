@@ -8,6 +8,8 @@
 #include "libtensorflow/include/c_api.h"
 #include "libtensorflow/include/eager_c_api.h"
 
+#define COUNT_OF(array) (sizeof(array) / sizeof(array[0]))
+
 static const size_t kMaxDims = 10;
 
 struct TensorWrap {
@@ -153,7 +155,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
 
   napi_status = napi_get_array_length(env, js_dims, &num_dims);
   assert(napi_status == napi_ok);
-  if (num_dims < 1 || num_dims > kMaxDims) {
+  if (num_dims < 1 || num_dims > COUNT_OF(dims)) {
     napi_throw_range_error(env, "ERANGE", "Invalid number of dimensions");
     return NULL;
   }
@@ -268,13 +270,13 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL}};
   status = napi_define_class(
       env,
-      "Tensor",           // JavaScript class name
-      NAPI_AUTO_LENGTH,   // JavasScript class name length
-      NewTensor,          // Constructor
-      NULL,               // Constructor argument
-      1,                  // Property count
-      tensor_properties,  // Property descriptors
-      &tensor_class);     // Out, Javascript value representing the class
+      "Tensor",                     // JavaScript class name
+      NAPI_AUTO_LENGTH,             // JavasScript class name length
+      NewTensor,                    // Constructor
+      NULL,                         // Constructor argument
+      COUNT_OF(tensor_properties),  // Property count
+      tensor_properties,            // Property descriptors
+      &tensor_class);               // Out: js value representing the class
 
   assert(status == napi_ok);
 
