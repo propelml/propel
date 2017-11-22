@@ -5,4 +5,5 @@ set -e
 ts-node backprop_test.ts
 ts-node tensor_test.ts
 ts-node util_test.ts
+node test-tensorflow-binding.js
 echo PASS
