@@ -1,9 +1,12 @@
 #!/bin/bash
+set -e -v
 cd `dirname "$0"`; cd ..
-set -e
-./tools/webpack
-ts-node backprop_test.ts
-ts-node tensor_test.ts
-ts-node util_test.ts
-node test-tensorflow-binding.js
+./deps/cpplint/cpplint.py *.cc
+npm build .
+node ./node_modules/webpack/bin/webpack.js
+./node_modules/typescript/bin/tsc
+node dist/backprop_test.js
+node dist/tensor_test.js
+node dist/util_test.js
+node binding_test.js
 echo PASS
