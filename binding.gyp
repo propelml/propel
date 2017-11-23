@@ -60,9 +60,7 @@
               ]
             }
           ],
-        }, { # Linux or OS X
-          'libraries': [ '-Wl,-rpath,\$$ORIGIN', '-ltensorflow' ],
-          'library_dirs': [ '<(PRODUCT_DIR)' ],
+        }, { # Linux or Mac
           'actions': [
             {
               'action_name': 'extract_so',
@@ -80,7 +78,20 @@
               ]
             }
           ]
-        }]
+        }],
+        ['OS=="linux"', {
+          'libraries': [
+            '-Wl,-rpath,\$$ORIGIN',
+            '-ltensorflow'
+          ],
+          'library_dirs': [ '<(PRODUCT_DIR)' ],
+        }],
+        ['OS=="mac"', {
+          'libraries': [
+            '-Wl,-rpath,@loader_path',
+            '-ltensorflow',
+          ],
+        }],
       ]
     }
   ]
