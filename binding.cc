@@ -26,6 +26,11 @@
 
 static const size_t kMaxDims = 10;
 
+struct ContextWrap {
+  napi_env env;
+  TFE_Context* tf_context;
+};
+
 struct TensorWrap {
   napi_env env;
   TF_Tensor* tf_tensor;
@@ -64,6 +69,48 @@ static void DeleteTensor(napi_env env, void* tensor_wrap_ptr, void* hint) {
   }
 
   delete tensor_wrap;
+}
+
+static void DeleteContext(napi_env env, void* wrap_ptr, void* hint) {
+  auto wrap = static_cast<ContextWrap*>(wrap_ptr);
+  auto tf_status = TF_NewStatus();
+  assert(tf_status);
+  TFE_DeleteContext(wrap->tf_context, tf_status);
+  assert(TF_GetCode(tf_status) == TF_OK);
+  delete wrap;
+  TF_DeleteStatus(tf_status);
+}
+
+static napi_value NewContext(napi_env env, napi_callback_info info) {
+  napi_value js_this;
+
+  // Check whether this function is called as a construct call.
+  napi_value js_target;
+  auto napi_status = napi_get_new_target(env, info, &js_target);
+  assert(napi_status == napi_ok);
+  assert(js_target != NULL);
+
+  napi_status = napi_get_cb_info(env, info, 0, NULL, &js_this, NULL);
+
+  auto opts = TFE_NewContextOptions();
+
+  auto tf_status = TF_NewStatus();
+  assert(tf_status);
+  auto tf_context = TFE_NewContext(opts, tf_status);
+  TF_DeleteStatus(tf_status);
+  TFE_DeleteContextOptions(opts);
+
+  auto context_wrap = new ContextWrap();
+  assert(context_wrap);
+
+  context_wrap->tf_context = tf_context;
+  context_wrap->env = env;
+
+  napi_status =
+      napi_wrap(env, js_this, context_wrap, DeleteContext, NULL, NULL);
+  assert(napi_status == napi_ok);
+
+  return js_this;
 }
 
 static napi_value NewTensor(napi_env env, napi_callback_info info) {
@@ -277,6 +324,26 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
 
 static napi_value InitBinding(napi_env env, napi_value exports) {
   napi_status status;
+  napi_property_descriptor descriptor;
+
+  // Define the Context JavaScript class.
+  napi_value context_class;
+  status = napi_define_class(
+      env,
+      "Context",         // JavaScript class name
+      NAPI_AUTO_LENGTH,  // JavasScript class name length
+      NewContext,        // Constructor
+      NULL,              // Constructor argument
+      0,                 // Property count
+      NULL,              // Property descriptors
+      &context_class);   // Out: js value representing the class
+  assert(status == napi_ok);
+
+  // Stick the Context class onto the exports object.
+  descriptor = {
+      "Context", NULL, NULL, NULL, NULL, context_class, napi_default, NULL};
+  status = napi_define_properties(env, exports, 1, &descriptor);
+  assert(status == napi_ok);
 
   // Define the Tensor JavaScript class.
   napi_value tensor_class;
@@ -295,7 +362,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   assert(status == napi_ok);
 
   // Stick the Tensor class onto the exports object.
-  napi_property_descriptor descriptor = {
+  descriptor = {
       "Tensor", NULL, NULL, NULL, NULL, tensor_class, napi_default, NULL};
   status = napi_define_properties(env, exports, 1, &descriptor);
   assert(status == napi_ok);
