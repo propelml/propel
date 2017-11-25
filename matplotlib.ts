@@ -3,34 +3,95 @@ import $ from "./propel";
 import * as repl from "./repl";
 import { assertEqual } from "./util";
 
-const currentPlot = null;
+let currentPlot = null;
+// TODO colors should match those used by the syntax highlighting.
+let color = d3.scaleOrdinal(d3.schemeCategory10);
 
-// TODO colors should match those used in highlight.js.
-const color = d3.scaleOrdinal(d3.schemeCategory10);
+function makeAxis(svg, margin, xScale, yScale, width, height) {
+  const axisBottom = d3.axisBottom(xScale);
+  axisBottom.tickSizeOuter(0);
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},${height+margin.top})`)
+    .call(axisBottom);
+
+  const axisLeft = d3.axisLeft(yScale);
+  axisLeft.tickSizeOuter(0);
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+    .call(axisLeft);
+
+  const axisRight = d3.axisRight(yScale);
+  axisRight.ticks(0);
+  axisRight.tickSizeOuter(0);
+  svg.append("g")
+    .attr("transform", `translate(${width+margin.left},${margin.top})`)
+    .call(axisRight);
+
+  const axisTop = d3.axisTop(xScale);
+  axisTop.ticks(0);
+  axisTop.tickSizeOuter(0);
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+    .call(axisTop);
+}
+
+function getLimits(lines): number[] {
+  // TODO Replace this with real ops on tensors.
+  let xMin, xMax, yMin, yMax;
+  for (let line of lines) {
+    for (let point of line) {
+      if (!xMin || point.x < xMin) {
+        xMin = point.x;
+      }
+
+      if (!yMin || point.y < yMin) {
+        yMin = point.y;
+      }
+
+      if (!xMax || point.x > xMax) {
+        xMax = point.x;
+      }
+
+      if (!yMax || point.y > yMax) {
+        yMax = point.y;
+      }
+    }
+  }
+  return [xMin, xMax, yMin, yMax];
+}
 
 function plotLines(data) {
   const outputId = repl.outputId();
   // Make an SVG Container
   const svg = d3.select(outputId).append("svg")
     .attr("width", 400)
-    .attr("height", 200);
-  const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+    .attr("height", 250);
+  const m = 30;
+  const margin = { top: m, right: m, bottom: m, left: m };
   const width = +svg.attr("width") - margin.left - margin.right;
   const height = +svg.attr("height") - margin.top - margin.bottom;
   const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
+  const [xMin, xMax, yMin, yMax] = getLimits(data);
+
+  // A small inner margin prevents the plot lines from touching the axes.
+  const xMargin = (xMax - xMin) * 0.02;
+  const yMargin = (yMax - yMin) * 0.02;
+
   const xScale = d3.scaleLinear()
-    .domain([-7, 7])
+    .domain([xMin - xMargin, xMax + xMargin])
     .range([0, width]);
 
   const yScale = d3.scaleLinear()
-    .domain([-1, 1])
+    .domain([yMin - yMargin, yMax + yMargin])
     .range([height, 0]);
 
+  makeAxis(svg, margin, xScale, yScale, width, height);
+
   const line = (d3.line() as any)
-    .x((d) => xScale(d.x))
-    .y((d) => yScale(d.y));
+    .x(d => xScale(d.x))
+    .y(d => yScale(d.y))
 
   g.selectAll("path").data(data)
     .enter()
