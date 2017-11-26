@@ -54,22 +54,17 @@ console.log("5*5 =", $(5).mul(5));
 
 <script type="repl">
 grad = $.grad;
-f = (x) => $(x).mul(x).mul(1/5).sub(.5);
-x = $.linspace(-7, 7, 200);
+f = (x) => $(x).mul(x);
+x = $.linspace(-4, 4, 200);
 plt.plot(x, f(x),
          x, grad(f)(x));
-plt.show();
 </script>
 
 <script type="repl">
 tanh = $.tanh;
 plt.plot(x, tanh(x),
-         x, grad(tanh)(x),                                // first  derivative
-         x, grad(grad(tanh))(x),                          // second derivative
-         x, grad(grad(grad(tanh)))(x),                    // third  derivative
-         x, grad(grad(grad(grad(tanh))))(x),              // fourth derivative
-         x, grad(grad(grad(grad(grad(tanh)))))(x),        // fifth  derivative
-         x, grad(grad(grad(grad(grad(grad(tanh))))))(x)); // sixth  derivative
+         x, grad(tanh)(x),        // first derivative
+         x, grad(grad(tanh))(x)); // second derivative
 </script>
 
 </body>

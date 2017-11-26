@@ -3,9 +3,9 @@ import $ from "./propel";
 import * as repl from "./repl";
 import { assertEqual } from "./util";
 
-let currentPlot = null;
+const currentPlot = null;
 // TODO colors should match those used by the syntax highlighting.
-let color = d3.scaleOrdinal(d3.schemeCategory10);
+const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 function makeAxis(svg, margin, xScale, yScale, width, height) {
   const axisBottom = d3.axisBottom(xScale);
@@ -38,21 +38,21 @@ function makeAxis(svg, margin, xScale, yScale, width, height) {
 function getLimits(lines): number[] {
   // TODO Replace this with real ops on tensors.
   let xMin, xMax, yMin, yMax;
-  for (let line of lines) {
-    for (let point of line) {
-      if (!xMin || point.x < xMin) {
+  for (const line of lines) {
+    for (const point of line) {
+      if (xMin === undefined || point.x < xMin) {
         xMin = point.x;
       }
 
-      if (!yMin || point.y < yMin) {
+      if (yMin === undefined || point.y < yMin) {
         yMin = point.y;
       }
 
-      if (!xMax || point.x > xMax) {
+      if (xMax === undefined || point.x > xMax) {
         xMax = point.x;
       }
 
-      if (!yMax || point.y > yMax) {
+      if (yMax === undefined || point.y > yMax) {
         yMax = point.y;
       }
     }
@@ -91,7 +91,7 @@ function plotLines(data) {
 
   const line = (d3.line() as any)
     .x(d => xScale(d.x))
-    .y(d => yScale(d.y))
+    .y(d => yScale(d.y));
 
   g.selectAll("path").data(data)
     .enter()
