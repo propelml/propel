@@ -1,7 +1,7 @@
 import { Shape, Tensor, TensorLike } from "./tensor";
 
-let debug = false;
-let J = JSON.stringify;
+const debug = false;
+const J = JSON.stringify;
 
 export function log(...args: any[]) {
   if (debug) {
@@ -16,7 +16,7 @@ export function assert(expr: boolean, msg = "") {
 }
 
 export function assertClose(actual: TensorLike, expected: TensorLike,
-  delta = 0.001) {
+                            delta = 0.001) {
   actual = Tensor.convert(actual).toNumber();
   expected = Tensor.convert(expected).toNumber();
   assert(Math.abs(actual - expected) < delta,
@@ -25,15 +25,15 @@ export function assertClose(actual: TensorLike, expected: TensorLike,
 
 export function assertEqual(actual: TensorLike, expected: number, msg = null) {
   actual = Tensor.convert(actual).toNumber();
-  if (!msg) msg = `actual: ${actual} expected: ${expected}`;
+  if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
   assert(actual == expected, msg);
 }
 
 export function assertShapesEqual(actual: Shape, expected: Shape) {
-  let msg = `Shape mismatch. actual: ${J(actual)} expected ${J(expected)}`;
+  const msg = `Shape mismatch. actual: ${J(actual)} expected ${J(expected)}`;
   assertEqual(actual.length, expected.length, msg);
   for (let i = 0; i < actual.length; ++i) {
-    assertEqual(actual[i], expected[i], msg)
+    assertEqual(actual[i], expected[i], msg);
   }
 }
 
@@ -43,22 +43,23 @@ export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
 
   assertShapesEqual(actual.shape, expected.shape);
 
-  let a = actual.ndarray.getValues();
-  let e = expected.ndarray.getValues();
+  const a = actual.ndarray.getValues();
+  const e = expected.ndarray.getValues();
 
   for (let i = 0; i < e.length; ++i) {
     assertEqual(a[i], e[i]);
   }
 }
 
-export function assertAllClose(actual: TensorLike, expected: TensorLike, delta = 0.001) {
+export function assertAllClose(actual: TensorLike, expected: TensorLike,
+                               delta = 0.001) {
   actual = Tensor.convert(actual);
   expected = Tensor.convert(expected);
 
   assertShapesEqual(actual.shape, expected.shape);
 
-  let a = actual.ndarray.getValues();
-  let e = expected.ndarray.getValues();
+  const a = actual.ndarray.getValues();
+  const e = expected.ndarray.getValues();
 
   for (let i = 0; i < e.length; ++i) {
     assert(Math.abs(a[i] - e[i]) < delta,
@@ -70,7 +71,7 @@ export class GradientCollector {
   // Maps tensor id -> gradient tensor array
   private map = new Map<number, Tensor[]>();
 
-  append(tid: number, grad: Tensor): void {
+  public append(tid: number, grad: Tensor): void {
     if (this.map.has(tid)) {
       this.map.get(tid).push(grad);
     } else {
@@ -79,12 +80,12 @@ export class GradientCollector {
   }
 
   // Sum up the gradients for a given tensor id.
-  aggregate(tid: number): Tensor {
+  public aggregate(tid: number): Tensor {
     if (!this.map.has(tid) || this.map.get(tid).length == 0) {
       // TODO(scalar) Handle non-scalar shapes.
       return Tensor.convert(0);
     }
-    let grads = this.map.get(tid);
+    const grads = this.map.get(tid);
     //log('aggregate tid %d ngrads %d', tid, grads.length);
     let sum = grads[0];
     for (let i = 1; i < grads.length; i++) {
@@ -98,20 +99,20 @@ export class GradientCollector {
 export class CounterMap {
   private map = new Map<number, number>();
 
-  get(id: number): number {
+  public get(id: number): number {
     return this.map.has(id) ? this.map.get(id) : 0;
   }
 
-  keys(): number[] {
+  public keys(): number[] {
     return Array.from(this.map.keys());
 
   }
 
-  inc(id: number): void {
+  public inc(id: number): void {
     this.map.set(id, this.get(id) + 1);
   }
 
-  dec(id: number): void {
+  public dec(id: number): void {
     this.map.set(id, this.get(id) - 1);
   }
 }

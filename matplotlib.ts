@@ -1,55 +1,54 @@
-import * as repl from "./repl";
 import * as d3 from "d3";
 import $ from "./propel";
+import * as repl from "./repl";
 import { assertEqual } from "./util";
 
-let currentPlot = null;
+const currentPlot = null;
 
 // TODO colors should match those used in highlight.js.
-let color = d3.scaleOrdinal(d3.schemeCategory10);
-
+const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 function plotLines(data) {
-  var outputId = repl.outputId();
+  const outputId = repl.outputId();
   // Make an SVG Container
-  let svg = d3.select(outputId).append("svg")
+  const svg = d3.select(outputId).append("svg")
     .attr("width", 400)
     .attr("height", 200);
-  let margin = { top: 10, right: 10, bottom: 10, left: 10 };
-  let width = +svg.attr("width") - margin.left - margin.right;
-  let height = +svg.attr("height") - margin.top - margin.bottom;
-  let g = svg.append("g")
+  const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+  const width = +svg.attr("width") - margin.left - margin.right;
+  const height = +svg.attr("height") - margin.top - margin.bottom;
+  const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  var xScale = d3.scaleLinear()
+  const xScale = d3.scaleLinear()
     .domain([-7, 7])
     .range([0, width]);
 
-  var yScale = d3.scaleLinear()
+  const yScale = d3.scaleLinear()
     .domain([-1, 1])
     .range([height, 0]);
 
-  var line = (d3.line() as any)
-    .x(d => xScale(d.x))
-    .y(d => yScale(d.y))
+  const line = (d3.line() as any)
+    .x((d) => xScale(d.x))
+    .y((d) => yScale(d.y));
 
-  g.selectAll('path').data(data)
+  g.selectAll("path").data(data)
     .enter()
     .append("path")
-    .attr("d", <any>line)
+    .attr("d", line as any)
     .style("fill", "none")
     .style("stroke-width", "2px")
     .style("stroke", (d, i) => {
-      return color(<any>i);
-    })
+      return color(i as any);
+    });
 }
 
 function plot(...args) {
-  let xs = [];
-  let ys = [];
+  const xs = [];
+  const ys = [];
   let state = "x";
   for (let i = 0; i < args.length; i++) {
-    let arg = args[i];
+    const arg = args[i];
     switch (state) {
       case "x":
         xs.push(arg);
@@ -65,13 +64,13 @@ function plot(...args) {
   }
 
   assertEqual(xs.length, ys.length);
-  let data = [];
+  const data = [];
   for (let i = 0; i < xs.length; ++i) {
     // TODO line = $.stack([xs[i], ys[i]], 1)
-    let xv = xs[i].ndarray.getValues();
-    let yv = ys[i].ndarray.getValues();
+    const xv = xs[i].ndarray.getValues();
+    const yv = ys[i].ndarray.getValues();
     assertEqual(xv.length, yv.length);
-    let line = [];
+    const line = [];
     for (let j = 0; j < xv.length; ++j) {
       line.push({ x: xv[j], y: yv[j] });
     }
@@ -88,6 +87,6 @@ function show(...args) {
 }
 
 export default {
-  "plot": plot,
-  "show": show,
-}
+  plot: plot,
+  show: show,
+};

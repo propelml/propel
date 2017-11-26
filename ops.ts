@@ -1,15 +1,16 @@
 // Based loosely on AutoGrad's numpy_jvps.py
+// tslint:disable-next-line:max-line-length
 // https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
 // Forward OPs only use NDArrayMath.
 // Backwards OPs must be defined in terms of forward OPs in order to support
 // higher order gradients.
-import { NDArrayMath } from './deeplearnjs/src/math/math';
-import { NDArray } from './deeplearnjs/src/math/ndarray';
-import { NDArrayMathCPU } from './deeplearnjs/src/math/math_cpu';
-import { Shape, Tensor, TensorLike } from "./tensor";
 import * as backprop from "./backprop";
+import { NDArrayMath } from "./deeplearnjs/src/math/math";
+import { NDArrayMathCPU } from "./deeplearnjs/src/math/math_cpu";
+import { NDArray } from "./deeplearnjs/src/math/ndarray";
+import { Shape, Tensor, TensorLike } from "./tensor";
 
-let cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
+const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
 type FWFunc = (math: NDArrayMath, ...args: TensorLike[]) => NDArray;
 type BWFunc = (grad: Tensor, ans: Tensor, ...args: TensorLike[]) => Tensor;
@@ -24,30 +25,30 @@ interface OpInfo {
   bwFuncs: BWFunc[];
 }
 
-let ops = {}; // name -> OpInfo
+const ops = {}; // name -> OpInfo
 
 function defFW(name: string, fwFunc: FWFunc): OpFunc {
-  let opFunc: OpFunc = (...args: TensorLike[]): Tensor => {
+  const opFunc: OpFunc = (...args: TensorLike[]): Tensor => {
     // Gather ids of args that are tensors. null for non-Tensor args.
-    let inputIds = args.map(t => (<Tensor>t).id)
-    let math = cpuMath; // TODO decide if we should use GPU math here.
-    let ndarrayAns = fwFunc(math, ...args);
-    let ans = new Tensor(ndarrayAns);
+    const inputIds = args.map((t) => (t as Tensor).id);
+    const math = cpuMath; // TODO decide if we should use GPU math here.
+    const ndarrayAns = fwFunc(math, ...args);
+    const ans = new Tensor(ndarrayAns);
     backprop.recordOp({
-      name: name,
+      name,
       oid: nextOpId++,
-      inputIds: inputIds,
+      inputIds,
       outputIds: [ans.id],
-      ans: ans,
+      ans,
       inputs: args,
     });
     return ans;
   };
   ops[name] = {
-    name: name,
-    opFunc: opFunc,
-    fwFunc: fwFunc,
-    bwFuncs: null
+    name,
+    opFunc,
+    fwFunc,
+    bwFuncs: null,
   };
   return opFunc;
 }
@@ -56,14 +57,14 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
-function defBW(name: string, ...bwFuncs: (null | BWFunc)[]) {
-  ops[name].bwFuncs = bwFuncs.map(f => {
+function defBW(name: string, ...bwFuncs: Array<null | BWFunc>) {
+  ops[name].bwFuncs = bwFuncs.map((f) => {
     if (f == null) {
       return (g, ans, ...args) => ans.zerosLike();
     } else {
       return f;
     }
-  })
+  });
 }
 
 // TODO Identity for now.
@@ -78,7 +79,7 @@ function C(x: TensorLike): NDArray {
 export let mul = defFW("mul", (m, x, y) => m.multiply(C(x), C(y)));
 defBW("mul",
   (g, ans, x, y) => mul(g, y),
-  (g, ans, x, y) => mul(g, x))
+  (g, ans, x, y) => mul(g, x));
 
 export let exp = defFW("exp", (m, x) => m.exp(C(x)));
 defBW("exp", (g, ans, x) => mul(ans, g));
@@ -87,7 +88,7 @@ export let neg = defFW("neg", (m, x) => m.neg(C(x)));
 defBW("neg", (g, ans, x) => neg(g));
 
 export let add = defFW("add", (m, x, y) => {
-  return m.add(C(x), C(y))
+  return m.add(C(x), C(y));
 });
 defBW("add", (g, ans, x, y) => broadcast(g, ans),
   (g, ans, x, y) => broadcast(g, ans));

@@ -1,11 +1,11 @@
-import $ from './propel';
-import { assertShapesEqual, assertEqual, assertAllEqual } from './util';
+import $ from "./propel";
+import { assertAllEqual, assertEqual, assertShapesEqual } from "./util";
 
 function testShapes() {
-  let a = $([[1, 2], [3, 4]]);
+  const a = $([[1, 2], [3, 4]]);
   assertAllEqual(a.shape, [2, 2]);
 
-  let b = $([[[1, 2]]]);
+  const b = $([[[1, 2]]]);
   assertAllEqual(b.shape, [1, 1, 2]);
 
   assertShapesEqual($(42).shape, []);
@@ -13,15 +13,15 @@ function testShapes() {
 }
 
 function testMul() {
-  let a = $([[1, 2], [3, 4]]);
-  let expected = $([[1, 4], [9, 16]]);
-  let actual = a.mul(a);
+  const a = $([[1, 2], [3, 4]]);
+  const expected = $([[1, 4], [9, 16]]);
+  const actual = a.mul(a);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllEqual(actual, expected);
 }
 
 function testReshape() {
-  let x = $.arange(0, 6).reshape([2, 3]);
+  const x = $.arange(0, 6).reshape([2, 3]);
   assertAllEqual(x.shape, [2, 3]);
   assertEqual(x.get(0, 0), 0);
   assertEqual(x.get(0, 1), 1);
@@ -32,9 +32,9 @@ function testReshape() {
 }
 
 function testExpandDims() {
-  let x = $.arange(0, 6).reshape([2, 3]);
-  let y = x.expandDims(1);
-  let z = y.expandDims(0);
+  const x = $.arange(0, 6).reshape([2, 3]);
+  const y = x.expandDims(1);
+  const z = y.expandDims(0);
   assertAllEqual(x.shape, [2, 3]);
   assertAllEqual(y.shape, [2, 1, 3]);
   assertAllEqual(z.shape, [1, 2, 1, 3]);
