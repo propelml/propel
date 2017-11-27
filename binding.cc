@@ -71,6 +71,15 @@ static void DeleteTensor(napi_env env, void* tensor_wrap_ptr, void* hint) {
   delete tensor_wrap;
 }
 
+void AssertConstructorCall(napi_env env, napi_callback_info info) {
+#ifdef DEBUG
+  napi_value js_target;
+  auto napi_status = napi_get_new_target(env, info, &js_target);
+  assert(napi_status == napi_ok);
+  assert(js_target != NULL && "Function not used as a constructor");
+#endif
+}
+
 static void DeleteContext(napi_env env, void* wrap_ptr, void* hint) {
   auto wrap = static_cast<ContextWrap*>(wrap_ptr);
   auto tf_status = TF_NewStatus();
@@ -84,13 +93,9 @@ static void DeleteContext(napi_env env, void* wrap_ptr, void* hint) {
 static napi_value NewContext(napi_env env, napi_callback_info info) {
   napi_value js_this;
 
-  // Check whether this function is called as a construct call.
-  napi_value js_target;
-  auto napi_status = napi_get_new_target(env, info, &js_target);
-  assert(napi_status == napi_ok);
-  assert(js_target != NULL);
+  AssertConstructorCall(env, info);
 
-  napi_status = napi_get_cb_info(env, info, 0, NULL, &js_this, NULL);
+  auto napi_status = napi_get_cb_info(env, info, 0, NULL, &js_this, NULL);
 
   auto opts = TFE_NewContextOptions();
 
@@ -116,14 +121,7 @@ static napi_value NewContext(napi_env env, napi_callback_info info) {
 static napi_value NewTensor(napi_env env, napi_callback_info info) {
   napi_status napi_status;
 
-  // Check whether this function is called as a construct call.
-  napi_value js_target;
-  napi_status = napi_get_new_target(env, info, &js_target);
-  assert(napi_status == napi_ok);
-  if (js_target == NULL) {
-    napi_throw_type_error(env, "EINVAL", "Function not used as a constructor");
-    return NULL;
-  }
+  AssertConstructorCall(env, info);
 
   // Fetch JavaScript `this` object and function arguments.
   size_t argc = 2;
