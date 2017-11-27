@@ -32,10 +32,11 @@ namespace $ {
   //
   // Returns num evenly spaced samples, calculated over the interval
   // [start, stop].
-  export const linspace = function(start, stop, num = 50): Tensor {
+  export const linspace = (start, stop, num = 50): Tensor => {
     const a = [];
-    const d = (stop - start) / num;
-    for (let i = 0; i < num; ++i) {
+    const n = num - 1;
+    const d = (stop - start) / n;
+    for (let i = 0; i <= n; ++i) {
       a.push(start + i * d);
     }
     return Tensor.convert(a);

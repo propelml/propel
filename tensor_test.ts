@@ -12,6 +12,11 @@ function testShapes() {
   assertShapesEqual($([42]).shape, [1]);
 }
 
+function testLinspace() {
+  const x = $.linspace(-4, 4, 6);
+  assertAllEqual(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
+}
+
 function testMul() {
   const a = $([[1, 2], [3, 4]]);
   const expected = $([[1, 4], [9, 16]]);
@@ -44,3 +49,4 @@ testShapes();
 testMul();
 testReshape();
 testExpandDims();
+testLinspace();
