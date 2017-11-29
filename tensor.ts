@@ -16,14 +16,14 @@ const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 let gpuMath: NDArrayMathGPU = null;
 
 export class Tensor {
-  private static nextId: number = 1;
-  public math: NDArrayMath = cpuMath;
-  public id: number;
-  public shape: Shape;
-  public ndarray: NDArray; // TODO private
-  public dtype: "float32" | "uint8";
+  private static nextId = 1;
+  math: NDArrayMath = cpuMath;
+  id: number;
+  shape: Shape;
+  ndarray: NDArray; // TODO private
+  dtype: "float32" | "uint8";
 
-  public static convert(x: TensorLike): Tensor {
+  static convert(x: TensorLike): Tensor {
     if (x instanceof Tensor) {
       return x;
     } else {
@@ -65,7 +65,7 @@ export class Tensor {
   }
 
   // Returns a copy of the Tensor that is stored on the GPU.
-  public gpu(): Tensor {
+  gpu(): Tensor {
     Tensor.gpuMath();
 
     const ndarray = NDArray.like(this.ndarray);
@@ -77,11 +77,11 @@ export class Tensor {
     return t;
   }
 
-  public inGPU(): boolean {
+  inGPU(): boolean {
     return this.ndarray.inGPU();
   }
 
-  public toNumber(): number {
+  toNumber(): number {
     const values = this.ndarray.getValues();
     if (values.length != 1) {
       throw new Error("toNumber() can only be used on scalar tensors.");
@@ -89,55 +89,55 @@ export class Tensor {
     return values[0];
   }
 
-  public get(...locs: number[]): number {
+  get(...locs: number[]): number {
     return this.ndarray.get(...locs);
   }
 
-  public zerosLike(): Tensor {
+  zerosLike(): Tensor {
     const zeros = NDArray.zerosLike(this.ndarray);
     return new Tensor(zeros);
   }
 
-  public onesLike(): Tensor {
+  onesLike(): Tensor {
     const ones = NDArray.zerosLike(this.ndarray);
     ones.fill(1.0);
     return new Tensor(ones);
   }
 
-  public toString(): string {
+  toString(): string {
     // TODO This should pretty print the tensor.
     return `[${this.ndarray.getValues()}]`;
   }
 
-  public exp(): Tensor {
+  exp(): Tensor {
     return ops.exp(this);
   }
 
-  public neg(): Tensor {
+  neg(): Tensor {
     return ops.neg(this);
   }
 
-  public add(x: TensorLike): Tensor {
+  add(x: TensorLike): Tensor {
     return ops.add(this, x);
   }
 
-  public sub(x: TensorLike): Tensor {
+  sub(x: TensorLike): Tensor {
     return ops.sub(this, x);
   }
 
-  public div(x: TensorLike): Tensor {
+  div(x: TensorLike): Tensor {
     return ops.div(this, x);
   }
 
-  public mul(x: TensorLike): Tensor {
+  mul(x: TensorLike): Tensor {
     return ops.mul(this, x);
   }
 
-  public reshape(newShape: Shape): Tensor {
+  reshape(newShape: Shape): Tensor {
     return ops.reshape(this, newShape);
   }
 
-  public expandDims(axis: number): Tensor {
+  expandDims(axis: number): Tensor {
     const newShape = expandShapeToKeepDim(this.shape, [axis]);
     return ops.reshape(this, newShape);
   }

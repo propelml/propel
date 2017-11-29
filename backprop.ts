@@ -35,13 +35,13 @@ function tapeEntryToString(e: TapeEntry): string {
 // Represents a gradient propagation trace.
 export class Tape {
   // Maps from Tensor ids to their operation ids.
-  public tensorToOp = new Map<number, number>();
+  tensorToOp = new Map<number, number>();
 
   // Maps from operation id to TapeEntry.
-  public oidLookup = new Map<number, TapeEntry>();
+  oidLookup = new Map<number, TapeEntry>();
 
   // Returns true if any tensor should be recorded.
-  public shouldRecord(tids: number[]): boolean {
+  shouldRecord(tids: number[]): boolean {
     for (const tid of tids) {
       if (this.tensorToOp.has(tid)) {
         return true;
@@ -51,14 +51,14 @@ export class Tape {
   }
 
   // Adds a tensor to the tape.
-  public watch(tensor: Tensor): void {
+  watch(tensor: Tensor): void {
     const id = tensor.id;
     if (!this.tensorToOp.has(id)) {
       this.tensorToOp.set(id, -1);
     }
   }
 
-  public recordOp(tapeEntry: TapeEntry): void {
+  recordOp(tapeEntry: TapeEntry): void {
     if (!this.shouldRecord(tapeEntry.inputIds)) {
       return;
     }

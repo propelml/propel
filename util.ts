@@ -71,7 +71,7 @@ export class GradientCollector {
   // Maps tensor id -> gradient tensor array
   private map = new Map<number, Tensor[]>();
 
-  public append(tid: number, grad: Tensor): void {
+  append(tid: number, grad: Tensor): void {
     if (this.map.has(tid)) {
       this.map.get(tid).push(grad);
     } else {
@@ -80,7 +80,7 @@ export class GradientCollector {
   }
 
   // Sum up the gradients for a given tensor id.
-  public aggregate(tid: number): Tensor {
+  aggregate(tid: number): Tensor {
     if (!this.map.has(tid) || this.map.get(tid).length == 0) {
       // TODO(scalar) Handle non-scalar shapes.
       return Tensor.convert(0);
@@ -99,20 +99,20 @@ export class GradientCollector {
 export class CounterMap {
   private map = new Map<number, number>();
 
-  public get(id: number): number {
+  get(id: number): number {
     return this.map.has(id) ? this.map.get(id) : 0;
   }
 
-  public keys(): number[] {
+  keys(): number[] {
     return Array.from(this.map.keys());
 
   }
 
-  public inc(id: number): void {
+  inc(id: number): void {
     this.map.set(id, this.get(id) + 1);
   }
 
-  public dec(id: number): void {
+  dec(id: number): void {
     this.map.set(id, this.get(id) - 1);
   }
 }

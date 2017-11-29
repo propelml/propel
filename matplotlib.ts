@@ -87,6 +87,6 @@ function show(...args) {
 }
 
 export default {
-  plot: plot,
-  show: show,
+  plot,
+  show,
 };
