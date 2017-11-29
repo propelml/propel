@@ -145,39 +145,36 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
     return NULL;
   }
 
-  // Create returned javascript array to be returned.
+  // Create array to be returned.
   napi_value js_retvals;
   napi_status = napi_create_array_with_length(env, num_retvals, &js_retvals);
   assert(napi_status == napi_ok);
 
+  // Get reference to Tensor class so we can call its constructor.
   napi_value tensor_class;
   napi_status = napi_get_reference_value(env, tensor_class_ref, &tensor_class);
   assert(napi_status == napi_ok);
 
+  // For each retval, wrap the TensorHandle.
   for (int i = 0; i < num_retvals; ++i) {
-    // Wrap the returned TensorHandle
     napi_value js_retval;
-
     // Create a new Tensor object.
     napi_status = napi_new_instance(env, tensor_class, 0, NULL, &js_retval);
     assert(napi_status == napi_ok);
-
+    // Unwrap
     TensorWrap* tensor_wrap;
     napi_status =
         napi_unwrap(env, js_retval, reinterpret_cast<void**>(&tensor_wrap));
     assert(napi_status == napi_ok);
-
-    tensor_wrap->env = env;
+    assert(tensor_wrap->env == env);
     tensor_wrap->tf_tensor_handle = retvals[i];
-
+    // Set created js object in output array.
     napi_status = napi_set_element(env, js_retvals, (uint32_t) i, js_retval);
     assert(napi_status == napi_ok);
   }
 
   TFE_DeleteOp(op);
   TF_DeleteStatus(tf_status);
-
-  printf("EXECUTE %s inputs len = %d\n", op_name, inputs_len);
   return js_retvals;
 }
 
@@ -401,6 +398,57 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   return js_this;
 }
 
+static void DeleteTensorArrayBuffer(napi_env env,
+                                    void* tensor_wrap_ptr,
+                                    void* hint) {
+  auto tensor = reinterpret_cast<TF_Tensor*>(hint);
+  TF_DeleteTensor(tensor);
+}
+
+static napi_status NewTensorArrayBuffer(napi_env env,
+                                        TF_Tensor* tensor,
+                                        napi_value* array_buffer_out) {
+  void* external_data = TF_TensorData(tensor);
+  size_t byte_length = TF_TensorByteSize(tensor);
+  return napi_create_external_arraybuffer(env,
+                                          external_data,
+                                          byte_length,
+                                          DeleteTensorArrayBuffer,
+                                          tensor,
+                                          array_buffer_out);
+}
+
+static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
+  napi_status napi_status;
+
+  // Fetch JavaScript `this` object.
+  napi_value js_this;
+  napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
+  assert(napi_status == napi_ok);
+
+  // Unwrap.
+  TensorWrap* tensor_wrap;
+  napi_status =
+      napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  assert(napi_status == napi_ok);
+
+
+  // Resolve TFE_TensorHandle into TF_Tensor
+  auto tf_status = TF_NewStatus();
+  auto tensor =
+      TFE_TensorHandleResolve(tensor_wrap->tf_tensor_handle, tf_status);
+  assert(TF_GetCode(tf_status) == TF_OK);
+  TF_DeleteStatus(tf_status);
+
+  assert(tensor_wrap->tf_tensor != tensor);
+
+  napi_value array_buffer;
+  napi_status = NewTensorArrayBuffer(env, tensor, &array_buffer);
+  assert(napi_status == napi_ok);
+
+  return array_buffer;
+}
+
 static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   napi_status napi_status;
 
@@ -447,6 +495,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   // Define the Tensor JavaScript class.
   napi_value tensor_class;
   napi_property_descriptor tensor_properties[] = {
+      {"asArrayBuffer",
+       NULL,
+       TensorAsArrayBuffer,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
       {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL}};
   status = napi_define_class(
       env,

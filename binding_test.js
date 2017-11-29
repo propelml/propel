@@ -16,7 +16,12 @@ console.assert(b.device == "CPU:0");
 let opAttrs = { transpose_a: false, transpose_b: false };
 let retvals = binding.execute(ctx, "MatMul", opAttrs, [a, b]);
 let r = retvals[0];
-console.log("r", r);
 console.assert(r.device == "CPU:0");
-
+let result = new Float32Array(r.asArrayBuffer());
+console.assert(result.length == 4);
+console.assert(result[0] == 22)
+console.assert(result[1] == 28)
+console.assert(result[2] == 49)
+console.assert(result[3] == 64)
+console.log(result);
 console.log("PASS");
