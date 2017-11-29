@@ -401,6 +401,38 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   return js_this;
 }
 
+static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
+  napi_status napi_status;
+
+  // Fetch JavaScript `this` object.
+  napi_value js_this;
+  napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
+  assert(napi_status == napi_ok);
+
+  // Unwrap.
+  TensorWrap* tensor_wrap;
+  napi_status =
+      napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  assert(napi_status == napi_ok);
+
+  // Resolve TFE_TensorHandle into TF_Tensor
+  auto tf_status = TF_NewStatus();
+  auto tensor =
+      TFE_TensorHandleResolve(tensor_wrap->tf_tensor_handle, tf_status);
+  assert(TF_GetCode(tf_status) == TF_OK);
+  TF_DeleteStatus(tf_status);
+
+  void* external_data = TF_TensorData(tensor);
+  size_t byte_length = TF_TensorByteSize(tensor);
+  napi_finalize finalize_cb = NULL;  // TODO(ry) How do we handle finalize_cb?
+  napi_value array_buffer;
+  napi_create_external_arraybuffer(
+      env, external_data, byte_length, finalize_cb, NULL, &array_buffer);
+  assert(napi_status == napi_ok);
+
+  return array_buffer;
+}
+
 static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   napi_status napi_status;
 
@@ -447,6 +479,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   // Define the Tensor JavaScript class.
   napi_value tensor_class;
   napi_property_descriptor tensor_properties[] = {
+      {"asArrayBuffer",
+       NULL,
+       TensorAsArrayBuffer,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
       {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL}};
   status = napi_define_class(
       env,
