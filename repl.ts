@@ -27,8 +27,8 @@ export function outputId(): string {
 window["require"] = function require(target) {
   //_log("require", target);
   const m = {
-    propel: propel,
-    matplotlib: matplotlib,
+    propel,
+    matplotlib,
   }[target];
   if (m) {
     return m;
@@ -49,12 +49,12 @@ function transpile(source: string): string {
 }
 
 class Cell {
-  public isLoad: boolean;
-  public output: HTMLElement;
-  public editor: CodeMirror.Editor;
-  public runButton: HTMLElement;
-  public id: number;
-  public static nextId = 1;
+  isLoad: boolean;
+  output: HTMLElement;
+  editor: CodeMirror.Editor;
+  runButton: HTMLElement;
+  id: number;
+  static nextId = 1;
 
   constructor(source?: string) {
     this.id = Cell.nextId++;
@@ -81,18 +81,18 @@ class Cell {
     cellsElement.appendChild(this.output);
   }
 
-  public focus() {
+  focus() {
     this.editor.focus();
   }
 
-  public update(cm) {
+  update(cm) {
     _log("update");
     this.output.innerText = ""; // Clear output.
     this.execute();
     return false;
   }
 
-  public log(...args) {
+  log(...args) {
     // messy
     let s = args.map((a) => a.toString()).join(" ");
     const last = this.output.lastChild;
@@ -104,7 +104,7 @@ class Cell {
     _log(...args);
   }
 
-  public error(...args) {
+  error(...args) {
     // messy
     let s = args.map((a) => a.toString()).join(" ");
     const last = this.output.lastChild;
@@ -117,15 +117,15 @@ class Cell {
     _log(...args);
   }
 
-  public appendOutput(svg) {
+  appendOutput(svg) {
     this.output.appendChild(svg);
   }
 
-  public outputId(): string {
+  outputId(): string {
     return "#" + this.output.id;
   }
 
-  public execute(done = null) {
+  execute(done = null) {
     console.log = this.log.bind(this);
     _REPLAppendOutput = this.appendOutput.bind(this);
     _REPLOutputId = this.outputId.bind(this);

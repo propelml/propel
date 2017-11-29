@@ -16,7 +16,7 @@ type FWFunc = (math: NDArrayMath, ...args: TensorLike[]) => NDArray;
 type BWFunc = (grad: Tensor, ans: Tensor, ...args: TensorLike[]) => Tensor;
 type OpFunc = (...args: TensorLike[]) => Tensor;
 
-let nextOpId: number = 1;
+let nextOpId = 1;
 
 interface OpInfo {
   name: string;
