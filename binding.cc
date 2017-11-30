@@ -12,13 +12,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-#include <assert.h>
 #include <node_api.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <map>
 #include <string>
+#include "./check.h"
 #include "deps/libtensorflow/include/tensorflow/c/c_api.h"
 #include "deps/libtensorflow/include/tensorflow/c/eager/c_api.h"
 
@@ -58,10 +58,10 @@ struct TensorWrap {
 static void ReleaseTypedArray(void* data, size_t len, void* tensor_wrap_ptr) {
   auto tensor_wrap = static_cast<TensorWrap*>(tensor_wrap_ptr);
 
-  assert(tensor_wrap->js_typed_array != NULL);
+  check(tensor_wrap->js_typed_array != NULL);
   napi_status status =
       napi_delete_reference(tensor_wrap->env, tensor_wrap->js_typed_array);
-  assert(status == napi_ok);
+  check(status == napi_ok);
   tensor_wrap->js_typed_array = NULL;
 }
 
@@ -82,7 +82,7 @@ static void DeleteTensor(napi_env env, void* tensor_wrap_ptr, void* hint) {
   if (tensor_wrap->js_typed_array != NULL) {
     status =
         napi_delete_reference(tensor_wrap->env, tensor_wrap->js_typed_array);
-    assert(status == napi_ok);
+    check(status == napi_ok);
   }
 
   delete tensor_wrap;
@@ -92,8 +92,8 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 #ifdef DEBUG
   napi_value js_target;
   auto napi_status = napi_get_new_target(env, info, &js_target);
-  assert(napi_status == napi_ok);
-  assert(js_target != NULL && "Function not used as a constructor");
+  check(napi_status == napi_ok);
+  check(js_target != NULL, "Function not used as a constructor");
 #endif
 }
 
@@ -111,50 +111,51 @@ const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
   char attr_name[512];
   auto status =
       napi_get_value_string_utf8(env, attr_name_js, attr_name, 512, NULL);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   auto it = attrNameMap.find(attr_name);
   if (it != attrNameMap.end()) {
     return it->first.c_str();
   }
-  abort();  // TODO(ry) Add unreachable macro.
+  fatal("Unreachable");
 }
 
 void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
   // Check that the attr is an array.
   bool is_array;
   auto status = napi_is_array(env, attr, &is_array);
-  assert(status == napi_ok && is_array);
+  check(status == napi_ok);
+  check(is_array);
   // Get length.
   uint32_t attr_len;
   status = napi_get_array_length(env, attr, &attr_len);
-  assert(status == napi_ok);
-  assert(attr_len >= 3);
+  check(status == napi_ok);
+  check(attr_len >= 3);
 
   // attr[0] should be the name e.g. "transpose_a"
   napi_value attr_name_js;
   status = napi_get_element(env, attr, 0, &attr_name_js);
-  assert(status == napi_ok);
+  check(status == napi_ok);
   const char* attr_name = AttrNameLookup(env, attr_name_js);
 
   // attr[1] should be an integer in enum AttrType.
   napi_value attr_type_js;
   status = napi_get_element(env, attr, 1, &attr_type_js);
-  assert(status == napi_ok);
+  check(status == napi_ok);
   enum AttrType attr_type;
   status = napi_get_value_int32(
       env, attr_type_js, reinterpret_cast<int32_t*>(&attr_type));
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   napi_value attr2;
   status = napi_get_element(env, attr, 2, &attr2);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   switch (attr_type) {
     case ATTR_BOOL: {
       bool v;
       status = napi_get_value_bool(env, attr2, &v);
-      assert(status == napi_ok);
+      check(status == napi_ok);
       TFE_OpSetAttrBool(op, attr_name, v);
       break;
     }
@@ -163,13 +164,13 @@ void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
       TF_DataType v;
       status =
           napi_get_value_int32(env, attr2, reinterpret_cast<int32_t*>(&v));
-      assert(status == napi_ok);
+      check(status == napi_ok);
       TFE_OpSetAttrType(op, attr_name, v);
       break;
     }
 
     default:
-      assert(false && "implement me");
+      fatal("implement me");
   }
 }
 
@@ -183,13 +184,13 @@ void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
 void SetOpAttrs(napi_env env, TFE_Op* op, napi_value attrs) {
   uint32_t attrs_len;
   auto status = napi_get_array_length(env, attrs, &attrs_len);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   for (uint32_t i = 0; i < attrs_len; ++i) {
     // Each element of the attrs list should be an array.
     napi_value attr;
     status = napi_get_element(env, attrs, i, &attr);
-    assert(status == napi_ok);
+    check(status == napi_ok);
     SetOpAttr(env, op, attr);
   }
 }
@@ -200,37 +201,39 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   napi_value args[4];
   napi_value js_this;
   auto napi_status = napi_get_cb_info(env, info, &argc, args, &js_this, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Get ContextWrap from args[0].
   ContextWrap* context_wrap;
   napi_status =
       napi_unwrap(env, args[0], reinterpret_cast<void**>(&context_wrap));
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Get op_name (const char*) from args[1].
   char op_name[512];
   napi_status = napi_get_value_string_utf8(env, args[1], op_name, 512, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Get attrs from args[2].
   auto attrs = args[2];
   bool is_array;
   napi_status = napi_is_array(env, attrs, &is_array);
-  assert(napi_status == napi_ok && is_array);
+  check(napi_status == napi_ok);
+  check(is_array);
 
   // Get inputs from args[3].
   auto inputs = args[3];
   napi_status = napi_is_array(env, inputs, &is_array);
-  assert(napi_status == napi_ok && is_array);
+  check(napi_status == napi_ok);
+  check(is_array);
   uint32_t inputs_len;
   napi_status = napi_get_array_length(env, inputs, &inputs_len);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Create TFE_Op
   auto tf_status = TF_NewStatus();
   TFE_Op* op = TFE_NewOp(context_wrap->tf_context, op_name, tf_status);
-  assert(TF_GetCode(tf_status) == TF_OK);
+  check(TF_GetCode(tf_status) == TF_OK);
 
   SetOpAttrs(env, op, attrs);
 
@@ -238,15 +241,15 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   for (uint32_t i = 0; i < inputs_len; ++i) {
     napi_value input;
     napi_status = napi_get_element(env, inputs, i, &input);
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
 
     TensorWrap* tensor_wrap;
     napi_status =
         napi_unwrap(env, input, reinterpret_cast<void**>(&tensor_wrap));
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
 
     TFE_OpAddInput(op, tensor_wrap->tf_tensor_handle, tf_status);
-    assert(TF_GetCode(tf_status) == TF_OK);
+    check(TF_GetCode(tf_status) == TF_OK);
   }
 
   // TODO(ry) only handling a single return value currently.
@@ -261,29 +264,29 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   // Create array to be returned.
   napi_value js_retvals;
   napi_status = napi_create_array_with_length(env, num_retvals, &js_retvals);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Get reference to Tensor class so we can call its constructor.
   napi_value tensor_class;
   napi_status = napi_get_reference_value(env, tensor_class_ref, &tensor_class);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // For each retval, wrap the TensorHandle.
   for (int i = 0; i < num_retvals; ++i) {
     napi_value js_retval;
     // Create a new Tensor object.
     napi_status = napi_new_instance(env, tensor_class, 0, NULL, &js_retval);
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
     // Unwrap
     TensorWrap* tensor_wrap;
     napi_status =
         napi_unwrap(env, js_retval, reinterpret_cast<void**>(&tensor_wrap));
-    assert(napi_status == napi_ok);
-    assert(tensor_wrap->env == env);
+    check(napi_status == napi_ok);
+    check(tensor_wrap->env == env);
     tensor_wrap->tf_tensor_handle = retvals[i];
     // Set created js object in output array.
     napi_status = napi_set_element(env, js_retvals, (uint32_t) i, js_retval);
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
   }
 
   TFE_DeleteOp(op);
@@ -294,9 +297,9 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
 static void DeleteContext(napi_env env, void* wrap_ptr, void* hint) {
   auto wrap = static_cast<ContextWrap*>(wrap_ptr);
   auto tf_status = TF_NewStatus();
-  assert(tf_status);
+  check(tf_status);
   TFE_DeleteContext(wrap->tf_context, tf_status);
-  assert(TF_GetCode(tf_status) == TF_OK);
+  check(TF_GetCode(tf_status) == TF_OK);
   delete wrap;
   TF_DeleteStatus(tf_status);
 }
@@ -311,20 +314,20 @@ static napi_value NewContext(napi_env env, napi_callback_info info) {
   auto opts = TFE_NewContextOptions();
 
   auto tf_status = TF_NewStatus();
-  assert(tf_status);
+  check(tf_status);
   auto tf_context = TFE_NewContext(opts, tf_status);
   TF_DeleteStatus(tf_status);
   TFE_DeleteContextOptions(opts);
 
   auto context_wrap = new ContextWrap();
-  assert(context_wrap);
+  check(context_wrap);
 
   context_wrap->tf_context = tf_context;
   context_wrap->env = env;
 
   napi_status =
       napi_wrap(env, js_this, context_wrap, DeleteContext, NULL, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   return js_this;
 }
@@ -339,7 +342,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   napi_value args[2];
   napi_value js_this;
   napi_status = napi_get_cb_info(env, info, &argc, args, &js_this, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Construct the native wrap object.
   TensorWrap* tensor_wrap = new TensorWrap();
@@ -351,7 +354,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   // Attach native wrapper to the JavaScript object.
   tensor_wrap->env = env;
   napi_status = napi_wrap(env, js_this, tensor_wrap, DeleteTensor, NULL, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Execute calls the Tensor constructor without any arguments.
   if (argc == 0) {
@@ -366,7 +369,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   // Check whether the first argument is a typed array.
   bool is_typed_array;
   napi_status = napi_is_typedarray(env, js_array, &is_typed_array);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   if (!is_typed_array) {
     napi_throw_type_error(
@@ -385,7 +388,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
                                          &js_array_data,
                                          NULL,
                                          NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Map to tensorflow type.
   size_t width;
@@ -435,7 +438,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   bool b;
 
   napi_status = napi_is_array(env, js_dims, &b);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
   if (!b) {
     napi_throw_range_error(
         env, "EINVAL", "Second argument should be an Array");
@@ -443,7 +446,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   }
 
   napi_status = napi_get_array_length(env, js_dims, &num_dims);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
   if (num_dims < 1 || num_dims > COUNT_OF(dims)) {
     napi_throw_range_error(env, "ERANGE", "Invalid number of dimensions");
     return NULL;
@@ -454,7 +457,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
     int64_t value;
 
     napi_status = napi_get_element(env, js_dims, i, &element);
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
 
     napi_status = napi_get_value_int64(env, element, &value);
     if (napi_status == napi_number_expected) {
@@ -465,7 +468,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
       napi_throw_range_error(env, "ERANGE", "Dimension size out of range");
       return NULL;
     }
-    assert(napi_status == napi_ok);
+    check(napi_status == napi_ok);
 
     dims[i] = value;
   }
@@ -475,7 +478,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   // the ReleaseTypedArray function that clears the reference.
   napi_status =
       napi_create_reference(env, js_array, 1, &tensor_wrap->js_typed_array);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Construct the TF_Tensor object.
   size_t byte_length = js_array_length * width;
@@ -537,26 +540,26 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
   // Fetch JavaScript `this` object.
   napi_value js_this;
   napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Unwrap.
   TensorWrap* tensor_wrap;
   napi_status =
       napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
   auto tensor =
       TFE_TensorHandleResolve(tensor_wrap->tf_tensor_handle, tf_status);
-  assert(TF_GetCode(tf_status) == TF_OK);
+  check(TF_GetCode(tf_status) == TF_OK);
   TF_DeleteStatus(tf_status);
 
-  assert(tensor_wrap->tf_tensor != tensor);
+  check(tensor_wrap->tf_tensor != tensor);
 
   napi_value array_buffer;
   napi_status = NewTensorArrayBuffer(env, tensor, &array_buffer);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   return array_buffer;
 }
@@ -567,13 +570,13 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   // Fetch JavaScript `this` object.
   napi_value js_this;
   napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Unwrap.
   TensorWrap* tensor_wrap;
   napi_status =
       napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   // Ask tensorflow for the device name.
   const char* device =
@@ -583,7 +586,7 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   napi_value js_device;
   napi_status =
       napi_create_string_utf8(env, device, NAPI_AUTO_LENGTH, &js_device);
-  assert(napi_status == napi_ok);
+  check(napi_status == napi_ok);
 
   return js_device;
 }
@@ -594,11 +597,11 @@ void AssignIntProperty(napi_env env,
                        int32_t value) {
   napi_value js_value;
   auto status = napi_create_int32(env, value, &js_value);
-  assert(status == napi_ok);
+  check(status == napi_ok);
   napi_property_descriptor d = {
       name, NULL, NULL, NULL, NULL, js_value, napi_default, NULL};
   status = napi_define_properties(env, exports, 1, &d);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 }
 
 static napi_value InitBinding(napi_env env, napi_value exports) {
@@ -615,7 +618,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       0,                 // Property count
       NULL,              // Property descriptors
       &context_class);   // Out: js value representing the class
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   // Define the Tensor JavaScript class.
   napi_value tensor_class;
@@ -638,12 +641,12 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       COUNT_OF(tensor_properties),  // Property count
       tensor_properties,            // Property descriptors
       &tensor_class);               // Out: js value representing the class
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   // tensor_class is used Execute() to instanciate resulting Tensors. Thus
   // create a reference.
   status = napi_create_reference(env, tensor_class, 1, &tensor_class_ref);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
   // Fill the exports.
   napi_property_descriptor exports_properties[] = {
@@ -653,7 +656,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   };
   status = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
-  assert(status == napi_ok);
+  check(status == napi_ok);
 
 #define EXPORT_ENUM(v) AssignIntProperty(env, exports, #v, v)
   // TF_DataType
