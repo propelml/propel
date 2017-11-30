@@ -514,14 +514,21 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
 static void DeleteTensorArrayBuffer(napi_env env,
                                     void* tensor_wrap_ptr,
                                     void* hint) {
-  auto tensor_wrap = reinterpret_cast<TensorWrap*>(hint);
-  // If this tensor's data originates from JavaScript, then it will
-  // be freed by ReleaseTypedArray. If not, we should delete the Tensor.
-  if (tensor_wrap->js_typed_array == NULL) {
-    assert(tensor_wrap->tf_tensor != NULL);
-    TF_DeleteTensor(tensor_wrap->tf_tensor);
-    tensor_wrap->tf_tensor = NULL;
-  }
+  auto tensor = reinterpret_cast<TF_Tensor*>(hint);
+  TF_DeleteTensor(tensor);
+}
+
+static napi_status NewTensorArrayBuffer(napi_env env,
+                                        TF_Tensor* tensor,
+                                        napi_value* array_buffer_out) {
+  void* external_data = TF_TensorData(tensor);
+  size_t byte_length = TF_TensorByteSize(tensor);
+  return napi_create_external_arraybuffer(env,
+                                          external_data,
+                                          byte_length,
+                                          DeleteTensorArrayBuffer,
+                                          tensor,
+                                          array_buffer_out);
 }
 
 static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
@@ -545,18 +552,10 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
   assert(TF_GetCode(tf_status) == TF_OK);
   TF_DeleteStatus(tf_status);
 
-  assert(tensor_wrap->tf_tensor == NULL || tensor_wrap->tf_tensor == tensor);
-  tensor_wrap->tf_tensor = tensor;
+  assert(tensor_wrap->tf_tensor != tensor);
 
-  void* external_data = TF_TensorData(tensor);
-  size_t byte_length = TF_TensorByteSize(tensor);
   napi_value array_buffer;
-  napi_create_external_arraybuffer(env,
-                                   external_data,
-                                   byte_length,
-                                   DeleteTensorArrayBuffer,
-                                   tensor_wrap,
-                                   &array_buffer);
+  napi_status = NewTensorArrayBuffer(env, tensor, &array_buffer);
   assert(napi_status == napi_ok);
 
   return array_buffer;
