@@ -13,16 +13,32 @@
    limitations under the License.
  */
 #include <assert.h>
+#include <node_api.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <node_api.h>
-
+#include <map>
+#include <string>
 #include "deps/libtensorflow/include/tensorflow/c/c_api.h"
 #include "deps/libtensorflow/include/tensorflow/c/eager/c_api.h"
 
 #define COUNT_OF(array) (sizeof(array) / sizeof(array[0]))
+
+enum AttrType {
+  ATTR_STRING,
+  ATTR_INT,
+  ATTR_FLOAT,
+  ATTR_BOOL,
+  ATTR_TYPE,
+  ATTR_SHAPE,
+  ATTR_FUNCTION,
+  ATTR_STRING_LIST,
+  ATTR_INT_LIST,
+  ATTR_FLOAT_LIST,
+  ATTR_BOOL_LIST,
+  ATTR_TYPE_LIST,
+  ATTR_SHAPE_LIST,
+};
 
 static const size_t kMaxDims = 10;
 static napi_ref tensor_class_ref;
@@ -81,6 +97,103 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 #endif
 }
 
+// TFE_OpSetAttrType, TFE_OpSetAttrBool, and friends use attr_name parameter
+// beyond the lifetime of the call. Because we are getting these strings
+// from V8, we cannot simply get a constant pointer. So, rather than trying
+// to dynamically allocate memory for these attribute names, we instead have
+// this lookup map to fixed strings.  The value (int) in the map is unused.
+// Add to this as needed.
+const std::map<std::string, int> attrNameMap = {
+    {"T", 0}, {"transpose_a", 0}, {"transpose_b", 0},
+};
+
+const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
+  char attr_name[512];
+  auto status =
+      napi_get_value_string_utf8(env, attr_name_js, attr_name, 512, NULL);
+  assert(status == napi_ok);
+
+  auto it = attrNameMap.find(attr_name);
+  if (it != attrNameMap.end()) {
+    return it->first.c_str();
+  }
+  assert(false && "attr_name not found in attrNameMap");
+}
+
+void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
+  // Check that the attr is an array.
+  bool is_array;
+  auto status = napi_is_array(env, attr, &is_array);
+  assert(status == napi_ok && is_array);
+  // Get length.
+  uint32_t attr_len;
+  status = napi_get_array_length(env, attr, &attr_len);
+  assert(status == napi_ok);
+  assert(attr_len >= 3);
+
+  // attr[0] should be the name e.g. "transpose_a"
+  napi_value attr_name_js;
+  status = napi_get_element(env, attr, 0, &attr_name_js);
+  assert(status == napi_ok);
+  const char* attr_name = AttrNameLookup(env, attr_name_js);
+
+  // attr[1] should be an integer in enum AttrType.
+  napi_value attr_type_js;
+  status = napi_get_element(env, attr, 1, &attr_type_js);
+  assert(status == napi_ok);
+  enum AttrType attr_type;
+  status = napi_get_value_int32(
+      env, attr_type_js, reinterpret_cast<int32_t*>(&attr_type));
+  assert(status == napi_ok);
+
+  napi_value attr2;
+  status = napi_get_element(env, attr, 2, &attr2);
+  assert(status == napi_ok);
+
+  switch (attr_type) {
+    case ATTR_BOOL: {
+      bool v;
+      status = napi_get_value_bool(env, attr2, &v);
+      assert(status == napi_ok);
+      TFE_OpSetAttrBool(op, attr_name, v);
+      break;
+    }
+
+    case ATTR_TYPE: {
+      TF_DataType v;
+      status =
+          napi_get_value_int32(env, attr2, reinterpret_cast<int32_t*>(&v));
+      assert(status == napi_ok);
+      TFE_OpSetAttrType(op, attr_name, v);
+      break;
+    }
+
+    default:
+      assert(false && "implement me");
+  }
+}
+
+/* Set attribtues from arguments. Attrs will look something like this:
+    [
+      ["transpose_a", binding.ATTR_BOOL, false],
+      ["transpose_b", binding.ATTR_BOOL, false],
+      ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+    ]
+*/
+void SetOpAttrs(napi_env env, TFE_Op* op, napi_value attrs) {
+  uint32_t attrs_len;
+  auto status = napi_get_array_length(env, attrs, &attrs_len);
+  assert(status == napi_ok);
+
+  for (uint32_t i = 0; i < attrs_len; ++i) {
+    // Each element of the attrs list should be an array.
+    napi_value attr;
+    status = napi_get_element(env, attrs, i, &attr);
+    assert(status == napi_ok);
+    SetOpAttr(env, op, attr);
+  }
+}
+
 static napi_value Execute(napi_env env, napi_callback_info info) {
   // Fetch JavaScript `this` object and function arguments.
   size_t argc = 4;
@@ -100,11 +213,14 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   napi_status = napi_get_value_string_utf8(env, args[1], op_name, 512, NULL);
   assert(napi_status == napi_ok);
 
-  // TODO(ry) Get attrs from args[2].
+  // Get attrs from args[2].
+  auto attrs = args[2];
+  bool is_array;
+  napi_status = napi_is_array(env, attrs, &is_array);
+  assert(napi_status == napi_ok && is_array);
 
   // Get inputs from args[3].
   auto inputs = args[3];
-  bool is_array;
   napi_status = napi_is_array(env, inputs, &is_array);
   assert(napi_status == napi_ok && is_array);
   uint32_t inputs_len;
@@ -116,10 +232,7 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   TFE_Op* op = TFE_NewOp(context_wrap->tf_context, op_name, tf_status);
   assert(TF_GetCode(tf_status) == TF_OK);
 
-  // TODO(ry) Set attribtues from arguments.
-  TFE_OpSetAttrBool(op, "transpose_a", false);
-  TFE_OpSetAttrBool(op, "transpose_b", false);
-  TFE_OpSetAttrType(op, "T", TF_FLOAT);
+  SetOpAttrs(env, op, attrs);
 
   // Loop thru inputs and add them to Op.
   for (uint32_t i = 0; i < inputs_len; ++i) {
@@ -425,7 +538,6 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
       napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
   assert(napi_status == napi_ok);
 
-
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
   auto tensor =
@@ -475,6 +587,19 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   assert(napi_status == napi_ok);
 
   return js_device;
+}
+
+void AssignIntProperty(napi_env env,
+                       napi_value exports,
+                       const char* name,
+                       int32_t value) {
+  napi_value js_value;
+  auto status = napi_create_int32(env, value, &js_value);
+  assert(status == napi_ok);
+  napi_property_descriptor d = {
+      name, NULL, NULL, NULL, NULL, js_value, napi_default, NULL};
+  status = napi_define_properties(env, exports, 1, &d);
+  assert(status == napi_ok);
 }
 
 static napi_value InitBinding(napi_env env, napi_value exports) {
@@ -530,6 +655,48 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   status = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
   assert(status == napi_ok);
+
+#define EXPORT_ENUM(v) AssignIntProperty(env, exports, #v, v)
+  // TF_DataType
+  EXPORT_ENUM(TF_FLOAT);
+  EXPORT_ENUM(TF_DOUBLE);
+  EXPORT_ENUM(TF_INT32);
+  EXPORT_ENUM(TF_UINT8);
+  EXPORT_ENUM(TF_INT16);
+  EXPORT_ENUM(TF_INT8);
+  EXPORT_ENUM(TF_STRING);
+  EXPORT_ENUM(TF_COMPLEX64);
+  EXPORT_ENUM(TF_COMPLEX);
+  EXPORT_ENUM(TF_INT64);
+  EXPORT_ENUM(TF_BOOL);
+  EXPORT_ENUM(TF_QINT8);
+  EXPORT_ENUM(TF_QUINT8);
+  EXPORT_ENUM(TF_QINT32);
+  EXPORT_ENUM(TF_BFLOAT16);
+  EXPORT_ENUM(TF_QINT16);
+  EXPORT_ENUM(TF_QUINT16);
+  EXPORT_ENUM(TF_UINT16);
+  EXPORT_ENUM(TF_COMPLEX128);
+  EXPORT_ENUM(TF_HALF);
+  EXPORT_ENUM(TF_RESOURCE);
+  EXPORT_ENUM(TF_VARIANT);
+  EXPORT_ENUM(TF_UINT32);
+  EXPORT_ENUM(TF_UINT64);
+  // AttrType
+  EXPORT_ENUM(ATTR_STRING);
+  EXPORT_ENUM(ATTR_INT);
+  EXPORT_ENUM(ATTR_FLOAT);
+  EXPORT_ENUM(ATTR_BOOL);
+  EXPORT_ENUM(ATTR_TYPE);
+  EXPORT_ENUM(ATTR_SHAPE);
+  EXPORT_ENUM(ATTR_FUNCTION);
+  EXPORT_ENUM(ATTR_STRING_LIST);
+  EXPORT_ENUM(ATTR_INT_LIST);
+  EXPORT_ENUM(ATTR_FLOAT_LIST);
+  EXPORT_ENUM(ATTR_BOOL_LIST);
+  EXPORT_ENUM(ATTR_TYPE_LIST);
+  EXPORT_ENUM(ATTR_SHAPE_LIST);
+#undef EXPORT_ENUM
 
   return exports;
 }
