@@ -11,5 +11,5 @@ node ./node_modules/webpack/bin/webpack.js
 node dist/backprop_test.js
 node dist/tensor_test.js
 node dist/util_test.js
-node binding_test.js
+node dist/binding_test.js
 echo PASS
