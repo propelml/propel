@@ -8,6 +8,7 @@
   "dependencies": {
     "@types/codemirror": "0.0.51",
     "@types/d3": "^4.11.1",
+    "@types/node": "^8.0.53",
     "codemirror": "^5.31.0",
     "d3": "^4.11.0",
     "seedrandom": "^2.4.3",
