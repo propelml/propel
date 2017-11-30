@@ -31,7 +31,11 @@ function testMatMul() {
   assert(a.device == "CPU:0");
   assert(b.device == "CPU:0");
 
-  const opAttrs = { transpose_a: false, transpose_b: false };
+  const opAttrs = [
+    ["transpose_a", binding.ATTR_BOOL, false],
+    ["transpose_b", binding.ATTR_BOOL, false],
+    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+  ];
   const retvals = binding.execute(ctx, "MatMul", opAttrs, [a, b]);
   const r = retvals[0];
   assert(r.device == "CPU:0");
