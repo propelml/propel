@@ -4,12 +4,13 @@ import { expandShapeToKeepDim } from "./deeplearnjs/src/math/axis_util";
 import { NDArrayMath } from "./deeplearnjs/src/math/math";
 import { NDArrayMathCPU } from "./deeplearnjs/src/math/math_cpu";
 import { NDArrayMathGPU } from "./deeplearnjs/src/math/math_gpu";
-import { flatten, inferShape, RegularArray } from "./deeplearnjs/src/util";
+import { flatten, inferShape, RegularArray, TypedArray }
+  from "./deeplearnjs/src/util";
 import * as ops from "./ops";
 import { assert } from "./util";
 
 export type TensorLike = boolean | number | RegularArray<boolean> |
-  RegularArray<number> | NDArray | Tensor;
+  RegularArray<number> | TypedArray | Tensor;
 export type Shape = number[];
 
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
@@ -31,7 +32,7 @@ export class Tensor {
     }
   }
 
-  constructor(x: TensorLike) {
+  constructor(x: TensorLike | NDArray) {
     if (x instanceof Array) {
       // Argument is a JS array like [[1, 2], [3, 4]].
       const shape = inferShape(x);
@@ -60,6 +61,10 @@ export class Tensor {
 
     this.id = Tensor.nextId;
     Tensor.nextId++;
+  }
+
+  getValues(): TypedArray {
+    return this.ndarray.getValues();
   }
 
   // Lazily initialize.
