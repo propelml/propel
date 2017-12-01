@@ -1,26 +1,5 @@
 import { assert, assertEqual, assertAllEqual } from "./util";
-import * as fs from "fs";
-import * as path from "path";
-
-export function maybeRequireBinding() {
-  // If we're in the browser, don't even attempt it.
-  if (typeof window !== 'undefined') return null;
-
-  // When using ts-node, we are in the root dir, after compiling to
-  // javascript, we are in the dist dir.
-  const toAttempt = [
-    '../build/Debug/tensorflow-binding.node',
-    '../build/Release/tensorflow-binding.node',
-    './build/Debug/tensorflow-binding.node',
-    './build/Release/tensorflow-binding.node',
-  ];
-  for (const fn of toAttempt) {
-    if (fs.existsSync(path.join(__dirname, fn))) {
-      return require(fn);
-    }
-  }
-  return null;
-}
+import { maybeRequireBinding } from "./tf";
 
 const binding = maybeRequireBinding();
 const ctx = new binding.Context();

@@ -7,6 +7,7 @@ import { NDArrayMathGPU } from "./deeplearnjs/src/math/math_gpu";
 import { flatten, inferShape, RegularArray, TypedArray }
   from "./deeplearnjs/src/util";
 import * as ops from "./ops";
+import * as tf from "./tf";
 import { assert } from "./util";
 
 export type TensorLike = boolean | number | RegularArray<boolean> |
@@ -16,23 +17,70 @@ export type Shape = number[];
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 let gpuMath: NDArrayMathGPU = null;
 
-export class Tensor {
+export abstract class Tensor {
   private static nextId = 1;
-  math: NDArrayMath = cpuMath;
   id: number;
   shape: Shape;
-  ndarray: NDArray; // TODO private
   dtype: "float32" | "uint8";
 
   static convert(x: TensorLike): Tensor {
     if (x instanceof Tensor) {
       return x;
+    } else if (tf.binding) {
+      return new TFTensor(x);
     } else {
-      return new Tensor(x);
+      return new DLTensor(x);
     }
   }
 
+  constructor() {
+    this.dtype = "float32";
+    this.id = Tensor.nextId;
+    Tensor.nextId++;
+  }
+
+  abstract getValues(): TypedArray;
+
+  // Returns a copy of the Tensor that is stored on the GPU.
+  abstract gpu(): Tensor;
+
+  abstract inGPU(): boolean;
+
+  abstract toNumber(): number;
+
+  abstract get(...locs: number[]): number;
+
+  abstract zerosLike(): Tensor;
+
+  abstract onesLike(): Tensor;
+
+  abstract toString(): string;
+
+  abstract exp(): Tensor;
+
+  abstract neg(): Tensor;
+
+  abstract add(x: TensorLike): Tensor;
+
+  abstract sub(x: TensorLike): Tensor;
+
+  abstract div(x: TensorLike): Tensor;
+
+  abstract mul(x: TensorLike): Tensor;
+
+  abstract reshape(newShape: Shape): Tensor;
+
+  abstract expandDims(axis: number): Tensor;
+
+  abstract equals(t: TensorLike): boolean;
+}
+
+export class DLTensor extends Tensor {
+  math: NDArrayMath = cpuMath;
+  ndarray: NDArray; // TODO private
+
   constructor(x: TensorLike | NDArray) {
+    super();
     if (x instanceof Array) {
       // Argument is a JS array like [[1, 2], [3, 4]].
       const shape = inferShape(x);
@@ -52,15 +100,12 @@ export class Tensor {
     } else if (x instanceof NDArray) {
       this.ndarray = x;
       if (x.inGPU()) {
-        this.math = Tensor.gpuMath();
+        this.math = DLTensor.gpuMath();
       }
       this.shape = x.shape;
     }
 
     this.dtype = "float32"; // TODO Support other dtypes.
-
-    this.id = Tensor.nextId;
-    Tensor.nextId++;
   }
 
   getValues(): TypedArray {
@@ -77,12 +122,12 @@ export class Tensor {
 
   // Returns a copy of the Tensor that is stored on the GPU.
   gpu(): Tensor {
-    Tensor.gpuMath();
+    DLTensor.gpuMath();
 
     const ndarray = NDArray.like(this.ndarray);
     assert(null != ndarray.getTexture()); // Upload to GPU.
 
-    const t = new Tensor(ndarray);
+    const t = new DLTensor(ndarray);
     assert(t.math == gpuMath);
 
     return t;
@@ -106,13 +151,13 @@ export class Tensor {
 
   zerosLike(): Tensor {
     const zeros = NDArray.zerosLike(this.ndarray);
-    return new Tensor(zeros);
+    return new DLTensor(zeros);
   }
 
   onesLike(): Tensor {
     const ones = NDArray.zerosLike(this.ndarray);
     ones.fill(1.0);
-    return new Tensor(ones);
+    return new DLTensor(ones);
   }
 
   toString(): string {
@@ -157,7 +202,7 @@ export class Tensor {
   // this op after the bindings are in place.
   equals(t: TensorLike): boolean {
     const a = this.ndarray;
-    const b = Tensor.convert(t).ndarray;
+    const b = (Tensor.convert(t) as DLTensor).ndarray;
     if (a === null) {
       return b === null;
     } else if (b === null) {
@@ -169,5 +214,116 @@ export class Tensor {
       if (v[i] === 0) return false;
     }
     return true;
+  }
+}
+
+export class TFTensor extends Tensor {
+  // handle is a binding.Tensor. It's called handle so we don't have too many
+  // things named Tensor, and because it's essentially as JS version of
+  // TFE_TensorHandle.
+  private handle;
+  private values: TypedArray;
+
+  constructor(x: TensorLike) {
+    super();
+
+    if (x instanceof Tensor) {
+      this.values = x.getValues();
+      this.shape = x.shape;
+    } else if (x instanceof Array) {
+      // Argument is a JS array like [[1, 2], [3, 4]].
+      const shape = inferShape(x);
+      if (shape.length == 1 && shape[0] == 0) {
+        // Special case the empty tensor...
+        this.shape = [];
+        this.values = new Float32Array([]);
+      } else {
+        const data = flatten(x) as number[];
+        this.values = new Float32Array(data);
+        this.shape = shape;
+      }
+    } else if (typeof x == "number") {
+      // Scalar
+      this.values = new Float32Array([x]);
+      this.shape = [];
+    } else if (typeof x == "boolean") {
+      throw new Error("Not Implemented.");
+    } else {
+      // TypedArray
+      this.values = x;
+      this.shape = [x.length];
+    }
+
+    this.handle = new tf.binding.Tensor(this.values, this.shape);
+    this.dtype = "float32"; // TODO Support other dtypes.
+  }
+
+  getValues(): TypedArray {
+    return this.values;
+  }
+
+  // Returns a copy of the Tensor that is stored on the GPU.
+  gpu(): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  inGPU(): boolean {
+    throw new Error("Not Implemented.");
+  }
+
+  toNumber(): number {
+    return this.values[0];
+  }
+
+  get(...locs: number[]): number {
+    throw new Error("Not Implemented.");
+  }
+
+  zerosLike(): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  onesLike(): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  toString(): string {
+    throw new Error("Not Implemented.");
+  }
+
+  exp(): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  neg(): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  add(x: TensorLike): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  sub(x: TensorLike): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  div(x: TensorLike): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  mul(x: TensorLike): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  reshape(newShape: Shape): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  expandDims(axis: number): Tensor {
+    throw new Error("Not Implemented.");
+  }
+
+  equals(t: TensorLike): boolean {
+    throw new Error("Not Implemented.");
   }
 }
