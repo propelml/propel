@@ -104,7 +104,11 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 // this lookup map to fixed strings.  The value (int) in the map is unused.
 // Add to this as needed.
 const std::map<std::string, int> attrNameMap = {
-    {"T", 0}, {"transpose_a", 0}, {"transpose_b", 0},
+    {"T", 0},
+    {"transpose_a", 0},
+    {"transpose_b", 0},
+    {"Tidx", 0},
+    {"keep_dims", 0},
 };
 
 const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
@@ -233,7 +237,11 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   // Create TFE_Op
   auto tf_status = TF_NewStatus();
   TFE_Op* op = TFE_NewOp(context_wrap->tf_context, op_name, tf_status);
-  check(TF_GetCode(tf_status) == TF_OK);
+  if (TF_GetCode(tf_status) != TF_OK) {
+    napi_throw_error(env, NULL, TF_Message(tf_status));
+    TF_DeleteStatus(tf_status);
+    return NULL;
+  }
 
   SetOpAttrs(env, op, attrs);
 
@@ -258,6 +266,8 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   TFE_Execute(op, retvals, &num_retvals, tf_status);
   if (TF_GetCode(tf_status) != TF_OK) {
     napi_throw_error(env, NULL, TF_Message(tf_status));
+    TF_DeleteStatus(tf_status);
+    TFE_DeleteOp(op);
     return NULL;
   }
 
@@ -447,7 +457,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
 
   napi_status = napi_get_array_length(env, js_dims, &num_dims);
   check(napi_status == napi_ok);
-  if (num_dims < 1 || num_dims > COUNT_OF(dims)) {
+  if (num_dims > COUNT_OF(dims)) {
     napi_throw_range_error(env, "ERANGE", "Invalid number of dimensions");
     return NULL;
   }
@@ -591,6 +601,30 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   return js_device;
 }
 
+static napi_value TensorGetDType(napi_env env, napi_callback_info info) {
+  napi_status napi_status;
+
+  // Fetch JavaScript `this` object.
+  napi_value js_this;
+  napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
+  check(napi_status == napi_ok);
+
+  // Unwrap.
+  TensorWrap* tensor_wrap;
+  napi_status =
+      napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  check(napi_status == napi_ok);
+
+  // Ask tensorflow for the dtype.
+  TF_DataType dtype = TFE_TensorHandleDataType(tensor_wrap->tf_tensor_handle);
+
+  napi_value js_dtype;
+  napi_status = napi_create_int32(env, dtype, &js_dtype);
+  check(napi_status == napi_ok);
+
+  return js_dtype;
+}
+
 void AssignIntProperty(napi_env env,
                        napi_value exports,
                        const char* name,
@@ -631,7 +665,9 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
        NULL,
        napi_default,
        NULL},
-      {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL}};
+      {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL},
+      {"dtype", NULL, NULL, TensorGetDType, NULL, NULL, napi_default, NULL},
+  };
   status = napi_define_class(
       env,
       "Tensor",                     // JavaScript class name
