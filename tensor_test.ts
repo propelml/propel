@@ -1,6 +1,6 @@
 import $ from "./propel";
-import { assert, assertFalse, assertShapesEqual, assertEqual, assertAllEqual }
-  from "./util";
+import { assert, assertFalse, assertShapesEqual, assertEqual, assertAllEqual,
+  assertAllClose } from "./util";
 
 function testShapes() {
   const a = $([[1, 2], [3, 4]]);
@@ -27,7 +27,7 @@ function testAllEqual() {
 
 function testLinspace() {
   const x = $.linspace(-4, 4, 6);
-  assertAllEqual(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
+  assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
 }
 
 function testMul() {

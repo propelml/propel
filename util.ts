@@ -1,12 +1,38 @@
 import { Shape, Tensor, TensorLike } from "./tensor";
+import { FlatVector, flatten, inferShape } from "./deeplearnjs/src/util";
 
 const debug = false;
 const J = JSON.stringify;
+
+
+function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
+  if (t instanceof Tensor) {
+    return [t.shape, t.getValues()];
+  } else if (t instanceof Array) {
+    return [inferShape(t), flatten(t) as number[]];
+  } else if (typeof t == "number") {
+    return [[], [t]];
+  } else if (typeof t == "boolean") {
+    return [[], [t]];
+  } else {
+    // TypedArray
+    return [[t.length], t];
+  }
+}
+
 
 export function log(...args: any[]) {
   if (debug) {
     console.log.apply(null, args);
   }
+}
+
+export function shapesEqual(x: Shape, y: Shape): boolean {
+  if (x.length != y.length) return false;
+  for (let i = 0; i < x.length; ++i) {
+    if (x[i] != y[i]) return false;
+  }
+  return true;
 }
 
 export function assert(expr: boolean, msg = "") {
@@ -27,47 +53,40 @@ export function assertClose(actual: TensorLike, expected: TensorLike,
     `actual: ${actual} expected: ${expected}`);
 }
 
-export function assertEqual(actual: TensorLike, expected: number, msg = null) {
+export function assertEqual(actual: TensorLike, expected: number|boolean,
+                            msg = null) {
   actual = Tensor.convert(actual).toNumber();
   if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
-  assert(actual == expected, msg);
+  assert(actual === expected, msg);
 }
 
 export function assertShapesEqual(actual: Shape, expected: Shape) {
   const msg = `Shape mismatch. actual: ${J(actual)} expected ${J(expected)}`;
-  assertEqual(actual.length, expected.length, msg);
-  for (let i = 0; i < actual.length; ++i) {
-    assertEqual(actual[i], expected[i], msg);
-  }
+  assert(shapesEqual(actual, expected), msg);
 }
 
 export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
-  actual = Tensor.convert(actual);
-  expected = Tensor.convert(expected);
-
-  assertShapesEqual(actual.shape, expected.shape);
-
-  const a = actual.ndarray.getValues();
-  const e = expected.ndarray.getValues();
-
-  for (let i = 0; i < e.length; ++i) {
-    assertEqual(a[i], e[i]);
+  const [actualShape, actualFlat] = toShapeAndFlatVector(actual);
+  const [expectedShape, expectedFlat] = toShapeAndFlatVector(expected);
+  assertShapesEqual(actualShape, expectedShape);
+  for (let i = 0; i < actualFlat.length; i++) {
+    assert(actualFlat[i] === expectedFlat[i],
+      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`);
   }
 }
 
 export function assertAllClose(actual: TensorLike, expected: TensorLike,
                                delta = 0.001) {
-  actual = Tensor.convert(actual);
-  expected = Tensor.convert(expected);
+  const [actualShape, actualFlat] = toShapeAndFlatVector(actual);
+  const [expectedShape, expectedFlat] = toShapeAndFlatVector(expected);
 
-  assertShapesEqual(actual.shape, expected.shape);
+  assertShapesEqual(actualShape, expectedShape);
 
-  const a = actual.ndarray.getValues();
-  const e = expected.ndarray.getValues();
-
-  for (let i = 0; i < e.length; ++i) {
-    assert(Math.abs(a[i] - e[i]) < delta,
-      `index ${i} actual: ${a[i]} expected: ${e[i]}`);
+  for (let i = 0; i < actualFlat.length; ++i) {
+    const a = (actualFlat[i]) as number;
+    const e = (expectedFlat[i]) as number;
+    assert(Math.abs(a - e) < delta,
+      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`);
   }
 }
 
