@@ -69,7 +69,8 @@
               ],
               'outputs': [
                 '<(PRODUCT_DIR)/libtensorflow.so',
-                '<(PRODUCT_DIR)/libtensorflow_framework.so'
+                # unlisted to avoid spurious rebuilds:
+                # '<(PRODUCT_DIR)/libtensorflow_framework.so'
               ],
               'action': [
                 'node',
