@@ -20,7 +20,6 @@ function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   }
 }
 
-
 export function log(...args: any[]) {
   if (debug) {
     console.log.apply(null, args);

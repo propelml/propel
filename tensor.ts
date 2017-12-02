@@ -8,7 +8,7 @@ import { flatten, inferShape, RegularArray, TypedArray }
   from "./deeplearnjs/src/util";
 import * as ops from "./ops";
 import * as tf from "./tf";
-import { assert } from "./util";
+import { assert, shapesEqual } from "./util";
 
 export type TensorLike = boolean | number | RegularArray<boolean> |
   RegularArray<number> | TypedArray | Tensor;
@@ -31,6 +31,16 @@ export abstract class Tensor {
     } else {
       return new DLTensor(x);
     }
+  }
+
+  static arange(start, stop, step = 1): Tensor {
+    const len = Math.floor((stop - start) / step);
+    const range = new Int32Array(len);
+    let j = 0;
+    for (let i = start; i < stop; i += step) {
+      range[j++] = i;
+    }
+    return Tensor.convert(range);
   }
 
   constructor() {
@@ -334,14 +344,23 @@ export class TFTensor extends Tensor {
   equals(t: TensorLike): boolean {
     const tt = TFTensor.convert(t);
 
+    if (!shapesEqual(this.shape, tt.shape)) {
+      return false;
+    }
+
+    if (this.shape.length == 0) {
+      assert(tt.shape.length == 0);
+      return this.toNumber() === tt.toNumber();
+    }
+
     const r = tf.execute0("Equal", [this.handle, tt.handle], [
       ["T", tf.binding.ATTR_TYPE, tf.binding.TF_FLOAT],
     ]);
     assert(r.dtype == tf.binding.TF_BOOL);
 
-    const reductionIndices = new tf.binding.Tensor(new Int32Array([]), []);
+    const idx = Tensor.arange(0, this.shape.length) as TFTensor;
 
-    const r2 = tf.execute0("All", [r, reductionIndices], [
+    const r2 = tf.execute0("All", [r, idx.handle], [
       ["Tidx", tf.binding.ATTR_TYPE, tf.binding.TF_INT32],
       ["keep_dims", tf.binding.ATTR_BOOL, false],
     ]);
