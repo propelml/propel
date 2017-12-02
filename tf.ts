@@ -1,3 +1,5 @@
+import { assertEqual } from "./util"; 
+
 export function maybeRequireBinding() {
   // If we're in the browser, don't even attempt it.
   if (typeof window !== 'undefined') return null;
@@ -30,3 +32,16 @@ export function maybeRequireBinding() {
 }
 
 export let binding = maybeRequireBinding();
+
+// Auto create context for now.
+export let ctx;
+if (binding) {
+  ctx = new binding.Context();
+}
+
+// Sugar for single value ops.
+export function execute0(opName, inputs, attrs) {
+  const r = binding.execute(ctx, opName, attrs, inputs);
+  assertEqual(r.length, 1);
+  return r[0];
+}

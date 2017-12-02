@@ -221,8 +221,16 @@ export class TFTensor extends Tensor {
   // handle is a binding.Tensor. It's called handle so we don't have too many
   // things named Tensor, and because it's essentially as JS version of
   // TFE_TensorHandle.
-  private handle;
+  handle;
   private values: TypedArray;
+
+  static convert(x: TensorLike): TFTensor {
+    if (x instanceof TFTensor) {
+      return x;
+    } else {
+      return new TFTensor(x);
+    }
+  }
 
   constructor(x: TensorLike) {
     super();
@@ -324,6 +332,22 @@ export class TFTensor extends Tensor {
   }
 
   equals(t: TensorLike): boolean {
-    throw new Error("Not Implemented.");
+    const tt = TFTensor.convert(t);
+
+    const r = tf.execute0("Equal", [this.handle, tt.handle], [
+      ["T", tf.binding.ATTR_TYPE, tf.binding.TF_FLOAT],
+    ]);
+    assert(r.dtype == tf.binding.TF_BOOL);
+
+    const reductionIndices = new tf.binding.Tensor(new Int32Array([]), []);
+
+    const r2 = tf.execute0("All", [r, reductionIndices], [
+      ["Tidx", tf.binding.ATTR_TYPE, tf.binding.TF_INT32],
+      ["keep_dims", tf.binding.ATTR_BOOL, false],
+    ]);
+    assert(r2.dtype == tf.binding.TF_BOOL);
+    const out = new Uint8Array(r2.asArrayBuffer());
+    assert(out.length == 1);
+    return Boolean(out[0]);
   }
 }
