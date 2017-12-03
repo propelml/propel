@@ -4,7 +4,7 @@
 // Forward OPs only use NDArrayMath.
 // Backwards OPs must be defined in terms of forward OPs in order to support
 // higher order gradients.
-import $ from "./propel";
+import { $, allEqual } from "./propel";
 import * as backprop from "./backprop";
 import { Array1D, Array2D, Array3D, Array4D }
   from "./deeplearnjs/src/math/ndarray";
@@ -117,7 +117,7 @@ function concatFW(m, axis: number, ...tensors: TensorLike[]): NDArray {
   const tensors_ = tensors.map(Tensor.convert);
   const ndarrays = tensors_.map(t => t.ndarray);
   const shapes = tensors_.map(t => t.shape);
-  assert($.allEqual(...shapes), "shapes not all equal");
+  assert(allEqual(...shapes), "shapes not all equal");
   const rank = shapes[0].length;
   const r = ndarrays.reduce((a, b) => {
     if (rank == 0) {

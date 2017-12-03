@@ -1,4 +1,4 @@
-import $ from "./propel";
+import { $, allEqual, linspace, arange, concat, stack } from "./propel";
 import { assert, assertFalse, assertShapesEqual, assertEqual, assertAllEqual,
   assertAllClose } from "./util";
 
@@ -15,18 +15,18 @@ function testShapes() {
 }
 
 function testAllEqual() {
-  assert($.allEqual([1, 2, 3], [1, 2, 3]));
-  assert($.allEqual([[1], [2]], [[1], [2]]));
+  assert(allEqual([1, 2, 3], [1, 2, 3]));
+  assert(allEqual([[1], [2]], [[1], [2]]));
   const t = $([[1], [3]]);
   const s = $([[1], [2]]);
   assertFalse(t.equals(s));
-  assertFalse($.allEqual(s, t));
-  assert($.allEqual([], []));
+  assertFalse(allEqual(s, t));
+  assert(allEqual([], []));
   assertFalse($(0).equals([]));
 }
 
 function testLinspace() {
-  const x = $.linspace(-4, 4, 6);
+  const x = linspace(-4, 4, 6);
   assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
 }
 
@@ -39,7 +39,7 @@ function testMul() {
 }
 
 function testReshape() {
-  const x = $.arange(0, 6).reshape([2, 3]);
+  const x = arange(0, 6).reshape([2, 3]);
   assertAllEqual(x.shape, [2, 3]);
   assertEqual(x.get(0, 0), 0);
   assertEqual(x.get(0, 1), 1);
@@ -50,7 +50,7 @@ function testReshape() {
 }
 
 function testExpandDims() {
-  const x = $.arange(0, 6).reshape([2, 3]);
+  const x = arange(0, 6).reshape([2, 3]);
   const y = x.expandDims(1);
   const z = y.expandDims(0);
   assertAllEqual(x.shape, [2, 3]);
@@ -59,9 +59,9 @@ function testExpandDims() {
 }
 
 function testConcat() {
-  const x = $.arange(0, 6).reshape([2, 3]);
-  const y = $.arange(6, 12).reshape([2, 3]);
-  const r = $.concat([x, y], 1);
+  const x = arange(0, 6).reshape([2, 3]);
+  const y = arange(6, 12).reshape([2, 3]);
+  const r = concat([x, y], 1);
   assertShapesEqual(r.shape, [2, 6]);
   assertEqual(r.get(0, 0), 0);
   assertEqual(r.get(0, 3), 6);
@@ -70,9 +70,9 @@ function testConcat() {
 }
 
 function testStack() {
-  const x = $.arange(0, 6).reshape([2, 3]);
-  const y = $.arange(6, 12).reshape([2, 3]);
-  const r = $.stack([x, y], 0);
+  const x = arange(0, 6).reshape([2, 3]);
+  const y = arange(6, 12).reshape([2, 3]);
+  const r = stack([x, y], 0);
   assertShapesEqual(r.shape, [2, 2, 3]);
   assertEqual(r.get(0, 0, 0), 0);
   assertEqual(r.get(1, 0, 0), 6);
