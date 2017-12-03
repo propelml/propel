@@ -209,16 +209,16 @@ window.onload = () => {
   cellsElement = document.getElementById("cells");
   document.getElementById("newCell").onclick = newCellClick;
 
-  // Pre-existing cells are stored as <script type=repl> elements.
+  // Pre-existing cells are stored as <script type=notebook> elements.
   // These script tags are promptly removed from the DOM and
   // replaced with CodeMirror-handled textareas containing
-  // the source code. We use <script type=repl> in order to get
+  // the source code. We use <script type=notebook> in order to get
   // proper syntax highlighting in editors.
 
   const cells = [];
-  const replScripts = Array.from(document.scripts).filter(
-    (s) => s.type == "repl");
-  for (const s of replScripts) {
+  const scripts = Array.from(document.scripts).filter(
+    (s) => s.type == "notebook");
+  for (const s of scripts) {
     s.remove();
     cells.push(new Cell(s.innerText));
   }

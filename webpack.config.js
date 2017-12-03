@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    'repl': './repl.ts',
+    'notebook': './notebook.ts',
     'propel': './propel.ts',
     'propel.min': './propel.ts'
   },
