@@ -7,9 +7,5 @@ export V=1
 ./deps/cpplint/cpplint.py *.cc
 npm build .
 node ./node_modules/webpack/bin/webpack.js
-./node_modules/typescript/bin/tsc
-node dist/backprop_test.js
-node dist/tensor_test.js
-node dist/util_test.js
-node dist/binding_test.js
+bash ./tools/test.sh
 echo PASS
