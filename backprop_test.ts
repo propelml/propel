@@ -1,4 +1,4 @@
-import $ from "./propel";
+import { $, grad, concat, tanh, multigrad } from "./propel";
 import { assertAllClose, assertAllEqual, assertClose } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
@@ -16,7 +16,7 @@ function testInc() {
   }
   assertClose(f(1), 2);
   assertClose(f(-1), 0);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1.0), 1.);
   checkGrad(f, g, 1.0);
 }
@@ -25,7 +25,7 @@ function testMul() {
   const f = (x) => $(42).mul(x);
   assertClose(f(1), 42);
   assertClose(f(2), 84);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1.), 42.);
   checkGrad(f, g, 1.0);
 }
@@ -37,7 +37,7 @@ function testSquared() {
   }
   assertClose(f(1), 1);
   assertClose(f(16), 256);
-  const g = $.grad(f); // g(x) = f'(x) = 2x
+  const g = grad(f); // g(x) = f'(x) = 2x
   assertClose(g(1), 2);
   assertClose(g(10), 20);
   checkGrad(f, g, 1.0);
@@ -49,7 +49,7 @@ function testSquaredMatrix() {
     return $(x).mul(x);
   }
   assertAllEqual(f([[1, 2], [3, 4]]), [[1, 4], [9, 16]]);
-  const g = $.grad(f); // g(x) = f'(x) = 2x
+  const g = grad(f); // g(x) = f'(x) = 2x
   const v = g([[1, 2], [3, 4]]);
   assertAllEqual(v.shape, [2, 2]);
   assertAllEqual(v, [[2, 4], [6, 8]]);
@@ -63,7 +63,7 @@ function testDiv() {
   }
   assertClose(f(1), 2);
   assertClose(f(16), (1 + 16) / 16);
-  const g = $.grad(f); // g(x) = -1 / x^2
+  const g = grad(f); // g(x) = -1 / x^2
   assertClose(g(1), -1);
   assertClose(g(10), -1 / 100);
   checkGrad(f, g, 1.0);
@@ -73,7 +73,7 @@ function testConstant() {
   const f = (_) => 42;
   assertClose(f(1), 42);
   assertClose(f(-1), 42);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1.0), 0.);
   checkGrad(f, g, 1.0);
 }
@@ -85,7 +85,7 @@ function testExp() {
   }
   assertClose(f(1), 7.3890);
   assertClose(f(2), 20.0855);
-  const g = $.grad(f); // g == f
+  const g = grad(f); // g == f
   assertClose(g(1), 7.3890);
   assertClose(g(2), 20.0855);
   checkGrad(f, g, 1.0);
@@ -97,7 +97,7 @@ function testSub() {
   }
   assertClose(f(1), 0);
   assertClose(f(2), -1);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1), -1);
   assertClose(g(2), -1);
   checkGrad(f, g, 1.0);
@@ -110,7 +110,7 @@ function testDiv2() {
   }
   assertClose(f(1), 0);
   assertClose(f(2), -1 / 3);
-  const g = $.grad(f); // g(x) = -2 / (x + 1)^2
+  const g = grad(f); // g(x) = -2 / (x + 1)^2
   assertClose(g(1), -2 / 4);
   assertClose(g(2), -2 / 9);
   checkGrad(f, g, 1.0);
@@ -123,17 +123,17 @@ function testDiv3() {
   }
   assertClose(f(1), 1.);
   assertClose(f(2), 1.);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1), 0.);
   assertClose(g(2), 0.);
   checkGrad(f, g, 1.0);
 }
 
 function testTanh() {
-  const f = $.tanh;
+  const f = tanh;
   assertClose(f(1), 0.7615);
   assertClose(f(16), 0.9999);
-  const g = $.grad(f);
+  const g = grad(f);
   assertClose(g(1), 0.4199);
   checkGrad(f, g, 1.0);
 }
@@ -144,7 +144,7 @@ function testMultigrad() {
   }
   assertClose(f(1, 1), 5);
   assertClose(f(1, 2), 8);
-  const g = $.multigrad(f, [0, 1]);
+  const g = multigrad(f, [0, 1]);
   assertClose(g(1, 1)[0], 2);
   assertClose(g(1, 1)[1], 3);
   assertClose(g(4, 2)[0], 2);
@@ -152,9 +152,9 @@ function testMultigrad() {
 }
 
 function testGradGradTanh() {
-  const f = $.tanh;
+  const f = tanh;
   assertAllClose(f([1, 16]), [0.7615, 0.9999]);
-  const g = $.grad($.grad(f));
+  const g = grad(grad(f));
   // def g(x): return -2 * np.tanh(x) / np.square(np.cosh(x))
   assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
 }
@@ -165,7 +165,7 @@ function testExpandDims() {
   }
   assertAllEqual(f(1), [2]);
   assertAllEqual(f([3, 4]), [[6, 8]]);
-  const g = $.grad(f);
+  const g = grad(f);
   assertAllClose(g(1), 2.0);
   assertAllClose(g([[1], [2], [3]]), [[2], [2], [2]]);
 }
@@ -173,10 +173,10 @@ function testExpandDims() {
 function testConcat() {
   function f(x) {
     const y = $(x).mul(2);
-    return $.concat([y, y], 0);
+    return concat([y, y], 0);
   }
   assertAllEqual(f(1), [2, 2]);
-  const g = $.grad(f);
+  const g = grad(f);
   // TODO Test backwards pass for concat and stack.
 }
 

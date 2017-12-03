@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import $ from "./propel";
+import { $ } from "./propel";
 import * as repl from "./repl";
 import { assertEqual } from "./util";
 
@@ -104,7 +104,7 @@ function plotLines(data) {
     });
 }
 
-function plot(...args) {
+export function plot(...args) {
   const xs = [];
   const ys = [];
   let state = "x";
@@ -143,11 +143,6 @@ function plot(...args) {
   //return svg
 }
 
-function show(...args) {
+export function show(...args) {
   //repl.appendOutput(currentPlot);
 }
-
-export default {
-  plot,
-  show,
-};

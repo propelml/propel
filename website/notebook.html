@@ -47,24 +47,26 @@
   <button id=newCell>New Cell</button>
 
 <script type="repl">
-import $ from "propel";
-import plt from "matplotlib";
+import { $ } from "propel";
 console.log("5*5 =", $(5).mul(5));
 </script>
 
 <script type="repl">
-grad = $.grad;
+import { grad, linspace } from "propel";
+import { plot } from "matplotlib";
+
 f = (x) => $(x).mul(x);
-x = $.linspace(-4, 4, 200);
-plt.plot(x, f(x),
-         x, grad(f)(x));
+x = linspace(-4, 4, 200);
+plot(x, f(x),
+     x, grad(f)(x));
 </script>
 
 <script type="repl">
-tanh = $.tanh;
-plt.plot(x, tanh(x),
-         x, grad(tanh)(x),        // first derivative
-         x, grad(grad(tanh))(x)); // second derivative
+import { tanh } from "propel";
+
+plot(x, tanh(x),
+     x, grad(tanh)(x),        // first derivative
+     x, grad(grad(tanh))(x)); // second derivative
 </script>
 
 </body>

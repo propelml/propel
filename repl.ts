@@ -1,8 +1,9 @@
 import * as CodeMirror from "codemirror";
 import "codemirror/mode/javascript/javascript.js";
 
-import matplotlib from "./matplotlib";
-import propel from "./propel";
+import * as matplotlib from "./matplotlib";
+import * as propel from "./propel";
+import { assert } from "./util";
 
 let cellsElement = null;
 const _log = console.log;
@@ -38,14 +39,70 @@ window["require"] = function require(target) {
 
 window["exports"] = {};
 
+// TODO(ry) Replace this with typescript compiler at some point.
+function parseImportLine(line) {
+  const words = line.split(/\s/);
+  if (words.shift() != "import") return null;
+  const imports = [];
+  let state = "curly-open";
+  while (true) {
+    let word = words.shift();
+    switch (state) {
+      case null:
+        return null;
+      case "curly-open":
+        if (word != "{") return null;
+        state = "imported";
+        break;
+      case "imported":
+        if (word == "}") {
+          state = "from";
+        } else {
+          if (word[word.length - 1] != ",") {
+            state = "curly-close";
+          }
+          imports.push(word.replace(/,$/, ""));
+        }
+        break;
+      case "curly-close":
+        if (word != "}") return null;
+        state = "from";
+        break;
+      case "from":
+        if (word != "from") return null;
+        state = "modname";
+        break;
+      case "modname":
+        const q = word[0];
+        word = word.replace(/;$/, "");
+        if (word[word.length - 1] != q) return null;
+        // success
+        return {
+          imports,
+          modname: word,
+        };
+
+      default:
+        assert(false);
+    }
+  }
+}
+
 // TODO Yes, extremely hacky.
 function transpile(source: string): string {
-  return source.replace(/import ([$\w]+) from ("[^"]+"|'[^']+')/g,
-    (m, p1, p2) => {
-      const x = `${p1} = require(${p2})`;
-      //_log("replace", p1, p2, x);
-      return x;
-    });
+  const lines = source.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const r = parseImportLine(line);
+    // Replace line with require() calls, if it's an import line.
+    if (r) {
+      lines[i] = "";
+      for (const m of r.imports) {
+        lines[i] += `${m} = require(${r.modname}).${m}; `;
+      }
+    }
+  }
+  return lines.join("\n");
 }
 
 class Cell {
