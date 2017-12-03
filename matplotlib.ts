@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { $ } from "./propel";
-import * as repl from "./repl";
+import * as notebook from "./notebook";
 import { assertEqual } from "./util";
 
 const currentPlot = null;
@@ -61,7 +61,7 @@ function getLimits(lines): number[] {
 }
 
 function plotLines(data) {
-  const outputId = repl.outputId();
+  const outputId = notebook.outputId();
   // Make an SVG Container
   const svg = d3.select(outputId).append("svg")
     .attr("width", 400)
@@ -139,10 +139,8 @@ export function plot(...args) {
   }
 
   plotLines(data);
-  //currentPlot = svg;
-  //return svg
 }
 
 export function show(...args) {
-  //repl.appendOutput(currentPlot);
+  //notebook.appendOutput(currentPlot);
 }

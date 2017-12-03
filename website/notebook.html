@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <script src="dist/repl.js"></script>
+  <script src="dist/notebook.js"></script>
   <link rel="stylesheet" href="codemirror.css"/>
   <title>Propel Notebook</title>
   <style>
@@ -46,12 +46,12 @@
   <div id=cells></div>
   <button id=newCell>New Cell</button>
 
-<script type="repl">
+<script type="notebook">
 import { $ } from "propel";
 console.log("5*5 =", $(5).mul(5));
 </script>
 
-<script type="repl">
+<script type="notebook">
 import { grad, linspace } from "propel";
 import { plot } from "matplotlib";
 
@@ -61,7 +61,7 @@ plot(x, f(x),
      x, grad(f)(x));
 </script>
 
-<script type="repl">
+<script type="notebook">
 import { tanh } from "propel";
 
 plot(x, tanh(x),
