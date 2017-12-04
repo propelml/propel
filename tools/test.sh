@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e -v
 cd `dirname "$0"`; cd ..
 ./node_modules/typescript/bin/tsc
 

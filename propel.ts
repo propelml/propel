@@ -41,7 +41,15 @@ export const linspace = (start, stop, num = 50): Tensor => {
   return $(a);
 };
 
-export const arange = Tensor.arange;
+export const arange = (start, stop, step = 1): Tensor => {
+  const len = Math.floor((stop - start) / step);
+  const range = new Int32Array(len);
+  let j = 0;
+  for (let i = start; i < stop; i += step) {
+    range[j++] = i;
+  }
+  return Tensor.convert(range);
+}
 
 export const tanh = function(x: TensorLike): Tensor {
   const y = $(x).mul(-2).exp();

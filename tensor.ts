@@ -8,6 +8,7 @@ import { flatten, inferShape, RegularArray, TypedArray }
   from "./deeplearnjs/src/util";
 import * as ops from "./ops";
 import * as tf from "./tf";
+import { arange } from "./propel";
 import { assert, shapesEqual } from "./util";
 
 export type TensorLike = boolean | number | RegularArray<boolean> |
@@ -31,16 +32,6 @@ export abstract class Tensor {
     } else {
       return new DLTensor(x);
     }
-  }
-
-  static arange(start, stop, step = 1): Tensor {
-    const len = Math.floor((stop - start) / step);
-    const range = new Int32Array(len);
-    let j = 0;
-    for (let i = start; i < stop; i += step) {
-      range[j++] = i;
-    }
-    return Tensor.convert(range);
   }
 
   constructor() {
@@ -91,7 +82,10 @@ export class DLTensor extends Tensor {
 
   constructor(x: TensorLike | NDArray) {
     super();
-    if (x instanceof Array) {
+    if (x instanceof Tensor) {
+      this.ndarray = (x as DLTensor).ndarray;
+      this.shape = x.shape;
+    } else if (x instanceof Array) {
       // Argument is a JS array like [[1, 2], [3, 4]].
       const shape = inferShape(x);
       if (shape.length == 1 && shape[0] == 0) {
@@ -107,12 +101,18 @@ export class DLTensor extends Tensor {
       // Scalar
       this.ndarray = NDArray.make([], { values: new Float32Array([x]) });
       this.shape = [];
+    } else if (typeof x == "boolean") {
+      throw new Error("Not Implemented");
     } else if (x instanceof NDArray) {
       this.ndarray = x;
       if (x.inGPU()) {
         this.math = DLTensor.gpuMath();
       }
       this.shape = x.shape;
+    } else {
+      // TypedArray
+      this.shape = [x.length];
+      this.ndarray = NDArray.make(this.shape, { values: x });
     }
 
     this.dtype = "float32"; // TODO Support other dtypes.
@@ -358,7 +358,7 @@ export class TFTensor extends Tensor {
     ]);
     assert(r.dtype == tf.binding.TF_BOOL);
 
-    const idx = Tensor.arange(0, this.shape.length) as TFTensor;
+    const idx = arange(0, this.shape.length) as TFTensor;
 
     const r2 = tf.execute0("All", [r, idx.handle], [
       ["Tidx", tf.binding.ATTR_TYPE, tf.binding.TF_INT32],
