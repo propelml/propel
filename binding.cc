@@ -105,6 +105,7 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 // Add to this as needed.
 const std::map<std::string, int> attrNameMap = {
     {"T", 0},
+    {"Tshape", 0},
     {"transpose_a", 0},
     {"transpose_b", 0},
     {"Tidx", 0},
@@ -170,6 +171,29 @@ void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
           napi_get_value_int32(env, attr2, reinterpret_cast<int32_t*>(&v));
       check(status == napi_ok);
       TFE_OpSetAttrType(op, attr_name, v);
+      break;
+    }
+
+    case ATTR_INT_LIST: {
+      status = napi_is_array(env, attr2, &is_array);
+      check(status == napi_ok && is_array);
+
+      uint32_t len;
+      status = napi_get_array_length(env, attr2, &len);
+      check(status == napi_ok);
+
+      auto list = new int64_t[len];
+      for (uint32_t i = 0; i < len; i++) {
+        napi_value d;
+        status = napi_get_element(env, attr2, i, &d);
+        check(status == napi_ok);
+        int32_t val;
+        status = napi_get_value_int32(env, d, &val);
+        check(status == napi_ok);
+        list[i] = val;
+      }
+      TFE_OpSetAttrIntList(op, attr_name, list, static_cast<int>(len));
+      delete[] list;
       break;
     }
 
