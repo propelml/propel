@@ -34,6 +34,8 @@ function testEquals() {
   ];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, a])[0];
   assert(r.device == "CPU:0");
+  assertAllEqual(r.shape, [2]);
+
   const result = Array.from(new Uint8Array(r.asArrayBuffer()));
   assertAllEqual(result, [1, 1]);
 
@@ -50,6 +52,8 @@ function testMatMul() {
   const b = new binding.Tensor(typedArray, [3, 2]);
   assert(a.device == "CPU:0");
   assert(b.device == "CPU:0");
+  assertAllEqual(a.shape, [2, 3]);
+  assertAllEqual(b.shape, [3, 2]);
 
   const opAttrs = [
     ["transpose_a", binding.ATTR_BOOL, false],
@@ -93,6 +97,7 @@ function testChaining() {
   ];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, a])[0];
   assert(r.dtype == binding.TF_BOOL);
+  assertAllEqual(r.shape, [2]);
 
   const reductionIndices = new binding.Tensor(new Int32Array([0]), [1]);
 
