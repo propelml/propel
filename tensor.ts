@@ -242,14 +242,18 @@ export class TFTensor extends Tensor {
     }
   }
 
-  constructor(x: TensorLike) {
+  constructor(x: TensorLike | any, shape_ = null) {
     super();
 
     if (x instanceof Tensor) {
       this.values = x.getValues();
       this.shape = x.shape;
+    } else if (x instanceof tf.binding.Tensor) {
+      this.handle = x;
+      this.shape = x.shape;
     } else if (x instanceof Array) {
       // Argument is a JS array like [[1, 2], [3, 4]].
+      assert(shape_ == null);
       const shape = inferShape(x);
       if (shape.length == 1 && shape[0] == 0) {
         // Special case the empty tensor...
@@ -262,6 +266,7 @@ export class TFTensor extends Tensor {
       }
     } else if (typeof x == "number") {
       // Scalar
+      assert(shape_ == null);
       this.values = new Float32Array([x]);
       this.shape = [];
     } else if (typeof x == "boolean") {
@@ -269,14 +274,19 @@ export class TFTensor extends Tensor {
     } else {
       // TypedArray
       this.values = x;
-      this.shape = [x.length];
+      this.shape = shape_ ? shape_ : [x.length];
     }
 
-    this.handle = new tf.binding.Tensor(this.values, this.shape);
+    if (!this.handle) {
+      this.handle = new tf.binding.Tensor(this.values, this.shape);
+    }
     this.dtype = "float32"; // TODO Support other dtypes.
   }
 
   getValues(): TypedArray {
+    if (!this.values) {
+      this.values = new Float32Array(this.handle.asArrayBuffer());
+    }
     return this.values;
   }
 
@@ -331,13 +341,10 @@ export class TFTensor extends Tensor {
 
   mul(x: TensorLike): Tensor {
     const xx = TFTensor.convert(x);
-
     const r = tf.execute0("Mul", [this.handle, xx.handle], [
       ["T", tf.binding.ATTR_TYPE, tf.binding.TF_FLOAT],
     ]);
-    assert(r.dtype == tf.binding.TF_FLOAT);
-
-    return new TFTensor(new Float32Array(r.asArrayBuffer()), );
+    return new TFTensor(r);
   }
 
   reshape(newShape: Shape): Tensor {
