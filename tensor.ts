@@ -330,7 +330,14 @@ export class TFTensor extends Tensor {
   }
 
   mul(x: TensorLike): Tensor {
-    throw new Error("Not Implemented.");
+    const xx = TFTensor.convert(x);
+
+    const r = tf.execute0("Mul", [this.handle, xx.handle], [
+      ["T", tf.binding.ATTR_TYPE, tf.binding.TF_FLOAT],
+    ]);
+    assert(r.dtype == tf.binding.TF_FLOAT);
+
+    return new TFTensor(new Float32Array(r.asArrayBuffer()), );
   }
 
   reshape(newShape: Shape): Tensor {
