@@ -82,7 +82,10 @@ testShapes();
 testAllEqual();
 testMul();
 testReshape();
+/*
 testExpandDims();
 testLinspace();
 testConcat();
 testStack();
+*/
+

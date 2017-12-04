@@ -284,9 +284,8 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
     check(TF_GetCode(tf_status) == TF_OK);
   }
 
-  // TODO(ry) only handling a single return value currently.
-  TFE_TensorHandle* retvals[1];
-  int num_retvals = 1;
+  TFE_TensorHandle* retvals[10];
+  int num_retvals = 10;
   TFE_Execute(op, retvals, &num_retvals, tf_status);
   if (TF_GetCode(tf_status) != TF_OK) {
     napi_throw_error(env, NULL, TF_Message(tf_status));
@@ -294,6 +293,7 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
     TFE_DeleteOp(op);
     return NULL;
   }
+  check(num_retvals >= 1);
 
   // Create array to be returned.
   napi_value js_retvals;
@@ -498,7 +498,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
       napi_throw_range_error(
           env, "ERANGE", "Dimension size should be a number");
       return NULL;
-    } else if (value <= 0) {
+    } else if (value < 0) {
       napi_throw_range_error(env, "ERANGE", "Dimension size out of range");
       return NULL;
     }

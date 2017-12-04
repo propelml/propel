@@ -30,5 +30,7 @@ module.exports = {
     path: __dirname + '/website/dist',
     libraryTarget: "var",
     library: "propel"
-  }
+  },
+  // So that require('fs') in tf.ts doesn't break webpack.
+  node: { fs: 'empty' },
 };

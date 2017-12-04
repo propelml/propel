@@ -5,7 +5,8 @@ cd `dirname "$0"`; cd ..
 export V=1
 ./tools/tslint.sh
 ./deps/cpplint/cpplint.py *.cc
-npm build .
+npm build .  # Run node-gyp.
+
+# Make sure we can compile the typescript.
 node ./node_modules/webpack/bin/webpack.js
 bash ./tools/test.sh
-echo PASS
