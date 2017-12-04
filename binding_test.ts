@@ -110,7 +110,20 @@ function testChaining() {
   assertAllEqual(result2, [1]);
 }
 
+function testReshape() {
+  const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
+  const t = new binding.Tensor(typedArray, [2, 3]);
+  const shape = new binding.Tensor(new Int32Array([3, 2]), [2]);
+  const opAttrs = [
+    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+    ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
+  ];
+  const r = binding.execute(ctx, "Reshape", opAttrs, [t, shape])[0];
+  assertAllEqual(r.shape, [3, 2]);
+}
+
 testEquals();
 testMatMul();
 testMul();
 testChaining();
+testReshape();
