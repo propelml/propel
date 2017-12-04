@@ -625,6 +625,40 @@ static napi_value TensorGetDType(napi_env env, napi_callback_info info) {
   return js_dtype;
 }
 
+static napi_value TensorGetShape(napi_env env, napi_callback_info info) {
+  napi_status napi_status;
+
+  // Fetch JavaScript `this` object.
+  napi_value js_this;
+  napi_status = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
+  check(napi_status == napi_ok);
+
+  // Unwrap.
+  TensorWrap* tensor_wrap;
+  napi_status =
+      napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  check(napi_status == napi_ok);
+
+  auto th = tensor_wrap->tf_tensor_handle;
+  int rank = TFE_TensorHandleNumDims(th);
+  napi_value shape;
+  napi_status = napi_create_array_with_length(env, rank, &shape);
+  check(napi_status == napi_ok);
+
+  for (int i = 0; i < rank; i++) {
+    auto dim = TFE_TensorHandleDim(th, i);
+
+    napi_value dim_js;
+    napi_status = napi_create_int32(env, dim, &dim_js);
+    check(napi_status == napi_ok);
+
+    napi_status = napi_set_element(env, shape, (uint32_t) i, dim_js);
+    check(napi_status == napi_ok);
+  }
+
+  return shape;
+}
+
 void AssignIntProperty(napi_env env,
                        napi_value exports,
                        const char* name,
@@ -667,6 +701,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
        NULL},
       {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL},
       {"dtype", NULL, NULL, TensorGetDType, NULL, NULL, napi_default, NULL},
+      {"shape", NULL, NULL, TensorGetShape, NULL, NULL, napi_default, NULL},
   };
   status = napi_define_class(
       env,
