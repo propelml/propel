@@ -81,8 +81,8 @@ function testStack() {
 testShapes();
 testAllEqual();
 testMul();
-/*
 testReshape();
+/*
 testExpandDims();
 testLinspace();
 testConcat();

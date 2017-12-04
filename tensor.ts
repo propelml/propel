@@ -285,7 +285,17 @@ export class TFTensor extends Tensor {
 
   getValues(): TypedArray {
     if (!this.values) {
-      this.values = new Float32Array(this.handle.asArrayBuffer());
+      const ab = this.handle.asArrayBuffer();
+      switch (this.handle.dtype) {
+          case tf.binding.TF_INT32:
+            this.values = new Int32Array(ab);
+            break;
+          case tf.binding.TF_FLOAT:
+            this.values = new Float32Array(ab);
+            break;
+          default:
+            throw new Error("Not Implemented.");
+      }
     }
     return this.values;
   }
@@ -303,8 +313,20 @@ export class TFTensor extends Tensor {
     return this.values[0];
   }
 
+  private strides(dim: number): number {
+    let s = 1;
+    for (let i = dim + 1; i < this.shape.length; i++) {
+      s *= this.shape[i];
+    }
+    return s;
+  }
+
   get(...locs: number[]): number {
-    throw new Error("Not Implemented.");
+    let index = locs[locs.length - 1];
+    for (let i = 0; i < locs.length - 1; ++i) {
+      index += this.strides(i) * locs[i];
+    }
+    return this.getValues()[index];
   }
 
   zerosLike(): Tensor {
@@ -342,13 +364,18 @@ export class TFTensor extends Tensor {
   mul(x: TensorLike): Tensor {
     const xx = TFTensor.convert(x);
     const r = tf.execute0("Mul", [this.handle, xx.handle], [
-      ["T", tf.binding.ATTR_TYPE, tf.binding.TF_FLOAT],
+      ["T", tf.binding.ATTR_TYPE, this.handle.dtype],
     ]);
     return new TFTensor(r);
   }
 
   reshape(newShape: Shape): Tensor {
-    throw new Error("Not Implemented.");
+    const shapeTensor = new TFTensor(new Int32Array(newShape));
+    const r = tf.execute0("Reshape", [this.handle, shapeTensor.handle], [
+      ["T", tf.binding.ATTR_TYPE, this.handle.dtype],
+      ["Tshape", tf.binding.ATTR_TYPE, tf.binding.TF_INT32],
+    ]);
+    return new TFTensor(r);
   }
 
   expandDims(axis: number): Tensor {
