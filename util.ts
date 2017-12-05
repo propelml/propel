@@ -1,25 +1,30 @@
-import { Shape, Tensor, TensorLike } from "./tensor";
-import { FlatVector, flatten, inferShape } from "./deeplearnjs/src/util";
+import { TensorLike, BasicTensor, isTypedArray, FlatVector, Shape }
+  from "./types";
+import { flatten, inferShape } from "./deeplearnjs/src/util";
 
 const debug = false;
 const J = JSON.stringify;
 
-
 function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
-  if (t instanceof Tensor) {
-    return [t.shape, t.getValues()];
+  if ((t as BasicTensor).getData) {
+    t = t as BasicTensor;
+    return [t.shape, t.getData()];
+  } else if (isTypedArray(t)) {
+    return [[t.length], t];
   } else if (t instanceof Array) {
     return [inferShape(t), flatten(t) as number[]];
   } else if (typeof t == "number") {
     return [[], [t]];
-  } else if (typeof t == "boolean") {
-    return [[], [t]];
-  } else {
-    // TypedArray
-    return [[t.length], t];
   }
 }
 
+function toNumber(t: TensorLike): number {
+  const [shape, values] = toShapeAndFlatVector(t);
+  if (values.length != 1) {
+    throw new Error("Not Scalar");
+  }
+  return values[0];
+}
 
 export function log(...args: any[]) {
   if (debug) {
@@ -47,15 +52,15 @@ export function assertFalse(expr: boolean, msg = "") {
 
 export function assertClose(actual: TensorLike, expected: TensorLike,
                             delta = 0.001) {
-  actual = Tensor.convert(actual).toNumber();
-  expected = Tensor.convert(expected).toNumber();
+  actual = toNumber(actual);
+  expected = toNumber(expected);
   assert(Math.abs(actual - expected) < delta,
     `actual: ${actual} expected: ${expected}`);
 }
 
 export function assertEqual(actual: TensorLike, expected: number|boolean,
                             msg = null) {
-  actual = Tensor.convert(actual).toNumber();
+  actual = toNumber(actual);
   if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
   assert(actual === expected, msg);
 }
@@ -90,34 +95,6 @@ export function assertAllClose(actual: TensorLike, expected: TensorLike,
   }
 }
 
-export class GradientCollector {
-  // Maps tensor id -> gradient tensor array
-  private map = new Map<number, Tensor[]>();
-
-  append(tid: number, grad: Tensor): void {
-    if (this.map.has(tid)) {
-      this.map.get(tid).push(grad);
-    } else {
-      this.map.set(tid, [grad]);
-    }
-  }
-
-  // Sum up the gradients for a given tensor id.
-  aggregate(tid: number): Tensor {
-    if (!this.map.has(tid) || this.map.get(tid).length == 0) {
-      // TODO(scalar) Handle non-scalar shapes.
-      return Tensor.convert(0);
-    }
-    const grads = this.map.get(tid);
-    //log('aggregate tid %d ngrads %d', tid, grads.length);
-    let sum = grads[0];
-    for (let i = 1; i < grads.length; i++) {
-      sum = sum.add(grads[i]);
-    }
-    return sum;
-  }
-}
-
 // Provides a map with default value 0.
 export class CounterMap {
   private map = new Map<number, number>();
@@ -139,3 +116,4 @@ export class CounterMap {
     this.map.set(id, this.get(id) - 1);
   }
 }
+

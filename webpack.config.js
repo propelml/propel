@@ -3,8 +3,8 @@ var webpack = require('webpack');
 module.exports = {
   entry: {
     'notebook': './notebook.ts',
-    'propel': './propel.ts',
-    'propel.min': './propel.ts'
+    'propel': './api.ts',
+    'propel.min': './api.ts'
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({
@@ -25,6 +25,7 @@ module.exports = {
   resolve: {
     extensions: [ '.ts', '.js' ]
   },
+  node: { fs: "empty" },
   output: {
     filename: '[name].js',
     path: __dirname + '/website/dist',

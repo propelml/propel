@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { $ } from "./propel";
+import { $ } from "./api";
 import * as notebook from "./notebook";
 import { assertEqual } from "./util";
 
@@ -128,8 +128,8 @@ export function plot(...args) {
   const data = [];
   for (let i = 0; i < xs.length; ++i) {
     // TODO line = $.stack([xs[i], ys[i]], 1)
-    const xv = xs[i].ndarray.getValues();
-    const yv = ys[i].ndarray.getValues();
+    const xv = xs[i].getData();
+    const yv = ys[i].getData();
     assertEqual(xv.length, yv.length);
     const line = [];
     for (let j = 0; j < xv.length; ++j) {

@@ -2,7 +2,7 @@ import * as CodeMirror from "codemirror";
 import "codemirror/mode/javascript/javascript.js";
 
 import * as matplotlib from "./matplotlib";
-import * as propel from "./propel";
+import * as propel from "./api";
 import { assert } from "./util";
 
 let cellsElement = null;
