@@ -157,4 +157,32 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  square(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Square", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  sinh(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Sinh", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  cosh(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Cosh", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  tanh(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Tanh", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }

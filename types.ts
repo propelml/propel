@@ -21,6 +21,10 @@ export interface BasicOps {
   exp(x: BasicTensor): BasicTensor;
   eye(size: number, dtype: DType): BasicTensor; 
   onesLike(x: BasicTensor): BasicTensor; 
+  square(x: BasicTensor): BasicTensor;
+  sinh(x: BasicTensor): BasicTensor;
+  cosh(x: BasicTensor): BasicTensor;
+  tanh(x: BasicTensor): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.

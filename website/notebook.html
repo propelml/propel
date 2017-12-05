@@ -65,8 +65,10 @@ plot(x, f(x),
 import { tanh } from "propel";
 
 plot(x, tanh(x),
-     x, grad(tanh)(x),        // first derivative
-     x, grad(grad(tanh))(x)); // second derivative
+     x, grad(tanh)(x),                     // first derivative
+     x, grad(grad(tanh))(x),               // second derivative
+     x, grad(grad(grad(tanh)))(x),         // third derivative
+     x, grad(grad(grad(grad(tanh))))(x));  // fourth derivative
 </script>
 
 </body>
