@@ -96,3 +96,15 @@ defBW("neg", (g, ans, x) => neg(g));
 
 export let exp = defFW("exp", (x) => basicOps.exp(x));
 defBW("exp", (g, ans, x) => mul(ans, g));
+
+export let square = defFW("square", (x) => basicOps.square(x));
+defBW("square", (g, ans, x) => mul(g, mul(2, x)));
+
+export let sinh = defFW("sinh", (x) => basicOps.sinh(x));
+defBW("sinh", (g, ans, x) => mul(g, cosh(x)));
+
+export let cosh = defFW("cosh", (x) => basicOps.cosh(x));
+defBW("cosh", (g, ans, x) => mul(g, sinh(x)));
+
+export let tanh = defFW("tanh", (x) => basicOps.tanh(x));
+defBW("tanh", (g, ans, x) => div(g, square(cosh(x))));

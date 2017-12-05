@@ -70,4 +70,24 @@ export class BasicOpsDL implements types.BasicOps {
     ones.fill(1.0);
     return new BasicTensorDL(ones, x.math);
   }
+
+  square(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.square(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  sinh(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.sinh(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  cosh(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.cosh(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  tanh(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.tanh(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
 }

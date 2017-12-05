@@ -174,6 +174,24 @@ function testGradGradTanh() {
   assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
 }
 
+function testSinh() {
+  const f = (x) => $(x).sinh();
+  const v = $([1, 2]);
+  assertAllClose(f(v), [1.17520119,  3.62686041]);
+  // The derivtive of sinh is cosh.
+  const g = grad(f);
+  assertAllClose(g(v), v.cosh());
+}
+
+function testSquare() {
+  const f = (x) => $(x).square();
+  const v = $([2, 4, -1]);
+  assertAllClose(f(v), [4, 16, 1]);
+  // The derivtive of x^2 is 2x
+  const g = grad(f);
+  assertAllClose(g(v), [4, 8, -2]);
+}
+
 
 testLinspace();
 testArange();
@@ -191,5 +209,7 @@ testTanh();
 testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
+testSinh();
+testSquare();
 
 console.log("PASS");

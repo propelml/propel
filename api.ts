@@ -17,11 +17,6 @@ export function eye(size: number, dtype: types.DType = "float32"): Tensor {
   return new ChainableTensor(t);
 }
 
-export const tanh = function(x: types.TensorLike): Tensor {
-  const y = $(x).mul(-2).exp();
-  return $(1).sub(y).div(y.add(1));
-};
-
 // Return evenly spaced numbers over a specified interval.
 //
 // Returns num evenly spaced samples, calculated over the interval
@@ -43,3 +38,8 @@ export const arange = function(start, stop, step = 1): Tensor {
   }
   return $(a);
 };
+
+export const square = (x) => $(x).square();
+export const sinh = (x) => $(x).sinh();
+export const cosh = (x) => $(x).cosh();
+export const tanh = (x) => $(x).tanh();
