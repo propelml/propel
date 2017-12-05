@@ -1,8 +1,9 @@
 // Deep Learn JS backend.
 import * as types from "./types";
-import { NDArray } from "./deeplearnjs/src/math/ndarray";
-import { NDArrayMath } from "./deeplearnjs/src/math/math";
-import { NDArrayMathCPU } from "./deeplearnjs/src/math/math_cpu";
+import { NDArray } from "./deps/deeplearnjs/src/math/ndarray";
+import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
+import {NDArrayMathCPU} from './deps/deeplearnjs/src/math/backends/backend_cpu';
+
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
 export class BasicTensorDL implements types.BasicTensor {

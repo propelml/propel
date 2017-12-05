@@ -2,7 +2,7 @@
 // BasicTensors are not traced in backprop and the class is not exposed to the
 // public API.
 import * as types from "./types";
-import { flatten, inferShape } from "./deeplearnjs/src/util";
+import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
 import { BasicTensorDL, BasicOpsDL } from "./dl";
 import { binding, BasicTensorTF, BasicOpsTF } from "./tf";
 
