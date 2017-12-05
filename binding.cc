@@ -689,7 +689,7 @@ static napi_value TensorGetShape(napi_env env, napi_callback_info info) {
   check(napi_status == napi_ok);
 
   for (int i = 0; i < rank; i++) {
-    auto dim = TFE_TensorHandleDim(th, i);
+    auto dim = static_cast<int32_t>(TFE_TensorHandleDim(th, i));
 
     napi_value dim_js;
     napi_status = napi_create_int32(env, dim, &dim_js);
