@@ -1,5 +1,5 @@
-import { $, grad, concat, tanh, multigrad } from "./propel";
-import { assertAllClose, assertAllEqual, assertClose } from "./util";
+import { $, grad, tanh, multigrad, linspace, arange } from "./api";
+import { assertClose, assertAllEqual, assertAllClose} from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -9,6 +9,21 @@ function checkGrad(f, g, val = 1.0) {
   const actual = g(val);
   assertClose(actual, expected);
 }
+
+// Basic Tests
+
+function testLinspace() {
+  const x = linspace(-4, 4, 6);
+  assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
+}
+
+function testArange() {
+  const x = arange(-2, 2, 1);
+  assertAllEqual(x, [-2, -1, 0, 1]);
+}
+
+
+// Backprop Tests
 
 function testInc() {
   function f(x) {
@@ -159,26 +174,9 @@ function testGradGradTanh() {
   assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
 }
 
-function testExpandDims() {
-  function f(x) {
-    return $(x).mul(2).expandDims(0);
-  }
-  assertAllEqual(f(1), [2]);
-  assertAllEqual(f([3, 4]), [[6, 8]]);
-  const g = grad(f);
-  assertAllClose(g(1), 2.0);
-  assertAllClose(g([[1], [2], [3]]), [[2], [2], [2]]);
-}
 
-function testConcat() {
-  function f(x) {
-    const y = $(x).mul(2);
-    return concat([y, y], 0);
-  }
-  assertAllEqual(f(1), [2, 2]);
-  const g = grad(f);
-  // TODO Test backwards pass for concat and stack.
-}
+testLinspace();
+testArange();
 
 testInc();
 testMul();
@@ -193,5 +191,5 @@ testTanh();
 testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
-testExpandDims();
-testConcat();
+
+console.log("PASS");
