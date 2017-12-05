@@ -1,6 +1,6 @@
 import { TensorLike, BasicTensor, isTypedArray, FlatVector, Shape }
   from "./types";
-import { flatten, inferShape } from "./deeplearnjs/src/util";
+import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
 
 const debug = false;
 const J = JSON.stringify;
