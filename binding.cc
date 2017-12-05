@@ -582,6 +582,14 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
       napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
   check(napi_status == napi_ok);
 
+  if (tensor_wrap->js_typed_array != NULL) {
+    napi_value typed_array;
+    napi_status = napi_get_reference_value(
+        env, tensor_wrap->js_typed_array, &typed_array);
+    check(napi_status == napi_ok);
+    return typed_array;
+  }
+
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
   auto tensor =
