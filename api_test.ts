@@ -18,8 +18,12 @@ function testLinspace() {
 }
 
 function testArange() {
-  const x = arange(-2, 2, 1);
-  assertAllEqual(x, [-2, -1, 0, 1]);
+  const r1 = arange(-2, 2);
+  assertAllEqual(r1, [-2, -1, 0, 1]);
+  const r2 = arange(4);
+  assertAllEqual(r2, [0, 1, 2, 3]);
+  const r3 = arange(4, 10, 2);
+  assertAllEqual(r3, [4, 6, 8]);
 }
 
 function testRandn() {

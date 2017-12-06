@@ -95,4 +95,22 @@ export class BasicOpsDL implements types.BasicOps {
     const r = NDArray.randNormal(shape, 0, 1, "float32", seed);
     return new BasicTensorDL(r, cpuMath);
   }
+
+  linspace(start: number, stop: number, num: number): BasicTensorDL {
+    const d = (stop - start) / (num - 1);
+    const ta = new Float32Array(num);
+    for (let i = 0; i <= num - 1; ++i) {
+      ta[i] = start + i * d;
+    }
+    return BasicTensorDL.fromTypedArray(ta, [num]);
+  }
+
+  arange(start: number, limit: number, delta: number): BasicTensorDL {
+    const num = (limit - start) / delta;
+    const ta = new Int32Array(num);
+    for (let i = 0; i < num; ++i) {
+      ta[i] = start + i * delta;
+    }
+    return BasicTensorDL.fromTypedArray(ta, [num]);
+  }
 }
