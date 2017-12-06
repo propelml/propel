@@ -25,6 +25,7 @@ export interface BasicOps {
   sinh(x: BasicTensor): BasicTensor;
   cosh(x: BasicTensor): BasicTensor;
   tanh(x: BasicTensor): BasicTensor;
+  randn(shape: Shape, seed?: number): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.

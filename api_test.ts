@@ -1,5 +1,5 @@
-import { $, grad, tanh, multigrad, linspace, arange } from "./api";
-import { assertClose, assertAllEqual, assertAllClose} from "./util";
+import { $, grad, tanh, multigrad, linspace, arange, randn } from "./api";
+import { assert, assertClose, assertAllEqual, assertAllClose } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -20,6 +20,16 @@ function testLinspace() {
 function testArange() {
   const x = arange(-2, 2, 1);
   assertAllEqual(x, [-2, -1, 0, 1]);
+}
+
+function testRandn() {
+  const t = randn(2, 3);
+  assertAllEqual(t.shape, [2, 3]);
+  const d = t.getData();
+  console.log("randn", d);
+  // TODO this isn't the best test...
+  assert(d[0] != d[1]);
+  assert(d[1] != d[2]);
 }
 
 
@@ -195,6 +205,7 @@ function testSquare() {
 
 testLinspace();
 testArange();
+testRandn();
 
 testInc();
 testMul();
