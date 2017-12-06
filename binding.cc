@@ -105,11 +105,14 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 // Add to this as needed.
 const std::map<std::string, int> attrNameMap = {
     {"T", 0},
+    {"Tidx", 0},
     {"Tshape", 0},
+    {"dtype", 0},
+    {"keep_dims", 0},
+    {"seed", 0},
+    {"seed2", 0},
     {"transpose_a", 0},
     {"transpose_b", 0},
-    {"Tidx", 0},
-    {"keep_dims", 0},
 };
 
 const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
@@ -171,6 +174,14 @@ void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
           napi_get_value_int32(env, attr2, reinterpret_cast<int32_t*>(&v));
       check(status == napi_ok);
       TFE_OpSetAttrType(op, attr_name, v);
+      break;
+    }
+
+    case ATTR_INT: {
+      int32_t v;
+      status = napi_get_value_int32(env, attr2, &v);
+      check(status == napi_ok);
+      TFE_OpSetAttrInt(op, attr_name, v);
       break;
     }
 

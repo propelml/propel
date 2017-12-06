@@ -43,3 +43,8 @@ export const square = (x) => $(x).square();
 export const sinh = (x) => $(x).sinh();
 export const cosh = (x) => $(x).cosh();
 export const tanh = (x) => $(x).tanh();
+
+export function randn(...shape: number[]): Tensor {
+  const t = basicOps.randn(shape);
+  return new ChainableTensor(t);
+}

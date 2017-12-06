@@ -90,4 +90,9 @@ export class BasicOpsDL implements types.BasicOps {
     const ndarray = x.math.tanh(x.ndarray);
     return new BasicTensorDL(ndarray, x.math);
   }
+
+  randn(shape: types.Shape, seed?: number): BasicTensorDL {
+    const r = NDArray.randNormal(shape, 0, 1, "float32", seed);
+    return new BasicTensorDL(r, cpuMath);
+  }
 }

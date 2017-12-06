@@ -60,7 +60,7 @@ function handleDType(handle): types.DType {
     case binding.TF_UINT8:
       return "uint8";
     default:
-      throw new Error("Not Implemented");
+      throw new Error(`Not Implemented: ${handle.dtype}`);
   }
 }
 
@@ -183,6 +183,21 @@ export class BasicOpsTF implements types.BasicOps {
     const r = execute0("Tanh", [x.handle], [
       ["T", binding.ATTR_TYPE, x.handle.dtype],
     ]);
+    return new BasicTensorTF(r);
+  }
+
+  randn(shape: types.Shape, seed?: number): BasicTensorTF {
+    const shapeT = BasicTensorTF.fromTypedArray(new Int32Array(shape),
+      [shape.length]);
+    const args = [shapeT.handle];
+    if (typeof seed != "number") seed = 0;
+    const attrs = [
+      ["dtype", binding.ATTR_TYPE, binding.TF_FLOAT], // output
+      ["T", binding.ATTR_TYPE, binding.TF_INT32], // shape
+      ["seed", binding.ATTR_INT, seed],
+      ["seed2", binding.ATTR_INT, seed],
+    ];
+    const r = execute0("RandomStandardNormal", args, attrs);
     return new BasicTensorTF(r);
   }
 }
