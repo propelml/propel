@@ -231,4 +231,12 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  transpose(x: BasicTensorTF, perm: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Transpose", [x.handle, perm.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tperm", binding.ATTR_TYPE, perm.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }

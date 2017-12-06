@@ -28,6 +28,7 @@ export interface BasicOps {
   randn(shape: Shape, seed?: number): BasicTensor;
   linspace(start: number, stop: number, num: number): BasicTensor;
   arange(start: number, limit: number, delta: number): BasicTensor;
+  transpose(x: BasicTensor, perm: BasicTensor): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.
