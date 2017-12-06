@@ -90,6 +90,30 @@ defBW("div",
   (g, ans, x, y) => div(g, y),
   (g, ans, x, y) => div(neg(mul(g, x)), mul(y, y)));
 
+// We create matmulT0 to mean the matmul op that transposes its first argument
+// and matmulT1 to mean the matmul op that transposes its second argument. This
+// is a hack to work around the fact that defFW can't handle optional/default
+// non-tensor parameters.
+// TODO combine matmulT0 and matmulT1 into matmul. This requires having
+// a mechanism for passthru arguments in defFW.
+export const matmulT0 = defFW("matmulT0", (x, y) => {
+  return basicOps.matmul(x, y, true, false);
+});
+
+export const matmulT1 = defFW("matmulT1", (x, y) => {
+  return basicOps.matmul(x, y, false, true);
+});
+
+export const matmul = defFW("matmul", (x, y) => {
+  return basicOps.matmul(x, y, false, false);
+});
+// y = x1 * x2
+// dx1 = dy * x2T
+// dx2 = x1T * dy
+defBW("matmul",
+  (g, ans, x, y) => matmulT1(g, y),
+  (g, ans, x, y) => matmulT0(x, g));
+
 export let neg = defFW("neg", (x) => basicOps.neg(x));
 defBW("neg", (g, ans, x) => neg(g));
 

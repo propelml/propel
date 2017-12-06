@@ -63,3 +63,5 @@ export function randn(...shape: number[]): Tensor {
   const t = basicOps.randn(shape);
   return new ChainableTensor(t);
 }
+
+export const matmul = (x, y) => $(x).matmul(y);

@@ -1,6 +1,7 @@
 import { $, arange, backend, grad, linspace, multigrad, randn, tanh }
   from "./api";
-import { assert, assertAllClose, assertAllEqual, assertClose } from "./util";
+import { assert, assertAllClose, assertAllEqual, assertClose,
+  assertShapesEqual } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -259,6 +260,39 @@ function testReverse() {
   assertAllEqual(g([1, 2, 3]), [2, 2, 2]);
 }
 
+function testMatMul() {
+  function f(x, y) {
+    return $(x).matmul(y);
+  }
+  const a = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  const b = $([
+    [1, 2],
+    [4, 5],
+    [7, 8],
+  ]);
+  const r = f(a, b);
+  assertShapesEqual(r.shape, [2, 2]);
+  assertAllClose(r, [
+    [90, 114],
+    [54, 69],
+  ]);
+  // Now test gradients
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assertAllEqual(gab[0], [
+    [3, 9, 15],
+    [3, 9, 15],
+  ]);
+  assertAllEqual(gab[1], [
+    [15, 15],
+    [13, 13],
+    [11, 11],
+  ]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -280,3 +314,4 @@ testSinh();
 testSquare();
 testTranspose();
 testReverse();
+testMatMul();
