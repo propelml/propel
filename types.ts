@@ -30,6 +30,8 @@ export interface BasicOps {
   arange(start: number, limit: number, delta: number): BasicTensor;
   transpose(x: BasicTensor, perm: BasicTensor): BasicTensor;
   reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
+  matmul(x: BasicTensor, y: BasicTensor, transposeA: boolean,
+         transposeB: boolean): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.

@@ -1,9 +1,12 @@
 // Deep Learn JS backend.
+import { MatrixOrientation }
+  from "./deps/deeplearnjs/src/math/backends/backend";
 import { NDArrayMathCPU }
   from "./deps/deeplearnjs/src/math/backends/backend_cpu";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
-import { NDArray } from "./deps/deeplearnjs/src/math/ndarray";
+import { Array2D, NDArray } from "./deps/deeplearnjs/src/math/ndarray";
 import * as types from "./types";
+import { assert } from "./util";
 
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
@@ -59,6 +62,18 @@ export class BasicOpsDL implements types.BasicOps {
 
   exp(x: BasicTensorDL): BasicTensorDL {
     const ndarray = x.math.exp(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  matmul(x: BasicTensorDL, y: BasicTensorDL, transposeA = false,
+         transposeB = false): BasicTensorDL {
+    const f = (t) => t ?
+      MatrixOrientation.TRANSPOSED :
+      MatrixOrientation.REGULAR;
+    assert(x.shape.length === 2 && y.shape.length === 2);
+    const x2 = x.ndarray as Array2D;
+    const y2 = y.ndarray as Array2D;
+    const ndarray = x.math.matMul(x2, y2, f(transposeA), f(transposeB));
     return new BasicTensorDL(ndarray, x.math);
   }
 

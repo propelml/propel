@@ -268,4 +268,14 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  matmul(x: BasicTensorTF, y: BasicTensorTF, transposeA = false,
+         transposeB = false): BasicTensorTF {
+    const r = execute0("MatMul", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["transpose_a", binding.ATTR_BOOL, transposeA],
+      ["transpose_b", binding.ATTR_BOOL, transposeB],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }

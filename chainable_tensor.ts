@@ -56,6 +56,10 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.div(this, x);
   }
 
+  matmul(x: types.TensorLike): ChainableTensor {
+    return ops.matmul(this, x);
+  }
+
   neg(): ChainableTensor {
     return ops.neg(this);
   }
