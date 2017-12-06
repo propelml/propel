@@ -108,3 +108,11 @@ defBW("cosh", (g, ans, x) => mul(g, sinh(x)));
 
 export let tanh = defFW("tanh", (x) => basicOps.tanh(x));
 defBW("tanh", (g, ans, x) => div(g, square(cosh(x))));
+
+export let transpose = defFW("transpose", (x, perm) => {
+  return basicOps.transpose(x, perm);
+});
+defBW("transpose", (g, ans, x, perm) => {
+  return transpose(g, convertChainable(perm, "int32"));
+});
+

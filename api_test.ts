@@ -206,6 +206,19 @@ function testSquare() {
   assertAllClose(g(v), [4, 8, -2]);
 }
 
+function testTranspose() {
+  const f = (x) => $(x).transpose();
+  const a = $([[1, 2], [3, 4]]);
+  const aT = $([[1, 3],[2, 4]]);
+  assertAllEqual(f(a), aT);
+  const g = grad(f);
+  assertAllEqual(g(a), [[1, 1], [1, 1]]);
+
+  const f2 = (x) => $(x).transpose().mul(2);
+  const g2 = grad(f2);
+  assertAllEqual(g2(a), [[2, 2], [2, 2]]);
+}
+
 
 testLinspace();
 testArange();
@@ -226,5 +239,6 @@ testSquaredMatrix();
 testGradGradTanh();
 testSinh();
 testSquare();
+testTranspose();
 
 console.log("PASS");

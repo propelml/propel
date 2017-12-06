@@ -113,4 +113,10 @@ export class BasicOpsDL implements types.BasicOps {
     }
     return BasicTensorDL.fromTypedArray(ta, [num]);
   }
+
+  transpose(x: BasicTensorDL, perm: BasicTensorDL): BasicTensorDL {
+    const permArr = Array.from(perm.ndarray.getValues());
+    const ndarray = x.math.transpose(x.ndarray, permArr);
+    return new BasicTensorDL(ndarray, x.math);
+  }
 }

@@ -109,6 +109,7 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 const std::map<std::string, int> attrNameMap = {
     {"T", 0},
     {"Tidx", 0},
+    {"Tperm", 0},
     {"Tshape", 0},
     {"dtype", 0},
     {"keep_dims", 0},

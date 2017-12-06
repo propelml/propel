@@ -67,4 +67,16 @@ export class ChainableTensor implements types.BasicTensor {
   sinh = () => ops.sinh(this);
   cosh = () => ops.cosh(this);
   tanh = () => ops.tanh(this);
+
+  transpose(perm?: types.TensorLike): ChainableTensor {
+    if (perm === undefined) {
+      // TODO perm = basicOps.arange(this.shape.length).reverse();
+      perm = new Array(this.shape.length);
+      for (let i = 0; i < this.shape.length; ++i) {
+        perm[i] = this.shape.length - i - 1;
+      }
+    }
+    perm = convertChainable(perm, "int32");
+    return ops.transpose(this, perm);
+  }
 }
