@@ -52,38 +52,41 @@ struct TensorWrap {
   napi_env env;
   TF_Tensor* tf_tensor;
   TFE_TensorHandle* tf_tensor_handle;
-  napi_ref js_typed_array;
 };
 
-static void ReleaseTypedArray(void* data, size_t len, void* tensor_wrap_ptr) {
-  auto tensor_wrap = static_cast<TensorWrap*>(tensor_wrap_ptr);
+class JSRef {
+ public:
+  JSRef(napi_env env, napi_value value) : env_(env) {
+    napi_status status = napi_create_reference(env, value, 1, &ref_);
+    check(status == napi_ok);
+  }
 
-  check(tensor_wrap->js_typed_array != NULL);
-  napi_status status =
-      napi_delete_reference(tensor_wrap->env, tensor_wrap->js_typed_array);
-  check(status == napi_ok);
-  tensor_wrap->js_typed_array = NULL;
+  ~JSRef() {
+    napi_status status = napi_delete_reference(env_, ref_);
+    check(status == napi_ok);
+  }
+
+  JSRef(const JSRef&) = delete;   // Disallow copy.
+  JSRef(const JSRef&&) = delete;  // Disallow assign.
+
+ private:
+  napi_env env_;
+  napi_ref ref_;
+};
+
+static void ReleaseTypedArray(void* data, size_t len, void* js_ref_ptr) {
+  auto js_ref = static_cast<JSRef*>(js_ref_ptr);
+  delete js_ref;
 }
 
 static void DeleteTensor(napi_env env, void* tensor_wrap_ptr, void* hint) {
   auto tensor_wrap = static_cast<TensorWrap*>(tensor_wrap_ptr);
-  napi_status status;
 
   if (tensor_wrap->tf_tensor_handle != NULL)
     TFE_DeleteTensorHandle(tensor_wrap->tf_tensor_handle);
 
   if (tensor_wrap->tf_tensor != NULL)
     TF_DeleteTensor(tensor_wrap->tf_tensor);
-
-  // At this point, the typed array should no longer be referenced, because
-  // tensorflow should have called ReleaseTypedArray(). But since it isn't
-  // clear what happens when TF_NewTensor() fails, double check here and clean
-  // up if necessary.
-  if (tensor_wrap->js_typed_array != NULL) {
-    status =
-        napi_delete_reference(tensor_wrap->env, tensor_wrap->js_typed_array);
-    check(status == napi_ok);
-  }
 
   delete tensor_wrap;
 }
@@ -518,12 +521,12 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
     dims[i] = value;
   }
 
-  // Store a TypedArray reference in the native wrapper. This must be done
-  // before calling TF_NewTensor, because TF_NewTensor might recursively invoke
-  // the ReleaseTypedArray function that clears the reference.
-  napi_status =
-      napi_create_reference(env, js_array, 1, &tensor_wrap->js_typed_array);
-  check(napi_status == napi_ok);
+  // Create a strong reference to the TypedArray; this reference will be
+  // deleted when tensorflow calls the ReleaseTypedArray callback. Note that
+  // this callback may be called at *any* time, it might be invoked recursively
+  // from TF_NewTensor(), but it may also be called *after* we call
+  // TF_DeleteTensor().
+  auto js_array_ref = new JSRef(env, js_array);
 
   // Construct the TF_Tensor object.
   size_t byte_length = js_array_length * width;
@@ -533,8 +536,9 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
                                       js_array_data,
                                       byte_length,
                                       ReleaseTypedArray,
-                                      tensor_wrap);
+                                      js_array_ref);
   if (tf_tensor == NULL) {
+    ReleaseTypedArray(js_array_data, byte_length, js_array_ref);
     napi_throw_error(env, "ENOMEM", "Out of memory");
     return NULL;
   }
@@ -592,14 +596,6 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
   napi_status =
       napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
   check(napi_status == napi_ok);
-
-  if (tensor_wrap->js_typed_array != NULL) {
-    napi_value typed_array;
-    napi_status = napi_get_reference_value(
-        env, tensor_wrap->js_typed_array, &typed_array);
-    check(napi_status == napi_ok);
-    return typed_array;
-  }
 
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
