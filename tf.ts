@@ -64,6 +64,14 @@ function handleDType(handle): types.DType {
   }
 }
 
+function int32Scalar(v: number): BasicTensorTF {
+  return BasicTensorTF.fromTypedArray(new Int32Array([v]), []);
+}
+
+function floatScalar(v: number): BasicTensorTF {
+  return BasicTensorTF.fromTypedArray(new Float32Array([v]), []);
+}
+
 export class BasicTensorTF implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
@@ -198,6 +206,29 @@ export class BasicOpsTF implements types.BasicOps {
       ["seed2", binding.ATTR_INT, seed],
     ];
     const r = execute0("RandomStandardNormal", args, attrs);
+    return new BasicTensorTF(r);
+  }
+
+  linspace(start: number, stop: number, num: number): BasicTensorTF {
+    const startT = floatScalar(start);
+    const stopT = floatScalar(stop);
+    const numT = int32Scalar(num);
+    const args = [startT.handle, stopT.handle, numT.handle];
+    const r = execute0("LinSpace", args, [
+      ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  arange(start: number, limit: number, delta: number): BasicTensorTF {
+    const startT = int32Scalar(start);
+    const limitT = int32Scalar(limit);
+    const deltaT = int32Scalar(delta);
+    const args = [startT.handle, limitT.handle, deltaT.handle];
+    const r = execute0("Range", args, [
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+    ]);
     return new BasicTensorTF(r);
   }
 }
