@@ -21,15 +21,27 @@ function create(data: types.TypedArray, shape: types.Shape): types.BasicTensor {
   return t;
 }
 
-export function convertBasic(x: types.TensorLike): types.BasicTensor {
+function makeTypedArray(data, dtype: types.DType): types.TypedArray {
+  switch (dtype) {
+    case "float32":
+      return new Float32Array(data);
+    case "int32":
+      return new Int32Array(data);
+    default:
+      throw new Error("Not implemented");
+  }
+}
+
+export function convertBasic(x: types.TensorLike,
+  dtype: types.DType = "float32"): types.BasicTensor {
   if (typeof x == "number") {
-    return create(new Float32Array([x]), []);
+    return create(makeTypedArray([x], dtype), []);
   } else if (types.isTypedArray(x)) {
     return create(x, [x.length]);
   } else if (x instanceof Array) {
     const shape = inferShape(x);
     const data = flatten(x) as number[];
-    return create(new Float32Array(data), shape);
+    return create(makeTypedArray(data, dtype), shape);
   }
   throw new Error("Unreachable");
 }

@@ -2,9 +2,10 @@ import * as types from "./types";
 import * as ops from "./ops";
 import { basicOps, convertBasic } from "./basic";
 
-export function convertChainable(t: types.TensorLike): ChainableTensor {
+export function convertChainable(t: types.TensorLike,
+  dtype: types.DType = "float32"): ChainableTensor {
   if (t instanceof ChainableTensor) return t;
-  return new ChainableTensor(convertBasic(t));
+  return new ChainableTensor(convertBasic(t, dtype));
 }
 
 // ChainableTensor wraps a BasicTensor object. This is the main public
