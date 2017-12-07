@@ -7,13 +7,16 @@ import { BasicOpsTF, BasicTensorTF, binding } from "./tf";
 import * as types from "./types";
 
 let tensorClass: any;
+export let backend: string;
 export let basicOps: types.BasicOps;
 if (binding) {
   tensorClass = BasicTensorTF;
   basicOps = new BasicOpsTF();
+  backend = "tf";
 } else {
   tensorClass = BasicTensorDL;
   basicOps = new BasicOpsDL();
+  backend = "dl";
 }
 
 function create(data: types.TypedArray, shape: types.Shape,
