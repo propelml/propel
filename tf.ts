@@ -1,10 +1,10 @@
 // TensorFlow backend.
-import { assertEqual } from "./util"; 
 import * as types from "./types";
+import { assertEqual } from "./util";
 
 export function maybeRequireBinding() {
   // If we're in the browser, don't even attempt it.
-  if (typeof window !== 'undefined') return null;
+  if (typeof window !== "undefined") return null;
 
   // This is to set the backend to either web or tensorflow.
   // Use this on the command line:
@@ -18,12 +18,12 @@ export function maybeRequireBinding() {
   // When using ts-node, we are in the root dir, after compiling to
   // javascript, we are in the dist dir.
   const toAttempt = [
-    '../../build/Debug/tensorflow-binding.node',
-    '../../build/Release/tensorflow-binding.node',
-    '../build/Debug/tensorflow-binding.node',
-    '../build/Release/tensorflow-binding.node',
-    './build/Debug/tensorflow-binding.node',
-    './build/Release/tensorflow-binding.node',
+    "../../build/Debug/tensorflow-binding.node",
+    "../../build/Release/tensorflow-binding.node",
+    "../build/Debug/tensorflow-binding.node",
+    "../build/Release/tensorflow-binding.node",
+    "./build/Debug/tensorflow-binding.node",
+    "./build/Release/tensorflow-binding.node",
   ];
   const fs = require("fs");
   const path = require("path");
@@ -198,7 +198,7 @@ export class BasicOpsTF implements types.BasicOps {
     const shapeT = BasicTensorTF.fromTypedArray(new Int32Array(shape),
       [shape.length]);
     const args = [shapeT.handle];
-    if (typeof seed != "number") seed = 0;
+    if (typeof seed !== "number") seed = 0;
     const attrs = [
       ["dtype", binding.ATTR_TYPE, binding.TF_FLOAT], // output
       ["T", binding.ATTR_TYPE, binding.TF_INT32], // shape

@@ -1,5 +1,5 @@
-import { convertBasic, basicOps } from "./basic";
-import { assertShapesEqual, assertAllEqual, assertAllClose } from "./util";
+import { basicOps, convertBasic } from "./basic";
+import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const $ = convertBasic;
 

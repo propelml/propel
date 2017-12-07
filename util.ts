@@ -1,6 +1,6 @@
-import { TensorLike, BasicTensor, isTypedArray, FlatVector, Shape }
-  from "./types";
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
+import { BasicTensor, FlatVector, isTypedArray, Shape, TensorLike }
+  from "./types";
 
 const debug = false;
 const J = JSON.stringify;
@@ -13,14 +13,14 @@ function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
     return [[t.length], t];
   } else if (t instanceof Array) {
     return [inferShape(t), flatten(t) as number[]];
-  } else if (typeof t == "number") {
+  } else if (typeof t === "number") {
     return [[], [t]];
   }
 }
 
 function toNumber(t: TensorLike): number {
   const [shape, values] = toShapeAndFlatVector(t);
-  if (values.length != 1) {
+  if (values.length !== 1) {
     throw new Error("Not Scalar");
   }
   return values[0];
@@ -33,9 +33,9 @@ export function log(...args: any[]) {
 }
 
 export function shapesEqual(x: Shape, y: Shape): boolean {
-  if (x.length != y.length) return false;
+  if (x.length !== y.length) return false;
   for (let i = 0; i < x.length; ++i) {
-    if (x[i] != y[i]) return false;
+    if (x[i] !== y[i]) return false;
   }
   return true;
 }
@@ -58,7 +58,7 @@ export function assertClose(actual: TensorLike, expected: TensorLike,
     `actual: ${actual} expected: ${expected}`);
 }
 
-export function assertEqual(actual: TensorLike, expected: number|boolean,
+export function assertEqual(actual: TensorLike, expected: number | boolean,
                             msg = null) {
   actual = toNumber(actual);
   if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
@@ -116,4 +116,3 @@ export class CounterMap {
     this.map.set(id, this.get(id) - 1);
   }
 }
-

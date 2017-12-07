@@ -2,10 +2,10 @@
 // tslint:disable-next-line:max-line-length
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
-import { TensorLike } from "./types";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import { getBackwardFuncs } from "./ops";
-import { CounterMap, log, assertEqual } from "./util";
+import { TensorLike } from "./types";
+import { assertEqual, CounterMap, log } from "./util";
 
 // The global tape stack. The tape stack is used to support higher order
 // gradients.
@@ -97,7 +97,7 @@ export function multigrad(f, argnums: number[]) {
 
 // Returns the gradient with respect to a single input.
 export function grad(f, argnum = 0) {
-  //return multigrad(f, [argnum])[0];
+  // return multigrad(f, [argnum])[0];
   const g = multigrad(f, [argnum]);
   return function(...args: TensorLike[]): ChainableTensor {
     return g(...args)[0];
@@ -152,13 +152,13 @@ function imperativeGrad(target: ChainableTensor, sources: ChainableTensor[]):
 
       if (usageCounts.get(t) > 0) {
         usageCounts.dec(t);
-        if (tape.tensorToOp.has(t) && usageCounts.get(t) == 0 &&
+        if (tape.tensorToOp.has(t) && usageCounts.get(t) === 0 &&
           !sourceIds.has(t)) {
           const inOp = tape.tensorToOp.get(t);
           if (inOp > 0) {
             if (opMissingTensor.get(inOp) > 0) {
               opMissingTensor.dec(inOp);
-              if (opMissingTensor.get(inOp) == 0) {
+              if (opMissingTensor.get(inOp) === 0) {
                 readyOps.push(inOp);
               }
             }
@@ -209,7 +209,7 @@ function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap,
       // - if this is the first usage of this tensor, and
       // - if the input tensor has a registered op, and
       // - it's not one of the source tensors,
-      if (usageCounts.get(inputId) == 1 && tape.tensorToOp.has(inputId) &&
+      if (usageCounts.get(inputId) === 1 && tape.tensorToOp.has(inputId) &&
         !sourceIds.has(inputId)) {
         tensorStack.push(inputId);
       }
@@ -263,12 +263,12 @@ export class GradientCollector {
 
   // Sum up the gradients for a given tensor id.
   aggregate(tid: number): ChainableTensor {
-    if (!this.map.has(tid) || this.map.get(tid).length == 0) {
+    if (!this.map.has(tid) || this.map.get(tid).length === 0) {
       // TODO(scalar) Handle non-scalar shapes.
       return convertChainable(0);
     }
     const grads = this.map.get(tid);
-    //log('aggregate tid %d ngrads %d', tid, grads.length);
+    // log('aggregate tid %d ngrads %d', tid, grads.length);
     let sum = grads[0];
     for (let i = 1; i < grads.length; i++) {
       sum = sum.add(grads[i]);

@@ -2,10 +2,10 @@
 // Based loosely on AutoGrad's numpy_jvps.py
 // tslint:disable-next-line:max-line-length
 // https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
-import { TensorLike, BasicTensor } from "./types";
-import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import * as backprop from "./backprop";
 import { basicOps } from "./basic";
+import { ChainableTensor, convertChainable } from "./chainable_tensor";
+import { BasicTensor, TensorLike } from "./types";
 
 type FWFunc = (...args: BasicTensor[]) => BasicTensor;
 type BWFunc = (grad: ChainableTensor, ans: ChainableTensor, ...args:
@@ -33,20 +33,20 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     const basicAnswer = fwFunc(...bargs);
     const ans = new ChainableTensor(basicAnswer);
     backprop.recordOp({
+      ans,
+      inputIds,
+      inputs: args,
       name,
       oid: nextOpId++,
-      inputIds,
       outputIds: [ans.id],
-      ans,
-      inputs: args,
     });
     return ans;
   };
   ops[name] = {
+    bwFuncs: null,
+    fwFunc,
     name,
     opFunc,
-    fwFunc,
-    bwFuncs: null,
   };
   return opFunc;
 }
@@ -69,7 +69,6 @@ export function getBackwardFuncs(name: string): BWFunc[] {
 function broadcast(x, target) {
   return x;
 }
-
 
 export let add = defFW("add", ( x, y) => basicOps.add(x, y));
 defBW("add",
@@ -115,4 +114,3 @@ export let transpose = defFW("transpose", (x, perm) => {
 defBW("transpose", (g, ans, x, perm) => {
   return transpose(g, convertChainable(perm, "int32"));
 });
-

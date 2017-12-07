@@ -1,7 +1,7 @@
-import * as types from "./types";
-import { convertChainable, ChainableTensor } from "./chainable_tensor";
-import { basicOps } from "./basic";
 import * as backprop from "./backprop";
+import { basicOps } from "./basic";
+import { ChainableTensor, convertChainable } from "./chainable_tensor";
+import * as types from "./types";
 
 export type Tensor = ChainableTensor;
 

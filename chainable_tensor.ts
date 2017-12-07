@@ -1,6 +1,6 @@
-import * as types from "./types";
-import * as ops from "./ops";
 import { basicOps, convertBasic } from "./basic";
+import * as ops from "./ops";
+import * as types from "./types";
 
 export function convertChainable(t: types.TensorLike,
   dtype: types.DType = "float32"): ChainableTensor {

@@ -1,10 +1,10 @@
 // BasicTensor abstracts TensorFlow and DeepLearn basicOps. Operations on
 // BasicTensors are not traced in backprop and the class is not exposed to the
 // public API.
-import * as types from "./types";
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
-import { BasicTensorDL, BasicOpsDL } from "./dl";
-import { binding, BasicTensorTF, BasicOpsTF } from "./tf";
+import { BasicOpsDL, BasicTensorDL } from "./dl";
+import { BasicOpsTF, BasicTensorTF, binding } from "./tf";
+import * as types from "./types";
 
 let tensorClass: any;
 export let basicOps: types.BasicOps;
@@ -34,7 +34,7 @@ function makeTypedArray(data, dtype: types.DType): types.TypedArray {
 
 export function convertBasic(x: types.TensorLike,
   dtype: types.DType = "float32"): types.BasicTensor {
-  if (typeof x == "number") {
+  if (typeof x === "number") {
     return create(makeTypedArray([x], dtype), []);
   } else if (types.isTypedArray(x)) {
     return create(x, [x.length]);
@@ -45,4 +45,3 @@ export function convertBasic(x: types.TensorLike,
   }
   throw new Error("Unreachable");
 }
-
