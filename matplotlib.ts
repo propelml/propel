@@ -11,7 +11,7 @@ function makeAxis(svg, margin, xScale, yScale, width, height) {
   const axisBottom = d3.axisBottom(xScale);
   axisBottom.tickSizeOuter(0);
   svg.append("g")
-    .attr("transform", `translate(${margin.left},${height+margin.top})`)
+    .attr("transform", `translate(${margin.left},${height + margin.top})`)
     .call(axisBottom);
 
   const axisLeft = d3.axisLeft(yScale);
@@ -24,7 +24,7 @@ function makeAxis(svg, margin, xScale, yScale, width, height) {
   axisRight.ticks(0);
   axisRight.tickSizeOuter(0);
   svg.append("g")
-    .attr("transform", `translate(${width+margin.left},${margin.top})`)
+    .attr("transform", `translate(${width + margin.left},${margin.top})`)
     .call(axisRight);
 
   const axisTop = d3.axisTop(xScale);
@@ -142,5 +142,5 @@ export function plot(...args) {
 }
 
 export function show(...args) {
-  //notebook.appendOutput(currentPlot);
+  // notebook.appendOutput(currentPlot);
 }

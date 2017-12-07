@@ -1,5 +1,5 @@
-import { $, grad, tanh, multigrad, linspace, arange, randn } from "./api";
-import { assert, assertClose, assertAllEqual, assertAllClose } from "./util";
+import { $, arange, grad, linspace, multigrad, randn, tanh } from "./api";
+import { assert, assertAllClose, assertAllEqual, assertClose } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -32,10 +32,9 @@ function testRandn() {
   const d = t.getData();
   console.log("randn", d);
   // TODO this isn't the best test...
-  assert(d[0] != d[1]);
-  assert(d[1] != d[2]);
+  assert(d[0] !== d[1]);
+  assert(d[1] !== d[2]);
 }
-
 
 // Backprop Tests
 
@@ -209,7 +208,7 @@ function testSquare() {
 function testTranspose() {
   const f = (x) => $(x).transpose();
   const a = $([[1, 2], [3, 4]]);
-  const aT = $([[1, 3],[2, 4]]);
+  const aT = $([[1, 3], [2, 4]]);
   assertAllEqual(f(a), aT);
   const g = grad(f);
   assertAllEqual(g(a), [[1, 1], [1, 1]]);
@@ -218,7 +217,6 @@ function testTranspose() {
   const g2 = grad(f2);
   assertAllEqual(g2(a), [[2, 2], [2, 2]]);
 }
-
 
 testLinspace();
 testArange();

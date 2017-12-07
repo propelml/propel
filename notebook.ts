@@ -1,8 +1,8 @@
 import * as CodeMirror from "codemirror";
 import "codemirror/mode/javascript/javascript.js";
 
-import * as matplotlib from "./matplotlib";
 import * as propel from "./api";
+import * as matplotlib from "./matplotlib";
 import { assert } from "./util";
 
 let cellsElement = null;
@@ -26,10 +26,10 @@ export function outputId(): string {
 }
 
 window["require"] = function require(target) {
-  //_log("require", target);
+  // _log("require", target);
   const m = {
-    propel,
     matplotlib,
+    propel,
   }[target];
   if (m) {
     return m;
@@ -42,7 +42,7 @@ window["exports"] = {};
 // TODO(ry) Replace this with typescript compiler at some point.
 function parseImportLine(line) {
   const words = line.split(/\s/);
-  if (words.shift() != "import") return null;
+  if (words.shift() !== "import") return null;
   const imports = [];
   let state = "curly-open";
   while (true) {
@@ -51,31 +51,31 @@ function parseImportLine(line) {
       case null:
         return null;
       case "curly-open":
-        if (word != "{") return null;
+        if (word !== "{") return null;
         state = "imported";
         break;
       case "imported":
-        if (word == "}") {
+        if (word === "}") {
           state = "from";
         } else {
-          if (word[word.length - 1] != ",") {
+          if (word[word.length - 1] !== ",") {
             state = "curly-close";
           }
           imports.push(word.replace(/,$/, ""));
         }
         break;
       case "curly-close":
-        if (word != "}") return null;
+        if (word !== "}") return null;
         state = "from";
         break;
       case "from":
-        if (word != "from") return null;
+        if (word !== "from") return null;
         state = "modname";
         break;
       case "modname":
         const q = word[0];
         word = word.replace(/;$/, "");
-        if (word[word.length - 1] != q) return null;
+        if (word[word.length - 1] !== q) return null;
         // success
         return {
           imports,
@@ -117,8 +117,8 @@ class Cell {
     this.id = Cell.nextId++;
 
     this.editor = CodeMirror(cellsElement, {
-      value: source ? source.trim() : "",
       lineNumbers: false,
+      value: source ? source.trim() : "",
       viewportMargin: Infinity,
     });
     this.editor.setOption("extraKeys", {
@@ -153,7 +153,7 @@ class Cell {
     // messy
     let s = args.map((a) => a.toString()).join(" ");
     const last = this.output.lastChild;
-    if (last && last.nodeType != Node.TEXT_NODE) {
+    if (last && last.nodeType !== Node.TEXT_NODE) {
       s = "\n" + s;
     }
     const t = document.createTextNode(s + "\n");
@@ -165,7 +165,7 @@ class Cell {
     // messy
     let s = args.map((a) => a.toString()).join(" ");
     const last = this.output.lastChild;
-    if (last && last.nodeType != Node.TEXT_NODE) {
+    if (last && last.nodeType !== Node.TEXT_NODE) {
       s = "\n" + s;
     }
     const t = document.createElement("b");
@@ -217,7 +217,7 @@ window.onload = () => {
 
   const cells = [];
   const scripts = Array.from(document.scripts).filter(
-    (s) => s.type == "notebook");
+    (s) => s.type === "notebook");
   for (const s of scripts) {
     s.remove();
     cells.push(new Cell(s.innerText));
