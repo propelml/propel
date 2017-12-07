@@ -1,8 +1,5 @@
-import { maybeRequireBinding } from "./tf";
+import { binding, ctx } from "./tf";
 import { assert, assertAllEqual, assertEqual } from "./util";
-
-const binding = maybeRequireBinding();
-const ctx = new binding.Context();
 
 function testEquals() {
   const a = new binding.Tensor(new Float32Array([2, 5]), [2]);
