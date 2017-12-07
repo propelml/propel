@@ -1,5 +1,6 @@
 import * as backprop from "./backprop";
 import { basicOps } from "./basic";
+export { backend } from "./basic";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import * as types from "./types";
 
