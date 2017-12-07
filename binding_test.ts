@@ -2,8 +2,8 @@ import { binding, ctx } from "./tf";
 import { assert, assertAllEqual, assertEqual } from "./util";
 
 function testEquals() {
-  const a = new binding.Tensor(new Float32Array([2, 5]), [2]);
-  const b = new binding.Tensor(new Float32Array([2, 4]), [2]);
+  const a = new binding.Tensor(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
+  const b = new binding.Tensor(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
 
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
@@ -24,8 +24,8 @@ function testMatMul() {
   assert(ctx instanceof binding.Context);
 
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
-  const a = new binding.Tensor(typedArray, [2, 3]);
-  const b = new binding.Tensor(typedArray, [3, 2]);
+  const a = new binding.Tensor(typedArray, [2, 3], binding.TF_FLOAT);
+  const b = new binding.Tensor(typedArray, [3, 2], binding.TF_FLOAT);
   assert(a.device === "CPU:0");
   assert(b.device === "CPU:0");
   assertAllEqual(a.shape, [2, 3]);
@@ -45,8 +45,8 @@ function testMatMul() {
 
 function testMul() {
   const typedArray = new Float32Array([2, 5]);
-  const a = new binding.Tensor(typedArray, [2]);
-  const b = new binding.Tensor(typedArray, [2]);
+  const a = new binding.Tensor(typedArray, [2], binding.TF_FLOAT);
+  const b = new binding.Tensor(typedArray, [2], binding.TF_FLOAT);
   assert(a.device === "CPU:0");
   assert(b.device === "CPU:0");
 
@@ -65,8 +65,8 @@ function testMul() {
 
 function testChaining() {
   // Do an Equal followed by ReduceAll.
-  const a = new binding.Tensor(new Float32Array([2, 5]), [2]);
-  const b = new binding.Tensor(new Float32Array([2, 4]), [2]);
+  const a = new binding.Tensor(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
+  const b = new binding.Tensor(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
 
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
@@ -75,8 +75,8 @@ function testChaining() {
   assert(r.dtype === binding.TF_BOOL);
   assertAllEqual(r.shape, [2]);
 
-  const reductionIndices = new binding.Tensor(new Int32Array([0]), [1]);
-
+  const reductionIndices = new binding.Tensor(new Int32Array([0]), [1],
+                                              binding.TF_INT32);
   const opAttrs2 = [
     ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
     ["keep_dims", binding.ATTR_BOOL, false],
@@ -88,8 +88,9 @@ function testChaining() {
 
 function testReshape() {
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
-  const t = new binding.Tensor(typedArray, [2, 3]);
-  const shape = new binding.Tensor(new Int32Array([3, 2]), [2]);
+  const t = new binding.Tensor(typedArray, [2, 3], binding.TF_FLOAT);
+  const shape = new binding.Tensor(new Int32Array([3, 2]), [2],
+                                   binding.TF_INT32);
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
     ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
@@ -98,8 +99,18 @@ function testReshape() {
   assertAllEqual(r.shape, [3, 2]);
 }
 
+function testBoolean() {
+  const ta = new Uint8Array([0, 1, 0, 1]);
+  const t = new binding.Tensor(ta, [3], binding.TF_BOOL);
+  assert(t.dtype === binding.TF_BOOL);
+  assertAllEqual(t.shape, [3]);
+  const result = Array.from(new Uint8Array(t.asArrayBuffer()));
+  assertAllEqual(result, [0, 1, 0, 1]);
+}
+
 testEquals();
 testMatMul();
 testMul();
 testChaining();
 testReshape();
+testBoolean();

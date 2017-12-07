@@ -51,8 +51,10 @@ export function execute0(opName, inputs, attrs) {
   return r[0];
 }
 
-function handleDType(handle): types.DType {
-  switch (handle.dtype) {
+function dtypeTF2Propel(dtypeTF: number): types.DType {
+  switch (dtypeTF) {
+    case binding.TF_BOOL:
+      return "bool";
     case binding.TF_FLOAT:
       return "float32";
     case binding.TF_INT32:
@@ -60,7 +62,22 @@ function handleDType(handle): types.DType {
     case binding.TF_UINT8:
       return "uint8";
     default:
-      throw new Error(`Not Implemented: ${handle.dtype}`);
+      throw new Error(`Not Implemented: dtype ${dtypeTF}`);
+  }
+}
+
+function dtypePropel2TF(dtype: types.DType): number {
+  switch (dtype) {
+    case "bool":
+      return binding.TF_BOOL;
+    case "float32":
+      return binding.TF_FLOAT;
+    case "int32":
+      return binding.TF_INT32;
+    case "uint8":
+      return binding.TF_UINT8;
+    default:
+      throw new Error(`Not Implemented`);
   }
 }
 
@@ -78,15 +95,19 @@ export class BasicTensorTF implements types.BasicTensor {
   readonly handle: any;  // binding.Tensor
   private data?: types.TypedArray;
 
-  static fromTypedArray(data: types.TypedArray, shape: types.Shape):
-    BasicTensorTF {
-    return new BasicTensorTF(new binding.Tensor(data, shape));
+  static fromTypedArray(data: types.TypedArray, shape: types.Shape,
+                        dtype?: types.DType): BasicTensorTF {
+    if (dtype === undefined) {
+      dtype = types.getDType(data);
+    }
+    const dtypeTF = dtypePropel2TF(dtype);
+    return new BasicTensorTF(new binding.Tensor(data, shape, dtypeTF));
   }
 
   constructor(handle: any) {
     this.handle = handle;
     this.shape = handle.shape;
-    this.dtype = handleDType(handle);
+    this.dtype = dtypeTF2Propel(handle.dtype);
   }
 
   getData(): types.TypedArray {
