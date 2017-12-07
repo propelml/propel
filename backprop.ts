@@ -16,11 +16,7 @@ interface TapeEntry {
   oid: number;
   inputIds: number[];
   outputIds: number[];
-
-  // TODO These should not be set for, ops like exp or neg. Keeping references
-  // to all Tensors is very inefficient.
-  inputs: TensorLike[];
-  ans: ChainableTensor;
+  savedForBackward: any[];
 }
 
 // Hacky. How does one define methods on interfaces?
@@ -140,7 +136,7 @@ function imperativeGrad(target: ChainableTensor, sources: ChainableTensor[]):
     log("- outGrad %s", outGrad);
 
     const inGrads = getBackwardFuncs(op.name).map((bwFunc) => {
-      return bwFunc(outGrad, op.ans, ...op.inputs);
+      return bwFunc(outGrad, ...op.savedForBackward);
     });
 
     log("- inGrad %s", inGrads);

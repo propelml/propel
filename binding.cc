@@ -293,7 +293,12 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
     TensorWrap* tensor_wrap;
     napi_status =
         napi_unwrap(env, input, reinterpret_cast<void**>(&tensor_wrap));
-    check(napi_status == napi_ok);
+    if (napi_status != napi_ok) {
+      napi_throw_error(env, NULL, "Cannot unwrap Execute input");
+      TF_DeleteStatus(tf_status);
+      TFE_DeleteOp(op);
+      return NULL;
+    }
 
     TFE_OpAddInput(op, tensor_wrap->tf_tensor_handle, tf_status);
     check(TF_GetCode(tf_status) == TF_OK);
