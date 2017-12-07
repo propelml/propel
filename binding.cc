@@ -387,8 +387,8 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   AssertConstructorCall(env, info);
 
   // Fetch JavaScript `this` object and function arguments.
-  size_t argc = 2;
-  napi_value args[2];
+  size_t argc = 3;
+  napi_value args[3];
   napi_value js_this;
   napi_status = napi_get_cb_info(env, info, &argc, args, &js_this, NULL);
   check(napi_status == napi_ok);
@@ -414,6 +414,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
 
   napi_value js_array = args[0];
   napi_value js_dims = args[1];
+  napi_value js_dtype = args[2];
 
   // Check whether the first argument is a typed array.
   bool is_typed_array;
@@ -439,42 +440,46 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
                                          NULL);
   check(napi_status == napi_ok);
 
-  // Map to tensorflow type.
-  size_t width;
-  TF_DataType tf_type;
+  // Get the dtype argument.
+  int32_t tf_dtype_val;
+  napi_status = napi_get_value_int32(env, js_dtype, &tf_dtype_val);
+  check(napi_status == napi_ok);
+  TF_DataType tf_type = static_cast<TF_DataType>(tf_dtype_val);
 
+  // Check the provided dtype matches the type of the TypedArray.
+  size_t width;
   switch (js_array_type) {
     case napi_int8_array:
       width = sizeof(int8_t);
-      tf_type = TF_INT8;
+      check(tf_type == TF_INT8);
       break;
     case napi_uint8_array:
     case napi_uint8_clamped_array:
       width = sizeof(uint8_t);
-      tf_type = TF_UINT8;
+      check(tf_type == TF_UINT8 || tf_type == TF_BOOL);
       break;
     case napi_int16_array:
       width = sizeof(int16_t);
-      tf_type = TF_INT16;
+      check(tf_type == TF_INT16);
       break;
     case napi_uint16_array:
       width = sizeof(uint16_t);
-      tf_type = TF_UINT16;
+      check(tf_type == TF_UINT16);
       break;
     case napi_int32_array:
       width = sizeof(int32_t);
-      tf_type = TF_INT32;
+      check(tf_type == TF_INT32);
       break;
     case napi_uint32_array:
       width = sizeof(uint32_t);
-      tf_type = TF_UINT32;
+      check(tf_type == TF_UINT32);
     case napi_float32_array:
       width = sizeof(float);
-      tf_type = TF_FLOAT;
+      check(tf_type == TF_FLOAT);
       break;
     case napi_float64_array:
       width = sizeof(double);
-      tf_type = TF_DOUBLE;
+      check(tf_type == TF_DOUBLE);
       break;
     default:
       napi_throw_type_error(env, "EINVAL", "Unsupported TypedArray type.");

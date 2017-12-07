@@ -16,13 +16,16 @@ if (binding) {
   basicOps = new BasicOpsDL();
 }
 
-function create(data: types.TypedArray, shape: types.Shape): types.BasicTensor {
-  const t = tensorClass.fromTypedArray(data, shape);
+function create(data: types.TypedArray, shape: types.Shape,
+    dtype: types.DType): types.BasicTensor {
+  const t = tensorClass.fromTypedArray(data, shape, dtype);
   return t;
 }
 
 function makeTypedArray(data, dtype: types.DType): types.TypedArray {
   switch (dtype) {
+    case "bool":
+      return new Uint8Array(data);
     case "float32":
       return new Float32Array(data);
     case "int32":
@@ -33,15 +36,15 @@ function makeTypedArray(data, dtype: types.DType): types.TypedArray {
 }
 
 export function convertBasic(x: types.TensorLike,
-  dtype: types.DType = "float32"): types.BasicTensor {
+    dtype: types.DType = "float32"): types.BasicTensor {
   if (typeof x === "number") {
-    return create(makeTypedArray([x], dtype), []);
+    return create(makeTypedArray([x], dtype), [], dtype);
   } else if (types.isTypedArray(x)) {
-    return create(x, [x.length]);
+    return create(x, [x.length], dtype);
   } else if (x instanceof Array) {
     const shape = inferShape(x);
     const data = flatten(x) as number[];
-    return create(makeTypedArray(data, dtype), shape);
+    return create(makeTypedArray(data, dtype), shape, dtype);
   }
   throw new Error("Unreachable");
 }
