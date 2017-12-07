@@ -31,6 +31,10 @@ export class ChainableTensor implements types.BasicTensor {
     return this.basic.getData();
   }
 
+  get rank(): number {
+    return this.shape.length;
+  }
+
   toString(): string {
     // TODO This should pretty print the tensor.
     return `[${this.getData()}]`;
@@ -72,7 +76,7 @@ export class ChainableTensor implements types.BasicTensor {
 
   transpose(perm?: types.TensorLike): ChainableTensor {
     if (perm === undefined) {
-      perm = arange(this.shape.length).reverse();
+      perm = arange(this.rank).reverse();
     }
     perm = convertChainable(perm, "int32");
     return ops.transpose(this, perm);
@@ -82,11 +86,10 @@ export class ChainableTensor implements types.BasicTensor {
   reverse(dims?: number[]): ChainableTensor {
     if (!dims) dims = [-1];
     // Convert dims to 1D tensor of booleans.
-    const rank = this.shape.length;
-    const ta = new Uint8Array(rank);
+    const ta = new Uint8Array(this.rank);
     for (const dim of dims) {
-      assert(-rank <= dim && dim < rank);
-      const i = dim >= 0 ? dim : rank + dim;
+      assert(-this.rank <= dim && dim < this.rank);
+      const i = dim >= 0 ? dim : this.rank + dim;
       ta[i] = 1;
     }
 
