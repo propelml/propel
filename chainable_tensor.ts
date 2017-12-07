@@ -9,6 +9,7 @@ export function convertChainable(t: types.TensorLike,
   if (t instanceof ChainableTensor) return t;
   return new ChainableTensor(convertBasic(t, dtype));
 }
+const $ = convertChainable;
 
 // ChainableTensor wraps a BasicTensor object. This is the main public
 // interface to tensor operatiors. Each instance has a unique id for use in
@@ -41,23 +42,23 @@ export class ChainableTensor implements types.BasicTensor {
   }
 
   add(x: types.TensorLike): ChainableTensor {
-    return ops.add(this, x);
+    return ops.add(this, $(x));
   }
 
   sub(x: types.TensorLike): ChainableTensor {
-    return ops.sub(this, x);
+    return ops.sub(this, $(x));
   }
 
   mul(x: types.TensorLike): ChainableTensor {
-    return ops.mul(this, x);
+    return ops.mul(this, $(x));
   }
 
   div(x: types.TensorLike): ChainableTensor {
-    return ops.div(this, x);
+    return ops.div(this, $(x));
   }
 
   matmul(x: types.TensorLike): ChainableTensor {
-    return ops.matmul(this, x);
+    return ops.matmul(this, $(x));
   }
 
   neg(): ChainableTensor {
@@ -82,7 +83,7 @@ export class ChainableTensor implements types.BasicTensor {
     if (perm === undefined) {
       perm = arange(this.rank).reverse();
     }
-    perm = convertChainable(perm, "int32");
+    perm = $(perm, "int32");
     return ops.transpose(this, perm);
   }
 
@@ -97,7 +98,7 @@ export class ChainableTensor implements types.BasicTensor {
       ta[i] = 1;
     }
 
-    const dimsT = convertChainable(ta, "bool");
+    const dimsT = $(ta, "bool");
     return ops.reverse(this, dimsT);
   }
 }
