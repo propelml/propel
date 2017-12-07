@@ -29,6 +29,7 @@ export interface BasicOps {
   linspace(start: number, stop: number, num: number): BasicTensor;
   arange(start: number, limit: number, delta: number): BasicTensor;
   transpose(x: BasicTensor, perm: BasicTensor): BasicTensor;
+  reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.
@@ -47,5 +48,18 @@ export function getDType(data: TypedArray): DType {
     return "float32";
   } else if (data instanceof Uint8Array) {
     return "uint8";
+  }
+}
+
+export function makeTypedArray(data, dtype: DType): TypedArray {
+  switch (dtype) {
+    case "bool":
+      return new Uint8Array(data);
+    case "float32":
+      return new Float32Array(data);
+    case "int32":
+      return new Int32Array(data);
+    default:
+      throw new Error("Not implemented");
   }
 }

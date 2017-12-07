@@ -120,4 +120,26 @@ export class BasicOpsDL implements types.BasicOps {
     const ndarray = x.math.transpose(x.ndarray, permArr);
     return new BasicTensorDL(ndarray, x.math);
   }
+
+  reverse(x: BasicTensorDL, dims: BasicTensorDL): BasicTensorDL {
+    const a = x.ndarray;
+    const dims_ = dims.getData();
+    // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
+    const resultValues = types.makeTypedArray(a.size, x.dtype);
+    const values = a.getValues();
+    const result = NDArray.make(a.shape, {values: resultValues});
+    for (let i = 0; i < a.size; ++i) {
+      const loc = a.indexToLoc(i);
+      // Reverse location.
+      const newLoc: number[] = new Array(loc.length);
+      for (let j = 0; j < newLoc.length; j++) {
+        newLoc[j] = dims_[j] ? a.shape[j] - loc[j] - 1 : loc[j];
+      }
+
+      const newIndex = result.locToIndex(newLoc);
+      resultValues[newIndex] = values[i];
+    }
+
+    return new BasicTensorDL(result, x.math);
+  }
 }
