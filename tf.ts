@@ -1,6 +1,6 @@
 // TensorFlow backend.
 import * as types from "./types";
-import { assertEqual } from "./util";
+import { assert, assertEqual } from "./util";
 
 export function maybeRequireBinding() {
   // If we're in the browser, don't even attempt it.
@@ -257,6 +257,14 @@ export class BasicOpsTF implements types.BasicOps {
     const r = execute0("Transpose", [x.handle, perm.handle], [
       ["T", binding.ATTR_TYPE, x.handle.dtype],
       ["Tperm", binding.ATTR_TYPE, perm.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  reverse(x: BasicTensorTF, dims: BasicTensorTF): BasicTensorTF {
+    assert(dims.dtype === "bool");
+    const r = execute0("Reverse", [x.handle, dims.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
     ]);
     return new BasicTensorTF(r);
   }

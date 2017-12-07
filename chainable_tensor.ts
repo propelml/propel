@@ -1,6 +1,8 @@
+import { arange } from "./api";
 import { basicOps, convertBasic } from "./basic";
 import * as ops from "./ops";
 import * as types from "./types";
+import { assert } from "./util";
 
 export function convertChainable(t: types.TensorLike,
   dtype: types.DType = "float32"): ChainableTensor {
@@ -70,13 +72,25 @@ export class ChainableTensor implements types.BasicTensor {
 
   transpose(perm?: types.TensorLike): ChainableTensor {
     if (perm === undefined) {
-      // TODO perm = basicOps.arange(this.shape.length).reverse();
-      perm = new Array(this.shape.length);
-      for (let i = 0; i < this.shape.length; ++i) {
-        perm[i] = this.shape.length - i - 1;
-      }
+      perm = arange(this.shape.length).reverse();
     }
     perm = convertChainable(perm, "int32");
     return ops.transpose(this, perm);
+  }
+
+  // Reverses specific dimensions of a tensor.
+  reverse(dims?: number[]): ChainableTensor {
+    if (!dims) dims = [-1];
+    // Convert dims to 1D tensor of booleans.
+    const rank = this.shape.length;
+    const ta = new Uint8Array(rank);
+    for (const dim of dims) {
+      assert(-rank <= dim && dim < rank);
+      const i = dim >= 0 ? dim : rank + dim;
+      ta[i] = 1;
+    }
+
+    const dimsT = convertChainable(ta, "bool");
+    return ops.reverse(this, dimsT);
   }
 }

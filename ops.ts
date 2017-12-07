@@ -114,3 +114,10 @@ export let transpose = defFW("transpose", (x, perm) => {
 defBW("transpose", (g, ans, x, perm) => {
   return transpose(g, convertChainable(perm, "int32"));
 });
+
+export let reverse = defFW("reverse", (x, dims) => {
+  return basicOps.reverse(x, dims);
+});
+defBW("reverse", (g, ans, x, dims) => {
+  return reverse(g, dims);
+});

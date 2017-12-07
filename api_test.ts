@@ -1,4 +1,5 @@
-import { $, arange, grad, linspace, multigrad, randn, tanh } from "./api";
+import { $, arange, backend, grad, linspace, multigrad, randn, tanh }
+  from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
@@ -218,6 +219,46 @@ function testTranspose() {
   assertAllEqual(g2(a), [[2, 2], [2, 2]]);
 }
 
+function testReverse() {
+  assertAllEqual($([1, 2, 3, 4]).reverse(), [4, 3, 2, 1]);
+
+  const t = $([[[[ 0,  1,  2,  3],
+                 [ 4,  5,  6,  7],
+                 [ 8,  9, 10, 11]],
+                [[12, 13, 14, 15],
+                 [16, 17, 18, 19],
+                 [20, 21, 22, 23]]]]);
+  assertAllEqual(t.shape, [1, 2, 3, 4]);
+  const tR1 = $([[[[12, 13, 14, 15],
+                   [16, 17, 18, 19],
+                   [20, 21, 22, 23]],
+                  [[ 0,  1,  2,  3],
+                   [ 4,  5,  6,  7],
+                   [ 8,  9, 10, 11]]]]);
+  assertAllEqual(t.reverse([1]), tR1);
+  assertAllEqual(t.reverse([-3]), tR1);
+  const tR2 = $([[[[8, 9, 10, 11],
+                   [4, 5, 6, 7],
+                   [0, 1, 2, 3]],
+                  [[20, 21, 22, 23],
+                   [16, 17, 18, 19],
+                   [12, 13, 14, 15]]]]);
+  assertAllEqual(t.reverse([2]), tR2);
+  assertAllEqual(t.reverse([-2]), tR2);
+  const tR3 = $([[[[ 3,  2,  1,  0],
+                   [ 7,  6,  5,  4],
+                   [ 11, 10, 9, 8]],
+                  [[15, 14, 13, 12],
+                   [19, 18, 17, 16],
+                   [23, 22, 21, 20]]]]);
+  assertAllEqual(t.reverse([3]), tR3);
+  assertAllEqual(t.reverse([-1]), tR3);
+
+  const f = (x) => $(x).reverse().mul(2);
+  const g = grad(f);
+  assertAllEqual(g([1, 2, 3]), [2, 2, 2]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -238,5 +279,4 @@ testGradGradTanh();
 testSinh();
 testSquare();
 testTranspose();
-
-console.log("PASS");
+testReverse();
