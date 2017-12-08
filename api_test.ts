@@ -121,6 +121,22 @@ function testExp() {
   checkGrad(f, g, 1.0);
 }
 
+function testLog() {
+  // f(x) = log(x)/log(base)
+  function f(x, base) {
+    return $(x).log().div($(base).log());
+  }
+  assertClose(f(2, 2), 1);
+  assertClose(f(9, 3), 2);
+  assertClose(f(64, 4), 3);
+  assertClose(f(625, 5), 4);
+  const g = grad(f); // g = (x*Math.log(base))^-1
+  assertClose(g(2, 2), 1 / (2 * Math.log(2)));
+  assertClose(g(9, 3), 1 / (9 * Math.log(3)));
+  assertClose(g(64, 4), 1 / (64 * Math.log(4)));
+  assertClose(g(625, 5), 1 / (625 * Math.log(5)));
+}
+
 function testSub() {
   function f(x) {
     return $(1).sub(x);
@@ -338,6 +354,7 @@ testSquared();
 testDiv();
 testConstant();
 testExp();
+testLog();
 testSub();
 testDiv2();
 testDiv3();

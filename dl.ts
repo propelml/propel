@@ -65,6 +65,11 @@ export class BasicOpsDL implements types.BasicOps {
     return new BasicTensorDL(ndarray, x.math);
   }
 
+  log(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.log(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
   matmul(x: BasicTensorDL, y: BasicTensorDL, transposeA = false,
          transposeB = false): BasicTensorDL {
     const f = (t) => t ?

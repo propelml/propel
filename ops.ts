@@ -163,6 +163,12 @@ export const exp = defFW("exp", (x) => {
 });
 defBW("exp", (g, ans) => mul(ans, g));
 
+export let log = defFW("log", (x) => {
+  saveForBackward(x);
+  return basicOps.log(x);
+});
+defBW("log", (g, x) => div(g, x));
+
 export const square = defFW("square", (x) => {
   saveForBackward(x);
   return basicOps.square(x);
