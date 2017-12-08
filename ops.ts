@@ -198,3 +198,16 @@ export let reverse = defFW("reverse", (x, dims) => {
   return basicOps.reverse(x, dims);
 });
 defBW("reverse", (g, dims) => reverse(g, dims));
+
+export let reduceSum = defFW("reduceSum", (x, axes, keepDims) => {
+  saveForBackward(x);
+  return basicOps.reduceSum(x, axes, keepDims);
+});
+defBW("reduceSum", (g, x) => mul(g, x.onesLike()));
+
+export let reduceMax = defFW("reduceMax", (x, axes, keepDims) => {
+  return basicOps.reduceMax(x, axes, keepDims);
+});
+defBW("reduceMax", (g, axes, keepDims) => {
+  throw new Error("Not Implemented.");
+});

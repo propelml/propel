@@ -1,4 +1,5 @@
 // TensorFlow backend.
+import { convertBasic } from "./basic";
 import * as types from "./types";
 import { assert, assertEqual } from "./util";
 
@@ -275,6 +276,28 @@ export class BasicOpsTF implements types.BasicOps {
       ["T", binding.ATTR_TYPE, x.handle.dtype],
       ["transpose_a", binding.ATTR_BOOL, transposeA],
       ["transpose_b", binding.ATTR_BOOL, transposeB],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  reduceSum(x: BasicTensorTF, axes: number[], keepDims: boolean): BasicTensorTF
+  {
+    const axesT = convertBasic(axes, "int32") as BasicTensorTF;
+    const r = execute0("Sum", [x.handle, axesT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["keep_dims", binding.ATTR_BOOL, keepDims],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  reduceMax(x: BasicTensorTF, axes: number[], keepDims: boolean): BasicTensorTF
+  {
+    const axesT = convertBasic(axes, "int32") as BasicTensorTF;
+    const r = execute0("Max", [x.handle, axesT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
     return new BasicTensorTF(r);
   }
