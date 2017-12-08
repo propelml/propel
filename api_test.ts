@@ -293,6 +293,41 @@ function testMatMul() {
   ]);
 }
 
+function testReduceSum() {
+  const a = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  assertAllEqual(a.reduceSum([0]), [9 + 6, 8 + 5, 7 + 4]);
+  assertAllEqual(a.reduceSum([1]), [9 + 8 + 7, 6 + 5 + 4]);
+  assertAllEqual(a.reduceSum(), 9 + 8 + 7 + 6 + 5 + 4);
+
+  assertAllEqual(a.reduceSum([0], true), [[9 + 6, 8 + 5, 7 + 4]]);
+  assertAllEqual(a.reduceSum([1], true), [[9 + 8 + 7], [6 + 5 + 4]]);
+
+  const f = (x) => $(x).mul(2).reduceSum([0]);
+  const g = grad(f);
+  assertAllEqual(g(a), [[2, 2, 2], [2, 2, 2]]);
+}
+
+function testReduceMax() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.reduceMax([0]), [9, 8, 7]);
+  assertAllEqual(a.reduceMax([1]), [9, 8]);
+  assertAllEqual(a.reduceMax(), 9);
+  assertAllEqual(a.reduceMax([0], true), [[9, 8, 7]]);
+  assertAllEqual(a.reduceMax([1], true), [[9], [8]]);
+
+  /* TODO
+  const f = (x) => $(x).reduceMax([0])
+  const g = grad(f);
+  assertAllEqual(g(a), [[1, 0, 1], [0, 1, 0]]);
+  */
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -315,3 +350,5 @@ testSquare();
 testTranspose();
 testReverse();
 testMatMul();
+testReduceSum();
+testReduceMax();

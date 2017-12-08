@@ -101,4 +101,23 @@ export class ChainableTensor implements types.BasicTensor {
     const dimsT = $(ta, "bool");
     return ops.reverse(this, dimsT);
   }
+
+  reduceSum(axes?: number[], keepDims = false): ChainableTensor {
+    if (!axes) axes = rangeJS(this.rank);
+    return ops.reduceSum(this, axes, keepDims);
+  }
+
+  reduceMax(axes?: number[], keepDims = false): ChainableTensor {
+    if (!axes) axes = rangeJS(this.rank);
+    return ops.reduceMax(this, axes, keepDims);
+  }
+}
+
+// Like arange() but outputs a javascript array of numbers.
+function rangeJS(limit: number): number[] {
+  const r = new Array(limit);
+  for (let i = 0; i < limit; i++) {
+    r[i] = i;
+  }
+  return r;
 }

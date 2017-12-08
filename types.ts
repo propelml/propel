@@ -32,6 +32,8 @@ export interface BasicOps {
   reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
   matmul(x: BasicTensor, y: BasicTensor, transposeA: boolean,
          transposeB: boolean): BasicTensor;
+  reduceSum(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
+  reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.
