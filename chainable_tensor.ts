@@ -121,12 +121,27 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.reduceMax(this, axes, keepDims);
   }
 
+  reduceLogSumExp(axes?: number[], keepDims = false): ChainableTensor {
+    if (!axes) axes = rangeJS(this.rank);
+    return ops.reduceLogSumExp(this, axes, keepDims);
+  }
+
   equal(x: types.TensorLike): ChainableTensor {
     return ops.equal(this, $(x));
   }
 
   reshape(newShape: types.Shape): ChainableTensor {
     return ops.reshape(this, newShape);
+  }
+
+  // Returns the softmax activations of a tensor.
+  softmax(axis = -1): ChainableTensor {
+    return softmaxHelper(this, axis, ops.softmax);
+  }
+
+  // Numerically stable log(softmax(x)).
+  logSoftmax(axis = -1): ChainableTensor {
+    return softmaxHelper(this, axis, ops.logSoftmax);
   }
 }
 
@@ -137,4 +152,20 @@ function rangeJS(limit: number): number[] {
     r[i] = i;
   }
   return r;
+}
+
+// The softmax and logSoftmax ops can only accept 2D tensors of the form
+// [batch_size, num_classes]. This function reshapes higher rank tensors to
+// that.
+function softmaxHelper(t: ChainableTensor, axis: number, op): ChainableTensor {
+  if (axis !== -1) {
+    throw new Error("Softmax along a non-last axis is not yet supported.");
+  }
+  if (t.rank === 2) {
+    return op(t, axis);
+  }
+  const origShape = t.shape;
+  const numClasses = t.shape[t.rank - 1];
+  const result = op(t.reshape([-1, numClasses]));
+  return result.reshape(origShape);
 }

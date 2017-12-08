@@ -393,6 +393,31 @@ function testReshape() {
   ]);
 }
 
+function testReduceLogSumExp() {
+  assertClose($([1, 2, 3, 4]).reduceLogSumExp(), 4.44018969856);
+  const f = (x) => $(x).reduceLogSumExp();
+  const g = grad(f);
+  assertAllClose(g([2, 3]), [0.26894142, 0.73105858]);
+}
+
+function testSoftmax() {
+  const f = (x) => $(x).softmax();
+  assertAllClose(f([1, 2, 3, 4]),
+    [0.0320586, 0.08714432, 0.23688281, 0.64391422]);
+  // Derivative of softmax isn't numerically stable.
+  const g = grad(f);
+  assertAllClose(g([1, 2, 3, 4]), [0, 0, 0, 0]);
+}
+
+function testLogSoftmax() {
+  const f = (x) => $(x).logSoftmax();
+  assertAllClose(f([1, 2, 3, 4]),
+    [-3.44018984, -2.44018984, -1.44018972, -0.44018975]);
+  const g = grad(f);
+  assertAllClose(g([1, 2, 3, 4]),
+    [0.87176559, 0.65142273, 0.05246873, -1.57565704]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -421,3 +446,6 @@ testReduceMax();
 testOnesAndZerosLike();
 testEqual();
 testReshape();
+testReduceLogSumExp();
+testSoftmax();
+testLogSoftmax();

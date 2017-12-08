@@ -331,4 +331,18 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  softmax(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Softmax", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  logSoftmax(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("LogSoftmax", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }

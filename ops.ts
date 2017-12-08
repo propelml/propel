@@ -228,3 +228,38 @@ export let reshape = defFW("reshape", (x, newShape) => {
   return basicOps.reshape(x, newShape);
 });
 defBW("reshape", (g, origShape) => reshape(g, origShape));
+
+export let reduceLogSumExp = defFW("reduceLogSumExp",
+  (x, axes: number[], keepDims = false) => {
+    const m = basicOps.reduceMax(x, axes, true);
+    const e = basicOps.exp(basicOps.sub(x, m));
+    const s = basicOps.reduceSum(e, axes, true);
+    const sLog = basicOps.log(s);
+    const ans =  basicOps.add(m, sLog);
+    saveForBackward(ans, x);
+    return ans;
+  });
+defBW("reduceLogSumExp", (g, ans, x) => {
+  return mul(g, exp(sub(x, ans)));
+});
+
+export const softmax = defFW("softmax", (x) => {
+  assert(x.shape.length === 2);
+  const ans = basicOps.softmax(x);
+  saveForBackward(ans);
+  return ans;
+});
+defBW("softmax", (g, ans) => {
+  return g.sub(g.mul(ans).reduceSum([1]).reshape([-1, 1])).mul(ans);
+});
+
+export const logSoftmax = defFW("logSoftmax", (x) => {
+  assert(x.shape.length === 2);
+  const ans = basicOps.logSoftmax(x);
+  saveForBackward(ans);
+  return ans;
+});
+defBW("logSoftmax", (g, ans) => {
+  const softmax = ans.exp();
+  return g.sub(g.reduceSum([1], true).mul(softmax));
+});

@@ -189,4 +189,16 @@ export class BasicOpsDL implements types.BasicOps {
     const ndarray = x.ndarray.reshape(newShape);
     return new BasicTensorDL(ndarray, x.math);
   }
+
+  softmax(x: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.softmax(x.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  logSoftmax(x: BasicTensorDL): BasicTensorDL {
+    const xa = x.ndarray;
+    const lastDim = x.shape.length - 1;
+    const ndarray = x.math.sub(xa, x.math.logSumExp(xa, lastDim, true));
+    return new BasicTensorDL(ndarray, x.math);
+  }
 }
