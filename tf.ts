@@ -177,6 +177,13 @@ export class BasicOpsTF implements types.BasicOps {
     return new BasicTensorTF(r);
   }
 
+  log(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Log", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
   eye(size: number, dtype: types.DType = "float32"): types.BasicTensor {
     throw new Error("Not Implemented");
   }

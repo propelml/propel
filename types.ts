@@ -19,6 +19,7 @@ export interface BasicOps {
   div(x: BasicTensor, y: BasicTensor): BasicTensor;
   neg(x: BasicTensor): BasicTensor;
   exp(x: BasicTensor): BasicTensor;
+  log(x: BasicTensor): BasicTensor;
   eye(size: number, dtype: DType): BasicTensor;
   onesLike(x: BasicTensor): BasicTensor;
   square(x: BasicTensor): BasicTensor;

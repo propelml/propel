@@ -69,6 +69,10 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.exp(this);
   }
 
+  log(): ChainableTensor {
+    return ops.log(this);
+  }
+
   onesLike(): ChainableTensor {
     const b = basicOps.onesLike(this.basic);
     return new ChainableTensor(b);
