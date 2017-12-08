@@ -195,6 +195,13 @@ export class BasicOpsTF implements types.BasicOps {
     return new BasicTensorTF(r);
   }
 
+  zerosLike(x: BasicTensorTF): BasicTensorTF {
+    const r = execute0("ZerosLike", [x.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
   square(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Square", [x.handle], [
       ["T", binding.ATTR_TYPE, x.handle.dtype],
@@ -305,6 +312,22 @@ export class BasicOpsTF implements types.BasicOps {
       ["T", binding.ATTR_TYPE, x.handle.dtype],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  equal(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
+    const r = execute0("Equal", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  reshape(x: BasicTensorTF, newShape: types.Shape): BasicTensorTF {
+    const shapeT = convertBasic(newShape, "int32") as BasicTensorTF;
+    const r = execute0("Reshape", [x.handle, shapeT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tshape", binding.ATTR_TYPE, shapeT.handle.dtype],
     ]);
     return new BasicTensorTF(r);
   }

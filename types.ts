@@ -22,6 +22,7 @@ export interface BasicOps {
   log(x: BasicTensor): BasicTensor;
   eye(size: number, dtype: DType): BasicTensor;
   onesLike(x: BasicTensor): BasicTensor;
+  zerosLike(x: BasicTensor): BasicTensor;
   square(x: BasicTensor): BasicTensor;
   sinh(x: BasicTensor): BasicTensor;
   cosh(x: BasicTensor): BasicTensor;
@@ -35,6 +36,8 @@ export interface BasicOps {
          transposeB: boolean): BasicTensor;
   reduceSum(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
+  reshape(x: BasicTensor, newShape: Shape): BasicTensor;
+  equal(x: BasicTensor, y: BasicTensor): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.

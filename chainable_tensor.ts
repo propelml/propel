@@ -78,6 +78,11 @@ export class ChainableTensor implements types.BasicTensor {
     return new ChainableTensor(b);
   }
 
+  zerosLike(): ChainableTensor {
+    const b = basicOps.zerosLike(this.basic);
+    return new ChainableTensor(b);
+  }
+
   square = () => ops.square(this);
   sinh = () => ops.sinh(this);
   cosh = () => ops.cosh(this);
@@ -114,6 +119,14 @@ export class ChainableTensor implements types.BasicTensor {
   reduceMax(axes?: number[], keepDims = false): ChainableTensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceMax(this, axes, keepDims);
+  }
+
+  equal(x: types.TensorLike): ChainableTensor {
+    return ops.equal(this, $(x));
+  }
+
+  reshape(newShape: types.Shape): ChainableTensor {
+    return ops.reshape(this, newShape);
   }
 }
 

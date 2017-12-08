@@ -217,3 +217,14 @@ export let reduceMax = defFW("reduceMax", (x, axes, keepDims) => {
 defBW("reduceMax", (g, axes, keepDims) => {
   throw new Error("Not Implemented.");
 });
+
+export let equal = defFW("equal", (x, y) => {
+  return basicOps.equal(x, y);
+});
+defBW("equal", null, null); // equal is not differentiable.
+
+export let reshape = defFW("reshape", (x, newShape) => {
+  saveForBackward(x.shape);
+  return basicOps.reshape(x, newShape);
+});
+defBW("reshape", (g, origShape) => reshape(g, origShape));
