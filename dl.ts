@@ -87,6 +87,11 @@ export class BasicOpsDL implements types.BasicOps {
     return new BasicTensorDL(ones, x.math);
   }
 
+  zerosLike(x: BasicTensorDL): BasicTensorDL {
+    const zeros = NDArray.zerosLike(x.ndarray);
+    return new BasicTensorDL(zeros, x.math);
+  }
+
   square(x: BasicTensorDL): BasicTensorDL {
     const ndarray = x.math.square(x.ndarray);
     return new BasicTensorDL(ndarray, x.math);
@@ -167,6 +172,16 @@ export class BasicOpsDL implements types.BasicOps {
   reduceMax(x: BasicTensorDL, axes: number[], keepDims: boolean): BasicTensorDL
   {
     const ndarray = x.math.max(x.ndarray, axes, keepDims);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  equal(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+    const ndarray = x.math.equal(x.ndarray, y.ndarray);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  reshape(x: BasicTensorDL, newShape: types.Shape): BasicTensorDL {
+    const ndarray = x.ndarray.reshape(newShape);
     return new BasicTensorDL(ndarray, x.math);
   }
 }

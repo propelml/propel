@@ -328,6 +328,55 @@ function testReduceMax() {
   */
 }
 
+function testOnesAndZerosLike() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.onesLike(), [ [1, 1, 1], [1, 1, 1] ]);
+  assertAllEqual(a.zerosLike(), [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testEqual() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  const b = $([
+    [9, 3, 7],
+    [0, 8, 2],
+  ]);
+  const r = a.equal(b);
+  assert(r.dtype === "bool");
+  // TODO Allow assertAllEqual to handle boolean.
+  assertAllEqual(r, [ [1, 0, 1], [0, 1, 0] ]);
+
+  // equal isn't differentiable but it should have the same behavior as
+  // autograd does.
+  const f = (x, y) => $(x).equal(y);
+  const g = multigrad(f, [0, 1]);
+  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testReshape() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.reshape([3, 2]), [
+    [9, 5],
+    [7, 6],
+    [8, 4],
+  ]);
+  const f = (x) => $(x).reshape([3, 2]);
+  const g = grad(f);
+  assertAllEqual(g(a), [
+    [1, 1, 1],
+    [1, 1, 1],
+  ]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -352,3 +401,6 @@ testReverse();
 testMatMul();
 testReduceSum();
 testReduceMax();
+testOnesAndZerosLike();
+testEqual();
+testReshape();
