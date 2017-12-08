@@ -38,6 +38,8 @@ export interface BasicOps {
   reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reshape(x: BasicTensor, newShape: Shape): BasicTensor;
   equal(x: BasicTensor, y: BasicTensor): BasicTensor;
+  softmax(x: BasicTensor): BasicTensor;
+  logSoftmax(x: BasicTensor): BasicTensor;
 }
 
 // JavaScript objects that can be generally converted to Tensors.
