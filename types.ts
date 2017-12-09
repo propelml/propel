@@ -23,6 +23,7 @@ export interface BasicOps {
   eye(size: number, dtype: DType): BasicTensor;
   onesLike(x: BasicTensor): BasicTensor;
   zerosLike(x: BasicTensor): BasicTensor;
+  fill(value: BasicTensor, shape: Shape): BasicTensor;
   square(x: BasicTensor): BasicTensor;
   sinh(x: BasicTensor): BasicTensor;
   cosh(x: BasicTensor): BasicTensor;
