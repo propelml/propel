@@ -427,6 +427,28 @@ function testLogSoftmax() {
     [0.87176559, 0.65142273, 0.05246873, -1.57565704]);
 }
 
+function testArgMaxAndMin() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.argmax(1), [0, 1]);
+  assertAllEqual(a.argmin(1), [1, 2]);
+  assertAllEqual(a.argmax(0), [0, 1, 0]);
+  assertAllEqual(a.argmin(0), [1, 0, 1]);
+  // Not differentiable.
+  const g = grad((x) => $(x).argmax(0));
+  assertAllEqual(g(a), [
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
+  const h = grad((x) => $(x).argmin(0));
+  assertAllEqual(h(a), [
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -459,3 +481,4 @@ testReshape();
 testReduceLogSumExp();
 testSoftmax();
 testLogSoftmax();
+testArgMaxAndMin();

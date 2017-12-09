@@ -306,6 +306,26 @@ export class BasicOpsTF implements types.BasicOps {
     return new BasicTensorTF(r);
   }
 
+  argmax(x: BasicTensorTF, axis: number): BasicTensorTF {
+    const axisT = int32Scalar(axis);
+    const r = execute0("ArgMax", [x.handle, axisT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
+  argmin(x: BasicTensorTF, axis: number): BasicTensorTF {
+    const axisT = int32Scalar(axis);
+    const r = execute0("ArgMin", [x.handle, axisT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
   reduceSum(x: BasicTensorTF, axes: number[], keepDims: boolean): BasicTensorTF
   {
     const axesT = convertBasic(axes, "int32") as BasicTensorTF;

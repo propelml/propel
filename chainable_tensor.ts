@@ -111,6 +111,20 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.reverse(this, dimsT);
   }
 
+  // Returns the index with the largest value across an axis of a tensor.
+  // axis defaults to 0.
+  argmax(axis?: number): ChainableTensor {
+    if (axis === undefined) axis = 0;
+    return ops.argmax(this, axis);
+  }
+
+  // Returns the index with the smallest value across an axis of a tensor.
+  // axis defaults to 0.
+  argmin(axis?: number): ChainableTensor {
+    if (axis === undefined) axis = 0;
+    return ops.argmin(this, axis);
+  }
+
   reduceSum(axes?: number[], keepDims = false): ChainableTensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceSum(this, axes, keepDims);

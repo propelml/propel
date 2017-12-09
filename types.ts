@@ -37,6 +37,8 @@ export interface BasicOps {
   reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
   matmul(x: BasicTensor, y: BasicTensor, transposeA: boolean,
          transposeB: boolean): BasicTensor;
+  argmax(x: BasicTensor, axis: number): BasicTensor;
+  argmin(x: BasicTensor, axis: number): BasicTensor;
   reduceSum(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reshape(x: BasicTensor, newShape: Shape): BasicTensor;
