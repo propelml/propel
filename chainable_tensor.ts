@@ -14,6 +14,10 @@ const $ = convertChainable;
 // ChainableTensor wraps a BasicTensor object. This is the main public
 // interface to tensor operatiors. Each instance has a unique id for use in
 // backprop.  Nothing about ChainableTensors is backend specific.
+// ChainableTensor might be renamed to BoxedTensor in the near future. To
+// external users this class is called just Tensor. We use a more specific name
+// internally so as not to confuse it with the many other tensor classes in
+// Propel.
 export class ChainableTensor implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
@@ -125,11 +129,15 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.argmin(this, axis);
   }
 
+  // Sum the tensor over the given axes.
+  // axes defaults to all.
   reduceSum(axes?: number[], keepDims = false): ChainableTensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceSum(this, axes, keepDims);
   }
 
+  // Take the maximum value over the given axes.
+  // axes defaults to all.
   reduceMax(axes?: number[], keepDims = false): ChainableTensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceMax(this, axes, keepDims);
@@ -140,10 +148,12 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.reduceLogSumExp(this, axes, keepDims);
   }
 
+  // Element-wise comparison. Returns a tensor with dtype == "bool".
   equal(x: types.TensorLike): ChainableTensor {
     return ops.equal(this, $(x));
   }
 
+  // Reshapes the tensor without changing its data.
   reshape(newShape: types.Shape): ChainableTensor {
     return ops.reshape(this, newShape);
   }

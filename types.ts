@@ -5,6 +5,9 @@ export type FlatVector = number[] | TypedArray;
 export type RegularArray<T> = T[] | T[][] | T[][][] | T[][][][];
 export type ShapeDType = [Shape, DType];
 export type ShapeDTypeList = Array<null | ShapeDType>;
+// JavaScript objects that can be generally converted to Tensors.
+export type Convertible = number | RegularArray<number> | TypedArray;
+export type TensorLike = BasicTensor | Convertible;
 
 // BasicTensor does not use backprop.
 export interface BasicTensor {
@@ -47,9 +50,16 @@ export interface BasicOps {
   logSoftmax(x: BasicTensor): BasicTensor;
 }
 
-// JavaScript objects that can be generally converted to Tensors.
-export type Convertible = number | RegularArray<number> | TypedArray;
-export type TensorLike = BasicTensor | Convertible;
+// A TapeEntry is created every time an op is executed. It is the bookkeeping
+// entry for backpropigation.
+export interface TapeEntry {
+  name: string;
+  oid: number;
+  inputIds: number[];
+  inputShapeDTypes: ShapeDTypeList;
+  outputIds: number[];
+  savedForBackward: any[];
+}
 
 export function isTypedArray(x: any): x is TypedArray {
   return (x instanceof Float32Array || x instanceof Uint8Array ||

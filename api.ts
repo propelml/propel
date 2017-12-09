@@ -7,13 +7,33 @@ export { ChainableTensor as Tensor } from "./chainable_tensor";
 import * as ops from "./ops";
 import * as types from "./types";
 
+// Turns a javascript array of numbers
+// into a tensor. Like this:
+//
+//    let tensor = $([[1, 2, 3],
+//                    [4, 5, 6]]);
+//    console.log(tensor.square());
+//
+// If a tensor is given to $, it simply returns it.
 export function $(t: types.TensorLike): Tensor {
   return convertChainable(t);
 }
 
+// grad(f) returns a gradient function. If f is a function that maps
+// R^n to R^m, then the gradient function maps R^n to R^n.
+// When evaluated at a point, it gives the slope in each dimension of
+// the function f. For example:
+//
+//   let f = (x) => $(x).square();
+//
+// Then grad(f) is 2*x (being the derivative of x^2).
+//
+//   g = grad(f);
+//   g(10) // is 2 * 10
 export const grad = backprop.grad;
 export const multigrad = backprop.multigrad;
 
+// Returns the identity matrix of a given size.
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
   const t = basicOps.eye(size, dtype);
   return new Tensor(t);

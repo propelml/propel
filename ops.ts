@@ -8,8 +8,21 @@ import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import * as types from "./types";
 import { assert } from "./util";
 
+// FWFunc defines a "primative" op (using autograd nomenclature). It should
+// never use ChainableTensors, only BasicTensors. These forward pass functions
+// are defined in ops.ts.
 type FWFunc = (...args) => types.BasicTensor;
-type BWFunc = (grad: ChainableTensor, ...savedArgs) => ChainableTensor;
+
+// BWFunc is a backwards pass function which receives the gradient and any
+// objects passed to saveForBackward(). Backwards pass functions are defined
+// alongside their foward pass counterparts in ops.ts. Unlike FWFunc, BWFunc
+// should use ChainableTensors.
+export type BWFunc = (grad: ChainableTensor, ...savedArgs) => ChainableTensor;
+
+// OpFunc is returned from defFW and is what is the external interface to
+// backprop ops. These are called a lot in api.ts and chainable_tensor.ts
+// which together define the public API. OpFuncs might even be exposed directly
+// to users. An OpFunc will record a TapeEntry when it is called.
 type OpFunc = (...args) => ChainableTensor;
 
 let nextOpId = 1;
