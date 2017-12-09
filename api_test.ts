@@ -475,6 +475,25 @@ function testArgMaxAndMin() {
   ]);
 }
 
+function testDot() {
+  assertAllEqual($(3).dot(4), 12);
+  assertAllEqual($([[3]]).dot([[4]]), [[12]]);
+  const r = $([9, 5, 7]).dot([6, 8, 4]);
+  assertAllEqual(r, 122);
+  const m1 = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  const m2 = $([
+    [1, 2],
+    [4, 5],
+    [7, 8],
+  ]);
+  assertAllEqual(m1.dot(m2), [[90, 114], [54, 69]]);
+  assertAllEqual(m1.dot([1, 2, 3]), [46, 28]);
+  assertAllEqual($([1, 2, 3]).dot(m2), [30, 36]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -511,3 +530,4 @@ testReduceLogSumExp();
 testSoftmax();
 testLogSoftmax();
 testArgMaxAndMin();
+testDot();
