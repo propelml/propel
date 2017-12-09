@@ -4,7 +4,7 @@
 
 import { fill } from "./api";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
-import { getBackwardFuncs } from "./ops";
+import { BWFunc, getBackwardFuncs } from "./ops";
 import * as types from "./types";
 import { assertEqual, CounterMap, log } from "./util";
 
@@ -12,17 +12,8 @@ import { assertEqual, CounterMap, log } from "./util";
 // gradients.
 const tapeStack: Tape[] = [];
 
-interface TapeEntry {
-  name: string;
-  oid: number;
-  inputIds: number[];
-  inputShapeDTypes: types.ShapeDTypeList;
-  outputIds: number[];
-  savedForBackward: any[];
-}
-
 // Hacky. How does one define methods on interfaces?
-function tapeEntryToString(e: TapeEntry): string {
+function tapeEntryToString(e: types.TapeEntry): string {
   const i = e.inputIds.toString();
   const o = e.outputIds.toString();
   return `${e.name}(${e.oid}) in ${i} out ${o}`;
@@ -34,7 +25,7 @@ export class Tape {
   tensorToOp = new Map<number, number>();
 
   // Maps from operation id to TapeEntry.
-  oidLookup = new Map<number, TapeEntry>();
+  oidLookup = new Map<number, types.TapeEntry>();
 
   // Returns true if any tensor should be recorded.
   shouldRecord(tids: number[]): boolean {
@@ -54,7 +45,7 @@ export class Tape {
     }
   }
 
-  recordOp(tapeEntry: TapeEntry): void {
+  recordOp(tapeEntry: types.TapeEntry): void {
     if (!this.shouldRecord(tapeEntry.inputIds)) {
       return;
     }
@@ -137,17 +128,18 @@ function imperativeGrad(target: ChainableTensor, sources: ChainableTensor[]):
     log("backprop %s", op);
     log("- outGrad %s", outGrad);
 
-    const inGrads = getBackwardFuncs(op.name).map((bwFunc, i) => {
-      if (bwFunc) {
-        return bwFunc(outGrad, ...op.savedForBackward);
-      } else {
-        // Null backwards function, return a zero tensor of the same shape and
-        // dtype as the input.
-        const shapeDType = op.inputShapeDTypes[i];
-        const zero = convertChainable(0, shapeDType[1]);
-        return fill(zero, shapeDType[0]);
-      }
-    });
+    const inGrads = getBackwardFuncs(op.name).map(
+      (bwFunc: null | BWFunc, i) => {
+        if (bwFunc) {
+          return bwFunc(outGrad, ...op.savedForBackward);
+        } else {
+          // Null backwards function, return a zero tensor of the same shape and
+          // dtype as the input.
+          const shapeDType = op.inputShapeDTypes[i];
+          const zero = convertChainable(0, shapeDType[1]);
+          return fill(zero, shapeDType[0]);
+        }
+      });
 
     log("- inGrad %s", inGrads);
 
@@ -192,9 +184,9 @@ function imperativeGrad(target: ChainableTensor, sources: ChainableTensor[]):
 // multiple operations has had all of its gradients calculated, and thus that
 // the algorithm can move on to the tensor's origin.
 function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap,
-  Map<number, TapeEntry>] {
+  Map<number, types.TapeEntry>] {
   const tensorStack = [target.id];
-  const oidLookup = new Map<number, TapeEntry>();
+  const oidLookup = new Map<number, types.TapeEntry>();
   const usageCounts = new CounterMap(); // tensor id -> count
 
   while (tensorStack.length > 0) {
@@ -249,7 +241,7 @@ function watch(t: ChainableTensor) {
   }
 }
 
-export function recordOp(tapeEntry: TapeEntry) {
+export function recordOp(tapeEntry: types.TapeEntry) {
   for (const tape of tapeStack) {
     tape.recordOp(tapeEntry);
   }
