@@ -178,6 +178,49 @@ export class ChainableTensor implements types.BasicTensor {
   logSoftmax(axis = -1): ChainableTensor {
     return softmaxHelper(this, axis, ops.logSoftmax);
   }
+
+  // Dot product of two tensors. For 2D tensors it is equivalent to matrix
+  // multiplication. For 1D tensors to inner product of vectors (without
+  // complex conjugation). Currently higher order tensors are not supported.
+  dot(x: types.TensorLike): ChainableTensor {
+    const xx = $(x);
+    let left, right;
+    let lShape, rShape;
+    if (this.rank === 0) {
+      left = this.reshape([1, 1]);
+      lShape = [];
+    } else if (this.rank === 1) {
+      assert(this.shape[0] === xx.shape[0]);
+      left = this.reshape([1, this.shape[0]]);
+      lShape = [];
+    } else if (this.rank === 2) {
+      left = this;
+      lShape = [this.shape[0]];
+    } else {
+      left = null;
+    }
+
+    if (xx.rank === 0) {
+      right = xx.reshape([1, 1]);
+      rShape = [];
+    } else if (xx.rank === 1) {
+      assert(this.shape[this.rank - 1] === xx.shape[0]);
+      right = xx.reshape([xx.shape[0], 1]);
+      rShape = [];
+    } else if (xx.rank === 2) {
+      right = xx;
+      rShape = [xx.shape[xx.rank - 1]];
+    } else {
+      right = null;
+    }
+
+    if (!left || !right) {
+      throw new Error("dot with tensors of rank greater " +
+        "than 2 is not yet implemented.");
+    }
+    const outShape = lShape.concat(rShape);
+    return left.matmul(right).reshape(outShape);
+  }
 }
 
 // Like arange() but outputs a javascript array of numbers.
