@@ -524,7 +524,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
       napi_throw_range_error(
           env, "ERANGE", "Dimension size should be a number");
       return NULL;
-    } else if (value <= 0) {
+    } else if (value < 0) {
       napi_throw_range_error(env, "ERANGE", "Dimension size out of range");
       return NULL;
     }
