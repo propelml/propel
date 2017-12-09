@@ -1,6 +1,30 @@
-<h1>Propel ML</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>README.md</title>
+  <link rel="stylesheet" href="style.css">
+  <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <script src="dist/notebook.js"></script>
+  <link rel="stylesheet" href="codemirror.css"/>
+</head>
+<body>
+<h1 id="propel">Propel</h1>
+<p><a href="https://travis-ci.com/propelml/propel"><img src="https://travis-ci.com/propelml/propel.svg?token=eWz4oGVxypBGsz78gdKp&amp;branch=master" alt="Build Status"></a><br><a href="https://propelml.org/">https://propelml.org/</a><br><a href="https://github.com/propelml/propel">https://github.com/propelml/propel</a></p>
+<p><em>A Machine Learning Framework for JavaScript.</em></p>
+<p>Try it with the <a href="http://propelml.org/notebook.html">notebook</a>.</p>
+<p>Or install:</p>
+<pre><code>npm install propel
+</code></pre>
 
-Machine Learning Framework for JavaScript (and TypeScript!)
 
+<p>For example try:</p>
+<div id=cells></div>
+<button id=newCell>New Cell</button>
+<script type="notebook">
+import { $ } from "propel";
+$([1, 2, 3]).mul([4, 5, 6])
+</script>
 
-npm install propel
+<p>Propel runs in browsers or in Node.</p>
+</body>
+</html>

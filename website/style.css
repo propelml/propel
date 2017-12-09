@@ -1,0 +1,43 @@
+
+body {
+    margin: auto;
+    max-width: 600px;
+    padding: 10px;
+    font-family: 'Lato', sans-serif;
+}
+
+.CodeMirror {
+  height: auto; /* Auto-resizing cells. */
+  padding: 10px;
+  background: #eee;
+  border: 0;
+  border-left: 2px solid #eee;
+}
+
+.CodeMirror-focused {
+  /* Color matches D3 lines. */
+  border-left: 2px solid rgb(31, 119, 180);
+}
+
+button.run-button {
+  visibility: hidden;
+  transition: visibility 0s .5s;
+  position: absolute;
+  right: 8px;
+}
+
+.CodeMirror-focused + button.run-button {
+  visibility: visible;
+  transition: none;
+}
+
+.output {
+  padding: 10px;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+.newCell {
+  margin: 50px 10px;
+}
+
