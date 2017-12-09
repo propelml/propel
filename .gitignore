@@ -41,3 +41,4 @@
 /CMakeCache.txt
 /cmake_install.cmake
 /Makefile
+/package-lock.json
