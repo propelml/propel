@@ -18,4 +18,19 @@ function testCounterMap() {
   console.log(k);
 }
 
+function testDeepCloneArray() {
+  const arr1 = [[1, 2], [3, 4]];
+  const arr2 = util.deepCloneArray(arr1);
+  // Verify that arrays have different identity.
+  assert(arr1 !== arr2);
+  assert(arr1[0] !== arr2[0]);
+  assert(arr1[1] !== arr2[1]);
+  // Verify that primitives inside the array have the same value.
+  assert(arr1[0][0] === arr2[0][0]);
+  assert(arr1[1][0] === arr2[1][0]);
+  assert(arr1[0][1] === arr2[0][1]);
+  assert(arr1[1][1] === arr2[1][1]);
+}
+
 testCounterMap();
+testDeepCloneArray();
