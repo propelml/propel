@@ -169,6 +169,14 @@ export let log = defFW("log", (x) => {
 });
 defBW("log", (g, x) => div(g, x));
 
+export const fill = defFW("fill", (value, shape) => {
+  saveForBackward(value);
+  return basicOps.fill(value, shape);
+});
+defBW("fill", (g, value) => {
+  throw new Error("Not Implemented: backward pass of fill.");
+});
+
 export const square = defFW("square", (x) => {
   saveForBackward(x);
   return basicOps.square(x);

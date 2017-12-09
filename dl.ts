@@ -97,6 +97,15 @@ export class BasicOpsDL implements types.BasicOps {
     return new BasicTensorDL(zeros, x.math);
   }
 
+  fill(value: BasicTensorDL, shape: types.Shape): BasicTensorDL {
+    if (value.shape.length !== 0) {
+      throw new Error("Fill value must be a scalar.");
+    }
+    const out = NDArray.zeros(shape, value.ndarray.dtype);
+    out.fill(value.ndarray.getValues()[0]);
+    return new BasicTensorDL(out, value.math);
+  }
+
   square(x: BasicTensorDL): BasicTensorDL {
     const ndarray = x.math.square(x.ndarray);
     return new BasicTensorDL(ndarray, x.math);

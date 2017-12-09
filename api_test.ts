@@ -1,4 +1,4 @@
-import { $, arange, backend, grad, linspace, multigrad, randn, tanh }
+import { $, arange, backend, fill, grad, linspace, multigrad, randn, tanh }
   from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
@@ -212,6 +212,15 @@ function testSinh() {
   // The derivtive of sinh is cosh.
   const g = grad(f);
   assertAllClose(g(v), v.cosh());
+}
+
+function testFill() {
+  const f = (x) => fill(x, [2, 3]);
+  assertAllEqual(f(1), [[1, 1, 1], [1, 1, 1]]);
+  assertAllEqual(f(42), [[42, 42, 42], [42, 42, 42]]);
+  // TODO
+  // const g = grad(f);
+  // assertAllEqual(g(1), [1]);
 }
 
 function testSquare() {
@@ -437,6 +446,7 @@ testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
 testSinh();
+testFill();
 testSquare();
 testTranspose();
 testReverse();

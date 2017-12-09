@@ -4,6 +4,7 @@ export { backend } from "./basic";
 import { ChainableTensor as Tensor, convertChainable }
   from "./chainable_tensor";
 export { ChainableTensor as Tensor } from "./chainable_tensor";
+import * as ops from "./ops";
 import * as types from "./types";
 
 export function $(t: types.TensorLike): Tensor {
@@ -62,6 +63,12 @@ export const tanh = (x) => $(x).tanh();
 export function randn(...shape: number[]): Tensor {
   const t = basicOps.randn(shape);
   return new Tensor(t);
+}
+
+// fill returns a new tensor of the given shape, filled with constant values
+// specified by the `value` argument. `value` must be a scalar tensor.
+export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
+  return ops.fill($(value), shape);
 }
 
 export const matmul = (x, y) => $(x).matmul(y);

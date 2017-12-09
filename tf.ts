@@ -202,6 +202,18 @@ export class BasicOpsTF implements types.BasicOps {
     return new BasicTensorTF(r);
   }
 
+  fill(value: BasicTensorTF, shape: types.Shape): BasicTensorTF {
+    if (value.shape.length !== 0) {
+      throw new Error("Fill value must be a scalar.");
+    }
+    const dims = BasicTensorTF.fromTypedArray(new Int32Array(shape),
+      [shape.length]);
+    const r = execute0("Fill", [dims.handle, value.handle], [
+      ["T", binding.ATTR_TYPE, value.handle.dtype],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
   square(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Square", [x.handle], [
       ["T", binding.ATTR_TYPE, x.handle.dtype],
