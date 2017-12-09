@@ -2,9 +2,10 @@
 // tslint:disable-next-line:max-line-length
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
+import { fill } from "./api";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import { getBackwardFuncs } from "./ops";
-import { TensorLike } from "./types";
+import * as types from "./types";
 import { assertEqual, CounterMap, log } from "./util";
 
 // The global tape stack. The tape stack is used to support higher order
@@ -15,6 +16,7 @@ interface TapeEntry {
   name: string;
   oid: number;
   inputIds: number[];
+  inputShapeDTypes: types.ShapeDTypeList;
   outputIds: number[];
   savedForBackward: any[];
 }
@@ -74,7 +76,7 @@ export class Tape {
 //   marked with TODO(scalar). Need to propigate shape_and_dtype (See
 //   backprop.py).
 export function multigrad(f, argnums: number[]) {
-  return function(...args: TensorLike[]): ChainableTensor[] {
+  return function(...args: types.TensorLike[]): ChainableTensor[] {
     pushNewTape();
     const targs: ChainableTensor[] = [];
     // Convert args to Tensors.
@@ -95,7 +97,7 @@ export function multigrad(f, argnums: number[]) {
 export function grad(f, argnum = 0) {
   // return multigrad(f, [argnum])[0];
   const g = multigrad(f, [argnum]);
-  return function(...args: TensorLike[]): ChainableTensor {
+  return function(...args: types.TensorLike[]): ChainableTensor {
     return g(...args)[0];
   };
 }
@@ -135,8 +137,16 @@ function imperativeGrad(target: ChainableTensor, sources: ChainableTensor[]):
     log("backprop %s", op);
     log("- outGrad %s", outGrad);
 
-    const inGrads = getBackwardFuncs(op.name).map((bwFunc) => {
-      return bwFunc(outGrad, ...op.savedForBackward);
+    const inGrads = getBackwardFuncs(op.name).map((bwFunc, i) => {
+      if (bwFunc) {
+        return bwFunc(outGrad, ...op.savedForBackward);
+      } else {
+        // Null backwards function, return a zero tensor of the same shape and
+        // dtype as the input.
+        const shapeDType = op.inputShapeDTypes[i];
+        const zero = convertChainable(0, shapeDType[1]);
+        return fill(zero, shapeDType[0]);
+      }
     });
 
     log("- inGrad %s", inGrads);

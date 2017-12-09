@@ -3,6 +3,8 @@ export type DType = "float32" | "int32" | "uint8" | "bool";
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 export type FlatVector = number[] | TypedArray;
 export type RegularArray<T> = T[] | T[][] | T[][][] | T[][][][];
+export type ShapeDType = [Shape, DType];
+export type ShapeDTypeList = Array<null | ShapeDType>;
 
 // BasicTensor does not use backprop.
 export interface BasicTensor {

@@ -5,10 +5,10 @@
 import * as backprop from "./backprop";
 import { basicOps } from "./basic";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
-import { BasicTensor, TensorLike } from "./types";
+import * as types from "./types";
 import { assert } from "./util";
 
-type FWFunc = (...args) => BasicTensor;
+type FWFunc = (...args) => types.BasicTensor;
 type BWFunc = (grad: ChainableTensor, ...savedArgs) => ChainableTensor;
 type OpFunc = (...args) => ChainableTensor;
 
@@ -40,6 +40,18 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
       }
     });
 
+    // An array of tuples [shape, dtype] for each argument.
+    // Non-tensor arguments are null.
+    const inputShapeDTypes: types.ShapeDTypeList = args.map((t) => {
+      if ((t as ChainableTensor).shape) {
+        const ct = t as ChainableTensor;
+        const st: types.ShapeDType = [ct.shape, ct.dtype];
+        return st;
+      } else {
+        return null;
+      }
+    });
+
     // Convert any ChainableTensor args to basic ones.
     const bargs = args.map((t) => {
       if ((t as ChainableTensor).basic) {
@@ -51,7 +63,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
 
     // Call the forward function, and wrap the resulting BasicTensor in a
     // ChainableTensor.
-    const basicAnswer: BasicTensor = fwFunc(...bargs);
+    const basicAnswer: types.BasicTensor = fwFunc(...bargs);
     const ans = new ChainableTensor(basicAnswer);
     cTensors.push(ans);
 
@@ -61,6 +73,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
 
     backprop.recordOp({
       inputIds,
+      inputShapeDTypes,
       name,
       oid: nextOpId++,
       outputIds: [ans.id],
@@ -80,8 +93,8 @@ function convertSavedBasicsToChainables(saved: any[], cTensors:
                                         ChainableTensor[]) {
   if (!saved) return null;
   return saved.map((t) => {
-    if ((t as BasicTensor).getData) {
-      const b = t as BasicTensor;
+    if ((t as types.BasicTensor).getData) {
+      const b = t as types.BasicTensor;
       for (const ct of cTensors) {
         if (ct.basic === b) return ct;
       }
@@ -94,13 +107,7 @@ function convertSavedBasicsToChainables(saved: any[], cTensors:
 }
 
 function defBW(name: string, ...bwFuncs: Array<null | BWFunc>) {
-  ops[name].bwFuncs = bwFuncs.map((f) => {
-    if (f == null) {
-      return (g, ...args) => g.zerosLike();
-    } else {
-      return f;
-    }
-  });
+  ops[name].bwFuncs = bwFuncs;
 }
 
 let globalSavedForBackward = null;
