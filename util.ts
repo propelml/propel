@@ -1,6 +1,6 @@
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
-import { BasicTensor, FlatVector, isTypedArray, Shape, TensorLike }
-  from "./types";
+import { BasicTensor, FlatVector, isTypedArray, RegularArray, Shape,
+  TensorLike } from "./types";
 
 const debug = false;
 const J = JSON.stringify;
@@ -115,4 +115,13 @@ export class CounterMap {
   dec(id: number): void {
     this.map.set(id, this.get(id) - 1);
   }
+}
+
+export function deepCloneArray(arr: RegularArray<any>): typeof arr {
+  const arr2 = [];
+  for (let i = 0; i < arr.length; i++) {
+    const value = arr[i];
+    arr2[i] = Array.isArray(value) ? deepCloneArray(value) : value;
+  }
+  return arr2;
 }

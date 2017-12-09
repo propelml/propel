@@ -5,6 +5,7 @@ import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
 import { BasicOpsDL, BasicTensorDL } from "./dl";
 import { BasicOpsTF, BasicTensorTF, binding } from "./tf";
 import * as types from "./types";
+import { deepCloneArray } from "./util";
 
 let tensorClass: any;
 export let backend: string;
@@ -31,7 +32,12 @@ export function convertBasic(x: types.TensorLike,
     return create(types.makeTypedArray([x], dtype), [], dtype);
   } else if (types.isTypedArray(x)) {
     return create(x, [x.length], dtype);
-  } else if (x instanceof Array) {
+  } else if (Array.isArray(x)) {
+    if (!(x instanceof Array)) {
+      // Unfortunately deeplearnjs gets confused by an out-of-context array.
+      // Therefore clone the array.
+      x = deepCloneArray(x);
+    }
     const shape = inferShape(x);
     const data = flatten(x) as number[];
     return create(types.makeTypedArray(data, dtype), shape, dtype);
