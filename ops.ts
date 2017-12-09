@@ -220,6 +220,16 @@ export let reverse = defFW("reverse", (x, dims) => {
 });
 defBW("reverse", (g, dims) => reverse(g, dims));
 
+export let argmax = defFW("argmax", (x, axis: number) => {
+  return basicOps.argmax(x, axis);
+});
+defBW("argmax", null);  // Not differentiable.
+
+export let argmin = defFW("argmin", (x, axis: number) => {
+  return basicOps.argmin(x, axis);
+});
+defBW("argmin", null);  // Not differentiable.
+
 export let reduceSum = defFW("reduceSum", (x, axes, keepDims) => {
   saveForBackward(x);
   return basicOps.reduceSum(x, axes, keepDims);

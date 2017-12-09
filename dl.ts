@@ -177,6 +177,16 @@ export class BasicOpsDL implements types.BasicOps {
     return new BasicTensorDL(result, x.math);
   }
 
+  argmax(x: BasicTensorDL, axis: number): BasicTensorDL {
+    const ndarray = x.math.argMax(x.ndarray, axis);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
+  argmin(x: BasicTensorDL, axis: number): BasicTensorDL {
+    const ndarray = x.math.argMin(x.ndarray, axis);
+    return new BasicTensorDL(ndarray, x.math);
+  }
+
   reduceSum(x: BasicTensorDL, axes: number[], keepDims: boolean): BasicTensorDL
   {
     const ndarray = x.math.sum(x.ndarray, axes, keepDims);

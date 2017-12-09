@@ -113,6 +113,7 @@ const std::map<std::string, int> attrNameMap = {
     {"Tshape", 0},
     {"dtype", 0},
     {"keep_dims", 0},
+    {"output_type", 0},
     {"seed", 0},
     {"seed2", 0},
     {"transpose_a", 0},
