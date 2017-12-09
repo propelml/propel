@@ -35,6 +35,7 @@
 /RelWithDebInfo/
 /x64/
 /website/dist/
+/website/docs/
 /Win32/
 
 /CMakeCache.txt
