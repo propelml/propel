@@ -35,8 +35,10 @@
 /RelWithDebInfo/
 /x64/
 /website/dist/
+/website/index.html
 /Win32/
 
 /CMakeCache.txt
 /cmake_install.cmake
 /Makefile
+
