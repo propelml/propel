@@ -76,7 +76,7 @@ export function getDType(data: TypedArray): DType {
   }
 }
 
-export function makeTypedArray(data, dtype: DType): TypedArray {
+export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
   switch (dtype) {
     case "bool":
       return new Uint8Array(data);

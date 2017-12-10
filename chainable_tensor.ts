@@ -5,7 +5,7 @@ import * as types from "./types";
 import { assert } from "./util";
 
 export function convertChainable(t: types.TensorLike,
-  dtype: types.DType = "float32"): ChainableTensor {
+                                 dtype?: types.DType): ChainableTensor {
   if (t instanceof ChainableTensor) return t;
   return new ChainableTensor(convertBasic(t, dtype));
 }

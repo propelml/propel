@@ -38,6 +38,18 @@ function testRandn() {
   assert(d[1] !== d[2]);
 }
 
+function testConvertWithType() {
+  const t = $([1, 2, 3], "int32");
+  assert(t.dtype === "int32");
+  const ta = t.getData();
+  assert(ta instanceof Int32Array);
+
+  const ta2 = new Int32Array([1, 2, 3]);
+  const t2 = $(ta2);
+  assert(t2.dtype === "int32");
+  assert(t2.getData() instanceof Int32Array);
+}
+
 // Backprop Tests
 
 function testInc() {
@@ -452,6 +464,7 @@ function testArgMaxAndMin() {
 testLinspace();
 testArange();
 testRandn();
+testConvertWithType();
 
 testInc();
 testMul();
