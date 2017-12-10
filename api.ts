@@ -15,8 +15,8 @@ import * as types from "./types";
 //    console.log(tensor.square());
 //
 // If a tensor is given to $, it simply returns it.
-export function $(t: types.TensorLike): Tensor {
-  return convertChainable(t);
+export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
+  return convertChainable(t, dtype);
 }
 
 // grad(f) returns a gradient function. If f is a function that maps

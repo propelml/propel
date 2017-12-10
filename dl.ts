@@ -16,9 +16,12 @@ export class BasicTensorDL implements types.BasicTensor {
   readonly math: NDArrayMath;
   readonly ndarray: NDArray;
 
-  static fromTypedArray(data: types.TypedArray, shape: types.Shape):
-    BasicTensorDL {
-    const ndarray = NDArray.make(shape, { values: data });
+  static fromTypedArray(data: types.TypedArray, shape: types.Shape,
+                        dtype?: types.DType): BasicTensorDL {
+    if (dtype === undefined) {
+      dtype = types.getDType(data);
+    }
+    const ndarray = NDArray.make(shape, { values: data }, dtype as any);
     return new BasicTensorDL(ndarray, cpuMath);
   }
 

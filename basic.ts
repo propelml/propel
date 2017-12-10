@@ -27,7 +27,7 @@ function create(data: types.TypedArray, shape: types.Shape,
 }
 
 export function convertBasic(x: types.TensorLike,
-    dtype: types.DType = "float32"): types.BasicTensor {
+                             dtype?: types.DType): types.BasicTensor {
   if (typeof x === "number") {
     return create(types.makeTypedArray([x], dtype), [], dtype);
   } else if (types.isTypedArray(x)) {
