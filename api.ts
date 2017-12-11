@@ -91,4 +91,16 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
   return ops.fill($(value), shape);
 }
 
+// Return a new tensor of given shape and dtype, filled with zeros.
+export function zeros(shape: types.Shape,
+                      dtype: types.DType = "float32"): Tensor {
+  return ops.fill($(0, dtype), shape);
+}
+
+// Return a new tensor of given shape and dtype, filled with ones.
+export function ones(shape: types.Shape,
+                     dtype: types.DType = "float32"): Tensor {
+  return ops.fill($(1, dtype), shape);
+}
+
 export const matmul = (x, y) => $(x).matmul(y);
