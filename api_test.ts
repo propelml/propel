@@ -1,5 +1,5 @@
-import { $, arange, backend, fill, grad, linspace, multigrad, randn, tanh }
-  from "./api";
+import { $, arange, backend, fill, grad, linspace, multigrad, ones, randn,
+  tanh, zeros } from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
 
@@ -494,6 +494,24 @@ function testDot() {
   assertAllEqual($([1, 2, 3]).dot(m2), [30, 36]);
 }
 
+function testZerosOnes() {
+  const z1 = zeros([2, 3]);
+  assertAllEqual(z1, [[0, 0, 0], [0, 0, 0]]);
+  assert(z1.dtype === "float32");
+
+  const z2 = zeros([2, 3], "int32");
+  assertAllEqual(z2, [[0, 0, 0], [0, 0, 0]]);
+  assert(z2.dtype === "int32");
+
+  const o1 = ones([2, 3]);
+  assertAllEqual(o1, [[1, 1, 1], [1, 1, 1]]);
+  assert(o1.dtype === "float32");
+
+  const o2 = ones([2, 3], "int32");
+  assertAllEqual(o2, [[1, 1, 1], [1, 1, 1]]);
+  assert(o2.dtype === "int32");
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -531,3 +549,4 @@ testSoftmax();
 testLogSoftmax();
 testArgMaxAndMin();
 testDot();
+testZerosOnes();
