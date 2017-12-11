@@ -414,6 +414,20 @@ function testReshape() {
   ]);
 }
 
+function testFlatten() {
+  const a = $([[1, 2], [3, 4]]);
+  assertAllEqual(a.flatten(), [1, 2, 3, 4]);
+}
+
+function testSqueeze() {
+  const a = $([[[0], [1], [2]]]);
+  assertShapesEqual(a.shape, [1, 3, 1]);
+  const b = a.squeeze();
+  assertAllEqual(b, [0, 1, 2]);
+  const c = $([[1, 2], [3, 4]]);
+  assertAllEqual(c.squeeze(), c);
+}
+
 function testReduceLogSumExp() {
   assertClose($([1, 2, 3, 4]).reduceLogSumExp(), 4.44018969856);
   const f = (x) => $(x).reduceLogSumExp();
@@ -491,6 +505,8 @@ testReduceMax();
 testOnesAndZerosLike();
 testEqual();
 testReshape();
+testFlatten();
+testSqueeze();
 testReduceLogSumExp();
 testSoftmax();
 testLogSoftmax();
