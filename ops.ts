@@ -278,7 +278,7 @@ export let reduceLogSumExp = defFW("reduceLogSumExp",
     return ans;
   });
 defBW("reduceLogSumExp", (g, ans, x) => {
-  return mul(g, exp(sub(x, ans)));
+  return g.mul(exp(x.sub(ans)));
 });
 
 export const softmax = defFW("softmax", (x) => {
