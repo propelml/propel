@@ -23,5 +23,8 @@
   "scripts": {
     "webpack": "node ./node_modules/webpack/bin/webpack.js --verbose"
   },
-  "gypfile": true
+  "gypfile": true,
+  "devDependencies": {
+    "typedoc": "^0.9.0"
+  }
 }
