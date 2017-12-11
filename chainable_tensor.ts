@@ -158,6 +158,17 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.reshape(this, newShape);
   }
 
+  // Return a copy of the tensor collapsed into one dimension.
+  flatten(): ChainableTensor {
+    return this.reshape([-1]);
+  }
+
+  // Remove single-dimensional axes from the shape of a tensor.
+  squeeze(): ChainableTensor {
+    const newShape = this.shape.filter((d) => d > 1);
+    return this.reshape(newShape);
+  }
+
   // Returns the softmax activations of a tensor.
   softmax(axis = -1): ChainableTensor {
     return softmaxHelper(this, axis, ops.softmax);
