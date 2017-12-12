@@ -60,12 +60,17 @@ export class Tape {
 
 // Returns a function which differentiates f with respect to the given
 // argnum indexes.
-//
-// Assumputions to be removed later:
-// - User doesn't need the forward pass result of f. (Need gradAndVal func
-//   which returns both.)
 export function multigrad(f, argnums: number[]) {
+  const g = multigradAndVal(f, argnums);
   return function(...args: types.TensorLike[]): ChainableTensor[] {
+    // Ignore the forward pass result.
+    return g(...args)[0];
+  };
+}
+
+export function multigradAndVal(f, argnums: number[]) {
+  return function(...args: types.TensorLike[]):
+      [ChainableTensor[], ChainableTensor] {
     pushNewTape();
     const targs: ChainableTensor[] = args.map((tl) => convertChainable(tl));
     // Watch the specified argnums.
@@ -74,15 +79,24 @@ export function multigrad(f, argnums: number[]) {
     }
     let result = f.apply(null, targs); // Do the forward pass.
     result = convertChainable(result);
-    return imperativeGrad(result, targs);
+    return [imperativeGrad(result, targs), result];
   };
 }
 
 // Returns the gradient with respect to a single input.
 export function grad(f, argnum = 0) {
-  const g = multigrad(f, [argnum]);
+  const g = multigradAndVal(f, [argnum]);
   return function(...args: types.TensorLike[]): ChainableTensor {
-    return g(...args)[0];
+    return g(...args)[0][0];
+  };
+}
+
+export function gradAndVal(f, argnum = 0) {
+  const g = multigradAndVal(f, [argnum]);
+  return function(...args: types.TensorLike[]):
+      [ChainableTensor, ChainableTensor] {
+    const [grad, val] = g(...args);
+    return [grad[0], val];
   };
 }
 

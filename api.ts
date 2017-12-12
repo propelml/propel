@@ -32,6 +32,8 @@ export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
 //   g(10) // is 2 * 10
 export const grad = backprop.grad;
 export const multigrad = backprop.multigrad;
+export const multigradAndVal = backprop.multigradAndVal;
+export const gradAndVal = backprop.gradAndVal;
 
 // Returns the identity matrix of a given size.
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
