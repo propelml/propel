@@ -107,6 +107,7 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 // this lookup map to fixed strings.  The value (int) in the map is unused.
 // Add to this as needed.
 const std::map<std::string, int> attrNameMap = {
+    {"Index", 0},
     {"T", 0},
     {"Tidx", 0},
     {"Tperm", 0},

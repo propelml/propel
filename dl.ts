@@ -4,7 +4,8 @@ import { MatrixOrientation }
 import { NDArrayMathCPU }
   from "./deps/deeplearnjs/src/math/backends/backend_cpu";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
-import { Array2D, NDArray } from "./deps/deeplearnjs/src/math/ndarray";
+import { Array2D, Array3D, Array4D, NDArray }
+  from "./deps/deeplearnjs/src/math/ndarray";
 import * as types from "./types";
 import { assert } from "./util";
 
@@ -205,6 +206,45 @@ export class BasicOpsDL implements types.BasicOps {
   equal(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
     const ndarray = x.math.equal(x.ndarray, y.ndarray);
     return new BasicTensorDL(ndarray, x.math);
+  }
+
+  slice(x: BasicTensorDL, begin: number[], size: number[]): BasicTensorDL {
+    let nd;
+    // DL doesn't handle negative sizes, so we translate them.
+    size = size.map((d, i) => {
+      if (d >= 0) {
+        return d;
+      } else {
+        assert(d === -1, "Bad value in size");
+        return x.shape[i];
+      }
+    });
+    switch (x.shape.length) {
+      case 0:
+        throw new Error("Slicing a scalar.");
+      case 1:
+        nd = x.math.slice1D(x.ndarray.as1D(), begin[0], size[0]);
+        break;
+      case 2:
+        nd = x.math.slice2D(x.ndarray as Array2D,
+                            [begin[0], begin[1]],
+                            [size[0], size[1]]);
+        break;
+      case 3:
+        nd = x.math.slice3D(x.ndarray as Array3D,
+                            [begin[0], begin[1], begin[2]],
+                            [size[0], size[1], size[2]]);
+        break;
+      case 4:
+        nd = x.math.slice4D(x.ndarray as Array4D,
+                            [begin[0], begin[1], begin[2], begin[3]],
+                            [size[0], size[1], size[2], size[3]]);
+        break;
+      default:
+        throw new Error("Slicing for tensors rank higher than " +
+                        "4 not yet supported.");
+    }
+    return new BasicTensorDL(nd, x.math);
   }
 
   reshape(x: BasicTensorDL, newShape: types.Shape): BasicTensorDL {

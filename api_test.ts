@@ -620,6 +620,31 @@ function testBcastDiv() {
   assertAllClose(gab[1], [-0.00907029, -0.01081666]);
 }
 
+function testSlice() {
+  const a = $([[[1, 1, 1], [2, 2, 2]],
+               [[3, 3, 3], [4, 4, 4]],
+               [[5, 5, 5], [6, 6, 6]]], "uint8");
+  assert(a.dtype === "uint8");
+  const s1 = a.slice([1, 0, 0], [1, 1, 3]);
+  assert(s1.dtype === "uint8");
+  assertAllEqual(s1, [[[3, 3, 3]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]),
+                 [[[3, 3, 3],
+                   [4, 4, 4]]]);
+  assertAllEqual(a.slice([1, 0, 0], [2, 1, 3]),
+                 [[[3, 3, 3]],
+                  [[5, 5, 5]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
+                 [[[3, 3, 3], [4, 4, 4]]]);
+
+  const s2 = $([1, 2, 3], "uint8").slice([1], [1]);
+  assert(s2.dtype === "uint8");
+  assertAllEqual(s2, [2]);
+  const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
+  const g = grad(f);
+  // TODO figure out backwards pass.
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -662,3 +687,4 @@ testBcastAdd();
 testBcastSub();
 testBcastMul();
 testBcastDiv();
+testSlice();
