@@ -125,3 +125,34 @@ export function deepCloneArray(arr: RegularArray<any>): typeof arr {
   }
   return arr2;
 }
+
+export function bcastGradientArgs(sx: Shape, sy: Shape): [Shape, Shape] {
+  const rx = [];
+  const ry = [];
+  const m = Math.max(sx.length, sy.length);
+  for (let i = 0; i < m; ++i) {
+    const argIndex = m - i - 1;
+    if (i >= sx.length) {
+      rx.unshift(argIndex);
+      continue;
+    }
+    if (i >= sy.length) {
+      ry.unshift(argIndex);
+      continue;
+    }
+
+    const xDim = sx[sx.length - i - 1];
+    const yDim = sy[sy.length - i - 1];
+
+    if (xDim === yDim) continue;
+
+    if (xDim === 1 && yDim !== 1) {
+      rx.unshift(argIndex);
+    } else if (xDim !== 1 && yDim === 1) {
+      ry.unshift(argIndex);
+    } else {
+      assert(xDim === 1 && yDim === 1, "Incompatible broadcast shapes.");
+    }
+  }
+  return [rx, ry];
+}
