@@ -50,6 +50,8 @@ export interface BasicOps {
   softmax(x: BasicTensor): BasicTensor;
   logSoftmax(x: BasicTensor): BasicTensor;
   cast(x: BasicTensor, dtype: DType): BasicTensor;
+  oneHot(x: BasicTensor, depth: number, onValue: number,
+         offValue: number): BasicTensor;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

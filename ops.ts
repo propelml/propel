@@ -360,3 +360,9 @@ export const cast = defFW("cast", (x, dtype) => {
 defBW("cast", (g, dtype) => {
   return g.cast(dtype);
 });
+
+export const oneHot = defFW("oneHot",
+  (x, depth: number, onValue: number, offValue: number) => {
+    return basicOps.oneHot(x, depth, onValue, offValue);
+  });
+defBW("oneHot", null);

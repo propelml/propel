@@ -652,6 +652,24 @@ function testCast() {
   assertAllClose(r, [1.0, 127 / 255, 0]);
 }
 
+function testOneHot() {
+  const a = $([0, 1, 3, 4], "uint8");
+  assertAllEqual(a.oneHot(6), [
+    [1, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0],
+  ]);
+
+  const b = $([0, 1, 3, 4], "int32");
+  assertAllEqual(b.oneHot(5, 0.5, -0.5), [
+    [ 0.5, -0.5, -0.5, -0.5, -0.5],
+    [-0.5,  0.5, -0.5, -0.5, -0.5],
+    [-0.5, -0.5, -0.5,  0.5, -0.5],
+    [-0.5, -0.5, -0.5, -0.5,  0.5],
+  ]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -696,3 +714,4 @@ testBcastMul();
 testBcastDiv();
 testSlice();
 testCast();
+testOneHot();

@@ -395,4 +395,21 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  oneHot(x: BasicTensorTF, depth: number, onValue: number,
+         offValue: number): BasicTensorTF {
+    if (x.dtype === "float32") {
+      throw new Error("Must use integer type with oneHot.");
+    }
+    const depthT = int32Scalar(depth);
+    const onT = floatScalar(onValue);
+    const offT = floatScalar(offValue);
+    const args = [x.handle, depthT.handle, onT.handle, offT.handle];
+    const r = execute0("OneHot", args, [
+      ["T", binding.ATTR_TYPE, onT.handle.dtype],
+      ["TI", binding.ATTR_TYPE, x.handle.dtype],
+      ["axis", binding.ATTR_INT, -1],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }
