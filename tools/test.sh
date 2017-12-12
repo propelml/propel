@@ -9,9 +9,11 @@ node dist/binding_test.js  # TF only
 node dist/api_test.js
 node dist/basic_test.js
 node dist/util_test.js
+node dist/mnist_test.js
 
 # Now using the Deep Learn backend.
 export PROPEL="web"
 node dist/api_test.js
 node dist/basic_test.js
 node dist/util_test.js
+node dist/mnist_test.js
