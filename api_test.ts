@@ -512,6 +512,114 @@ function testZerosOnes() {
   assert(o2.dtype === "int32");
 }
 
+function testBcastAdd() {
+  const a = $([
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ]);
+  const b = $([42, 43]);
+  const f = (x, y) => $(x).add(y);
+  assertAllEqual(f(a, b), [
+    [1 + 42, 2 + 43],
+    [3 + 42, 4 + 43],
+    [5 + 42, 6 + 43],
+    [7 + 42, 8 + 43],
+  ]);
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assert(gab.length === 2);
+  assertAllEqual(gab[0], [
+    [1, 1],
+    [1, 1],
+    [1, 1],
+    [1, 1],
+  ]);
+  assertAllEqual(gab[1], [4, 4]);
+}
+
+function testBcastSub() {
+  const a = $([
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ]);
+  const b = $([42, 43]);
+  const f = (x, y) => $(x).sub(y);
+  assertAllEqual(f(a, b), [
+    [1 - 42, 2 - 43],
+    [3 - 42, 4 - 43],
+    [5 - 42, 6 - 43],
+    [7 - 42, 8 - 43],
+  ]);
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assert(gab.length === 2);
+  assertAllEqual(gab[0], [
+    [1, 1],
+    [1, 1],
+    [1, 1],
+    [1, 1],
+  ]);
+  assertAllEqual(gab[1], [-4, -4]);
+}
+
+function testBcastMul() {
+  const a = $([
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ]);
+  const b = $([42, 43]);
+  const f = (x, y) => $(x).mul(y);
+  assertAllEqual(f(a, b), [
+    [1 * 42, 2 * 43],
+    [3 * 42, 4 * 43],
+    [5 * 42, 6 * 43],
+    [7 * 42, 8 * 43],
+  ]);
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assert(gab.length === 2);
+  assertAllEqual(gab[0], [
+    [42, 43],
+    [42, 43],
+    [42, 43],
+    [42, 43],
+  ]);
+  assertAllEqual(gab[1], [16, 20]);
+}
+
+function testBcastDiv() {
+  const a = $([
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ]);
+  const b = $([42, 43]);
+  const f = (x, y) => $(x).div(y);
+  assertAllClose(f(a, b), [
+    [1 / 42, 2 / 43],
+    [3 / 42, 4 / 43],
+    [5 / 42, 6 / 43],
+    [7 / 42, 8 / 43],
+  ]);
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assert(gab.length === 2);
+  assertAllClose(gab[0], [
+    [0.02380952, 0.02325581],
+    [0.02380952, 0.02325581],
+    [0.02380952, 0.02325581],
+    [0.02380952, 0.02325581],
+  ]);
+  assertAllClose(gab[1], [-0.00907029, -0.01081666]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -550,3 +658,7 @@ testLogSoftmax();
 testArgMaxAndMin();
 testDot();
 testZerosOnes();
+testBcastAdd();
+testBcastSub();
+testBcastMul();
+testBcastDiv();
