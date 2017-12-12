@@ -355,6 +355,16 @@ export class BasicOpsTF implements types.BasicOps {
     return new BasicTensorTF(r);
   }
 
+  slice(x: BasicTensorTF, begin: number[], size: number[]): BasicTensorTF {
+    const beginT = convertBasic(begin, "int32") as BasicTensorTF;
+    const sizeT = convertBasic(size, "int32") as BasicTensorTF;
+    const r = execute0("Slice", [x.handle, beginT.handle, sizeT.handle], [
+      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["Index", binding.ATTR_TYPE, binding.TF_INT32],
+    ]);
+    return new BasicTensorTF(r);
+  }
+
   reshape(x: BasicTensorTF, newShape: types.Shape): BasicTensorTF {
     const shapeT = convertBasic(newShape, "int32") as BasicTensorTF;
     const r = execute0("Reshape", [x.handle, shapeT.handle], [

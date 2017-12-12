@@ -153,6 +153,18 @@ export class ChainableTensor implements types.BasicTensor {
     return ops.equal(this, $(x));
   }
 
+  // Return a slice from 'input'.
+  // The output tensor is a tensor with dimensions described by 'size' whose
+  // values are extracted from 'input' starting at the offsets in 'begin'.
+  // begin[i] specifies the offset into the ith dimension of 'input' to slice
+  // from.  size[i] specifies the number of elements of the ith dimension of
+  // 'input' to slice. If size[i] is -1, all remaining elements in dimension
+  // are included in the slice -- this is equivalent to setting
+  //   size[i] = input.shape[i] - begin[i]
+  slice(begin: number[], size: number[]): ChainableTensor {
+    return ops.slice(this, begin, size);
+  }
+
   // Reshapes the tensor without changing its data.
   reshape(newShape: types.Shape): ChainableTensor {
     return ops.reshape(this, newShape);

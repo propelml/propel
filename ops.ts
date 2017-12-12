@@ -304,6 +304,14 @@ export let equal = defFW("equal", (x, y) => {
 });
 defBW("equal", null, null); // equal is not differentiable.
 
+export let slice = defFW("slice", (x, begin, size) => {
+  saveForBackward(x.shape, begin, size);
+  return basicOps.slice(x, begin, size);
+});
+defBW("slice", (g, sx, begin, size) => {
+  throw new Error("Not Implemented.");
+});
+
 export let reshape = defFW("reshape", (x, newShape) => {
   saveForBackward(x.shape);
   return basicOps.reshape(x, newShape);
