@@ -352,3 +352,11 @@ defBW("logSoftmax", (g, ans) => {
   const softmax = ans.exp();
   return g.sub(g.reduceSum([1], true).mul(softmax));
 });
+
+export const cast = defFW("cast", (x, dtype) => {
+  saveForBackward(x.dtype);
+  return basicOps.cast(x, dtype);
+});
+defBW("cast", (g, dtype) => {
+  return g.cast(dtype);
+});

@@ -49,6 +49,7 @@ export interface BasicOps {
   equal(x: BasicTensor, y: BasicTensor): BasicTensor;
   softmax(x: BasicTensor): BasicTensor;
   logSoftmax(x: BasicTensor): BasicTensor;
+  cast(x: BasicTensor, dtype: DType): BasicTensor;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping
@@ -85,6 +86,8 @@ export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
       return new Float32Array(data);
     case "int32":
       return new Int32Array(data);
+    case "uint8":
+      return new Uint8Array(data);
     default:
       throw new Error("Not implemented");
   }

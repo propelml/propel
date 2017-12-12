@@ -263,4 +263,9 @@ export class BasicOpsDL implements types.BasicOps {
     const ndarray = x.math.sub(xa, x.math.logSumExp(xa, lastDim, true));
     return new BasicTensorDL(ndarray, x.math);
   }
+
+  cast(x: BasicTensorDL, dtype: types.DType): BasicTensorDL {
+    const nd = NDArray.make(x.shape, { values: x.getData() }, dtype as any);
+    return new BasicTensorDL(nd, x.math);
+  }
 }
