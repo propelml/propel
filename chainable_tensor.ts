@@ -237,6 +237,13 @@ export class ChainableTensor implements types.BasicTensor {
     const outShape = lShape.concat(rShape);
     return left.matmul(right).reshape(outShape);
   }
+
+  oneHot(depth: number, onValue = 1.0, offValue = 0.0): ChainableTensor {
+    if (this.dtype === "float32") {
+      throw new Error("Must use integer type with oneHot.");
+    }
+    return ops.oneHot(this, depth, onValue, offValue);
+  }
 }
 
 // Like arange() but outputs a javascript array of numbers.

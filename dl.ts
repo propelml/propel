@@ -268,4 +268,10 @@ export class BasicOpsDL implements types.BasicOps {
     const nd = NDArray.make(x.shape, { values: x.getData() }, dtype as any);
     return new BasicTensorDL(nd, x.math);
   }
+
+  oneHot(x: BasicTensorDL, depth: number, onValue: number,
+         offValue: number): BasicTensorDL {
+    const nd = x.math.oneHot(x.ndarray.as1D(), depth, onValue, offValue);
+    return new BasicTensorDL(nd, x.math);
+  }
 }
