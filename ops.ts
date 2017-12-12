@@ -6,7 +6,7 @@ import * as backprop from "./backprop";
 import { basicOps } from "./basic";
 import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import * as types from "./types";
-import { assert } from "./util";
+import { assert, bcastGradientArgs, shapesEqual } from "./util";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
 // never use ChainableTensors, only BasicTensors. These forward pass functions
@@ -135,31 +135,74 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
-export const add = defFW("add", (x, y) => basicOps.add(x, y));
-defBW("add",
-  (g) => g,
-  (g) => g);
+// TODO This is called for each arg - unnecessary compute. Make it so defBW
+// just takes a single argument.
+function addGrad(firstArg: boolean) {
+  return (g: ChainableTensor, sx: types.Shape, sy: types.Shape) => {
+    // If sx and sy are the same (no broadcasting) just return g.
+    if (shapesEqual(sx, sy)) return g;
+    // Broadcast.
+    const [rx, ry] = bcastGradientArgs(sx, sy);
+    if (firstArg) {
+      return g.reduceSum(rx).reshape(sx);
+    } else {
+      return g.reduceSum(ry).reshape(sy);
+    }
+  };
+}
 
-export const sub = defFW("sub", (x, y) => basicOps.sub(x, y));
+export const add = defFW("add", (x, y) => {
+  saveForBackward(x.shape, y.shape);
+  return basicOps.add(x, y);
+});
+defBW("add",
+  (g, sx, sy) => addGrad(true)(g, sx, sy),
+  (g, sx, sy) => addGrad(false)(g, sx, sy));
+
+export const sub = defFW("sub", (x, y) => {
+  saveForBackward(x.shape, y.shape);
+  return basicOps.sub(x, y);
+});
 defBW("sub",
-  (g) => g,
-  (g) => neg(g));
+  (g, sx, sy) => addGrad(true)(g, sx, sy),
+  (g, sx, sy) => addGrad(false)(g, sx, sy).neg());
+
+// TODO This is called for each arg - unnecessary compute. Make it so defBW
+// just takes a backwards function.
+function mulDivGrad(firstArg: boolean, isMul: boolean) {
+  return (g: ChainableTensor, x: ChainableTensor, y: ChainableTensor) => {
+    if (isMul) {
+      g = firstArg ? g.mul(y) : g.mul(x);
+    } else {
+      g = firstArg ? g.div(y) : g.mul(x).neg().div(y.square());
+    }
+    // If sx and sy are the same (no broadcasting) just return g.
+    if (shapesEqual(x.shape, y.shape)) return g;
+    // Broadcast.
+    const [rx, ry] = bcastGradientArgs(x.shape, y.shape);
+    if (firstArg) {
+      return g.reduceSum(rx).reshape(x.shape);
+    } else {
+      return g.reduceSum(ry).reshape(y.shape);
+    }
+  };
+}
 
 export const mul = defFW("mul", (x, y) => {
   saveForBackward(x, y);
   return basicOps.mul(x, y);
 });
 defBW("mul",
-  (g, x, y) => mul(g, y),
-  (g, x, y) => mul(g, x));
+  (g, x, y) => mulDivGrad(true, true)(g, x, y),
+  (g, x, y) => mulDivGrad(false, true)(g, x, y));
 
 export const div = defFW("div", (x, y) => {
   saveForBackward(x, y);
   return basicOps.div(x, y);
 });
 defBW("div",
-  (g, x, y) => div(g, y),
-  (g, x, y) => div(neg(mul(g, x)), mul(y, y)));
+  (g, x, y) => mulDivGrad(true, false)(g, x, y),
+  (g, x, y) => mulDivGrad(false, false)(g, x, y));
 
 export const matmul = defFW("matmul",
   (a, b, transposeA = false, transposeB = false) => {
