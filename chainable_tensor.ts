@@ -45,6 +45,10 @@ export class ChainableTensor implements types.BasicTensor {
     return `[${this.getData()}]`;
   }
 
+  cast(dtype: types.DType): ChainableTensor {
+    return ops.cast(this, dtype);
+  }
+
   add(x: types.TensorLike): ChainableTensor {
     return ops.add(this, $(x));
   }

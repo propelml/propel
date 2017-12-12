@@ -387,4 +387,12 @@ export class BasicOpsTF implements types.BasicOps {
     ]);
     return new BasicTensorTF(r);
   }
+
+  cast(x: BasicTensorTF, dtype: types.DType): BasicTensorTF {
+    const r = execute0("Cast", [x.handle], [
+      ["SrcT", binding.ATTR_TYPE, x.handle.dtype],
+      ["DstT", binding.ATTR_TYPE, dtypePropel2TF(dtype)],
+    ]);
+    return new BasicTensorTF(r);
+  }
 }

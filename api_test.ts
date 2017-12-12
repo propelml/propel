@@ -645,6 +645,13 @@ function testSlice() {
   // TODO figure out backwards pass.
 }
 
+function testCast() {
+  const a = $([255, 127, 0], "uint8");
+  assert(a.dtype === "uint8");
+  const r = a.cast("float32").div(255);
+  assertAllClose(r, [1.0, 127 / 255, 0]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -688,3 +695,4 @@ testBcastSub();
 testBcastMul();
 testBcastDiv();
 testSlice();
+testCast();
