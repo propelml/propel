@@ -135,8 +135,6 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
-// TODO This is called for each arg - unnecessary compute. Make it so defBW
-// just takes a single argument.
 function addGrad(firstArg: boolean) {
   return (g: Tensor, sx: types.Shape, sy: types.Shape) => {
     // If sx and sy are the same (no broadcasting) just return g.
@@ -167,8 +165,6 @@ defBW("sub",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
   (g, sx, sy) => addGrad(false)(g, sx, sy).neg());
 
-// TODO This is called for each arg - unnecessary compute. Make it so defBW
-// just takes a backwards function.
 function mulDivGrad(firstArg: boolean, isMul: boolean) {
   return (g: Tensor, x: Tensor, y: Tensor) => {
     if (isMul) {
