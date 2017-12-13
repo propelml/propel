@@ -1,5 +1,5 @@
 import { arange } from "./api";
-import { basicOps, convertBasic } from "./basic";
+import { bo, convertBasic } from "./backend";
 import * as ops from "./ops";
 import * as types from "./types";
 import { assert } from "./util";
@@ -81,12 +81,12 @@ export class Tensor implements types.BasicTensor {
   }
 
   onesLike(): Tensor {
-    const b = basicOps.onesLike(this.basic);
+    const b = bo.onesLike(this.basic);
     return new Tensor(b);
   }
 
   zerosLike(): Tensor {
-    const b = basicOps.zerosLike(this.basic);
+    const b = bo.zerosLike(this.basic);
     return new Tensor(b);
   }
 

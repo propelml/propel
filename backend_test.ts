@@ -1,4 +1,4 @@
-import { basicOps, convertBasic } from "./basic";
+import { bo, convertBasic } from "./backend";
 import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const $ = convertBasic;
@@ -17,7 +17,7 @@ function testShapes() {
 function testMul() {
   const a = $([[1, 2], [3, 4]]);
   const expected = $([[1, 4], [9, 16]]);
-  const actual = basicOps.mul(a, a);
+  const actual = bo.mul(a, a);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllEqual(actual, expected);
 }
@@ -25,14 +25,14 @@ function testMul() {
 function testSquare() {
   const a = $([[1, 2], [3, 4]]);
   const expected = $([[1, 4], [9, 16]]);
-  const actual = basicOps.square(a);
+  const actual = bo.square(a);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllEqual(actual, expected);
 }
 
 function testCosh() {
   const a = $([[1, 2], [3, 4]]);
-  const actual = basicOps.cosh(a);
+  const actual = bo.cosh(a);
   assertAllEqual(actual.shape, [2, 2]);
   const expected = [
     [  1.54308063,   3.76219569],
