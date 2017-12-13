@@ -11,19 +11,19 @@ import { assert } from "./util";
 
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
 
-export class BasicTensorDL implements types.BasicTensor {
+export class TensorDL implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
   readonly math: NDArrayMath;
   readonly ndarray: NDArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                        dtype?: types.DType): BasicTensorDL {
+                        dtype?: types.DType): TensorDL {
     if (dtype === undefined) {
       dtype = types.getDType(data);
     }
     const ndarray = NDArray.make(shape, { values: data }, dtype as any);
-    return new BasicTensorDL(ndarray, cpuMath);
+    return new TensorDL(ndarray, cpuMath);
   }
 
   constructor(ndarray: NDArray, math: NDArrayMath = cpuMath) {
@@ -39,43 +39,43 @@ export class BasicTensorDL implements types.BasicTensor {
 }
 
 export class OpsDL implements types.BackendOps {
-  add(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+  add(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.add(x.ndarray, y.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  sub(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+  sub(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.sub(x.ndarray, y.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  mul(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+  mul(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.multiply(x.ndarray, y.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  div(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+  div(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.divide(x.ndarray, y.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  neg(x: BasicTensorDL): BasicTensorDL {
+  neg(x: TensorDL): TensorDL {
     const ndarray = x.math.neg(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  exp(x: BasicTensorDL): BasicTensorDL {
+  exp(x: TensorDL): TensorDL {
     const ndarray = x.math.exp(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  log(x: BasicTensorDL): BasicTensorDL {
+  log(x: TensorDL): TensorDL {
     const ndarray = x.math.log(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  matmul(x: BasicTensorDL, y: BasicTensorDL, transposeA = false,
-         transposeB = false): BasicTensorDL {
+  matmul(x: TensorDL, y: TensorDL, transposeA = false,
+         transposeB = false): TensorDL {
     const f = (t) => t ?
       MatrixOrientation.TRANSPOSED :
       MatrixOrientation.REGULAR;
@@ -83,83 +83,83 @@ export class OpsDL implements types.BackendOps {
     const x2 = x.ndarray as Array2D;
     const y2 = y.ndarray as Array2D;
     const ndarray = x.math.matMul(x2, y2, f(transposeA), f(transposeB));
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
   eye(size: number, dtype: types.DType = "float32"): types.BasicTensor {
     throw new Error("Not Implemented");
   }
 
-  onesLike(x: BasicTensorDL): BasicTensorDL {
+  onesLike(x: TensorDL): TensorDL {
     const ones = NDArray.zerosLike(x.ndarray);
     ones.fill(1.0);
-    return new BasicTensorDL(ones, x.math);
+    return new TensorDL(ones, x.math);
   }
 
-  zerosLike(x: BasicTensorDL): BasicTensorDL {
+  zerosLike(x: TensorDL): TensorDL {
     const zeros = NDArray.zerosLike(x.ndarray);
-    return new BasicTensorDL(zeros, x.math);
+    return new TensorDL(zeros, x.math);
   }
 
-  fill(value: BasicTensorDL, shape: types.Shape): BasicTensorDL {
+  fill(value: TensorDL, shape: types.Shape): TensorDL {
     if (value.shape.length !== 0) {
       throw new Error("Fill value must be a scalar.");
     }
     const out = NDArray.zeros(shape, value.ndarray.dtype);
     out.fill(value.ndarray.getValues()[0]);
-    return new BasicTensorDL(out, value.math);
+    return new TensorDL(out, value.math);
   }
 
-  square(x: BasicTensorDL): BasicTensorDL {
+  square(x: TensorDL): TensorDL {
     const ndarray = x.math.square(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  sinh(x: BasicTensorDL): BasicTensorDL {
+  sinh(x: TensorDL): TensorDL {
     const ndarray = x.math.sinh(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  cosh(x: BasicTensorDL): BasicTensorDL {
+  cosh(x: TensorDL): TensorDL {
     const ndarray = x.math.cosh(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  tanh(x: BasicTensorDL): BasicTensorDL {
+  tanh(x: TensorDL): TensorDL {
     const ndarray = x.math.tanh(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  randn(shape: types.Shape, seed?: number): BasicTensorDL {
+  randn(shape: types.Shape, seed?: number): TensorDL {
     const r = NDArray.randNormal(shape, 0, 1, "float32", seed);
-    return new BasicTensorDL(r, cpuMath);
+    return new TensorDL(r, cpuMath);
   }
 
-  linspace(start: number, stop: number, num: number): BasicTensorDL {
+  linspace(start: number, stop: number, num: number): TensorDL {
     const d = (stop - start) / (num - 1);
     const ta = new Float32Array(num);
     for (let i = 0; i <= num - 1; ++i) {
       ta[i] = start + i * d;
     }
-    return BasicTensorDL.fromTypedArray(ta, [num]);
+    return TensorDL.fromTypedArray(ta, [num]);
   }
 
-  arange(start: number, limit: number, delta: number): BasicTensorDL {
+  arange(start: number, limit: number, delta: number): TensorDL {
     const num = (limit - start) / delta;
     const ta = new Int32Array(num);
     for (let i = 0; i < num; ++i) {
       ta[i] = start + i * delta;
     }
-    return BasicTensorDL.fromTypedArray(ta, [num]);
+    return TensorDL.fromTypedArray(ta, [num]);
   }
 
-  transpose(x: BasicTensorDL, perm: BasicTensorDL): BasicTensorDL {
+  transpose(x: TensorDL, perm: TensorDL): TensorDL {
     const permArr = Array.from(perm.ndarray.getValues());
     const ndarray = x.math.transpose(x.ndarray, permArr);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  reverse(x: BasicTensorDL, dims: BasicTensorDL): BasicTensorDL {
+  reverse(x: TensorDL, dims: TensorDL): TensorDL {
     const a = x.ndarray;
     const dims_ = dims.getData();
     // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
@@ -178,37 +178,37 @@ export class OpsDL implements types.BackendOps {
       resultValues[newIndex] = values[i];
     }
 
-    return new BasicTensorDL(result, x.math);
+    return new TensorDL(result, x.math);
   }
 
-  argmax(x: BasicTensorDL, axis: number): BasicTensorDL {
+  argmax(x: TensorDL, axis: number): TensorDL {
     const ndarray = x.math.argMax(x.ndarray, axis);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  argmin(x: BasicTensorDL, axis: number): BasicTensorDL {
+  argmin(x: TensorDL, axis: number): TensorDL {
     const ndarray = x.math.argMin(x.ndarray, axis);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  reduceSum(x: BasicTensorDL, axes: number[], keepDims: boolean): BasicTensorDL
+  reduceSum(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
   {
     const ndarray = x.math.sum(x.ndarray, axes, keepDims);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  reduceMax(x: BasicTensorDL, axes: number[], keepDims: boolean): BasicTensorDL
+  reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
   {
     const ndarray = x.math.max(x.ndarray, axes, keepDims);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  equal(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
+  equal(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.equal(x.ndarray, y.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  slice(x: BasicTensorDL, begin: number[], size: number[]): BasicTensorDL {
+  slice(x: TensorDL, begin: number[], size: number[]): TensorDL {
     let nd;
     // DL doesn't handle negative sizes, so we translate them.
     size = size.map((d, i) => {
@@ -244,34 +244,34 @@ export class OpsDL implements types.BackendOps {
         throw new Error("Slicing for tensors rank higher than " +
                         "4 not yet supported.");
     }
-    return new BasicTensorDL(nd, x.math);
+    return new TensorDL(nd, x.math);
   }
 
-  reshape(x: BasicTensorDL, newShape: types.Shape): BasicTensorDL {
+  reshape(x: TensorDL, newShape: types.Shape): TensorDL {
     const ndarray = x.ndarray.reshape(newShape);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  softmax(x: BasicTensorDL): BasicTensorDL {
+  softmax(x: TensorDL): TensorDL {
     const ndarray = x.math.softmax(x.ndarray);
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  logSoftmax(x: BasicTensorDL): BasicTensorDL {
+  logSoftmax(x: TensorDL): TensorDL {
     const xa = x.ndarray;
     const lastDim = x.shape.length - 1;
     const ndarray = x.math.sub(xa, x.math.logSumExp(xa, lastDim, true));
-    return new BasicTensorDL(ndarray, x.math);
+    return new TensorDL(ndarray, x.math);
   }
 
-  cast(x: BasicTensorDL, dtype: types.DType): BasicTensorDL {
+  cast(x: TensorDL, dtype: types.DType): TensorDL {
     const nd = NDArray.make(x.shape, { values: x.getData() }, dtype as any);
-    return new BasicTensorDL(nd, x.math);
+    return new TensorDL(nd, x.math);
   }
 
-  oneHot(x: BasicTensorDL, depth: number, onValue: number,
-         offValue: number): BasicTensorDL {
+  oneHot(x: TensorDL, depth: number, onValue: number,
+         offValue: number): TensorDL {
     const nd = x.math.oneHot(x.ndarray.as1D(), depth, onValue, offValue);
-    return new BasicTensorDL(nd, x.math);
+    return new TensorDL(nd, x.math);
   }
 }

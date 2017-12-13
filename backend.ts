@@ -2,8 +2,8 @@
 // BasicTensors are not traced in backprop and the class is not exposed to the
 // public API.
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
-import { BasicTensorDL, OpsDL } from "./dl";
-import { BasicTensorTF, binding, OpsTF } from "./tf";
+import { OpsDL, TensorDL } from "./dl";
+import { binding, OpsTF, TensorTF } from "./tf";
 import * as types from "./types";
 import { deepCloneArray } from "./util";
 
@@ -11,11 +11,11 @@ let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
 if (binding) {
-  tensorClass = BasicTensorTF;
+  tensorClass = TensorTF;
   bo = new OpsTF();
   backend = "tf";
 } else {
-  tensorClass = BasicTensorDL;
+  tensorClass = TensorDL;
   bo = new OpsDL();
   backend = "dl";
 }
