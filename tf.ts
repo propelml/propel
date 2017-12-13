@@ -1,9 +1,10 @@
 // TensorFlow backend.
 import { convertBasic } from "./backend";
+import { BindingInterface } from "./binding";
 import * as types from "./types";
 import { assert, assertEqual } from "./util";
 
-export function maybeRequireBinding() {
+function maybeRequireBinding(): BindingInterface | null {
   // If we're in the browser, don't even attempt it.
   if (typeof window !== "undefined") return null;
 
@@ -19,8 +20,6 @@ export function maybeRequireBinding() {
   // When using ts-node, we are in the root dir, after compiling to
   // javascript, we are in the dist dir.
   const toAttempt = [
-    "../../build/Debug/tensorflow-binding.node",
-    "../../build/Release/tensorflow-binding.node",
     "../build/Debug/tensorflow-binding.node",
     "../build/Release/tensorflow-binding.node",
     "./build/Debug/tensorflow-binding.node",
