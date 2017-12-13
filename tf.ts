@@ -107,13 +107,13 @@ export class BasicTensorTF implements types.BasicTensor {
 
   constructor(handle: any) {
     this.handle = handle;
-    this.shape = handle.shape;
-    this.dtype = dtypeTF2Propel(handle.dtype);
+    this.shape = binding.getShape(handle);
+    this.dtype = dtypeTF2Propel(binding.getDType(handle));
   }
 
   getData(): types.TypedArray {
     if (!this.data) {
-      const ab = this.handle.asArrayBuffer();
+      const ab = binding.asArrayBuffer(this.handle);
       switch (this.dtype) {
         case "float32":
           this.data = new Float32Array(ab);
@@ -137,49 +137,49 @@ export class BasicOpsTF implements types.BasicOps {
 
   add(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Add", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   sub(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Sub", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   mul(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Mul", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   div(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Div", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   neg(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Neg", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   exp(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Exp", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   log(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Log", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -190,14 +190,14 @@ export class BasicOpsTF implements types.BasicOps {
 
   onesLike(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("OnesLike", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   zerosLike(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("ZerosLike", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -209,35 +209,35 @@ export class BasicOpsTF implements types.BasicOps {
     const dims = BasicTensorTF.fromTypedArray(new Int32Array(shape),
       [shape.length]);
     const r = execute0("Fill", [dims.handle, value.handle], [
-      ["T", binding.ATTR_TYPE, value.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(value.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   square(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Square", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   sinh(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Sinh", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   cosh(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Cosh", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   tanh(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Tanh", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -282,8 +282,8 @@ export class BasicOpsTF implements types.BasicOps {
 
   transpose(x: BasicTensorTF, perm: BasicTensorTF): BasicTensorTF {
     const r = execute0("Transpose", [x.handle, perm.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
-      ["Tperm", binding.ATTR_TYPE, perm.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+      ["Tperm", binding.ATTR_TYPE, binding.getDType(perm.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -291,7 +291,7 @@ export class BasicOpsTF implements types.BasicOps {
   reverse(x: BasicTensorTF, dims: BasicTensorTF): BasicTensorTF {
     assert(dims.dtype === "bool");
     const r = execute0("Reverse", [x.handle, dims.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -299,7 +299,7 @@ export class BasicOpsTF implements types.BasicOps {
   matmul(x: BasicTensorTF, y: BasicTensorTF, transposeA = false,
          transposeB = false): BasicTensorTF {
     const r = execute0("MatMul", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["transpose_a", binding.ATTR_BOOL, transposeA],
       ["transpose_b", binding.ATTR_BOOL, transposeB],
     ]);
@@ -309,7 +309,7 @@ export class BasicOpsTF implements types.BasicOps {
   argmax(x: BasicTensorTF, axis: number): BasicTensorTF {
     const axisT = int32Scalar(axis);
     const r = execute0("ArgMax", [x.handle, axisT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
@@ -319,7 +319,7 @@ export class BasicOpsTF implements types.BasicOps {
   argmin(x: BasicTensorTF, axis: number): BasicTensorTF {
     const axisT = int32Scalar(axis);
     const r = execute0("ArgMin", [x.handle, axisT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
@@ -330,7 +330,7 @@ export class BasicOpsTF implements types.BasicOps {
   {
     const axesT = convertBasic(axes, "int32") as BasicTensorTF;
     const r = execute0("Sum", [x.handle, axesT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
@@ -341,7 +341,7 @@ export class BasicOpsTF implements types.BasicOps {
   {
     const axesT = convertBasic(axes, "int32") as BasicTensorTF;
     const r = execute0("Max", [x.handle, axesT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
@@ -350,7 +350,7 @@ export class BasicOpsTF implements types.BasicOps {
 
   equal(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Equal", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
@@ -359,7 +359,7 @@ export class BasicOpsTF implements types.BasicOps {
     const beginT = convertBasic(begin, "int32") as BasicTensorTF;
     const sizeT = convertBasic(size, "int32") as BasicTensorTF;
     const r = execute0("Slice", [x.handle, beginT.handle, sizeT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Index", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
     return new BasicTensorTF(r);
@@ -368,29 +368,29 @@ export class BasicOpsTF implements types.BasicOps {
   reshape(x: BasicTensorTF, newShape: types.Shape): BasicTensorTF {
     const shapeT = convertBasic(newShape, "int32") as BasicTensorTF;
     const r = execute0("Reshape", [x.handle, shapeT.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
-      ["Tshape", binding.ATTR_TYPE, shapeT.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+      ["Tshape", binding.ATTR_TYPE, binding.getDType(shapeT.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   softmax(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("Softmax", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   logSoftmax(x: BasicTensorTF): BasicTensorTF {
     const r = execute0("LogSoftmax", [x.handle], [
-      ["T", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
     ]);
     return new BasicTensorTF(r);
   }
 
   cast(x: BasicTensorTF, dtype: types.DType): BasicTensorTF {
     const r = execute0("Cast", [x.handle], [
-      ["SrcT", binding.ATTR_TYPE, x.handle.dtype],
+      ["SrcT", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["DstT", binding.ATTR_TYPE, dtypePropel2TF(dtype)],
     ]);
     return new BasicTensorTF(r);
@@ -406,8 +406,8 @@ export class BasicOpsTF implements types.BasicOps {
     const offT = floatScalar(offValue);
     const args = [x.handle, depthT.handle, onT.handle, offT.handle];
     const r = execute0("OneHot", args, [
-      ["T", binding.ATTR_TYPE, onT.handle.dtype],
-      ["TI", binding.ATTR_TYPE, x.handle.dtype],
+      ["T", binding.ATTR_TYPE, binding.getDType(onT.handle)],
+      ["TI", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["axis", binding.ATTR_INT, -1],
     ]);
     return new BasicTensorTF(r);
