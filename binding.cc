@@ -597,18 +597,25 @@ static napi_status NewTensorArrayBuffer(napi_env env,
                                           array_buffer_out);
 }
 
+// Returns a HandleWrap from the first and only argument of a bound function.
+// The program crashes if there isn't exactly one argument.
+HandleWrap* HandleFromFirstArg(napi_env env, napi_callback_info info) {
+  napi_status nstatus;
+  size_t argc = 1;
+  napi_value args[1];
+  nstatus = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+  check(nstatus == napi_ok);
+  check(argc == 1);
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, args[0], reinterpret_cast<void**>(&handle_wrap));
+  check(nstatus == napi_ok);
+  return handle_wrap;
+}
+
 static napi_value HandleAsArrayBuffer(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
-  // Fetch JavaScript `this` object.
-  napi_value js_this;
-  nstatus = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  check(nstatus == napi_ok);
-
-  // Unwrap.
-  HandleWrap* handle_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
-  check(nstatus == napi_ok);
+  auto handle_wrap = HandleFromFirstArg(env, info);
 
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
@@ -629,15 +636,7 @@ static napi_value HandleAsArrayBuffer(napi_env env, napi_callback_info info) {
 static napi_value HandleGetDevice(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
-  // Fetch JavaScript `this` object.
-  napi_value js_this;
-  nstatus = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  check(nstatus == napi_ok);
-
-  // Unwrap.
-  HandleWrap* handle_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
-  check(nstatus == napi_ok);
+  auto handle_wrap = HandleFromFirstArg(env, info);
 
   // Ask tensorflow for the device name.
   const char* device =
@@ -654,15 +653,7 @@ static napi_value HandleGetDevice(napi_env env, napi_callback_info info) {
 static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
-  // Fetch JavaScript `this` object.
-  napi_value js_this;
-  nstatus = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  check(nstatus == napi_ok);
-
-  // Unwrap.
-  HandleWrap* handle_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
-  check(nstatus == napi_ok);
+  auto handle_wrap = HandleFromFirstArg(env, info);
 
   // Ask tensorflow for the dtype.
   TF_DataType dtype = TFE_TensorHandleDataType(handle_wrap->tf_tensor_handle);
@@ -677,15 +668,7 @@ static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
 static napi_value HandleGetShape(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
-  // Fetch JavaScript `this` object.
-  napi_value js_this;
-  nstatus = napi_get_cb_info(env, info, NULL, NULL, &js_this, NULL);
-  check(nstatus == napi_ok);
-
-  // Unwrap.
-  HandleWrap* handle_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
-  check(nstatus == napi_ok);
+  auto handle_wrap = HandleFromFirstArg(env, info);
 
   auto th = handle_wrap->tf_tensor_handle;
   int rank = TFE_TensorHandleNumDims(th);
@@ -738,28 +721,15 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
 
   // Define the Handle JavaScript class (wraps TFE_TensorHandle)
   napi_value handle_class;
-  napi_property_descriptor handle_properties[] = {
-      {"asArrayBuffer",
-       NULL,
-       HandleAsArrayBuffer,
-       NULL,
-       NULL,
-       NULL,
-       napi_default,
-       NULL},
-      {"device", NULL, NULL, HandleGetDevice, NULL, NULL, napi_default, NULL},
-      {"dtype", NULL, NULL, HandleGetDType, NULL, NULL, napi_default, NULL},
-      {"shape", NULL, NULL, HandleGetShape, NULL, NULL, napi_default, NULL},
-  };
   nstatus = napi_define_class(
       env,
-      "Handle",                     // JavaScript class name
-      NAPI_AUTO_LENGTH,             // JavasScript class name length
-      NewHandle,                    // Constructor
-      NULL,                         // Constructor argument
-      COUNT_OF(handle_properties),  // Property count
-      handle_properties,            // Property descriptors
-      &handle_class);               // Out: js value representing the class
+      "Handle",          // JavaScript class name
+      NAPI_AUTO_LENGTH,  // JavasScript class name length
+      NewHandle,         // Constructor
+      NULL,              // Constructor argument
+      0,                 // Property count
+      NULL,              // Property descriptors
+      &handle_class);    // Out: js value representing the class
   check(nstatus == napi_ok);
 
   // handle_class is used Execute() to instanciate resulting Handles. Thus
@@ -772,6 +742,24 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       {"Context", NULL, NULL, NULL, NULL, context_class, napi_default, NULL},
       {"execute", NULL, Execute, NULL, NULL, NULL, napi_default, NULL},
       {"Handle", NULL, NULL, NULL, NULL, handle_class, napi_default, NULL},
+      {"asArrayBuffer",
+       NULL,
+       HandleAsArrayBuffer,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
+      {"getDevice",
+       NULL,
+       HandleGetDevice,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
+      {"getDType", NULL, HandleGetDType, NULL, NULL, NULL, napi_default, NULL},
+      {"getShape", NULL, HandleGetShape, NULL, NULL, NULL, napi_default, NULL},
   };
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
