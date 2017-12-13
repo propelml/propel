@@ -16,8 +16,8 @@ export interface BasicTensor {
   getData(): TypedArray;
 }
 
-// BasicOps do not use backprop.
-export interface BasicOps {
+// BackendOps do not use backprop.
+export interface BackendOps {
   add(x: BasicTensor, y: BasicTensor): BasicTensor;
   sub(x: BasicTensor, y: BasicTensor): BasicTensor;
   mul(x: BasicTensor, y: BasicTensor): BasicTensor;

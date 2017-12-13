@@ -38,7 +38,7 @@ export class BasicTensorDL implements types.BasicTensor {
   }
 }
 
-export class BasicOpsDL implements types.BasicOps {
+export class OpsDL implements types.BackendOps {
   add(x: BasicTensorDL, y: BasicTensorDL): BasicTensorDL {
     const ndarray = x.math.add(x.ndarray, y.ndarray);
     return new BasicTensorDL(ndarray, x.math);

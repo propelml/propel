@@ -1,22 +1,22 @@
-// BasicTensor abstracts TensorFlow and DeepLearn basicOps. Operations on
+// BasicTensor abstracts TensorFlow and DeepLearn BackendOps. Operations on
 // BasicTensors are not traced in backprop and the class is not exposed to the
 // public API.
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
-import { BasicOpsDL, BasicTensorDL } from "./dl";
-import { BasicOpsTF, BasicTensorTF, binding } from "./tf";
+import { BasicTensorDL, OpsDL } from "./dl";
+import { BasicTensorTF, binding, OpsTF } from "./tf";
 import * as types from "./types";
 import { deepCloneArray } from "./util";
 
 let tensorClass: any;
 export let backend: string;
-export let basicOps: types.BasicOps;
+export let bo: types.BackendOps;
 if (binding) {
   tensorClass = BasicTensorTF;
-  basicOps = new BasicOpsTF();
+  bo = new OpsTF();
   backend = "tf";
 } else {
   tensorClass = BasicTensorDL;
-  basicOps = new BasicOpsDL();
+  bo = new OpsDL();
   backend = "dl";
 }
 

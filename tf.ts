@@ -1,5 +1,5 @@
 // TensorFlow backend.
-import { convertBasic } from "./basic";
+import { convertBasic } from "./backend";
 import * as types from "./types";
 import { assert, assertEqual } from "./util";
 
@@ -133,7 +133,7 @@ export class BasicTensorTF implements types.BasicTensor {
   }
 }
 
-export class BasicOpsTF implements types.BasicOps {
+export class OpsTF implements types.BackendOps {
 
   add(x: BasicTensorTF, y: BasicTensorTF): BasicTensorTF {
     const r = execute0("Add", [x.handle, y.handle], [

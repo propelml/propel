@@ -1,6 +1,6 @@
+import { bo } from "./backend";
 import * as backprop from "./backprop";
-import { basicOps } from "./basic";
-export { backend } from "./basic";
+export { backend } from "./backend";
 import { convert, Tensor } from "./tensor";
 export { Tensor } from "./tensor";
 import * as ops from "./ops";
@@ -36,14 +36,14 @@ export const gradAndVal = backprop.gradAndVal;
 
 // Returns the identity matrix of a given size.
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
-  const t = basicOps.eye(size, dtype);
+  const t = bo.eye(size, dtype);
   return new Tensor(t);
 }
 
 // Returns num evenly spaced samples, calculated over the interval
 // [start, stop].
 export const linspace = (start: number, stop: number, num = 50): Tensor => {
-  const t = basicOps.linspace(start, stop, num);
+  const t = bo.linspace(start, stop, num);
   return new Tensor(t);
 };
 
@@ -72,7 +72,7 @@ export const arange = function(...args: number[]): Tensor {
     default:
       throw new Error("Bad number of arguments.");
   }
-  const t = basicOps.arange(start, limit, delta);
+  const t = bo.arange(start, limit, delta);
   return new Tensor(t);
 };
 
@@ -82,7 +82,7 @@ export const cosh = (x) => $(x).cosh();
 export const tanh = (x) => $(x).tanh();
 
 export function randn(...shape: number[]): Tensor {
-  const t = basicOps.randn(shape);
+  const t = bo.randn(shape);
   return new Tensor(t);
 }
 

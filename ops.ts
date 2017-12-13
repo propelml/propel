@@ -2,8 +2,8 @@
 // Based loosely on AutoGrad's numpy_jvps.py
 // tslint:disable-next-line:max-line-length
 // https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
+import { bo } from "./backend";
 import * as backprop from "./backprop";
-import { basicOps } from "./basic";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, bcastGradientArgs, shapesEqual } from "./util";
@@ -153,7 +153,7 @@ function addGrad(firstArg: boolean) {
 
 export const add = defFW("add", (x, y) => {
   saveForBackward(x.shape, y.shape);
-  return basicOps.add(x, y);
+  return bo.add(x, y);
 });
 defBW("add",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
@@ -161,7 +161,7 @@ defBW("add",
 
 export const sub = defFW("sub", (x, y) => {
   saveForBackward(x.shape, y.shape);
-  return basicOps.sub(x, y);
+  return bo.sub(x, y);
 });
 defBW("sub",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
@@ -190,7 +190,7 @@ function mulDivGrad(firstArg: boolean, isMul: boolean) {
 
 export const mul = defFW("mul", (x, y) => {
   saveForBackward(x, y);
-  return basicOps.mul(x, y);
+  return bo.mul(x, y);
 });
 defBW("mul",
   (g, x, y) => mulDivGrad(true, true)(g, x, y),
@@ -198,7 +198,7 @@ defBW("mul",
 
 export const div = defFW("div", (x, y) => {
   saveForBackward(x, y);
-  return basicOps.div(x, y);
+  return bo.div(x, y);
 });
 defBW("div",
   (g, x, y) => mulDivGrad(true, false)(g, x, y),
@@ -207,7 +207,7 @@ defBW("div",
 export const matmul = defFW("matmul",
   (a, b, transposeA = false, transposeB = false) => {
     saveForBackward(a, b, transposeA, transposeB);
-    return basicOps.matmul(a, b, transposeA, transposeB);
+    return bo.matmul(a, b, transposeA, transposeB);
   });
 // y = a * b
 // da = dy * bT
@@ -216,11 +216,11 @@ defBW("matmul",
   (g, a, b, tA, tB) => matmul(g, b, tA, !tB),
   (g, a, b, tA, tB) => matmul(a, g, !tA, tB));
 
-export const neg = defFW("neg", (x) => basicOps.neg(x));
+export const neg = defFW("neg", (x) => bo.neg(x));
 defBW("neg", (g) => neg(g));
 
 export const exp = defFW("exp", (x) => {
-  const ans = basicOps.exp(x);
+  const ans = bo.exp(x);
   saveForBackward(ans);
   return ans;
 });
@@ -228,13 +228,13 @@ defBW("exp", (g, ans) => mul(ans, g));
 
 export let log = defFW("log", (x) => {
   saveForBackward(x);
-  return basicOps.log(x);
+  return bo.log(x);
 });
 defBW("log", (g, x) => div(g, x));
 
 export const fill = defFW("fill", (value, shape) => {
   saveForBackward(value);
-  return basicOps.fill(value, shape);
+  return bo.fill(value, shape);
 });
 defBW("fill", (g, value) => {
   throw new Error("Not Implemented: backward pass of fill.");
@@ -242,71 +242,71 @@ defBW("fill", (g, value) => {
 
 export const square = defFW("square", (x) => {
   saveForBackward(x);
-  return basicOps.square(x);
+  return bo.square(x);
 });
 defBW("square", (g, x) => mul(g, mul(x, convert(2, x.dtype))));
 
 export const sinh = defFW("sinh", (x) => {
   saveForBackward(x);
-  return basicOps.sinh(x);
+  return bo.sinh(x);
 });
 defBW("sinh", (g, x) => mul(g, cosh(x)));
 
 export let cosh = defFW("cosh", (x) => {
   saveForBackward(x);
-  return basicOps.cosh(x);
+  return bo.cosh(x);
 });
 defBW("cosh", (g, x) => mul(g, sinh(x)));
 
 export let tanh = defFW("tanh", (x) => {
   saveForBackward(x);
-  return basicOps.tanh(x);
+  return bo.tanh(x);
 });
 defBW("tanh", (g, x) => div(g, square(cosh(x))));
 
 export let transpose = defFW("transpose", (x, perm) => {
   saveForBackward(perm);
-  return basicOps.transpose(x, perm);
+  return bo.transpose(x, perm);
 });
 defBW("transpose", (g, perm) => transpose(g, perm));
 
 export let reverse = defFW("reverse", (x, dims) => {
   saveForBackward(dims);
-  return basicOps.reverse(x, dims);
+  return bo.reverse(x, dims);
 });
 defBW("reverse", (g, dims) => reverse(g, dims));
 
 export let argmax = defFW("argmax", (x, axis: number) => {
-  return basicOps.argmax(x, axis);
+  return bo.argmax(x, axis);
 });
 defBW("argmax", null);  // Not differentiable.
 
 export let argmin = defFW("argmin", (x, axis: number) => {
-  return basicOps.argmin(x, axis);
+  return bo.argmin(x, axis);
 });
 defBW("argmin", null);  // Not differentiable.
 
 export let reduceSum = defFW("reduceSum", (x, axes, keepDims) => {
   saveForBackward(x);
-  return basicOps.reduceSum(x, axes, keepDims);
+  return bo.reduceSum(x, axes, keepDims);
 });
 defBW("reduceSum", (g, x) => mul(g, x.onesLike()));
 
 export let reduceMax = defFW("reduceMax", (x, axes, keepDims) => {
-  return basicOps.reduceMax(x, axes, keepDims);
+  return bo.reduceMax(x, axes, keepDims);
 });
 defBW("reduceMax", (g, axes, keepDims) => {
   throw new Error("Not Implemented.");
 });
 
 export let equal = defFW("equal", (x, y) => {
-  return basicOps.equal(x, y);
+  return bo.equal(x, y);
 });
 defBW("equal", null, null); // equal is not differentiable.
 
 export let slice = defFW("slice", (x, begin, size) => {
   saveForBackward(x.shape, begin, size);
-  return basicOps.slice(x, begin, size);
+  return bo.slice(x, begin, size);
 });
 defBW("slice", (g, sx, begin, size) => {
   throw new Error("Not Implemented.");
@@ -314,17 +314,17 @@ defBW("slice", (g, sx, begin, size) => {
 
 export let reshape = defFW("reshape", (x, newShape) => {
   saveForBackward(x.shape);
-  return basicOps.reshape(x, newShape);
+  return bo.reshape(x, newShape);
 });
 defBW("reshape", (g, origShape) => reshape(g, origShape));
 
 export let reduceLogSumExp = defFW("reduceLogSumExp",
   (x, axes: number[], keepDims = false) => {
-    const m = basicOps.reduceMax(x, axes, true);
-    const e = basicOps.exp(basicOps.sub(x, m));
-    const s = basicOps.reduceSum(e, axes, true);
-    const sLog = basicOps.log(s);
-    const ans =  basicOps.add(m, sLog);
+    const m = bo.reduceMax(x, axes, true);
+    const e = bo.exp(bo.sub(x, m));
+    const s = bo.reduceSum(e, axes, true);
+    const sLog = bo.log(s);
+    const ans =  bo.add(m, sLog);
     saveForBackward(ans, x);
     return ans;
   });
@@ -334,7 +334,7 @@ defBW("reduceLogSumExp", (g, ans, x) => {
 
 export const softmax = defFW("softmax", (x) => {
   assert(x.shape.length === 2);
-  const ans = basicOps.softmax(x);
+  const ans = bo.softmax(x);
   saveForBackward(ans);
   return ans;
 });
@@ -344,7 +344,7 @@ defBW("softmax", (g, ans) => {
 
 export const logSoftmax = defFW("logSoftmax", (x) => {
   assert(x.shape.length === 2);
-  const ans = basicOps.logSoftmax(x);
+  const ans = bo.logSoftmax(x);
   saveForBackward(ans);
   return ans;
 });
@@ -355,7 +355,7 @@ defBW("logSoftmax", (g, ans) => {
 
 export const cast = defFW("cast", (x, dtype) => {
   saveForBackward(x.dtype);
-  return basicOps.cast(x, dtype);
+  return bo.cast(x, dtype);
 });
 defBW("cast", (g, dtype) => {
   return g.cast(dtype);
@@ -363,6 +363,6 @@ defBW("cast", (g, dtype) => {
 
 export const oneHot = defFW("oneHot",
   (x, depth: number, onValue: number, offValue: number) => {
-    return basicOps.oneHot(x, depth, onValue, offValue);
+    return bo.oneHot(x, depth, onValue, offValue);
   });
 defBW("oneHot", null);
