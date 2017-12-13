@@ -93,7 +93,7 @@ function floatScalar(v: number): BasicTensorTF {
 export class BasicTensorTF implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
-  readonly handle: any;  // binding.Tensor
+  readonly handle: any;  // binding.Handle
   private data?: types.TypedArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
@@ -102,7 +102,7 @@ export class BasicTensorTF implements types.BasicTensor {
       dtype = types.getDType(data);
     }
     const dtypeTF = dtypePropel2TF(dtype);
-    return new BasicTensorTF(new binding.Tensor(data, shape, dtypeTF));
+    return new BasicTensorTF(new binding.Handle(data, shape, dtypeTF));
   }
 
   constructor(handle: any) {

@@ -41,14 +41,14 @@ enum AttrType {
 };
 
 static const size_t kMaxDims = 10;
-static napi_ref tensor_class_ref;
+static napi_ref handle_class_ref;
 
 struct ContextWrap {
   napi_env env;
   TFE_Context* tf_context;
 };
 
-struct TensorWrap {
+struct HandleWrap {
   napi_env env;
   TF_Tensor* tf_tensor;
   TFE_TensorHandle* tf_tensor_handle;
@@ -79,16 +79,16 @@ static void ReleaseTypedArray(void* data, size_t len, void* js_ref_ptr) {
   delete js_ref;
 }
 
-static void DeleteTensor(napi_env env, void* tensor_wrap_ptr, void* hint) {
-  auto tensor_wrap = static_cast<TensorWrap*>(tensor_wrap_ptr);
+static void DeleteHandle(napi_env env, void* handle_wrap_ptr, void* hint) {
+  auto handle_wrap = static_cast<HandleWrap*>(handle_wrap_ptr);
 
-  if (tensor_wrap->tf_tensor_handle != NULL)
-    TFE_DeleteTensorHandle(tensor_wrap->tf_tensor_handle);
+  if (handle_wrap->tf_tensor_handle != NULL)
+    TFE_DeleteTensorHandle(handle_wrap->tf_tensor_handle);
 
-  if (tensor_wrap->tf_tensor != NULL)
-    TF_DeleteTensor(tensor_wrap->tf_tensor);
+  if (handle_wrap->tf_tensor != NULL)
+    TF_DeleteTensor(handle_wrap->tf_tensor);
 
-  delete tensor_wrap;
+  delete handle_wrap;
 }
 
 void AssertConstructorCall(napi_env env, napi_callback_info info) {
@@ -295,8 +295,8 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
     nstatus = napi_get_element(env, inputs, i, &input);
     check(nstatus == napi_ok);
 
-    TensorWrap* tensor_wrap;
-    nstatus = napi_unwrap(env, input, reinterpret_cast<void**>(&tensor_wrap));
+    HandleWrap* handle_wrap;
+    nstatus = napi_unwrap(env, input, reinterpret_cast<void**>(&handle_wrap));
     if (nstatus != napi_ok) {
       napi_throw_error(env, NULL, "Cannot unwrap Execute input");
       TF_DeleteStatus(tf_status);
@@ -304,7 +304,7 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    TFE_OpAddInput(op, tensor_wrap->tf_tensor_handle, tf_status);
+    TFE_OpAddInput(op, handle_wrap->tf_tensor_handle, tf_status);
     check(TF_GetCode(tf_status) == TF_OK);
   }
 
@@ -324,24 +324,24 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   nstatus = napi_create_array_with_length(env, num_retvals, &js_retvals);
   check(nstatus == napi_ok);
 
-  // Get reference to Tensor class so we can call its constructor.
-  napi_value tensor_class;
-  nstatus = napi_get_reference_value(env, tensor_class_ref, &tensor_class);
+  // Get reference to Handle class so we can call its constructor.
+  napi_value handle_class;
+  nstatus = napi_get_reference_value(env, handle_class_ref, &handle_class);
   check(nstatus == napi_ok);
 
   // For each retval, wrap the TensorHandle.
   for (int i = 0; i < num_retvals; ++i) {
     napi_value js_retval;
-    // Create a new Tensor object.
-    nstatus = napi_new_instance(env, tensor_class, 0, NULL, &js_retval);
+    // Create a new Handle object.
+    nstatus = napi_new_instance(env, handle_class, 0, NULL, &js_retval);
     check(nstatus == napi_ok);
     // Unwrap
-    TensorWrap* tensor_wrap;
+    HandleWrap* handle_wrap;
     nstatus =
-        napi_unwrap(env, js_retval, reinterpret_cast<void**>(&tensor_wrap));
+        napi_unwrap(env, js_retval, reinterpret_cast<void**>(&handle_wrap));
     check(nstatus == napi_ok);
-    check(tensor_wrap->env == env);
-    tensor_wrap->tf_tensor_handle = retvals[i];
+    check(handle_wrap->env == env);
+    handle_wrap->tf_tensor_handle = retvals[i];
     // Set created js object in output array.
     nstatus = napi_set_element(env, js_retvals, (uint32_t) i, js_retval);
     check(nstatus == napi_ok);
@@ -389,7 +389,7 @@ static napi_value NewContext(napi_env env, napi_callback_info info) {
   return js_this;
 }
 
-static napi_value NewTensor(napi_env env, napi_callback_info info) {
+static napi_value NewHandle(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   AssertConstructorCall(env, info);
@@ -402,21 +402,21 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   // Construct the native wrap object.
-  TensorWrap* tensor_wrap = new TensorWrap();
-  if (tensor_wrap == NULL) {
+  HandleWrap* handle_wrap = new HandleWrap();
+  if (handle_wrap == NULL) {
     napi_throw_error(env, "ENOMEM", "Out of memory");
     return NULL;
   }
 
   // Attach native wrapper to the JavaScript object.
-  tensor_wrap->env = env;
-  nstatus = napi_wrap(env, js_this, tensor_wrap, DeleteTensor, NULL, NULL);
+  handle_wrap->env = env;
+  nstatus = napi_wrap(env, js_this, handle_wrap, DeleteHandle, NULL, NULL);
   check(nstatus == napi_ok);
 
-  // Execute calls the Tensor constructor without any arguments.
+  // Execute calls the Handle constructor without any arguments.
   if (argc == 0) {
-    tensor_wrap->tf_tensor_handle = NULL;
-    tensor_wrap->tf_tensor = NULL;
+    handle_wrap->tf_tensor_handle = NULL;
+    handle_wrap->tf_tensor = NULL;
     return js_this;
   }
 
@@ -556,7 +556,7 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
     napi_throw_error(env, "ENOMEM", "Out of memory");
     return NULL;
   }
-  tensor_wrap->tf_tensor = tf_tensor;
+  handle_wrap->tf_tensor = tf_tensor;
 
   // Create the TFE_TensorHandle object.
   TF_Status* tf_status = TF_NewStatus();
@@ -572,13 +572,13 @@ static napi_value NewTensor(napi_env env, napi_callback_info info) {
     return NULL;
   }
   TF_DeleteStatus(tf_status);
-  tensor_wrap->tf_tensor_handle = tf_tensor_handle;
+  handle_wrap->tf_tensor_handle = tf_tensor_handle;
 
   return js_this;
 }
 
 static void DeleteTensorArrayBuffer(napi_env env,
-                                    void* tensor_wrap_ptr,
+                                    void* handle_wrap_ptr,
                                     void* hint) {
   auto tensor = reinterpret_cast<TF_Tensor*>(hint);
   TF_DeleteTensor(tensor);
@@ -597,7 +597,7 @@ static napi_status NewTensorArrayBuffer(napi_env env,
                                           array_buffer_out);
 }
 
-static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
+static napi_value HandleAsArrayBuffer(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   // Fetch JavaScript `this` object.
@@ -606,18 +606,18 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   // Unwrap.
-  TensorWrap* tensor_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
   check(nstatus == napi_ok);
 
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
   auto tensor =
-      TFE_TensorHandleResolve(tensor_wrap->tf_tensor_handle, tf_status);
+      TFE_TensorHandleResolve(handle_wrap->tf_tensor_handle, tf_status);
   check(TF_GetCode(tf_status) == TF_OK);
   TF_DeleteStatus(tf_status);
 
-  check(tensor_wrap->tf_tensor != tensor);
+  check(handle_wrap->tf_tensor != tensor);
 
   napi_value array_buffer;
   nstatus = NewTensorArrayBuffer(env, tensor, &array_buffer);
@@ -626,7 +626,7 @@ static napi_value TensorAsArrayBuffer(napi_env env, napi_callback_info info) {
   return array_buffer;
 }
 
-static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
+static napi_value HandleGetDevice(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   // Fetch JavaScript `this` object.
@@ -635,13 +635,13 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   // Unwrap.
-  TensorWrap* tensor_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
   check(nstatus == napi_ok);
 
   // Ask tensorflow for the device name.
   const char* device =
-      TFE_TensorHandleDeviceName(tensor_wrap->tf_tensor_handle);
+      TFE_TensorHandleDeviceName(handle_wrap->tf_tensor_handle);
 
   // Build JavaScript string containing the device name.
   napi_value js_device;
@@ -651,7 +651,7 @@ static napi_value TensorGetDevice(napi_env env, napi_callback_info info) {
   return js_device;
 }
 
-static napi_value TensorGetDType(napi_env env, napi_callback_info info) {
+static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   // Fetch JavaScript `this` object.
@@ -660,12 +660,12 @@ static napi_value TensorGetDType(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   // Unwrap.
-  TensorWrap* tensor_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
   check(nstatus == napi_ok);
 
   // Ask tensorflow for the dtype.
-  TF_DataType dtype = TFE_TensorHandleDataType(tensor_wrap->tf_tensor_handle);
+  TF_DataType dtype = TFE_TensorHandleDataType(handle_wrap->tf_tensor_handle);
 
   napi_value js_dtype;
   nstatus = napi_create_int32(env, dtype, &js_dtype);
@@ -674,7 +674,7 @@ static napi_value TensorGetDType(napi_env env, napi_callback_info info) {
   return js_dtype;
 }
 
-static napi_value TensorGetShape(napi_env env, napi_callback_info info) {
+static napi_value HandleGetShape(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   // Fetch JavaScript `this` object.
@@ -683,11 +683,11 @@ static napi_value TensorGetShape(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   // Unwrap.
-  TensorWrap* tensor_wrap;
-  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&tensor_wrap));
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, js_this, reinterpret_cast<void**>(&handle_wrap));
   check(nstatus == napi_ok);
 
-  auto th = tensor_wrap->tf_tensor_handle;
+  auto th = handle_wrap->tf_tensor_handle;
   int rank = TFE_TensorHandleNumDims(th);
   napi_value shape;
   nstatus = napi_create_array_with_length(env, rank, &shape);
@@ -736,42 +736,42 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       &context_class);   // Out: js value representing the class
   check(nstatus == napi_ok);
 
-  // Define the Tensor JavaScript class.
-  napi_value tensor_class;
-  napi_property_descriptor tensor_properties[] = {
+  // Define the Handle JavaScript class (wraps TFE_TensorHandle)
+  napi_value handle_class;
+  napi_property_descriptor handle_properties[] = {
       {"asArrayBuffer",
        NULL,
-       TensorAsArrayBuffer,
+       HandleAsArrayBuffer,
        NULL,
        NULL,
        NULL,
        napi_default,
        NULL},
-      {"device", NULL, NULL, TensorGetDevice, NULL, NULL, napi_default, NULL},
-      {"dtype", NULL, NULL, TensorGetDType, NULL, NULL, napi_default, NULL},
-      {"shape", NULL, NULL, TensorGetShape, NULL, NULL, napi_default, NULL},
+      {"device", NULL, NULL, HandleGetDevice, NULL, NULL, napi_default, NULL},
+      {"dtype", NULL, NULL, HandleGetDType, NULL, NULL, napi_default, NULL},
+      {"shape", NULL, NULL, HandleGetShape, NULL, NULL, napi_default, NULL},
   };
   nstatus = napi_define_class(
       env,
-      "Tensor",                     // JavaScript class name
+      "Handle",                     // JavaScript class name
       NAPI_AUTO_LENGTH,             // JavasScript class name length
-      NewTensor,                    // Constructor
+      NewHandle,                    // Constructor
       NULL,                         // Constructor argument
-      COUNT_OF(tensor_properties),  // Property count
-      tensor_properties,            // Property descriptors
-      &tensor_class);               // Out: js value representing the class
+      COUNT_OF(handle_properties),  // Property count
+      handle_properties,            // Property descriptors
+      &handle_class);               // Out: js value representing the class
   check(nstatus == napi_ok);
 
-  // tensor_class is used Execute() to instanciate resulting Tensors. Thus
+  // handle_class is used Execute() to instanciate resulting Handles. Thus
   // create a reference.
-  nstatus = napi_create_reference(env, tensor_class, 1, &tensor_class_ref);
+  nstatus = napi_create_reference(env, handle_class, 1, &handle_class_ref);
   check(nstatus == napi_ok);
 
   // Fill the exports.
   napi_property_descriptor exports_properties[] = {
       {"Context", NULL, NULL, NULL, NULL, context_class, napi_default, NULL},
       {"execute", NULL, Execute, NULL, NULL, NULL, napi_default, NULL},
-      {"Tensor", NULL, NULL, NULL, NULL, tensor_class, napi_default, NULL},
+      {"Handle", NULL, NULL, NULL, NULL, handle_class, napi_default, NULL},
   };
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
