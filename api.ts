@@ -1,9 +1,8 @@
 import * as backprop from "./backprop";
 import { basicOps } from "./basic";
 export { backend } from "./basic";
-import { ChainableTensor as Tensor, convertChainable }
-  from "./chainable_tensor";
-export { ChainableTensor as Tensor } from "./chainable_tensor";
+import { convert, Tensor } from "./tensor";
+export { Tensor } from "./tensor";
 import * as ops from "./ops";
 import * as types from "./types";
 
@@ -16,7 +15,7 @@ import * as types from "./types";
 //
 // If a tensor is given to $, it simply returns it.
 export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
-  return convertChainable(t, dtype);
+  return convert(t, dtype);
 }
 
 // grad(f) returns a gradient function. If f is a function that maps

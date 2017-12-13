@@ -3,8 +3,8 @@
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
 import { fill } from "./api";
-import { ChainableTensor, convertChainable } from "./chainable_tensor";
 import { BWFunc, getBackwardFuncs } from "./ops";
+import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
 
@@ -21,7 +21,7 @@ function tapeEntryToString(e: types.TapeEntry): string {
 
 // Represents a gradient propagation trace.
 export class Tape {
-  // Maps from ChainableTensor ids to their operation ids.
+  // Maps from Tensor ids to their operation ids.
   tensorToOp = new Map<number, number>();
 
   // Maps from operation id to TapeEntry.
@@ -38,7 +38,7 @@ export class Tape {
   }
 
   // Adds a tensor to the tape.
-  watch(tensor: ChainableTensor): void {
+  watch(tensor: Tensor): void {
     const id = tensor.id;
     if (!this.tensorToOp.has(id)) {
       this.tensorToOp.set(id, -1);
@@ -62,7 +62,7 @@ export class Tape {
 // argnum indexes.
 export function multigrad(f, argnums: number[]) {
   const g = multigradAndVal(f, argnums);
-  return function(...args: types.TensorLike[]): ChainableTensor[] {
+  return function(...args: types.TensorLike[]): Tensor[] {
     // Ignore the forward pass result.
     return g(...args)[0];
   };
@@ -70,15 +70,15 @@ export function multigrad(f, argnums: number[]) {
 
 export function multigradAndVal(f, argnums: number[]) {
   return function(...args: types.TensorLike[]):
-      [ChainableTensor[], ChainableTensor] {
+      [Tensor[], Tensor] {
     pushNewTape();
-    const targs: ChainableTensor[] = args.map((tl) => convertChainable(tl));
+    const targs: Tensor[] = args.map((tl) => convert(tl));
     // Watch the specified argnums.
     for (const i of argnums) {
       watch(targs[i]);
     }
     let result = f.apply(null, targs); // Do the forward pass.
-    result = convertChainable(result);
+    result = convert(result);
     return [imperativeGrad(result, targs), result];
   };
 }
@@ -86,7 +86,7 @@ export function multigradAndVal(f, argnums: number[]) {
 // Returns the gradient with respect to a single input.
 export function grad(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
-  return function(...args: types.TensorLike[]): ChainableTensor {
+  return function(...args: types.TensorLike[]): Tensor {
     return g(...args)[0][0];
   };
 }
@@ -94,14 +94,14 @@ export function grad(f, argnum = 0) {
 export function gradAndVal(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
   return function(...args: types.TensorLike[]):
-      [ChainableTensor, ChainableTensor] {
+      [Tensor, Tensor] {
     const [grad, val] = g(...args);
     return [grad[0], val];
   };
 }
 
-function imperativeGrad(target: ChainableTensor,
-                        sources: ChainableTensor[]): ChainableTensor[] {
+function imperativeGrad(target: Tensor,
+                        sources: Tensor[]): Tensor[] {
   const tape = popTape();
   const readyOps: number[] = [];
   const sourceIds = new Set(sources.map((t) => t.id));
@@ -136,14 +136,14 @@ function imperativeGrad(target: ChainableTensor,
     log("- outGrad %s", outGrad.shape, outGrad.getData());
 
     const inGrads = getBackwardFuncs(op.name).map(
-      (bwFunc: null | BWFunc, i): ChainableTensor => {
+      (bwFunc: null | BWFunc, i): Tensor => {
         if (bwFunc) {
           return bwFunc(outGrad, ...op.savedForBackward);
         } else {
           // Null backwards function, return a zero tensor of the same shape and
           // dtype as the input.
           const shapeDType = op.inputShapeDTypes[i];
-          const zero = convertChainable(0, shapeDType[1]);
+          const zero = convert(0, shapeDType[1]);
           return fill(zero, shapeDType[0]);
         }
       });
@@ -180,7 +180,7 @@ function imperativeGrad(target: ChainableTensor,
   }
 
   // Collect the gradients that we want.
-  const result: ChainableTensor[] = [];
+  const result: Tensor[] = [];
   for (const t of sources) {
     const r = gradients.aggregate(t.id);
     log("- result", t.id, r.shape);
@@ -248,7 +248,7 @@ export function popTape(): Tape {
 }
 
 // Marks this tensor to be watched by all tapes in the stack.
-function watch(t: ChainableTensor) {
+function watch(t: Tensor) {
   for (const tape of tapeStack) {
     tape.watch(t);
   }
@@ -262,9 +262,9 @@ export function recordOp(tapeEntry: types.TapeEntry) {
 
 export class GradientCollector {
   // Maps tensor id -> gradient tensor array
-  private map = new Map<number, ChainableTensor[]>();
+  private map = new Map<number, Tensor[]>();
 
-  append(tid: number, grad: ChainableTensor): void {
+  append(tid: number, grad: Tensor): void {
     log("- GradientCollector append", tid, grad.shape);
     if (this.map.has(tid)) {
       this.map.get(tid).push(grad);
@@ -274,10 +274,10 @@ export class GradientCollector {
   }
 
   // Sum up the gradients for a given tensor id.
-  aggregate(tid: number): ChainableTensor {
+  aggregate(tid: number): Tensor {
     if (!this.map.has(tid) || this.map.get(tid).length === 0) {
       // TODO(scalar) Handle non-scalar shapes.
-      return convertChainable(0);
+      return convert(0);
     }
     const grads = this.map.get(tid);
     // log('aggregate tid %d ngrads %d', tid, grads.length);
