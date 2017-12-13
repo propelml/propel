@@ -4,26 +4,26 @@
 // https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
 import * as backprop from "./backprop";
 import { basicOps } from "./basic";
-import { ChainableTensor, convertChainable } from "./chainable_tensor";
+import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, bcastGradientArgs, shapesEqual } from "./util";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
-// never use ChainableTensors, only BasicTensors. These forward pass functions
+// never use Tensors, only BasicTensors. These forward pass functions
 // are defined in ops.ts.
 type FWFunc = (...args) => types.BasicTensor;
 
 // BWFunc is a backwards pass function which receives the gradient and any
 // objects passed to saveForBackward(). Backwards pass functions are defined
 // alongside their foward pass counterparts in ops.ts. Unlike FWFunc, BWFunc
-// should use ChainableTensors.
-export type BWFunc = (grad: ChainableTensor, ...savedArgs) => ChainableTensor;
+// should use Tensors.
+export type BWFunc = (grad: Tensor, ...savedArgs) => Tensor;
 
 // OpFunc is returned from defFW and is what is the external interface to
-// backprop ops. These are called a lot in api.ts and chainable_tensor.ts
+// backprop ops. These are called a lot in api.ts and tensor.ts
 // which together define the public API. OpFuncs might even be exposed directly
 // to users. An OpFunc will record a TapeEntry when it is called.
-type OpFunc = (...args) => ChainableTensor;
+type OpFunc = (...args) => Tensor;
 
 let nextOpId = 1;
 
@@ -37,17 +37,17 @@ const ops = {}; // name -> OpInfo
 
 // Define a forward op.
 function defFW(name: string, fwFunc: FWFunc): OpFunc {
-  const opFunc: OpFunc = (...args): ChainableTensor => {
+  const opFunc: OpFunc = (...args): Tensor => {
     // We no longer automatically convert the op args to tensors.
     // It's up to the caller.
 
-    const cTensors: ChainableTensor[] = [];
+    const cTensors: Tensor[] = [];
 
     // Gather ids of args that are tensors. null for non-Tensor args.
     const inputIds = args.map((t) => {
-      if ((t as ChainableTensor).id) {
+      if ((t as Tensor).id) {
         cTensors.push(t);
-        return (t as ChainableTensor).id;
+        return (t as Tensor).id;
       } else {
         return null;
       }
@@ -56,8 +56,8 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     // An array of tuples [shape, dtype] for each argument.
     // Non-tensor arguments are null.
     const inputShapeDTypes: types.ShapeDTypeList = args.map((t) => {
-      if ((t as ChainableTensor).shape) {
-        const ct = t as ChainableTensor;
+      if ((t as Tensor).shape) {
+        const ct = t as Tensor;
         const st: types.ShapeDType = [ct.shape, ct.dtype];
         return st;
       } else {
@@ -65,23 +65,23 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
       }
     });
 
-    // Convert any ChainableTensor args to basic ones.
+    // Convert any Tensor args to basic ones.
     const bargs = args.map((t) => {
-      if ((t as ChainableTensor).basic) {
-        return (t as ChainableTensor).basic;
+      if ((t as Tensor).basic) {
+        return (t as Tensor).basic;
       } else {
         return t;
       }
     });
 
     // Call the forward function, and wrap the resulting BasicTensor in a
-    // ChainableTensor.
+    // Tensor.
     const basicAnswer: types.BasicTensor = fwFunc(...bargs);
-    const ans = new ChainableTensor(basicAnswer);
+    const ans = new Tensor(basicAnswer);
     cTensors.push(ans);
 
     const savedForBackward =
-      convertSavedBasicsToChainables(globalSavedForBackward, cTensors);
+      convertSavedBasicsTos(globalSavedForBackward, cTensors);
     globalSavedForBackward = null;
 
     backprop.recordOp({
@@ -102,8 +102,8 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
   return opFunc;
 }
 
-function convertSavedBasicsToChainables(saved: any[], cTensors:
-                                        ChainableTensor[]) {
+function convertSavedBasicsTos(saved: any[], cTensors:
+                                        Tensor[]) {
   if (!saved) return null;
   return saved.map((t) => {
     if ((t as types.BasicTensor).getData) {
@@ -111,7 +111,7 @@ function convertSavedBasicsToChainables(saved: any[], cTensors:
       for (const ct of cTensors) {
         if (ct.basic === b) return ct;
       }
-      throw new Error("Couldn't find corresponding ChainableTensor.");
+      throw new Error("Couldn't find corresponding Tensor.");
     } else {
       // Not a tensor. Just pass it through.
       return t;
@@ -138,7 +138,7 @@ export function getBackwardFuncs(name: string): BWFunc[] {
 // TODO This is called for each arg - unnecessary compute. Make it so defBW
 // just takes a single argument.
 function addGrad(firstArg: boolean) {
-  return (g: ChainableTensor, sx: types.Shape, sy: types.Shape) => {
+  return (g: Tensor, sx: types.Shape, sy: types.Shape) => {
     // If sx and sy are the same (no broadcasting) just return g.
     if (shapesEqual(sx, sy)) return g;
     // Broadcast.
@@ -170,7 +170,7 @@ defBW("sub",
 // TODO This is called for each arg - unnecessary compute. Make it so defBW
 // just takes a backwards function.
 function mulDivGrad(firstArg: boolean, isMul: boolean) {
-  return (g: ChainableTensor, x: ChainableTensor, y: ChainableTensor) => {
+  return (g: Tensor, x: Tensor, y: Tensor) => {
     if (isMul) {
       g = firstArg ? g.mul(y) : g.mul(x);
     } else {
@@ -244,7 +244,7 @@ export const square = defFW("square", (x) => {
   saveForBackward(x);
   return basicOps.square(x);
 });
-defBW("square", (g, x) => mul(g, mul(x, convertChainable(2, x.dtype))));
+defBW("square", (g, x) => mul(g, mul(x, convert(2, x.dtype))));
 
 export const sinh = defFW("sinh", (x) => {
   saveForBackward(x);

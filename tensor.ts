@@ -4,21 +4,20 @@ import * as ops from "./ops";
 import * as types from "./types";
 import { assert } from "./util";
 
-export function convertChainable(t: types.TensorLike,
-                                 dtype?: types.DType): ChainableTensor {
-  if (t instanceof ChainableTensor) return t;
-  return new ChainableTensor(convertBasic(t, dtype));
+export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
+  if (t instanceof Tensor) return t;
+  return new Tensor(convertBasic(t, dtype));
 }
-const $ = convertChainable;
+const $ = convert;
 
-// ChainableTensor wraps a BasicTensor object. This is the main public
+// Tensor wraps a BasicTensor object. This is the main public
 // interface to tensor operatiors. Each instance has a unique id for use in
-// backprop.  Nothing about ChainableTensors is backend specific.
-// ChainableTensor might be renamed to BoxedTensor in the near future. To
+// backprop.  Nothing about Tensors is backend specific.
+// Tensor might be renamed to BoxedTensor in the near future. To
 // external users this class is called just Tensor. We use a more specific name
 // internally so as not to confuse it with the many other tensor classes in
 // Propel.
-export class ChainableTensor implements types.BasicTensor {
+export class Tensor implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
   readonly basic: types.BasicTensor;
@@ -29,7 +28,7 @@ export class ChainableTensor implements types.BasicTensor {
     this.shape = t.shape;
     this.dtype = t.dtype;
     this.basic = t;
-    this.id = ChainableTensor.nextId++;
+    this.id = Tensor.nextId++;
   }
 
   getData(): types.TypedArray {
@@ -45,50 +44,50 @@ export class ChainableTensor implements types.BasicTensor {
     return `[${this.getData()}]`;
   }
 
-  cast(dtype: types.DType): ChainableTensor {
+  cast(dtype: types.DType): Tensor {
     return ops.cast(this, dtype);
   }
 
-  add(x: types.TensorLike): ChainableTensor {
+  add(x: types.TensorLike): Tensor {
     return ops.add(this, $(x));
   }
 
-  sub(x: types.TensorLike): ChainableTensor {
+  sub(x: types.TensorLike): Tensor {
     return ops.sub(this, $(x));
   }
 
-  mul(x: types.TensorLike): ChainableTensor {
+  mul(x: types.TensorLike): Tensor {
     return ops.mul(this, $(x));
   }
 
-  div(x: types.TensorLike): ChainableTensor {
+  div(x: types.TensorLike): Tensor {
     return ops.div(this, $(x));
   }
 
-  matmul(x: types.TensorLike): ChainableTensor {
+  matmul(x: types.TensorLike): Tensor {
     return ops.matmul(this, $(x));
   }
 
-  neg(): ChainableTensor {
+  neg(): Tensor {
     return ops.neg(this);
   }
 
-  exp(): ChainableTensor {
+  exp(): Tensor {
     return ops.exp(this);
   }
 
-  log(): ChainableTensor {
+  log(): Tensor {
     return ops.log(this);
   }
 
-  onesLike(): ChainableTensor {
+  onesLike(): Tensor {
     const b = basicOps.onesLike(this.basic);
-    return new ChainableTensor(b);
+    return new Tensor(b);
   }
 
-  zerosLike(): ChainableTensor {
+  zerosLike(): Tensor {
     const b = basicOps.zerosLike(this.basic);
-    return new ChainableTensor(b);
+    return new Tensor(b);
   }
 
   square = () => ops.square(this);
@@ -96,7 +95,7 @@ export class ChainableTensor implements types.BasicTensor {
   cosh = () => ops.cosh(this);
   tanh = () => ops.tanh(this);
 
-  transpose(perm?: types.TensorLike): ChainableTensor {
+  transpose(perm?: types.TensorLike): Tensor {
     if (perm === undefined) {
       perm = arange(this.rank).reverse();
     }
@@ -105,7 +104,7 @@ export class ChainableTensor implements types.BasicTensor {
   }
 
   // Reverses specific dimensions of a tensor.
-  reverse(dims?: number[]): ChainableTensor {
+  reverse(dims?: number[]): Tensor {
     if (!dims) dims = [-1];
     // Convert dims to 1D tensor of booleans.
     const ta = new Uint8Array(this.rank);
@@ -121,39 +120,39 @@ export class ChainableTensor implements types.BasicTensor {
 
   // Returns the index with the largest value across an axis of a tensor.
   // axis defaults to 0.
-  argmax(axis?: number): ChainableTensor {
+  argmax(axis?: number): Tensor {
     if (axis === undefined) axis = 0;
     return ops.argmax(this, axis);
   }
 
   // Returns the index with the smallest value across an axis of a tensor.
   // axis defaults to 0.
-  argmin(axis?: number): ChainableTensor {
+  argmin(axis?: number): Tensor {
     if (axis === undefined) axis = 0;
     return ops.argmin(this, axis);
   }
 
   // Sum the tensor over the given axes.
   // axes defaults to all.
-  reduceSum(axes?: number[], keepDims = false): ChainableTensor {
+  reduceSum(axes?: number[], keepDims = false): Tensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceSum(this, axes, keepDims);
   }
 
   // Take the maximum value over the given axes.
   // axes defaults to all.
-  reduceMax(axes?: number[], keepDims = false): ChainableTensor {
+  reduceMax(axes?: number[], keepDims = false): Tensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceMax(this, axes, keepDims);
   }
 
-  reduceLogSumExp(axes?: number[], keepDims = false): ChainableTensor {
+  reduceLogSumExp(axes?: number[], keepDims = false): Tensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceLogSumExp(this, axes, keepDims);
   }
 
   // Element-wise comparison. Returns a tensor with dtype == "bool".
-  equal(x: types.TensorLike): ChainableTensor {
+  equal(x: types.TensorLike): Tensor {
     return ops.equal(this, $(x));
   }
 
@@ -165,40 +164,40 @@ export class ChainableTensor implements types.BasicTensor {
   // 'input' to slice. If size[i] is -1, all remaining elements in dimension
   // are included in the slice -- this is equivalent to setting
   //   size[i] = input.shape[i] - begin[i]
-  slice(begin: number[], size: number[]): ChainableTensor {
+  slice(begin: number[], size: number[]): Tensor {
     return ops.slice(this, begin, size);
   }
 
   // Reshapes the tensor without changing its data.
-  reshape(newShape: types.Shape): ChainableTensor {
+  reshape(newShape: types.Shape): Tensor {
     return ops.reshape(this, newShape);
   }
 
   // Return a copy of the tensor collapsed into one dimension.
-  flatten(): ChainableTensor {
+  flatten(): Tensor {
     return this.reshape([-1]);
   }
 
   // Remove single-dimensional axes from the shape of a tensor.
-  squeeze(): ChainableTensor {
+  squeeze(): Tensor {
     const newShape = this.shape.filter((d) => d > 1);
     return this.reshape(newShape);
   }
 
   // Returns the softmax activations of a tensor.
-  softmax(axis = -1): ChainableTensor {
+  softmax(axis = -1): Tensor {
     return softmaxHelper(this, axis, ops.softmax);
   }
 
   // Numerically stable log(softmax(x)).
-  logSoftmax(axis = -1): ChainableTensor {
+  logSoftmax(axis = -1): Tensor {
     return softmaxHelper(this, axis, ops.logSoftmax);
   }
 
   // Dot product of two tensors. For 2D tensors it is equivalent to matrix
   // multiplication. For 1D tensors to inner product of vectors (without
   // complex conjugation). Currently higher order tensors are not supported.
-  dot(x: types.TensorLike): ChainableTensor {
+  dot(x: types.TensorLike): Tensor {
     const xx = $(x);
     let left, right;
     let lShape, rShape;
@@ -238,7 +237,7 @@ export class ChainableTensor implements types.BasicTensor {
     return left.matmul(right).reshape(outShape);
   }
 
-  oneHot(depth: number, onValue = 1.0, offValue = 0.0): ChainableTensor {
+  oneHot(depth: number, onValue = 1.0, offValue = 0.0): Tensor {
     if (this.dtype === "float32") {
       throw new Error("Must use integer type with oneHot.");
     }
@@ -258,7 +257,7 @@ function rangeJS(limit: number): number[] {
 // The softmax and logSoftmax ops can only accept 2D tensors of the form
 // [batch_size, num_classes]. This function reshapes higher rank tensors to
 // that.
-function softmaxHelper(t: ChainableTensor, axis: number, op): ChainableTensor {
+function softmaxHelper(t: Tensor, axis: number, op): Tensor {
   if (axis !== -1) {
     throw new Error("Softmax along a non-last axis is not yet supported.");
   }
