@@ -14,7 +14,7 @@ function maybeRequireBinding(): BindingInterface | null {
   // This is used in tools/presubmit.sh to run tests on both backends through
   // node.
   const opts = (process.env.PROPEL || "").split(",");
-  if (opts.indexOf("web") >= 0) return null;
+  if (opts.indexOf("dl") >= 0) return null;
 
   // Now require the compiled tensorflow-binding.node
   // When using ts-node, we are in the root dir, after compiling to

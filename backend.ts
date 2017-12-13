@@ -11,10 +11,12 @@ let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
 if (binding) {
+  console.log("Using TF backend.");
   tensorClass = TensorTF;
   bo = new OpsTF();
   backend = "tf";
 } else {
+  console.log("Using DL backend.");
   tensorClass = TensorDL;
   bo = new OpsDL();
   backend = "dl";
