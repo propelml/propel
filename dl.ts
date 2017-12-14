@@ -1,8 +1,8 @@
 // Deep Learn JS backend.
-import { MatrixOrientation }
-  from "./deps/deeplearnjs/src/math/backends/backend";
 import { NDArrayMathCPU }
   from "./deps/deeplearnjs/src/math/backends/backend_cpu";
+import { MatrixOrientation }
+  from "./deps/deeplearnjs/src/math/backends/types/matmul";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
 import { Array2D, Array3D, Array4D, NDArray }
   from "./deps/deeplearnjs/src/math/ndarray";
