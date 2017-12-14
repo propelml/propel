@@ -5,6 +5,7 @@ import { convert, Tensor } from "./tensor";
 export { Tensor } from "./tensor";
 import * as ops from "./ops";
 import * as types from "./types";
+import { assert, assertShapesEqual } from "./util";
 
 // Turns a javascript array of numbers
 // into a tensor. Like this:
@@ -105,3 +106,37 @@ export function ones(shape: types.Shape,
 }
 
 export const matmul = (x, y) => $(x).matmul(y);
+
+export interface ArgsSGD {
+  lossFn: (...params: Tensor[]) => Tensor;
+  params: Tensor[];
+  callback: (step: number, params: Tensor[], loss: Tensor) => void;
+  learningRate: number;
+  steps: number;
+  momentum: number;
+}
+
+// Stochastic gradient descent with momentum.
+export function sgd(args: ArgsSGD) {
+  const m = args.momentum;
+  assert(0 <= m && m <= 1.0);
+  const params = args.params;
+  // Get gradient of objective using autograd.
+  const lossGradVal = multigradAndVal(args.lossFn);
+  const velocity = params.map((p) => p.zerosLike());
+  // Training loop.
+  for (let step = 0; step < args.steps; step++) {
+    // Forward/Backward pass
+    const [pGrads, loss] = lossGradVal(...params);
+    assert(loss.rank === 0);
+    assert(pGrads.length === params.length);
+    // Update each param tensor.
+    for (let j = 0; j < params.length; j++) {
+      assertShapesEqual(params[j].shape, pGrads[j].shape);
+      velocity[j] = velocity[j].mul(m).sub(pGrads[j].mul(1 - m));
+      params[j] = params[j].add(velocity[j].mul(args.learningRate));
+    }
+    if (args.callback) args.callback(step, params, loss);
+  }
+  return params;
+}
