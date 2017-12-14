@@ -60,7 +60,7 @@ export class Tape {
 
 // Returns a function which differentiates f with respect to the given
 // argnum indexes.
-export function multigrad(f, argnums: number[]) {
+export function multigrad(f, argnums?: number[]) {
   const g = multigradAndVal(f, argnums);
   return function(...args: types.TensorLike[]): Tensor[] {
     // Ignore the forward pass result.
@@ -68,14 +68,20 @@ export function multigrad(f, argnums: number[]) {
   };
 }
 
-export function multigradAndVal(f, argnums: number[]) {
+export function multigradAndVal(f, argnums?: number[]) {
   return function(...args: types.TensorLike[]):
       [Tensor[], Tensor] {
     pushNewTape();
     const targs: Tensor[] = args.map((tl) => convert(tl));
     // Watch the specified argnums.
-    for (const i of argnums) {
-      watch(targs[i]);
+    if (argnums == null) {
+      for (const t of targs) {
+        watch(t);
+      }
+    } else {
+      for (const i of argnums) {
+        watch(targs[i]);
+      }
     }
     let result = f.apply(null, targs); // Do the forward pass.
     result = convert(result);
