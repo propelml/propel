@@ -202,7 +202,7 @@ function testMultigrad() {
   }
   assertClose(f(1, 1), 5);
   assertClose(f(1, 2), 8);
-  const g = multigrad(f, [0, 1]);
+  const g = multigrad(f);
   assertClose(g(1, 1)[0], 2);
   assertClose(g(1, 1)[1], 3);
   assertClose(g(4, 2)[0], 2);
