@@ -325,10 +325,26 @@ defBW("reduceMax", (g, axes, keepDims) => {
   throw new Error("Not Implemented.");
 });
 
-export let equal = defFW("equal", (x, y) => {
-  return bo.equal(x, y);
+export let equal = defFW("equal", (x, y) => bo.equal(x, y));
+defBW("equal", null, null); // Not differentiable.
+
+export let greater = defFW("greater", (x, y) => bo.greater(x, y));
+defBW("greater", null, null); // Not differentiable.
+
+export let greaterEqual = defFW("greaterEqual",
+  (x, y) => bo.greaterEqual(x, y));
+defBW("greaterEqual", null, null); // Not differentiable.
+
+export let less = defFW("less", (x, y) => bo.less(x, y));
+defBW("less", null, null); // Not differentiable.
+
+export let lessEqual = defFW("lessEqual", (x, y) => bo.lessEqual(x, y));
+defBW("lessEqual", null, null); // Not differentiable.
+
+export let select = defFW("select", (cond, x, y) => {
+  return bo.select(cond, x, y);
 });
-defBW("equal", null, null); // equal is not differentiable.
+defBW("select", null, null, null); // Not differentiable.
 
 export let slice = defFW("slice", (x, begin, size) => {
   saveForBackward(x.shape, begin, size);

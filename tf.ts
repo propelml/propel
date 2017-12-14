@@ -365,6 +365,42 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r);
   }
 
+  greater(x: TensorTF, y: TensorTF): TensorTF {
+    const r = execute0("Greater", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  greaterEqual(x: TensorTF, y: TensorTF): TensorTF {
+    const r = execute0("GreaterEqual", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  less(x: TensorTF, y: TensorTF): TensorTF {
+    const r = execute0("Less", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  lessEqual(x: TensorTF, y: TensorTF): TensorTF {
+    const r = execute0("LessEqual", [x.handle, y.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  select(cond: TensorTF, t: TensorTF, f: TensorTF): TensorTF {
+    const args = [cond.handle, t.handle, f.handle];
+    const r = execute0("Select", args, [
+      ["T", binding.ATTR_TYPE, binding.getDType(t.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
   slice(x: TensorTF, begin: number[], size: number[]): TensorTF {
     const beginT = convertBasic(begin, "int32") as TensorTF;
     const sizeT = convertBasic(size, "int32") as TensorTF;
