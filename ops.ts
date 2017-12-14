@@ -291,10 +291,17 @@ export let argmin = defFW("argmin", (x, axis: number) => {
 defBW("argmin", null);  // Not differentiable.
 
 export let reduceSum = defFW("reduceSum", (x, axes, keepDims) => {
-  saveForBackward(x);
+  saveForBackward(x.shape, x.dtype, axes);
   return bo.reduceSum(x, axes, keepDims);
 });
-defBW("reduceSum", (g, x) => mul(g, x.onesLike()));
+defBW("reduceSum", (g, xs, xd, axes) => {
+  const gs = xs.slice(); // copy
+  for (const a of axes) {
+    const i = a < 0 ? xs.length + a : a;
+    gs[i] = 1;
+  }
+  return g.reshape(gs).mul(ones(xs, xd));
+});
 
 export let reduceMax = defFW("reduceMax", (x, axes, keepDims) => {
   return bo.reduceMax(x, axes, keepDims);
