@@ -243,6 +243,21 @@ export class Tensor implements types.BasicTensor {
     }
     return ops.oneHot(this, depth, onValue, offValue);
   }
+
+  // Computes softmax cross entropy on logits.
+  // This is known as softmax_cross_entropy_with_logits in TF.
+  // @param labels A batch_size x num_classes matrix. The caller must ensure
+  //               that each batch of labels represents a valid probability
+  //               distribution. Often labels is one-hot along axis 1.
+  softmaxCE(labels: types.TensorLike): Tensor {
+    const logits = this;
+    const labelsT = $(labels);
+    assert(labelsT.rank === 2);
+    assert(logits.rank === 2);
+    const logQ = logits.logSoftmax();
+    const pLogQ = labelsT.mul(logQ);
+    return pLogQ.reduceSum([1]).neg();
+  }
 }
 
 // Like arange() but outputs a javascript array of numbers.

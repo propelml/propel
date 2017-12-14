@@ -688,6 +688,28 @@ function testOneHot() {
   ]);
 }
 
+function testSoftmaxCE() {
+  const labels = $([
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.3, 0.0, 0.7],
+  ], "float32");
+  const f = (x) => $(x).softmaxCE(labels);
+  const logits = $([
+    [-2, 2, 10],
+    [-2, 2, 10],
+    [-2, 2, 10],
+  ], "float32");
+  const ce = f(logits);
+  assertAllClose(ce, [12.00034142, 8.00034142, 3.6003418]);
+  const g = grad(f);
+  assertAllClose(g(logits), [
+    [ -9.99993861e-01,   3.35348042e-04,   9.99658465e-01],
+    [  6.14211376e-06,  -9.99664664e-01,   9.99658465e-01],
+    [ -2.99993873e-01,   3.35348042e-04,   2.99658477e-01]
+  ]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -733,3 +755,4 @@ testBcastDiv();
 testSlice();
 testCast();
 testOneHot();
+testSoftmaxCE();
