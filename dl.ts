@@ -197,6 +197,12 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  reduceMean(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
+  {
+    const ndarray = x.math.mean(x.ndarray, axes, keepDims);
+    return new TensorDL(ndarray, x.math);
+  }
+
   reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
   {
     const ndarray = x.math.max(x.ndarray, axes, keepDims);

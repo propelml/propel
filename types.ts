@@ -43,6 +43,7 @@ export interface BackendOps {
   argmax(x: BasicTensor, axis: number): BasicTensor;
   argmin(x: BasicTensor, axis: number): BasicTensor;
   reduceSum(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
+  reduceMean(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   slice(x: BasicTensor, begin: number[], size: number[]): BasicTensor;
   reshape(x: BasicTensor, newShape: Shape): BasicTensor;

@@ -139,6 +139,13 @@ export class Tensor implements types.BasicTensor {
     return ops.reduceSum(this, axes, keepDims);
   }
 
+  // Mean the tensor over the given axes.
+  // axes defaults to all.
+  reduceMean(axes?: number[], keepDims = false): Tensor {
+    if (!axes) axes = rangeJS(this.rank);
+    return ops.reduceMean(this, axes, keepDims);
+  }
+
   // Take the maximum value over the given axes.
   // axes defaults to all.
   reduceMax(axes?: number[], keepDims = false): Tensor {
