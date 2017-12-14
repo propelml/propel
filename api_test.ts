@@ -345,6 +345,22 @@ function testReduceSum() {
   const f = (x) => $(x).mul(2).reduceSum([0]);
   const g = grad(f);
   assertAllEqual(g(a), [[2, 2, 2], [2, 2, 2]]);
+
+  const b = $([
+    [9, 8, 7],
+    [6, 5, 4],
+    [1, 2, 3],
+    [4, -4, -5],
+  ]);
+  const f2 = (x) => $(x).reduceSum([1]);
+  assertShapesEqual(f2(b).shape, [4]);
+  const g2 = grad(f2);
+  assertAllEqual(g2(b), [
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+  ]);
 }
 
 function testReduceMax() {

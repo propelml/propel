@@ -95,13 +95,13 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
 // Return a new tensor of given shape and dtype, filled with zeros.
 export function zeros(shape: types.Shape,
                       dtype: types.DType = "float32"): Tensor {
-  return ops.fill($(0, dtype), shape);
+  return ops.zeros(shape, dtype);
 }
 
 // Return a new tensor of given shape and dtype, filled with ones.
 export function ones(shape: types.Shape,
                      dtype: types.DType = "float32"): Tensor {
-  return ops.fill($(1, dtype), shape);
+  return ops.ones(shape, dtype);
 }
 
 export const matmul = (x, y) => $(x).matmul(y);
