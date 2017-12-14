@@ -241,6 +241,27 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r);
   }
 
+  relu(x: TensorTF): TensorTF {
+    const r = execute0("Relu", [x.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  sigmoid(x: TensorTF): TensorTF {
+    const r = execute0("Sigmoid", [x.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
+  abs(x: TensorTF): TensorTF {
+    const r = execute0("Abs", [x.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
   randn(shape: types.Shape, seed?: number): TensorTF {
     const shapeT = TensorTF.fromTypedArray(new Int32Array(shape),
       [shape.length]);

@@ -130,6 +130,21 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  relu(x: TensorDL): TensorDL {
+    const ndarray = x.math.relu(x.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  sigmoid(x: TensorDL): TensorDL {
+    const ndarray = x.math.sigmoid(x.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  abs(x: TensorDL): TensorDL {
+    const ndarray = x.math.abs(x.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
   randn(shape: types.Shape, seed?: number): TensorDL {
     const r = NDArray.randNormal(shape, 0, 1, "float32", seed);
     return new TensorDL(r, cpuMath);

@@ -33,6 +33,9 @@ export interface BackendOps {
   sinh(x: BasicTensor): BasicTensor;
   cosh(x: BasicTensor): BasicTensor;
   tanh(x: BasicTensor): BasicTensor;
+  relu(x: BasicTensor): BasicTensor;
+  sigmoid(x: BasicTensor): BasicTensor;
+  abs(x: BasicTensor): BasicTensor;
   randn(shape: Shape, seed?: number): BasicTensor;
   linspace(start: number, stop: number, num: number): BasicTensor;
   arange(start: number, limit: number, delta: number): BasicTensor;

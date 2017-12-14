@@ -94,6 +94,9 @@ export class Tensor implements types.BasicTensor {
   sinh = () => ops.sinh(this);
   cosh = () => ops.cosh(this);
   tanh = () => ops.tanh(this);
+  relu = () => ops.relu(this);
+  sigmoid = () => ops.sigmoid(this);
+  abs = () => ops.abs(this);
 
   transpose(perm?: types.TensorLike): Tensor {
     if (perm === undefined) {
