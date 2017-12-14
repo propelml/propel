@@ -135,6 +135,14 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
+export function ones(shape, dtype) {
+  return fill(convert(1, dtype), shape);
+}
+
+export function zeros(shape, dtype) {
+  return fill(convert(0, dtype), shape);
+}
+
 // TODO This is called for each arg - unnecessary compute. Make it so defBW
 // just takes a single argument.
 function addGrad(firstArg: boolean) {
