@@ -337,6 +337,17 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r);
   }
 
+  reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
+  {
+    const axesT = convertBasic(axes, "int32") as TensorTF;
+    const r = execute0("Mean", [x.handle, axesT.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["keep_dims", binding.ATTR_BOOL, keepDims],
+    ]);
+    return new TensorTF(r);
+  }
+
   reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
     const axesT = convertBasic(axes, "int32") as TensorTF;

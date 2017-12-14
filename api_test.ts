@@ -363,6 +363,40 @@ function testReduceSum() {
   ]);
 }
 
+function testReduceMean() {
+  const a = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  assertAllEqual(a.reduceMean([0]), [7.5, 6.5, 5.5]);
+  assertAllEqual(a.reduceMean([1]), [8, 5]);
+  assertAllEqual(a.reduceMean(), 6.5);
+
+  assertAllEqual(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
+  assertAllEqual(a.reduceMean([1], true), [[8], [5]]);
+
+  const f = (x) => $(x).mul(2).reduceMean([0]);
+  const g = grad(f);
+  assertAllEqual(g(a), [[1, 1, 1], [1, 1, 1]]);
+
+  const b = $([
+    [9, 8, 7],
+    [6, 5, 4],
+    [1, 2, 3],
+    [4, -4, -5],
+  ]);
+  const f2 = (x) => $(x).reduceMean([1]);
+  assertShapesEqual(f2(b).shape, [4]);
+  const g2 = grad(f2);
+  const t = 1 / 3;
+  assertAllClose(g2(b), [
+    [t, t, t],
+    [t, t, t],
+    [t, t, t],
+    [t, t, t],
+  ]);
+}
+
 function testReduceMax() {
   const a = $([
     [9, 5, 7],
@@ -736,6 +770,7 @@ testTranspose();
 testReverse();
 testMatMul();
 testReduceSum();
+testReduceMean();
 testReduceMax();
 testOnesAndZerosLike();
 testEqual();

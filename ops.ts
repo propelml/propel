@@ -102,8 +102,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
   return opFunc;
 }
 
-function convertSavedBasicsTos(saved: any[], cTensors:
-                                        Tensor[]) {
+function convertSavedBasicsTos(saved: any[], cTensors: Tensor[]) {
   if (!saved) return null;
   return saved.map((t) => {
     if ((t as types.BasicTensor).getData) {
@@ -301,6 +300,22 @@ defBW("reduceSum", (g, xs, xd, axes) => {
     gs[i] = 1;
   }
   return g.reshape(gs).mul(ones(xs, xd));
+});
+
+export let reduceMean = defFW("reduceMean", (x, axes, keepDims) => {
+  saveForBackward(axes, x.shape, x.dtype);
+  return bo.reduceMean(x, axes, keepDims);
+});
+defBW("reduceMean", (g, axes, shape, dtype) => {
+  let n = 1;
+  const gs = shape.slice(); // copy
+  for (const i of axes) {
+    const j = i < 0 ? shape.length + i : i;
+    n *= shape[j];
+    gs[j] = 1;
+  }
+  const a = convert(1 / n, "float32");
+  return g.reshape(gs).mul(fill(a, shape));
 });
 
 export let reduceMax = defFW("reduceMax", (x, axes, keepDims) => {
