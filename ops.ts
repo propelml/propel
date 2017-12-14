@@ -267,6 +267,37 @@ export let tanh = defFW("tanh", (x) => {
 });
 defBW("tanh", (g, x) => div(g, square(cosh(x))));
 
+export let relu = defFW("relu", (x) => {
+  saveForBackward(x);
+  return bo.relu(x);
+});
+defBW("relu", (g, x) => {
+  // TODO Optimize this: TF has a ReluGrad op. Also DL has step.
+  const z = x.zerosLike();
+  const cond = x.greater(z);
+  return cond.select(g, z);
+});
+
+export let sigmoid = defFW("sigmoid", (x) => {
+  const ans = bo.sigmoid(x);
+  saveForBackward(ans);
+  return ans;
+});
+defBW("sigmoid", (g, ans) => {
+  // s(x) * (1 - s(x))
+  return g.mul(ans.sub(ans.square()));
+});
+
+export let abs = defFW("abs", (x) => {
+  saveForBackward(x);
+  return bo.abs(x);
+});
+defBW("abs", (g, x) => {
+  const z = x.zerosLike();
+  const cond = x.greater(z);
+  return cond.select(g, g.neg());
+});
+
 export let transpose = defFW("transpose", (x, perm) => {
   saveForBackward(perm);
   return bo.transpose(x, perm);

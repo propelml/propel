@@ -196,6 +196,33 @@ function testTanh() {
   checkGrad(f, g, 1.0);
 }
 
+function testRelu() {
+  const f = (x) => $(x).relu();
+  assertAllEqual(f([-5, 0, 5]), [0, 0, 5]);
+  const g = grad(f);
+  assertAllClose(g([-5, 0.1, 5]), [0, 1, 1]);
+  checkGrad(f, g, 1.0);
+  checkGrad(f, g, -1.0);
+}
+
+function testSigmoid() {
+  const f = (x) => $(x).sigmoid();
+  assertAllClose(f([-1, 0, 1]), [0.26894142, 0.5, 0.73105858]);
+  const g = grad(f);
+  assertAllClose(g([-1, 0, 1]), [0.19661193, 0.25, 0.19661193]);
+  checkGrad(f, g, 1.0);
+  checkGrad(f, g, -1.0);
+}
+
+function testAbs() {
+  const f = (x) => $(x).abs();
+  assertAllEqual(f([-5, 0, 5]), [5, 0, 5]);
+  const g = grad(f);
+  assertAllClose(g([-5, 0.1, 5]), [-1, 1, 1]);
+  checkGrad(f, g, 1.0);
+  checkGrad(f, g, -1.0);
+}
+
 function testMultigrad() {
   function f(a, b) {
     return $(a).mul(2).add($(b).mul(3));
@@ -868,6 +895,9 @@ testSub();
 testDiv2();
 testDiv3();
 testTanh();
+testRelu();
+testSigmoid();
+testAbs();
 testMultigrad();
 testSquaredMatrix();
 testGradGradTanh();
