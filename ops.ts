@@ -135,6 +135,14 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
+export function ones(shape, dtype) {
+  return fill(convert(1, dtype), shape);
+}
+
+export function zeros(shape, dtype) {
+  return fill(convert(0, dtype), shape);
+}
+
 function addGrad(firstArg: boolean) {
   return (g: Tensor, sx: types.Shape, sy: types.Shape) => {
     // If sx and sy are the same (no broadcasting) just return g.
