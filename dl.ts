@@ -214,6 +214,33 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  greater(x: TensorDL, y: TensorDL): TensorDL {
+    const ndarray = x.math.greater(x.ndarray, y.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  greaterEqual(x: TensorDL, y: TensorDL): TensorDL {
+    const ndarray = x.math.greaterEqual(x.ndarray, y.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  less(x: TensorDL, y: TensorDL): TensorDL {
+    const ndarray = x.math.less(x.ndarray, y.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  lessEqual(x: TensorDL, y: TensorDL): TensorDL {
+    const ndarray = x.math.lessEqual(x.ndarray, y.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
+  select(cond: TensorDL, t: TensorDL, f: TensorDL): TensorDL {
+    const math = t.math;
+    const condArray = cond.ndarray.asType("bool");
+    const ndarray = math.select(condArray, t.ndarray, f.ndarray);
+    return new TensorDL(ndarray, math);
+  }
+
   slice(x: TensorDL, begin: number[], size: number[]): TensorDL {
     let nd;
     // DL doesn't handle negative sizes, so we translate them.

@@ -446,6 +446,114 @@ function testEqual() {
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
 }
 
+function testGreater() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 2],
+  ]);
+  const b = $([
+    [9, 3, 7],
+    [0, 8, 4],
+  ]);
+  const r = a.greater(b);
+  assert(r.dtype === "bool");
+  // TODO Allow assertAllEqual to handle boolean.
+  assertAllEqual(r, [ [0, 1, 0], [1, 0, 0] ]);
+  // greater isn't differentiable but it should have the same behavior as
+  // autograd does.
+  const f = (x, y) => $(x).greater(y);
+  const g = multigrad(f, [0, 1]);
+  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testGreaterEqual() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 2],
+  ]);
+  const b = $([
+    [9, 3, 7],
+    [0, 8, 4],
+  ]);
+  const r = a.greaterEqual(b);
+  assert(r.dtype === "bool");
+  // TODO Allow assertAllEqual to handle boolean.
+  assertAllEqual(r, [ [1, 1, 1], [1, 1, 0] ]);
+  // greaterEqual isn't differentiable but it should have the same behavior as
+  // autograd does.
+  const f = (x, y) => $(x).greaterEqual(y);
+  const g = multigrad(f, [0, 1]);
+  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testLess() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 2],
+  ]);
+  const b = $([
+    [9, 3, 7],
+    [0, 8, 4],
+  ]);
+  const r = a.less(b);
+  assert(r.dtype === "bool");
+  // TODO Allow assertAllEqual to handle boolean.
+  assertAllEqual(r, [ [0, 0, 0], [0, 0, 1] ]);
+  // less isn't differentiable but it should have the same behavior as
+  // autograd does.
+  const f = (x, y) => $(x).less(y);
+  const g = multigrad(f, [0, 1]);
+  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testLessEqual() {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 2],
+  ]);
+  const b = $([
+    [9, 3, 7],
+    [0, 8, 4],
+  ]);
+  const r = a.lessEqual(b);
+  assert(r.dtype === "bool");
+  // TODO Allow assertAllEqual to handle boolean.
+  assertAllEqual(r, [ [1, 0, 1], [0, 1, 1] ]);
+  // lessEqual isn't differentiable but it should have the same behavior as
+  // autograd does.
+  const f = (x, y) => $(x).lessEqual(y);
+  const g = multigrad(f, [0, 1]);
+  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+}
+
+function testSelect() {
+  const t = $([
+    [1, 2, 3],
+    [4, 5, 6],
+  ]);
+  const f = $([
+    [ 7,  8,  9],
+    [10, 11, 12],
+  ]);
+  // TODO Use false/true literals instead of 0 and 1 in cond.
+  const cond = $([
+    [1, 0, 1],
+    [0, 1, 0],
+  ], "bool");
+  const r = cond.select(t, f);
+  assertAllEqual(r, [
+    [ 1, 8,  3],
+    [10, 5, 12],
+  ]);
+  // select isn't differentiable.
+  const g = grad((c) => c.select(t, f));
+  assertAllEqual(g(cond), [ [0, 0, 0], [0, 0, 0] ]);
+}
+
 function testReshape() {
   const a = $([
     [9, 5, 7],
@@ -774,6 +882,11 @@ testReduceMean();
 testReduceMax();
 testOnesAndZerosLike();
 testEqual();
+testGreater();
+testGreaterEqual();
+testLess();
+testLessEqual();
+testSelect();
 testReshape();
 testFlatten();
 testSqueeze();

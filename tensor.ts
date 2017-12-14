@@ -163,6 +163,34 @@ export class Tensor implements types.BasicTensor {
     return ops.equal(this, $(x));
   }
 
+  // Returns a boolean tensor with the truth value of (this > x) element-wise.
+  greater(x: types.TensorLike): Tensor {
+    return ops.greater(this, $(x, this.dtype));
+  }
+
+  // Returns a boolean tensor with the truth value of (this >= x) element-wise.
+  greaterEqual(x: types.TensorLike): Tensor {
+    return ops.greaterEqual(this, $(x, this.dtype));
+  }
+
+  // Returns a boolean tensor with the truth value of (this < x) element-wise.
+  less(x: types.TensorLike): Tensor {
+    return ops.less(this, $(x, this.dtype));
+  }
+
+  // Returns a boolean tensor with the truth value of (this <= x) element-wise.
+  lessEqual(x: types.TensorLike): Tensor {
+    return ops.lessEqual(this, $(x, this.dtype));
+  }
+
+  // Selects elements from `t` or `f`, depending on the condition (this).
+  // this should be a boolean Tensor.
+  select(t: types.TensorLike, f: types.TensorLike): Tensor {
+    const tT = $(t);
+    const fT = $(f, tT.dtype);
+    return ops.select(this, tT, fT);
+  }
+
   // Return a slice from 'input'.
   // The output tensor is a tensor with dimensions described by 'size' whose
   // values are extracted from 'input' starting at the offsets in 'begin'.

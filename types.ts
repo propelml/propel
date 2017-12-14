@@ -48,6 +48,11 @@ export interface BackendOps {
   slice(x: BasicTensor, begin: number[], size: number[]): BasicTensor;
   reshape(x: BasicTensor, newShape: Shape): BasicTensor;
   equal(x: BasicTensor, y: BasicTensor): BasicTensor;
+  greater(x: BasicTensor, y: BasicTensor): BasicTensor;
+  greaterEqual(x: BasicTensor, y: BasicTensor): BasicTensor;
+  less(x: BasicTensor, y: BasicTensor): BasicTensor;
+  lessEqual(x: BasicTensor, y: BasicTensor): BasicTensor;
+  select(cond: BasicTensor, t: BasicTensor, f: BasicTensor): BasicTensor;
   softmax(x: BasicTensor): BasicTensor;
   logSoftmax(x: BasicTensor): BasicTensor;
   cast(x: BasicTensor, dtype: DType): BasicTensor;
