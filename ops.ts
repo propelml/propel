@@ -271,12 +271,15 @@ export let relu = defFW("relu", (x) => {
   saveForBackward(x);
   return bo.relu(x);
 });
-defBW("relu", (g, x) => {
-  // TODO Optimize this: TF has a ReluGrad op. Also DL has step.
-  const z = x.zerosLike();
-  const cond = x.greater(z);
-  return cond.select(g, z);
+defBW("relu", (g, x) => reluGrad(g, x));
+
+export let reluGrad = defFW("reluGrad", (grad, features) => {
+  saveForBackward(features);
+  return bo.reluGrad(grad, features);
 });
+defBW("reluGrad",
+  (g, features) => reluGrad(g, features),
+  null);
 
 export let sigmoid = defFW("sigmoid", (x) => {
   const ans = bo.sigmoid(x);

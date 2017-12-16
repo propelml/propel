@@ -41,7 +41,16 @@ function testCosh() {
   assertAllClose(actual, expected);
 }
 
+function testReluGrad() {
+  const grad = $([[-1, 42], [-3, 4]]);
+  const ans = $([[-7, 4], [ 0.1, -9 ]]);
+  const actual = bo.reluGrad(grad, ans);
+  assertAllEqual(actual.shape, [2, 2]);
+  assertAllClose(actual, [[0, 42], [-3,  0]]);
+}
+
 testShapes();
 testMul();
 testSquare();
 testCosh();
+testReluGrad();

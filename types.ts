@@ -34,6 +34,12 @@ export interface BackendOps {
   cosh(x: BasicTensor): BasicTensor;
   tanh(x: BasicTensor): BasicTensor;
   relu(x: BasicTensor): BasicTensor;
+  // reluGrad should not be exposed to the public API.
+  // Generally Propel wants to express gradient functions in terms of other
+  // known ops. However due to the ubiquity and performance necessities of
+  // ReLU, we break this design goal and expose a special op for ReLU's
+  // backward pass.
+  reluGrad(grads: BasicTensor, features: BasicTensor): BasicTensor;
   sigmoid(x: BasicTensor): BasicTensor;
   abs(x: BasicTensor): BasicTensor;
   randn(shape: Shape, seed?: number): BasicTensor;

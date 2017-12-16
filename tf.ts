@@ -248,6 +248,13 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r);
   }
 
+  reluGrad(grad: TensorTF, features: TensorTF): TensorTF {
+    const r = execute0("ReluGrad", [grad.handle, features.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(grad.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
   sigmoid(x: TensorTF): TensorTF {
     const r = execute0("Sigmoid", [x.handle], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
