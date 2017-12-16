@@ -2,7 +2,7 @@
 // tslint:disable-next-line:max-line-length
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
-import { fill } from "./api";
+import { fill, Params } from "./api";
 import { BWFunc, getBackwardFuncs } from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
@@ -68,6 +68,41 @@ export function multigrad(f, argnums?: number[]) {
   };
 }
 
+export type ParamsFn = (params: Params) => Tensor;
+export function gradParams(f: ParamsFn, names?: string[]) {
+  return function(params: Params): [Params, Tensor] {
+    pushNewTape();
+    // Watch the specified tensors..
+    if (names) {
+      for (const name of names) {
+        watch(params.get(name));
+      }
+    } else {
+      params.forEach((t, name) => watch(t));
+    }
+    let result = f(params); // Do the forward pass.
+    result = convert(result);
+    // At this point we need to turn params into an array, so it can be
+    // processed by imperativeGrad.
+    const order: string[] = [];
+    const targs: Tensor[] = [];
+    params.forEach((t, name) => {
+      order.push(name);
+      targs.push(t);
+    });
+
+    const grads = imperativeGrad(result, targs);
+    // Now grads is an array, which we want to turn back into a params object.
+    assert(grads.length === order.length);
+    const out = new Params();
+    for (let i = 0; i < order.length; ++i) {
+      const n = order[i];
+      out.set(n, grads[i]);
+    }
+    return [out, result];
+  };
+}
+
 export function multigradAndVal(f, argnums?: number[]) {
   return function(...args: types.TensorLike[]):
       [Tensor[], Tensor] {
@@ -89,7 +124,17 @@ export function multigradAndVal(f, argnums?: number[]) {
   };
 }
 
-// Returns the gradient with respect to a single input.
+// grad(f) returns a gradient function. If f is a function that maps
+// R^n to R^m, then the gradient function maps R^n to R^n.
+// When evaluated at a point, it gives the slope in each dimension of
+// the function f. For example:
+//
+//   let f = (x) => $(x).square();
+//
+// Then grad(f) is 2*x (being the derivative of x^2).
+//
+//   g = grad(f);
+//   g(10) // is 2 * 10
 export function grad(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
   return function(...args: types.TensorLike[]): Tensor {

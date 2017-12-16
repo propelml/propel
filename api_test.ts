@@ -1,5 +1,5 @@
-import { $, arange, backend, fill, grad, linspace, multigrad, ones, randn,
-  zeros } from "./api";
+import { $, arange, backend, fill, grad, linspace, multigrad, ones, Params,
+  randn, zeros } from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
 
@@ -889,6 +889,21 @@ function testSoftmaxCE() {
   ]);
 }
 
+function testParams() {
+  const params = new Params();
+  // randn
+  const a = params.randn("a", [2, 3]);
+  assert(a.getData()[0] !== 0);
+  assertShapesEqual(a.shape, [2, 3]);
+  const aa = params.randn("a", [2, 3]);
+  assertAllEqual(a, aa);
+  // zeros
+  const b = params.zeros("b", [2, 3]);
+  assertAllEqual(b, [[0, 0, 0], [0, 0, 0]]);
+  const bb = params.zeros("b", [2, 3]);
+  assertAllEqual(b, bb);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -945,3 +960,4 @@ testSlice();
 testCast();
 testOneHot();
 testSoftmaxCE();
+testParams();
