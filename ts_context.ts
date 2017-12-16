@@ -160,7 +160,7 @@ export function Context() {
     const code = importSources[href];
     if (typeof code !== "string") {
       throw new Error(`Module source not available: ${href}\n` +
-                      `\tin${base}`);
+                      `    from ${base}`);
     }
 
     const exports = {};
