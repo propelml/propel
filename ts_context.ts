@@ -39,6 +39,10 @@ function hrefGetPath(href) {
    return p;
 }
 
+export function fileext(s) {
+  return /(?:\.([^\/\\.]*))?$/.exec(s)[1] || "";
+}
+
 async function getModuleSource(href) {
   if (NODE) {
     const url = new W3URL(href);
@@ -59,14 +63,16 @@ async function getModuleSource(href) {
   return await res.text();
 }
 
-function getRelativeImports(code) {
+function getRelativeImports(code, ext) {
   const imports = [];
+  const kind = (ext === "ts") ? ts.ScriptKind.TS
+                              : ts.ScriptKind.JS;
   const sourceFile = ts.createSourceFile(
     "eval.ts",
     code,
     ts.ScriptTarget.ES2015,
     false, // setParentNodes
-    ts.ScriptKind.TS);
+    kind);
   walk(sourceFile);
   return imports;
 
@@ -81,8 +87,8 @@ function getRelativeImports(code) {
   }
 }
 
-function getImports(code, baseHref) {
-  return getRelativeImports(code)
+function getImports(code, baseHref, ext) {
+  return getRelativeImports(code, ext)
     .filter(href => !(href in BUILTINS))
     .map(href => resolveImport(href, baseHref));
 }
@@ -115,14 +121,36 @@ export function Context() {
   const importSources = {};
   const importModules = {};
 
-  async function fetchAndLoadRecursiveImports(url) {
-    if (!/\.[jt]s$/.exec(url)) {
-      url += ".ts";
+  async function fetchAndLoadRecursiveImports(href) {
+    let ext = fileext(href);
+    const tries = (ext === "ts" || ext === "js")
+                   ? [ href ]
+                   : [ `${href}.ts`, `${href}.js` ];
+    let code, error;
+    for (href of tries) {
+      console.log(href);
+      try {
+        code = await getModuleSource(href);
+        error = undefined;
+        ext = fileext(href);
+        break;
+      } catch (e) {
+        error = e;
+      }
     }
-    const code = await getModuleSource(url);
-    const imports = getImports(code, url);
+
+    if (error) {
+      throw error;
+    }
+
+    const imports = getImports(code, href, ext);
     await preloadImports(imports);
-    return transpile(code);
+
+    if (ext === "ts") {
+      code = transpile(code);
+    }
+
+    return code;
   }
 
   async function preloadImport(url) {
@@ -199,7 +227,7 @@ export function Context() {
 
   this.eval = async(code) => {
     const js = transpile(code);
-    const imports = getImports(code, replBaseHref);
+    const imports = getImports(code, replBaseHref, "ts");
     try {
       await preloadImports(imports);
     } catch (error) {
