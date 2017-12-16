@@ -53,6 +53,9 @@ async function getModuleSource(href) {
   }
   console.log("fetching " + href);
   const res = await w3fetch(href, { mode: "no-cors" });
+  if (!res.ok) {
+    throw new Error("Fetch failed: " + JSON.stringify(res));
+  }
   return await res.text();
 }
 
