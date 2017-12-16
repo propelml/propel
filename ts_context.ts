@@ -18,9 +18,7 @@ if (WEB) {
 }
 
 const BUILTINS = {
-  "./dl": dl, // TODO: do not have this as a builtin
-  fs: NODE && nodeRequire("fs"),
-  path: NODE && nodeRequire("path")
+  seedrandom: require("seedrandom")
 };
 
 function resolveImport(href, baseHref) {
@@ -89,7 +87,7 @@ function getRelativeImports(code, ext) {
 
 function getImports(code, baseHref, ext) {
   return getRelativeImports(code, ext)
-    .filter(href => !(href in BUILTINS))
+    .filter(href => !/^\w*$/.test(href))
     .map(href => resolveImport(href, baseHref));
 }
 
