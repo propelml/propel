@@ -4,12 +4,27 @@ import { NDArrayMathCPU }
 import { MatrixOrientation }
   from "./deps/deeplearnjs/src/math/backends/types/matmul";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
-import { Array2D, Array3D, Array4D, NDArray }
+import { Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./deps/deeplearnjs/src/math/ndarray";
 import * as types from "./types";
 import { assert } from "./util";
 
 const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
+
+// TODO Propel largely follows the dtype scheme layed out by DL, but
+// additonally adds the uint8 type. This function will map that down to int32.
+// This is a hack and a potential source of bugs.
+type DTypeDL = "float32" | "int32" | "bool";
+function dtypeDL(propelDtype: types.DType): DTypeDL {
+  switch (propelDtype) {
+      case "int32":
+      case "float32":
+      case "bool":
+        return propelDtype;
+      case "uint8":
+        return "int32";
+  }
+}
 
 export class TensorDL implements types.BasicTensor {
   readonly dtype: types.DType;
@@ -254,6 +269,18 @@ export class OpsDL implements types.BackendOps {
     const condArray = cond.ndarray.asType("bool");
     const ndarray = math.select(condArray, t.ndarray, f.ndarray);
     return new TensorDL(ndarray, math);
+  }
+
+  sign(x: TensorDL): TensorDL {
+    const m = x.math;
+    const a = m.step(x.ndarray);  // maps neg to 0 and pos to 1
+    // The following just does (2 * a - 1) which gives us sign.
+    const dt = dtypeDL(x.dtype);
+    const s2 = Scalar.new(2, dt);
+    const s1 = Scalar.new(1, dt);
+    const a2 = m.scalarTimesArray(s2, a);
+    const b = m.arrayMinusScalar(a2, s1);
+    return new TensorDL(b, m);
   }
 
   slice(x: TensorDL, begin: number[], size: number[]): TensorDL {

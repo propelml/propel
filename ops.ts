@@ -377,6 +377,9 @@ export let select = defFW("select", (cond, x, y) => {
 });
 defBW("select", null, null, null); // Not differentiable.
 
+export const sign = defFW("sign", (x) => bo.sign(x));
+defBW("sign", null); // Not differentiable.
+
 export let slice = defFW("slice", (x, begin, size) => {
   saveForBackward(x.shape, begin, size);
   return bo.slice(x, begin, size);

@@ -581,6 +581,14 @@ function testSelect() {
   assertAllEqual(g(cond), [ [0, 0, 0], [0, 0, 0] ]);
 }
 
+function testSign() {
+  const x = $([-2, 5, -1, 3]);
+  assertAllEqual(x.sign(), [-1, 1, -1, 1]);
+  // sign isn't differentiable.
+  const g = grad((c) => c.sign());
+  assertAllEqual(g(x), [0, 0, 0, 0]);
+}
+
 function testReshape() {
   const a = $([
     [9, 5, 7],
@@ -917,6 +925,7 @@ testGreaterEqual();
 testLess();
 testLessEqual();
 testSelect();
+testSign();
 testReshape();
 testFlatten();
 testSqueeze();

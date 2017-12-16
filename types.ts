@@ -56,6 +56,7 @@ export interface BackendOps {
   less(x: BasicTensor, y: BasicTensor): BasicTensor;
   lessEqual(x: BasicTensor, y: BasicTensor): BasicTensor;
   select(cond: BasicTensor, t: BasicTensor, f: BasicTensor): BasicTensor;
+  sign(x: BasicTensor): BasicTensor;
   softmax(x: BasicTensor): BasicTensor;
   logSoftmax(x: BasicTensor): BasicTensor;
   cast(x: BasicTensor, dtype: DType): BasicTensor;

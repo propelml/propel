@@ -194,6 +194,10 @@ export class Tensor implements types.BasicTensor {
     return ops.select(this, tT, fT);
   }
 
+  // Returns an element-wise indication of the sign of a number.
+  // -1 for negative values and 1 for positive values.
+  sign = () => ops.sign(this);
+
   // Return a slice from 'input'.
   // The output tensor is a tensor with dimensions described by 'size' whose
   // values are extracted from 'input' starting at the offsets in 'begin'.

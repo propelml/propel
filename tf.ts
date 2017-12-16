@@ -422,6 +422,13 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r);
   }
 
+  sign(x: TensorTF): TensorTF {
+    const r = execute0("Sign", [x.handle], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+    ]);
+    return new TensorTF(r);
+  }
+
   slice(x: TensorTF, begin: number[], size: number[]): TensorTF {
     const beginT = convertBasic(begin, "int32") as TensorTF;
     const sizeT = convertBasic(size, "int32") as TensorTF;
