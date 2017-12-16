@@ -7,6 +7,11 @@ import * as ops from "./ops";
 import * as types from "./types";
 import { assert, assertShapesEqual } from "./util";
 
+export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
+  from "./backprop";
+import { gradParams, ParamsFn }
+  from "./backprop";
+
 // Turns a javascript array of numbers
 // into a tensor. Like this:
 //
@@ -18,22 +23,6 @@ import { assert, assertShapesEqual } from "./util";
 export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
   return convert(t, dtype);
 }
-
-// grad(f) returns a gradient function. If f is a function that maps
-// R^n to R^m, then the gradient function maps R^n to R^n.
-// When evaluated at a point, it gives the slope in each dimension of
-// the function f. For example:
-//
-//   let f = (x) => $(x).square();
-//
-// Then grad(f) is 2*x (being the derivative of x^2).
-//
-//   g = grad(f);
-//   g(10) // is 2 * 10
-export const grad = backprop.grad;
-export const multigrad = backprop.multigrad;
-export const multigradAndVal = backprop.multigradAndVal;
-export const gradAndVal = backprop.gradAndVal;
 
 // Returns the identity matrix of a given size.
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
@@ -103,35 +92,108 @@ export function ones(shape: types.Shape,
 export const matmul = (x, y) => $(x).matmul(y);
 
 export interface ArgsSGD {
-  lossFn: (...params: Tensor[]) => Tensor;
-  params: Tensor[];
-  callback: (step: number, params: Tensor[], loss: Tensor) => void;
+  callback: (step: number, loss: number, params: Params) => void;
+  lossFn: ParamsFn;
+  params?: Params;
   learningRate: number;
-  steps: number;
   momentum: number;
+  steps: number;
 }
 
 // Stochastic gradient descent with momentum.
-export function sgd(args: ArgsSGD) {
+export function sgd(args: ArgsSGD): Params {
   const m = args.momentum;
   assert(0 <= m && m <= 1.0);
-  const params = args.params;
+  let params = args.params ? args.params : new Params();
   // Get gradient of objective using autograd.
-  const lossGradVal = multigradAndVal(args.lossFn);
-  const velocity = params.map((p) => p.zerosLike());
+  const gradFn = gradParams(args.lossFn);
+  // TODO Design note. The name "Params" doesn't fit well with what velocity
+  // is. Maybe "Params" should be named more generically, like "NamedTensors".
+  // But I prefer to have a more nuanced name than "NamedTensors".  "Params"
+  // works for now.
+  const velocity = new Params();
+  const updated = new Params();
   // Training loop.
-  for (let step = 0; step < args.steps; step++) {
+  for (let step = 1; step < args.steps; ++step) {
     // Forward/Backward pass
-    const [pGrads, loss] = lossGradVal(...params);
+    const [grads, loss] = gradFn(params);
     assert(loss.rank === 0);
-    assert(pGrads.length === params.length);
+    assert(grads instanceof Params);
     // Update each param tensor.
-    for (let j = 0; j < params.length; j++) {
-      assertShapesEqual(params[j].shape, pGrads[j].shape);
-      velocity[j] = velocity[j].mul(m).sub(pGrads[j].mul(1 - m));
-      params[j] = params[j].add(velocity[j].mul(args.learningRate));
-    }
-    if (args.callback) args.callback(step, params, loss);
+    grads.forEach((g, name) => {
+      const p = params.get(name);
+      let v = velocity.zeros(name, p.shape);
+      if (step > 1) {
+        assertShapesEqual(p.shape, g.shape);
+        assertShapesEqual(p.shape, v.shape);
+      }
+      // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
+      // 10% from g (grad).
+      v = velocity.set(name, v.mul(m).sub(g.mul(1 - m)));
+      // p += v * lr
+      updated.set(name, p.add(v.mul(args.learningRate)));
+    });
+    params = updated;
+
+    const lossVal = loss.getData()[0];
+    if (args.callback) args.callback(step, lossVal, params);
   }
-  return params;
+  return updated;
+}
+
+// A collection of named Tensors. Used with sgd().
+// Iterate over it like this:
+//
+//    params.forEach((tensor, name) => {
+//      console.log("name", tensor);
+//    });
+//
+export class Params {
+  // Note TS doesn't allow extending Map:
+  // https://github.com/Microsoft/TypeScript/issues/10853
+  store = new Map<string, Tensor>();
+
+  has(name: string): boolean {
+    return this.store.has(name);
+  }
+
+  get(name: string): Tensor {
+    return this.store.get(name);
+  }
+
+  set(name: string, t: Tensor): Tensor {
+    this.store.set(name, t);
+    return t;
+  }
+
+  forEach(cb): void {
+    this.store.forEach(cb);
+  }
+
+  // If the given name does not exist in the parameters object, this
+  // initializes a new random normal tensor. If the name does exist
+  // in the parameters object, this just returns that stored tensor.
+  randn(name: string, shape: types.Shape, scale = 0.1): Tensor {
+    if (this.has(name)) {
+      return this.get(name);
+    }
+    // Initialize.
+    const t = randn(shape).mul(scale);
+    this.set(name, t);
+    return t;
+  }
+
+  // If the given name does not exist in the parameters object, this
+  // initializes a new tensor with zero values. If the name does exist
+  // in the parameters object, this just returns that stored tensor.
+  zeros(name: string, shape: types.Shape, dtype:
+        types.DType = "float32"): Tensor {
+    if (this.has(name)) {
+      return this.get(name);
+    }
+    // Initialize.
+    const t = zeros(shape);
+    this.set(name, t);
+    return t;
+  }
 }
