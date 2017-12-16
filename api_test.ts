@@ -1,5 +1,5 @@
 import { $, arange, backend, fill, grad, linspace, multigrad, ones, randn,
-  tanh, zeros } from "./api";
+  zeros } from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
 
@@ -29,7 +29,7 @@ function testArange() {
 }
 
 function testRandn() {
-  const t = randn(2, 3);
+  const t = randn([2, 3]);
   assertAllEqual(t.shape, [2, 3]);
   const d = t.getData();
   console.log("randn", d);
@@ -188,7 +188,7 @@ function testDiv3() {
 }
 
 function testTanh() {
-  const f = tanh;
+  const f = (x) => $(x).tanh();
   assertClose(f(1), 0.7615);
   assertClose(f(16), 0.9999);
   const g = grad(f);
@@ -239,7 +239,7 @@ function testMultigrad() {
 }
 
 function testGradGradTanh() {
-  const f = tanh;
+  const f = (x) => $(x).tanh();
   assertAllClose(f([1, 16]), [0.7615, 0.9999]);
   const g = grad(grad(f));
   // def g(x): return -2 * np.tanh(x) / np.square(np.cosh(x))
