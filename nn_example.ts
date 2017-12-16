@@ -1,4 +1,4 @@
-// A multi-layer perceptron for classification of MNIST handwritten digits.
+// Simple MNIST classifier.
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
 import { $, randn, sgd, Tensor } from "./api";
@@ -22,7 +22,7 @@ function initRandomParams(scale: number, layerSizes: number[]): Tensor[] {
   return params;
 }
 
-// Implements a fully-connected network with tanh activations.
+// Implements a fully-connected network with ReLU activations.
 // Returns logits.
 // @param params A list of parameters.
 // @param images An (N x 28 x 28) tensor.
@@ -33,7 +33,7 @@ function inference(params: Tensor[], images: Tensor) {
     const weight = params[i];
     const bias = params[i + 1];
     outputs = inputs.matmul(weight).add(bias);
-    inputs = outputs.tanh();
+    inputs = outputs.relu();
   }
   return outputs;
 }
