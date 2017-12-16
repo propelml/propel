@@ -188,8 +188,12 @@ export function Context() {
 
     const code = importSources[href];
     if (typeof code !== "string") {
-      throw new Error(`Module source not available: ${href}\n` +
-                      `    from ${base}`);
+      if (WEB) {
+        throw new Error(`Module source not available: ${href}\n` +
+                        `    from ${base}`);
+      } else {
+        return nodeRequire(hrefGetPath(href));
+      }
     }
 
     const exports = {};
