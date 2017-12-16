@@ -77,12 +77,7 @@ export const arange = function(...args: number[]): Tensor {
   return new Tensor(t);
 };
 
-export const square = (x) => $(x).square();
-export const sinh = (x) => $(x).sinh();
-export const cosh = (x) => $(x).cosh();
-export const tanh = (x) => $(x).tanh();
-
-export function randn(...shape: number[]): Tensor {
+export function randn(shape: number[]): Tensor {
   const t = bo.randn(shape);
   return new Tensor(t);
 }

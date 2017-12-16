@@ -16,8 +16,8 @@ function initRandomParams(scale: number, layerSizes: number[]): Tensor[] {
   for (let i = 0; i < layerSizes.length - 1; ++i) {
     const m = layerSizes[i];
     const n = layerSizes[i + 1];
-    params.push(randn(m, n).mul(scale)); // weight
-    params.push(randn(n).mul(scale)); // bias
+    params.push(randn([m, n]).mul(scale)); // weight
+    params.push(randn([n]).mul(scale)); // bias
   }
   return params;
 }
