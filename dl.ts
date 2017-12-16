@@ -150,6 +150,13 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  reluGrad(grad: TensorDL, features: TensorDL): TensorDL {
+    const m = grad.math;
+    const s = m.step(features.ndarray);
+    const ndarray = m.multiply(grad.ndarray, s);
+    return new TensorDL(ndarray, m);
+  }
+
   sigmoid(x: TensorDL): TensorDL {
     const ndarray = x.math.sigmoid(x.ndarray);
     return new TensorDL(ndarray, x.math);

@@ -203,6 +203,8 @@ function testRelu() {
   assertAllClose(g([-5, 0.1, 5]), [0, 1, 1]);
   checkGrad(f, g, 1.0);
   checkGrad(f, g, -1.0);
+  const g2 = grad(g);
+  assertAllClose(g2([-5, 0.1, 5]), [0, 0, 0]);
 }
 
 function testSigmoid() {
