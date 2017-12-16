@@ -45,10 +45,25 @@ if (binding) {
 }
 
 // Sugar for single value ops.
-export function execute0(opName, inputs, attrs) {
-  const r = binding.execute(ctx, opName, attrs, inputs);
+export function execute0(opName: string, inputs: TensorTF[], attrs): TensorTF {
+  const handles = inputs.map((t) => t.handle);
+  const r = binding.execute(ctx, opName, attrs, handles);
   assertEqual(r.length, 1);
-  return r[0];
+  return new TensorTF(r[0]);
+}
+
+// Execute a simple op, which may have multiple inputs, but only a single
+// attribute T, and only returns a single value.
+// The returned tensor dtype will be same as first input, unless specified by
+// the dtype argument.
+export function execute1(opName: string, inputs: TensorTF[],
+                         dtype?: types.DType): TensorTF {
+  const handles = inputs.map((t) => t.handle);
+  const dtypeTF = dtype == null ? binding.getDType(handles[0])
+                                : dtypePropel2TF(dtype);
+  const attrs = [["T", binding.ATTR_TYPE, dtypeTF]];
+  const r = binding.execute(ctx, opName, attrs, handles);
+  return new TensorTF(r[0]);
 }
 
 function dtypeTF2Propel(dtypeTF: number): types.DType {
@@ -135,52 +150,31 @@ export class TensorTF implements types.BasicTensor {
 export class OpsTF implements types.BackendOps {
 
   add(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Add", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Add", [x, y]);
   }
 
   sub(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Sub", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Sub", [x, y]);
   }
 
   mul(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Mul", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Mul", [x, y]);
   }
 
   div(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Div", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Div", [x, y]);
   }
 
   neg(x: TensorTF): TensorTF {
-    const r = execute0("Neg", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Neg", [x]);
   }
 
   exp(x: TensorTF): TensorTF {
-    const r = execute0("Exp", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Exp", [x]);
   }
 
   log(x: TensorTF): TensorTF {
-    const r = execute0("Log", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Log", [x]);
   }
 
   eye(size: number, dtype: types.DType = "float32"): types.BasicTensor {
@@ -188,17 +182,11 @@ export class OpsTF implements types.BackendOps {
   }
 
   onesLike(x: TensorTF): TensorTF {
-    const r = execute0("OnesLike", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("OnesLike", [x]);
   }
 
   zerosLike(x: TensorTF): TensorTF {
-    const r = execute0("ZerosLike", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("ZerosLike", [x]);
   }
 
   fill(value: TensorTF, shape: types.Shape): TensorTF {
@@ -207,72 +195,44 @@ export class OpsTF implements types.BackendOps {
     }
     const dims = TensorTF.fromTypedArray(new Int32Array(shape),
       [shape.length]);
-    const r = execute0("Fill", [dims.handle, value.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(value.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Fill", [dims, value], value.dtype);
   }
 
   square(x: TensorTF): TensorTF {
-    const r = execute0("Square", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Square", [x]);
   }
 
   sinh(x: TensorTF): TensorTF {
-    const r = execute0("Sinh", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Sinh", [x]);
   }
 
   cosh(x: TensorTF): TensorTF {
-    const r = execute0("Cosh", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Cosh", [x]);
   }
 
   tanh(x: TensorTF): TensorTF {
-    const r = execute0("Tanh", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Tanh", [x]);
   }
 
   relu(x: TensorTF): TensorTF {
-    const r = execute0("Relu", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Relu", [x]);
   }
 
   reluGrad(grad: TensorTF, features: TensorTF): TensorTF {
-    const r = execute0("ReluGrad", [grad.handle, features.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(grad.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("ReluGrad", [grad, features]);
   }
 
   sigmoid(x: TensorTF): TensorTF {
-    const r = execute0("Sigmoid", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Sigmoid", [x]);
   }
 
   abs(x: TensorTF): TensorTF {
-    const r = execute0("Abs", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Abs", [x]);
   }
 
   randn(shape: types.Shape, seed?: number): TensorTF {
     const shapeT = TensorTF.fromTypedArray(new Int32Array(shape),
       [shape.length]);
-    const args = [shapeT.handle];
     if (typeof seed !== "number") seed = 0;
     const attrs = [
       ["dtype", binding.ATTR_TYPE, binding.TF_FLOAT], // output
@@ -280,201 +240,156 @@ export class OpsTF implements types.BackendOps {
       ["seed", binding.ATTR_INT, seed],
       ["seed2", binding.ATTR_INT, seed],
     ];
-    const r = execute0("RandomStandardNormal", args, attrs);
-    return new TensorTF(r);
+    return execute0("RandomStandardNormal", [shapeT], attrs);
   }
 
   linspace(start: number, stop: number, num: number): TensorTF {
     const startT = floatScalar(start);
     const stopT = floatScalar(stop);
     const numT = int32Scalar(num);
-    const args = [startT.handle, stopT.handle, numT.handle];
-    const r = execute0("LinSpace", args, [
+    return execute0("LinSpace", [startT, stopT, numT], [
       ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
-    return new TensorTF(r);
   }
 
   arange(start: number, limit: number, delta: number): TensorTF {
     const startT = int32Scalar(start);
     const limitT = int32Scalar(limit);
     const deltaT = int32Scalar(delta);
-    const args = [startT.handle, limitT.handle, deltaT.handle];
-    const r = execute0("Range", args, [
+    const args = [startT, limitT, deltaT];
+    return execute0("Range", args, [
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
-    return new TensorTF(r);
   }
 
   transpose(x: TensorTF, perm: TensorTF): TensorTF {
-    const r = execute0("Transpose", [x.handle, perm.handle], [
+    return execute0("Transpose", [x, perm], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tperm", binding.ATTR_TYPE, binding.getDType(perm.handle)],
     ]);
-    return new TensorTF(r);
   }
 
   reverse(x: TensorTF, dims: TensorTF): TensorTF {
     assert(dims.dtype === "bool");
-    const r = execute0("Reverse", [x.handle, dims.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Reverse", [x, dims]);
   }
 
   matmul(x: TensorTF, y: TensorTF, transposeA = false,
          transposeB = false): TensorTF {
-    const r = execute0("MatMul", [x.handle, y.handle], [
+    return execute0("MatMul", [x, y], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["transpose_a", binding.ATTR_BOOL, transposeA],
       ["transpose_b", binding.ATTR_BOOL, transposeB],
     ]);
-    return new TensorTF(r);
   }
 
   argmax(x: TensorTF, axis: number): TensorTF {
     const axisT = int32Scalar(axis);
-    const r = execute0("ArgMax", [x.handle, axisT.handle], [
+    return execute0("ArgMax", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
-    return new TensorTF(r);
   }
 
   argmin(x: TensorTF, axis: number): TensorTF {
     const axisT = int32Scalar(axis);
-    const r = execute0("ArgMin", [x.handle, axisT.handle], [
+    return execute0("ArgMin", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
-    return new TensorTF(r);
   }
 
   reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
     const axesT = convertBasic(axes, "int32") as TensorTF;
-    const r = execute0("Sum", [x.handle, axesT.handle], [
+    return execute0("Sum", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
-    return new TensorTF(r);
   }
 
   reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
     const axesT = convertBasic(axes, "int32") as TensorTF;
-    const r = execute0("Mean", [x.handle, axesT.handle], [
+    return execute0("Mean", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
-    return new TensorTF(r);
   }
 
   reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
     const axesT = convertBasic(axes, "int32") as TensorTF;
-    const r = execute0("Max", [x.handle, axesT.handle], [
+    return execute0("Max", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
       ["keep_dims", binding.ATTR_BOOL, keepDims],
     ]);
-    return new TensorTF(r);
   }
 
   equal(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Equal", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Equal", [x, y]);
   }
 
   greater(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Greater", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Greater", [x, y]);
   }
 
   greaterEqual(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("GreaterEqual", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("GreaterEqual", [x, y]);
   }
 
   less(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("Less", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Less", [x, y]);
   }
 
   lessEqual(x: TensorTF, y: TensorTF): TensorTF {
-    const r = execute0("LessEqual", [x.handle, y.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("LessEqual", [x, y]);
   }
 
   select(cond: TensorTF, t: TensorTF, f: TensorTF): TensorTF {
-    const args = [cond.handle, t.handle, f.handle];
-    const r = execute0("Select", args, [
-      ["T", binding.ATTR_TYPE, binding.getDType(t.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Select", [cond, t, f], t.dtype);
   }
 
   sign(x: TensorTF): TensorTF {
-    const r = execute0("Sign", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Sign", [x]);
   }
 
   slice(x: TensorTF, begin: number[], size: number[]): TensorTF {
     const beginT = convertBasic(begin, "int32") as TensorTF;
     const sizeT = convertBasic(size, "int32") as TensorTF;
-    const r = execute0("Slice", [x.handle, beginT.handle, sizeT.handle], [
+    return execute0("Slice", [x, beginT, sizeT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Index", binding.ATTR_TYPE, binding.TF_INT32],
     ]);
-    return new TensorTF(r);
   }
 
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
     const shapeT = convertBasic(newShape, "int32") as TensorTF;
-    const r = execute0("Reshape", [x.handle, shapeT.handle], [
+    return execute0("Reshape", [x, shapeT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tshape", binding.ATTR_TYPE, binding.getDType(shapeT.handle)],
     ]);
-    return new TensorTF(r);
   }
 
   softmax(x: TensorTF): TensorTF {
-    const r = execute0("Softmax", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("Softmax", [x]);
   }
 
   logSoftmax(x: TensorTF): TensorTF {
-    const r = execute0("LogSoftmax", [x.handle], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-    ]);
-    return new TensorTF(r);
+    return execute1("LogSoftmax", [x]);
   }
 
   cast(x: TensorTF, dtype: types.DType): TensorTF {
-    const r = execute0("Cast", [x.handle], [
+    return execute0("Cast", [x], [
       ["SrcT", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["DstT", binding.ATTR_TYPE, dtypePropel2TF(dtype)],
     ]);
-    return new TensorTF(r);
   }
 
   oneHot(x: TensorTF, depth: number, onValue: number,
@@ -485,12 +400,10 @@ export class OpsTF implements types.BackendOps {
     const depthT = int32Scalar(depth);
     const onT = floatScalar(onValue);
     const offT = floatScalar(offValue);
-    const args = [x.handle, depthT.handle, onT.handle, offT.handle];
-    const r = execute0("OneHot", args, [
+    return execute0("OneHot", [x, depthT, onT, offT], [
       ["T", binding.ATTR_TYPE, binding.getDType(onT.handle)],
       ["TI", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["axis", binding.ATTR_INT, -1],
     ]);
-    return new TensorTF(r);
   }
 }
