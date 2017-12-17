@@ -1,7 +1,7 @@
 // Simple MNIST classifier.
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
-import { $, Params, sgd, Tensor } from "./api";
+import { $, OptimizerSGD, Params, Tensor } from "./api";
 import * as mnist from "./mnist";
 
 // Hyperparameters
@@ -68,36 +68,24 @@ async function accuracy(params: Params, dataset,
 }
 
 async function main() {
-  let params = new Params();
-
-  for (let step = 1; step <= 10000; ++step) {
+  const opt = new OptimizerSGD();
+  while (opt.steps < 10000) {
     const {images, labels} = await datasetTrain.next();
 
-    let loss_: number; // loss value to be filled in by callback.
-
-    // Take a step of SGD.
-    params = sgd({
-      callback: (step: number, loss: number, params: Params) => {
-        loss_ = loss;
-      },
-      learningRate,
-      lossFn: (params: Params) => {
-        return loss(images, labels, params);
-      },
-      momentum,
-      params,
-      steps: 1,
+    // Take a step of SGD. Update the parameters opt.params.
+    const l = opt.step(learningRate, momentum, (params: Params) => {
+      return loss(images, labels, params);
     });
 
-    if (step % 100 === 0) {
-      const trainAcc = await accuracy(params, datasetTrain, 2 * batchSize);
-      console.log("step", step,
-                  "loss", loss_.toFixed(3),
+    if (opt.steps % 100 === 0) {
+      const trainAcc = await accuracy(opt.params, datasetTrain, 2 * batchSize);
+      console.log("step", opt.steps,
+                  "loss", l.toFixed(3),
                   "train accuracy", (100 * trainAcc).toFixed(1));
     }
 
-    if (step % 1000 === 0) {
-      const testAcc = await accuracy(params, datasetTest, 10 * batchSize);
+    if (opt.steps % 1000 === 0) {
+      const testAcc = await accuracy(opt.params, datasetTest, 10 * batchSize);
       console.log("test accuracy", (100 * testAcc).toFixed(1));
     }
   }

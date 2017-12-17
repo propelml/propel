@@ -91,56 +91,6 @@ export function ones(shape: types.Shape,
 
 export const matmul = (x, y) => $(x).matmul(y);
 
-export interface ArgsSGD {
-  callback: (step: number, loss: number, params: Params) => void;
-  lossFn: ParamsFn;
-  params?: Params;
-  learningRate: number;
-  momentum: number;
-  steps: number;
-}
-
-// Stochastic gradient descent with momentum.
-export function sgd(args: ArgsSGD): Params {
-  const m = args.momentum;
-  assert(0 <= m && m <= 1.0);
-  let params = args.params ? args.params : new Params();
-  // Get gradient of objective using autograd.
-  const gradFn = gradParams(args.lossFn);
-  // TODO Design note. The name "Params" doesn't fit well with what velocity
-  // is. Maybe "Params" should be named more generically, like "NamedTensors".
-  // But I prefer to have a more nuanced name than "NamedTensors".  "Params"
-  // works for now.
-  const velocity = new Params();
-  const updated = new Params();
-  // Training loop.
-  for (let step = 1; step <= args.steps; ++step) {
-    // Forward/Backward pass
-    const [grads, loss] = gradFn(params);
-    assert(loss.rank === 0);
-    assert(grads instanceof Params);
-    // Update each param tensor.
-    grads.forEach((g, name) => {
-      const p = params.get(name);
-      let v = velocity.zeros(name, p.shape);
-      if (step > 1) {
-        assertShapesEqual(p.shape, g.shape);
-        assertShapesEqual(p.shape, v.shape);
-      }
-      // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
-      // 10% from g (grad).
-      v = velocity.set(name, v.mul(m).sub(g.mul(1 - m)));
-      // p += v * lr
-      updated.set(name, p.add(v.mul(args.learningRate)));
-    });
-    params = updated;
-
-    const lossVal = loss.getData()[0];
-    if (args.callback) args.callback(step, lossVal, params);
-  }
-  return updated;
-}
-
 // A collection of named Tensors. Used with sgd().
 // Iterate over it like this:
 //
@@ -195,5 +145,56 @@ export class Params {
     const t = zeros(shape);
     this.set(name, t);
     return t;
+  }
+}
+
+// Stochastic gradient descent with momentum.
+export class OptimizerSGD {
+  steps: number;
+  params: Params;
+  grads?: Params;
+  // TODO Design note. The name "Params" doesn't fit well with what velocity
+  // is. Maybe "Params" should be named more generically, like
+  // "NamedTensors".  But I prefer to have a more nuanced name than
+  // "NamedTensors".  "Params" works for now.
+  velocity: Params;
+
+  constructor() {
+    this.steps = 0;
+    this.params = new Params();
+    this.velocity = new Params();
+  }
+
+  step(learningRate: number, momentum: number, lossFn: ParamsFn): number {
+    const m = momentum;
+    assert(0 <= m && m <= 1.0);
+    // Get gradient of objective using autograd.
+    // TODO it's possible that calling gradParams every step is killing the
+    // possibility of a good optimization in backprop. Re-evaluate later.
+    const gradFn = gradParams(lossFn);
+    // Forward/Backward pass
+    const [grads, loss] = gradFn(this.params);
+    this.grads = grads;
+    assert(loss.rank === 0);
+    assert(grads instanceof Params);
+    // Update each param tensor.
+    const updated = new Params();
+    grads.forEach((g, name) => {
+      const p = this.params.get(name);
+      let v = this.velocity.zeros(name, p.shape);
+      if (this.steps > 0) {
+        assertShapesEqual(p.shape, g.shape);
+        assertShapesEqual(p.shape, v.shape);
+      }
+      //  v = m * v - (1 - m) * g
+      // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
+      // 10% from g (grad).
+      v = this.velocity.set(name, v.mul(m).sub(g.mul(1 - m)));
+      // p += v * lr
+      updated.set(name, p.add(v.mul(learningRate)));
+    });
+    this.params = updated;
+    this.steps++;
+    return loss.getData()[0];
   }
 }
