@@ -6,6 +6,7 @@ import * as mnist from "./mnist";
 
 // Hyperparameters
 const learningRate = 0.001;
+const momentum = 0.9;
 const batchSize = 256;
 const layerSizes = [784, 200, 100, 10];
 const reg = 0.0001;
@@ -34,8 +35,7 @@ function inference(params: Params, images: Tensor) {
 }
 
 // Define the training objective using softmax cross entropy loss.
-function loss(params: Params): Tensor {
-  const [images, labels] = datasetTrain.next();
+function loss(images, labels, params: Params): Tensor {
   const labels1H = labels.oneHot(10);
   const logits = inference(params, images);
   const softmaxLoss = logits.softmaxCE(labels1H).reduceMean();
@@ -51,12 +51,12 @@ function regLoss(params: Params): Tensor {
   return s.mul(reg);
 }
 
-function accuracy(params: Params, dataset, nExamples = 500): number {
+async function accuracy(params: Params, dataset,
+                        nExamples = 500): Promise<number> {
   let totalCorrect = $(0);
   let seen = 0;
   while (seen < nExamples) {
-    const [images, labels] = dataset.next();
-
+    const {images, labels} = await dataset.next();
     const logits = inference(params, images);
     const predicted = logits.argmax(1).cast("uint8");
     const a = predicted.equal(labels).cast("float32").reduceSum();
@@ -67,21 +67,40 @@ function accuracy(params: Params, dataset, nExamples = 500): number {
   return acc.getData()[0];
 }
 
-sgd({
-  callback: (step, loss, params) => {
+async function main() {
+  let params = new Params();
+
+  for (let step = 1; step <= 10000; ++step) {
+    const {images, labels} = await datasetTrain.next();
+
+    let loss_: number; // loss value to be filled in by callback.
+
+    // Take a step of SGD.
+    params = sgd({
+      callback: (step: number, loss: number, params: Params) => {
+        loss_ = loss;
+      },
+      learningRate,
+      lossFn: (params: Params) => {
+        return loss(images, labels, params);
+      },
+      momentum,
+      params,
+      steps: 1,
+    });
+
     if (step % 100 === 0) {
-      const trainAcc = accuracy(params, datasetTrain, 2 * batchSize);
+      const trainAcc = await accuracy(params, datasetTrain, 2 * batchSize);
       console.log("step", step,
-                  "loss", loss.toFixed(3),
+                  "loss", loss_.toFixed(3),
                   "train accuracy", (100 * trainAcc).toFixed(1));
     }
+
     if (step % 1000 === 0) {
-      const testAcc = accuracy(params, datasetTest, 10 * batchSize);
+      const testAcc = await accuracy(params, datasetTest, 10 * batchSize);
       console.log("test accuracy", (100 * testAcc).toFixed(1));
     }
-  },
-  learningRate,
-  lossFn: loss,
-  momentum: 0.9,
-  steps: 10000,
-});
+  }
+}
+
+main();
