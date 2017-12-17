@@ -62,7 +62,7 @@ plot(x, f(x),
 </script>
 
 <script type="notebook">
-import { tanh } from "propel";
+tanh = (a) => $(a).tanh();
 
 plot(x, tanh(x),
      x, grad(tanh)(x),                     // first derivative
