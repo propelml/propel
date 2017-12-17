@@ -1,8 +1,13 @@
 // TODO This file is Node specific. Adapt for web.
 import { existsSync, readFileSync } from "fs";
 import { basename, resolve } from "path";
-import { $ } from "./api";
+import { $, Tensor } from "./api";
 import { assert, assertEqual, log } from "./util";
+
+interface Elements {
+  images: Tensor;
+  labels: Tensor;
+}
 
 // If compiled to JS, this might be in a different directory.
 export const dirname = basename(__dirname) === "dist" ?
@@ -26,10 +31,10 @@ export function filenames(split: string): [string, string] {
 }
 
 function littleEndianToBig(val) {
-    return ((val & 0x00FF) << 24) |
-           ((val & 0xFF00) << 8) |
-           ((val >> 8) & 0xFF00) |
-           ((val >> 24) & 0x00FF);
+  return ((val & 0x00FF) << 24) |
+         ((val & 0xFF00) << 8) |
+         ((val >> 8) & 0xFF00) |
+         ((val >> 24) & 0x00FF);
 }
 
 function bufferToTypedArray(b: any): [Int32Array, Uint8Array] {
@@ -82,17 +87,24 @@ export function load(split: string, batchSize: number) {
   const images = loadFile(imageFn, split, true);
   const labels = loadFile(labelFn, split, false);
   // inspectImg(images, 7);
-  let idx = 0;
-  return {
-    next: () => {
-      // Wrap around.
-      if (idx + batchSize >= images.shape[0]) {
-        idx = 0;
-      }
-      const imageBatch = images.slice([idx, 0, 0], [batchSize, -1, -1]);
-      const labelBatch = labels.slice([idx], [batchSize]);
-      idx += batchSize;
-      return [imageBatch, labelBatch];
+  const ds = {
+    idx: 0,
+    next: (): Promise<Elements> => {
+      return new Promise((resolve, reject) => {
+        if (ds.idx + batchSize >= images.shape[0]) {
+          // Wrap around.
+          ds.idx = 0;
+        }
+        const imagesBatch = images.slice([ds.idx, 0, 0],
+                                         [batchSize, -1, -1]);
+        const labelsBatch = labels.slice([ds.idx], [batchSize]);
+        ds.idx += batchSize;
+        resolve({
+          images: imagesBatch,
+          labels: labelsBatch,
+        });
+      });
     }
   };
+  return ds;
 }

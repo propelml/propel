@@ -114,7 +114,7 @@ export function sgd(args: ArgsSGD): Params {
   const velocity = new Params();
   const updated = new Params();
   // Training loop.
-  for (let step = 1; step < args.steps; ++step) {
+  for (let step = 1; step <= args.steps; ++step) {
     // Forward/Backward pass
     const [grads, loss] = gradFn(params);
     assert(loss.rank === 0);
