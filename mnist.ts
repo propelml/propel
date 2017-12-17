@@ -1,29 +1,34 @@
-// TODO This file is Node specific. Adapt for web.
-import { existsSync, readFileSync } from "fs";
-import { basename, resolve } from "path";
 import { $, Tensor } from "./api";
-import { assert, assertEqual, log } from "./util";
+import { assert, assertEqual, IS_WEB, log } from "./util";
 
 interface Elements {
   images: Tensor;
   labels: Tensor;
 }
 
-// If compiled to JS, this might be in a different directory.
-export const dirname = basename(__dirname) === "dist" ?
-  resolve(__dirname, "../deps/mnist") :
-  resolve(__dirname, "deps/mnist");
+export function makeHref(fn) {
+  if (IS_WEB) {
+    return "http://localhost:8000/mnist/" + fn;
+  } else {
+    // If compiled to JS, this might be in a different directory.
+    const path = require("path");
+    const dirname = path.basename(__dirname) === "dist" ?
+      path.resolve(__dirname, "../deps/mnist") :
+      path.resolve(__dirname, "deps/mnist");
+    return path.resolve(dirname, fn);
+  }
+}
 
 export function filenames(split: string): [string, string] {
   if (split === "train") {
     return [
-      resolve(dirname, "train-labels-idx1-ubyte"),
-      resolve(dirname, "train-images-idx3-ubyte"),
+      makeHref("train-labels-idx1-ubyte"),
+      makeHref("train-images-idx3-ubyte"),
     ];
   } else if (split === "test") {
     return [
-      resolve(dirname, "t10k-labels-idx1-ubyte"),
-      resolve(dirname, "t10k-images-idx3-ubyte"),
+      makeHref("t10k-labels-idx1-ubyte"),
+      makeHref("t10k-images-idx3-ubyte"),
     ];
   } else {
     assert(false, "Bad split: " + split);
@@ -37,17 +42,8 @@ function littleEndianToBig(val) {
          ((val >> 24) & 0x00FF);
 }
 
-function bufferToTypedArray(b: any): [Int32Array, Uint8Array] {
-  // TODO ensure zero copy if possible.
-  // var ab = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-  const i32 = new Int32Array(b.buffer, b.byteOffset,
-                           b.byteLength / Int32Array.BYTES_PER_ELEMENT);
-  const ui8 = new Uint8Array(b.buffer, b.byteOffset, b.byteLength);
-  return [i32, ui8];
-}
-
 // TODO Remove once pretty printing lands.
-function inspectImg(t, idx) {
+export function inspectImg(t, idx) {
   const img = t.slice([idx, 0, 0], [1, -1, -1]);
   console.log("img");
   const imgData = img.getData();
@@ -59,52 +55,70 @@ function inspectImg(t, idx) {
   console.log(s);
 }
 
-function loadFile(fn, split, images: boolean) {
-  const fileBuffer = readFileSync(fn, null);
-  const [i32, ui8] = bufferToTypedArray(fileBuffer);
+async function fetch2(href): Promise<ArrayBuffer> {
+  if (IS_WEB) {
+    const res = await fetch(href, { mode: "no-cors" });
+    return res.arrayBuffer();
+  } else {
+    const b = require("fs").readFileSync(href, null);
+    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+  }
+}
+
+async function loadFile(href, split: string, images: boolean) {
+  const ab = await fetch2(href);
+  const i32 = new Int32Array(ab);
+  const ui8 = new Uint8Array(ab);
+
   const magicValue = images ? 2051 : 2049;
   const numExamples = split === "train" ? 60000 : 10000;
   let i = 0;
   assertEqual(littleEndianToBig(i32[i++]), magicValue);
   assertEqual(littleEndianToBig(i32[i++]), numExamples);
+
   if (images) {
     assertEqual(littleEndianToBig(i32[i++]), 28);
     assertEqual(littleEndianToBig(i32[i++]), 28);
   }
   const tensorData = ui8.slice(4 * i) as Uint8Array;
-  let t = $(tensorData, "uint8");
-  if (images) {
-    t = t.reshape([numExamples, 28, 28]);
-  } else {
-    t = t.reshape([numExamples]);
-  }
-  return t;
+  const t = $(tensorData, "uint8");
+  const shape = images ? [numExamples, 28, 28] : [numExamples];
+  return t.reshape(shape);
 }
 
 export function load(split: string, batchSize: number) {
-  assert(existsSync(dirname));
   const [labelFn, imageFn] = filenames(split);
-  const images = loadFile(imageFn, split, true);
-  const labels = loadFile(labelFn, split, false);
-  // inspectImg(images, 7);
+  const imagesPromise = loadFile(imageFn, split, true);
+  const labelsPromise = loadFile(labelFn, split, false);
+
   const ds = {
     idx: 0,
+    images: null,
+    labels: null,
+    loadPromise: Promise.all([imagesPromise, labelsPromise]),
     next: (): Promise<Elements> => {
       return new Promise((resolve, reject) => {
-        if (ds.idx + batchSize >= images.shape[0]) {
-          // Wrap around.
-          ds.idx = 0;
-        }
-        const imagesBatch = images.slice([ds.idx, 0, 0],
-                                         [batchSize, -1, -1]);
-        const labelsBatch = labels.slice([ds.idx], [batchSize]);
-        ds.idx += batchSize;
-        resolve({
-          images: imagesBatch,
-          labels: labelsBatch,
+        ds.loadPromise.then((_) => {
+          if (ds.idx + batchSize >= ds.images.shape[0]) {
+            // Wrap around.
+            ds.idx = 0;
+          }
+          const imagesBatch = ds.images.slice([ds.idx, 0, 0],
+                                              [batchSize, -1, -1]);
+          const labelsBatch = ds.labels.slice([ds.idx], [batchSize]);
+          ds.idx += batchSize;
+          resolve({
+            images: imagesBatch,
+            labels: labelsBatch,
+          });
         });
       });
     }
   };
+
+  ds.loadPromise.then(([images, labels]) => {
+    ds.images = images;
+    ds.labels = labels;
+  });
   return ds;
 }

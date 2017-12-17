@@ -3,6 +3,7 @@ import "codemirror/mode/javascript/javascript.js";
 
 import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
+import * as mnist from "./mnist";
 import { assert } from "./util";
 
 let cellsElement = null;
@@ -29,6 +30,7 @@ window["require"] = function require(target) {
   // _log("require", target);
   const m = {
     matplotlib,
+    mnist,
     propel,
   }[target];
   if (m) {
