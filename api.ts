@@ -89,8 +89,6 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, dtype);
 }
 
-export const matmul = (x, y) => $(x).matmul(y);
-
 // A collection of named Tensors. Used with sgd().
 // Iterate over it like this:
 //
