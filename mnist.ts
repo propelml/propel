@@ -98,20 +98,22 @@ export function load(split: string, batchSize: number) {
     loadPromise: Promise.all([imagesPromise, labelsPromise]),
     next: (): Promise<Elements> => {
       return new Promise((resolve, reject) => {
-        ds.loadPromise.then((_) => {
-          if (ds.idx + batchSize >= ds.images.shape[0]) {
-            // Wrap around.
-            ds.idx = 0;
-          }
-          const imagesBatch = ds.images.slice([ds.idx, 0, 0],
-                                              [batchSize, -1, -1]);
-          const labelsBatch = ds.labels.slice([ds.idx], [batchSize]);
-          ds.idx += batchSize;
-          resolve({
-            images: imagesBatch,
-            labels: labelsBatch,
+        setTimeout(() => {
+          ds.loadPromise.then((_) => {
+            if (ds.idx + batchSize >= ds.images.shape[0]) {
+              // Wrap around.
+              ds.idx = 0;
+            }
+            const imagesBatch = ds.images.slice([ds.idx, 0, 0],
+                                                [batchSize, -1, -1]);
+            const labelsBatch = ds.labels.slice([ds.idx], [batchSize]);
+            ds.idx += batchSize;
+            resolve({
+              images: imagesBatch,
+              labels: labelsBatch,
+            });
           });
-        });
+        }, 0);
       });
     }
   };
