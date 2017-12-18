@@ -48,15 +48,16 @@
 
 <script type="notebook">
 import { $ } from "propel";
+import { imshow } from "matplotlib";
 import { load, inspectImg } from "mnist";
 
 const dataset = load("train", 256);
 dataset.next().then(({images, labels}) => {
-  let firstLabels = labels.slice([0], [8]);
-  console.log("labels:", firstLabels.getData());
-  console.log("TrainSplit ok");
-
-  inspectImg(images, 0);
+  console.log("labels:", labels);
+  for (let i = 0; i < images.shape[0]; i++) {
+    let img = images.slice([i, 0, 0], [1, -1, -1]).squeeze();
+    imshow(img);
+  }
 });
 </script>
 

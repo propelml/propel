@@ -1,7 +1,7 @@
 import * as d3 from "d3";
-import { $ } from "./api";
+import { $, Tensor } from "./api";
 import * as notebook from "./notebook";
-import { assertEqual } from "./util";
+import { assert, assertEqual } from "./util";
 
 const currentPlot = null;
 // TODO colors should match those used by the syntax highlighting.
@@ -139,6 +139,35 @@ export function plot(...args) {
   }
 
   plotLines(data);
+}
+
+export function imshow(image: Tensor): void {
+  const outputId = notebook.outputId();
+  const output = document.getElementById(outputId);
+  assert(output != null);
+  const canvas = document.createElement("canvas");
+  // Assuming image shape is [3, height, width] for RGB.
+  // [height, width] for monochrome.
+  assertEqual(image.shape.length, 2, "Assuming monochrome for now");
+  const tensorData = image.getData();
+  const h = canvas.height = image.shape[0];
+  const w = canvas.width = image.shape[1];
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  for (let y = 0; y < h; ++y) {
+    for (let x = 0; x < w; ++x) {
+      let index = (y * w + x) * 4;
+      // TODO image.get(y, x);
+      const value = tensorData[y * w + x];
+      data[index]   = value; // red
+      data[++index] = value; // green
+      data[++index] = value; // blue
+      data[++index] = 255;   // alpha
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+  output.appendChild(canvas);
 }
 
 export function show(...args) {
