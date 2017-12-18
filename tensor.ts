@@ -2,7 +2,7 @@ import { arange } from "./api";
 import { bo, convertBasic } from "./backend";
 import * as ops from "./ops";
 import * as types from "./types";
-import { assert } from "./util";
+import { allFinite, assert } from "./util";
 
 export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
   if (t instanceof Tensor) return t;
@@ -207,6 +207,8 @@ export class Tensor implements types.BasicTensor {
   // are included in the slice -- this is equivalent to setting
   //   size[i] = input.shape[i] - begin[i]
   slice(begin: number[], size: number[]): Tensor {
+    assert(allFinite(begin));
+    assert(allFinite(size));
     return ops.slice(this, begin, size);
   }
 

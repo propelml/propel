@@ -13,6 +13,13 @@ if (IS_NODE) {
   });
 }
 
+export function allFinite(arr: number[]): boolean {
+  for (const n of arr) {
+    if (Number.isNaN(n)) return false;
+  }
+  return true;
+}
+
 function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   if ((t as BasicTensor).getData) {
     t = t as BasicTensor;
