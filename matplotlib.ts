@@ -61,7 +61,7 @@ function getLimits(lines): number[] {
 }
 
 function plotLines(data) {
-  const outputId = notebook.outputId();
+  const outputId = "#" + notebook.outputId();
   // Make an SVG Container
   const svg = d3.select(outputId).append("svg")
     .attr("width", 400)

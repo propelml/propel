@@ -181,7 +181,7 @@ class Cell {
   }
 
   outputId(): string {
-    return "#" + this.output.id;
+    return this.output.id;
   }
 
   execute(done = null) {
