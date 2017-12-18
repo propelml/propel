@@ -142,8 +142,7 @@ export function plot(...args) {
 }
 
 export function imshow(image: Tensor): void {
-  const outputId = notebook.outputId();
-  const output = document.getElementById(outputId);
+  const output = notebook.outputEl();
   assert(output != null);
   const canvas = document.createElement("canvas");
   // Assuming image shape is [3, height, width] for RGB.
@@ -168,8 +167,4 @@ export function imshow(image: Tensor): void {
   }
   ctx.putImageData(imageData, 0, 0);
   output.appendChild(canvas);
-}
-
-export function show(...args) {
-  // notebook.appendOutput(currentPlot);
 }

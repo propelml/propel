@@ -6,8 +6,10 @@ import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { assert } from "./util";
 
+const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let cellsElement = null;
 const _log = console.log;
+const _error = console.error;
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
 // the local scope. This means, for instance, that function declarations create
@@ -15,15 +17,36 @@ const _log = console.log;
 // local variables within the scope where it's being called.
 const globalEval = eval;
 
-let _REPLAppendOutput = null;
-let _REPLOutputId = null;
+let lastExecutedCellId = null;
 
-export function appendOutput(svg) {
-  _REPLAppendOutput(svg);
+export function evalCell(source, cellId) {
+  source += `\n//# sourceURL=__cell${cellId}__.js`;
+  globalEval(source);
+}
+
+// This is to handle asynchronous output situations.
+// Try to guess which cell we are executing in by looking at the stack trace.
+// If there isn't a cell in there, then default to the lastExecutedCellId.
+export function guessCellId(): number {
+  const stacktrace = (new Error()).stack.split("\n");
+  for (let i = stacktrace.length - 1; i >= 0; --i) {
+    const line = stacktrace[i];
+    const m = line.match(/__cell(\d+)__/);
+    if (m) return Number(m[1]);
+  }
+  return lastExecutedCellId;
+}
+
+export function outputEl(): HTMLElement {
+  const id = guessCellId();
+  const cell = cellTable.get(id);
+  return cell.output;
 }
 
 export function outputId(): string {
-  return _REPLOutputId();
+  const id = guessCellId();
+  const cell = cellTable.get(id);
+  return cell.output.id;
 }
 
 window["require"] = function require(target) {
@@ -40,6 +63,35 @@ window["require"] = function require(target) {
 };
 
 window["exports"] = {};
+
+// Override console.log so that it goes to the correct cell output.
+console.log = (...args) => {
+  const output = outputEl();
+  // messy
+  let s = args.map((a) => a.toString()).join(" ");
+  const last = output.lastChild;
+  if (last && last.nodeType !== Node.TEXT_NODE) {
+    s = "\n" + s;
+  }
+  const t = document.createTextNode(s + "\n");
+  output.appendChild(t);
+  _log(...args);
+};
+
+// Override console.error so that it goes to the correct cell output.
+console.error = (...args) => {
+  const output = outputEl();
+  // messy
+  let s = args.map((a) => a.toString()).join(" ");
+  const last = output.lastChild;
+  if (last && last.nodeType !== Node.TEXT_NODE) {
+    s = "\n" + s;
+  }
+  const t = document.createElement("b");
+  t.innerText = s + "\n";
+  output.appendChild(t);
+  _error(...args);
+};
 
 // TODO(ry) Replace this with typescript compiler at some point.
 function parseImportLine(line) {
@@ -117,6 +169,7 @@ class Cell {
 
   constructor(source?: string) {
     this.id = Cell.nextId++;
+    cellTable.set(this.id, this);
 
     this.editor = CodeMirror(cellsElement, {
       lineNumbers: false,
@@ -151,31 +204,6 @@ class Cell {
     return false;
   }
 
-  log(...args) {
-    // messy
-    let s = args.map((a) => a.toString()).join(" ");
-    const last = this.output.lastChild;
-    if (last && last.nodeType !== Node.TEXT_NODE) {
-      s = "\n" + s;
-    }
-    const t = document.createTextNode(s + "\n");
-    this.output.appendChild(t);
-    _log(...args);
-  }
-
-  error(...args) {
-    // messy
-    let s = args.map((a) => a.toString()).join(" ");
-    const last = this.output.lastChild;
-    if (last && last.nodeType !== Node.TEXT_NODE) {
-      s = "\n" + s;
-    }
-    const t = document.createElement("b");
-    t.innerText = s + "\n";
-    this.output.appendChild(t);
-    _log(...args);
-  }
-
   appendOutput(svg) {
     this.output.appendChild(svg);
   }
@@ -184,18 +212,16 @@ class Cell {
     return this.output.id;
   }
 
-  execute(done = null) {
-    console.log = this.log.bind(this);
-    _REPLAppendOutput = this.appendOutput.bind(this);
-    _REPLOutputId = this.outputId.bind(this);
+  execute(done?: () => void) {
+    lastExecutedCellId = this.id;
     const source = transpile(this.editor.getValue());
     let rval;
     try {
-      rval = globalEval(source);
+      rval = evalCell(source, this.id);
     } catch (e) {
-      this.error(e.stack);
+      console.error(e.stack);
     }
-    if (rval) { this.log(rval); }
+    if (rval) { console.log(rval); }
     if (done) { done(); }
   }
 }
