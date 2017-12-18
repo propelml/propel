@@ -4,6 +4,14 @@ import { BasicTensor, FlatVector, isTypedArray, RegularArray, Shape,
 
 const debug = false;
 const J = JSON.stringify;
+export const IS_WEB = typeof window !== "undefined";
+export const IS_NODE = !IS_WEB;
+
+if (IS_NODE) {
+  process.on("unhandledRejection", (error) => {
+    throw error;
+  });
+}
 
 function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   if ((t as BasicTensor).getData) {
