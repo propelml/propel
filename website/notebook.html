@@ -52,6 +52,7 @@ console.log("5*5 =", $(5).mul(5));
 </script>
 
 <script type="notebook">
+import { $ } from "propel";
 import { grad, linspace } from "propel";
 import { plot } from "matplotlib";
 
@@ -62,6 +63,8 @@ plot(x, f(x),
 </script>
 
 <script type="notebook">
+import { $, grad } from "propel";
+import { plot } from "matplotlib";
 tanh = (a) => $(a).tanh();
 
 plot(x, tanh(x),
@@ -69,6 +72,11 @@ plot(x, tanh(x),
      x, grad(grad(tanh))(x),               // second derivative
      x, grad(grad(grad(tanh)))(x),         // third derivative
      x, grad(grad(grad(grad(tanh))))(x));  // fourth derivative
+</script>
+
+<script type="notebook">
+let s = await (await fetch('https://cors-test.appspot.com/test')).text();
+console.log(s);
 </script>
 
 </body>

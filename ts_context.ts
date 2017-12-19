@@ -3,8 +3,10 @@ import * as dl from "./dl";
 
 const WEB = typeof window !== "undefined";
 const NODE = !WEB;
-const nodeRequire = WEB ? null : ((mod) => require(mod));
+const nodeRequire = WEB ? null : mod => require(mod);
 
+const asyncFunction = Object.getPrototypeOf(eval("(async function(){})"))
+  .constructor;
 const w3fetch = WEB ? window.fetch : nodeRequire("node-fetch");
 const W3URL = WEB ? window.URL : require("url").URL;
 
@@ -17,24 +19,23 @@ if (WEB) {
   replBaseHref = url.href;
 }
 
-const BUILTINS = {
-  seedrandom: require("seedrandom")
-};
-
 function resolveImport(href, baseHref) {
   const url = new W3URL(href, new W3URL(baseHref));
   return url.href;
 }
 
 function hrefGetPath(href) {
-   const url = new W3URL(href);
-   let p = url.pathname;
-   if (url.protocol === "file:" &&
-       process.platform === "win32" && /^\/[a-zA-Z]:/.test(p)) {
-     // Remove leading slash before '/c:/windows/file.txt'
-     p = p.slice(1);
-   }
-   return p;
+  const url = new W3URL(href);
+  let p = url.pathname;
+  if (
+    url.protocol === "file:" &&
+    process.platform === "win32" &&
+    /^\/[a-zA-Z]:/.test(p)
+  ) {
+    // Remove leading slash before '/c:/windows/file.txt'
+    p = p.slice(1);
+  }
+  return p;
 }
 
 export function fileext(s) {
@@ -63,19 +64,19 @@ async function getModuleSource(href) {
 
 function getRelativeImports(code, ext) {
   const imports = [];
-  const kind = (ext === "ts") ? ts.ScriptKind.TS
-                              : ts.ScriptKind.JS;
+  const kind = ext === "ts" ? ts.ScriptKind.TS : ts.ScriptKind.JS;
   const sourceFile = ts.createSourceFile(
     "eval.ts",
     code,
     ts.ScriptTarget.ES2015,
     false, // setParentNodes
-    kind);
+    kind
+  );
   walk(sourceFile);
   return imports;
 
   function walk(node) {
-    if (node.moduleSpecifier)  {
+    if (node.moduleSpecifier) {
       imports.push(node.moduleSpecifier.text);
     }
     if (node.moduleReference) {
@@ -92,38 +93,25 @@ function getImports(code, baseHref, ext) {
 }
 
 function transpile(code) {
-  const compilerOptions = { diagnostics: true,
-                            noImplicitUseStrict: true,
-                            sourceMap: false };
+  const compilerOptions = {
+    diagnostics: true,
+    module: ts.ModuleKind.CommonJS,
+    noImplicitUseStrict: true,
+    sourceMap: false,
+    target: ts.ScriptTarget.ES2017
+  };
   const tr = ts.transpileModule(code, { compilerOptions });
   return tr.outputText;
 }
 
-const wrapper =
-   `let __$code = yield;
-   for (;;) {
-     try {
-       __$code = yield { result: eval(__$code) };
-     } catch (error) {
-       __$code = yield { error }
-     }
-   }`;
-// Works in javascript proper but ts-node somehow breaks it:
-//  const Generator = Object.getPrototypeOf(function*(){}).constructor;
-//  const evalScope = new Generator('exports', 'require', 'module', wrapper);
-const src = `(function*(exports, require, module){${wrapper}})`;
-const globalEval = eval;
-const evalScope = globalEval(src);
-
-export function Context() {
+export function Context({ builtins }) {
   const importSources = {};
   const importModules = {};
 
   async function fetchAndLoadRecursiveImports(href) {
     let ext = fileext(href);
-    const tries = (ext === "ts" || ext === "js")
-                   ? [ href ]
-                   : [ `${href}.ts`, `${href}.js` ];
+    const tries =
+      ext === "ts" || ext === "js" ? [href] : [`${href}.ts`, `${href}.js`];
     let code, error;
     for (href of tries) {
       console.log(href);
@@ -170,13 +158,13 @@ export function Context() {
   }
 
   async function preloadImports(imports) {
-    const promises = imports.map((url) => preloadImport(url));
+    const promises = imports.map(url => preloadImport(url));
     await Promise.all(promises);
   }
 
   function requireHelper(href, base) {
-    if (href in BUILTINS) {
-      return BUILTINS[href];
+    if (href in builtins) {
+      return builtins[href];
     }
 
     href = resolveImport(href, base);
@@ -189,45 +177,44 @@ export function Context() {
     const code = importSources[href];
     if (typeof code !== "string") {
       if (WEB) {
-        throw new Error(`Module source not available: ${href}\n` +
-                        `    from ${base}`);
+        throw new Error(
+          `Module source not available: ${href}\n` + `    from ${base}`
+        );
       } else {
         return nodeRequire(hrefGetPath(href));
       }
     }
 
     const exports = {};
-    const require = makeRequireFunction(href);
-    module = { exports, require };
+    const req = makeRequireFunction(href);
+    module = { exports, require: req };
     importModules[href] = module;
 
     const dirname = hrefGetPath(resolveImport(".", href));
     const filename = hrefGetPath(href);
 
-    const fn = new Function("exports",
-                            "require",
-                            "module",
-                            "__dirname",
-                            "__filename",
-                            code);
-    fn(exports, require, module, dirname, filename);
-
+    const fn = new Function(
+      "exports",
+      "require",
+      "module",
+      "__dirname",
+      "__filename",
+      code
+    );
+    fn(exports, req, module, dirname, filename);
     return module.exports;
   }
 
   function makeRequireFunction(base) {
-    return (href) => requireHelper(href, base);
+    return href => requireHelper(href, base);
   }
 
   const replModule = {
     exports: {},
     require: makeRequireFunction(replBaseHref)
   };
-  const scope = evalScope(replModule.exports, replModule.require, replModule);
-  scope.eval = (code) => scope.next(code).value;
-  scope.eval(); // Start the generator.
 
-  this.eval = async(code) => {
+  this.eval = async code => {
     const js = transpile(code);
     const imports = getImports(code, replBaseHref, "ts");
     try {
@@ -236,7 +223,14 @@ export function Context() {
       return { error };
     }
 
-    const { result, error } = scope.eval(js);
-    return { result, error };
+    const require = makeRequireFunction(replBaseHref);
+
+    try {
+      const fn = new asyncFunction("exports", "require", "module", js);
+      const result = await fn(exports, require, module);
+      return { result };
+    } catch (error) {
+      return { error };
+    }
   };
 }

@@ -14,7 +14,7 @@ assert.strictEqual(fileext("file.ext"), "ext");
 assert.strictEqual(fileext("file.foo."), "");
 assert.strictEqual(fileext("file.foo.bar"), "bar");
 
-const ctx = new Context();
+const ctx = new Context({ builtins: { seedrandom: require("seedrandom") } });
 
 async function pass(code, retval = undefined) {
   const { result, error } = await ctx.eval(code);
@@ -57,7 +57,7 @@ async function fail(code) {
   await fail("throw new Error('wut')");
   await fail("sdfk.gjhsdk;lfghskl,dfjgkl");
   console.log("PASS");
-})().catch((error) => {
+})().catch(error => {
   // Ridiculous this is necessary
   console.error(error);
   process.exit(1);
