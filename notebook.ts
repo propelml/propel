@@ -3,6 +3,8 @@ import "codemirror/mode/javascript/javascript.js";
 
 import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
+
+import { Context } from "./ts_context";
 import { assert } from "./util";
 
 let cellsElement = null;
@@ -25,85 +27,7 @@ export function outputId(): string {
   return _REPLOutputId();
 }
 
-window["require"] = function require(target) {
-  // _log("require", target);
-  const m = {
-    matplotlib,
-    propel,
-  }[target];
-  if (m) {
-    return m;
-  }
-  throw new Error("Unknown module: " + target);
-};
-
-window["exports"] = {};
-
-// TODO(ry) Replace this with typescript compiler at some point.
-function parseImportLine(line) {
-  const words = line.split(/\s/);
-  if (words.shift() !== "import") return null;
-  const imports = [];
-  let state = "curly-open";
-  while (true) {
-    let word = words.shift();
-    switch (state) {
-      case null:
-        return null;
-      case "curly-open":
-        if (word !== "{") return null;
-        state = "imported";
-        break;
-      case "imported":
-        if (word === "}") {
-          state = "from";
-        } else {
-          if (word[word.length - 1] !== ",") {
-            state = "curly-close";
-          }
-          imports.push(word.replace(/,$/, ""));
-        }
-        break;
-      case "curly-close":
-        if (word !== "}") return null;
-        state = "from";
-        break;
-      case "from":
-        if (word !== "from") return null;
-        state = "modname";
-        break;
-      case "modname":
-        const q = word[0];
-        word = word.replace(/;$/, "");
-        if (word[word.length - 1] !== q) return null;
-        // success
-        return {
-          imports,
-          modname: word,
-        };
-
-      default:
-        assert(false);
-    }
-  }
-}
-
-// TODO Yes, extremely hacky.
-function transpile(source: string): string {
-  const lines = source.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const r = parseImportLine(line);
-    // Replace line with require() calls, if it's an import line.
-    if (r) {
-      lines[i] = "";
-      for (const m of r.imports) {
-        lines[i] += `${m} = require(${r.modname}).${m}; `;
-      }
-    }
-  }
-  return lines.join("\n");
-}
+const ctx = new Context({ builtins: { propel, matplotlib } });
 
 class Cell {
   isLoad: boolean;
@@ -119,10 +43,10 @@ class Cell {
     this.editor = CodeMirror(cellsElement, {
       lineNumbers: false,
       value: source ? source.trim() : "",
-      viewportMargin: Infinity,
+      viewportMargin: Infinity
     });
     this.editor.setOption("extraKeys", {
-      "Shift-Enter": this.update.bind(this),
+      "Shift-Enter": this.update.bind(this)
     });
 
     const runButton = document.createElement("button");
@@ -151,7 +75,7 @@ class Cell {
 
   log(...args) {
     // messy
-    let s = args.map((a) => a.toString()).join(" ");
+    let s = args.map(a => "" + a).join(" ");
     const last = this.output.lastChild;
     if (last && last.nodeType !== Node.TEXT_NODE) {
       s = "\n" + s;
@@ -163,7 +87,7 @@ class Cell {
 
   error(...args) {
     // messy
-    let s = args.map((a) => a.toString()).join(" ");
+    let s = args.map(a => a.toString()).join(" ");
     const last = this.output.lastChild;
     if (last && last.nodeType !== Node.TEXT_NODE) {
       s = "\n" + s;
@@ -186,15 +110,13 @@ class Cell {
     console.log = this.log.bind(this);
     _REPLAppendOutput = this.appendOutput.bind(this);
     _REPLOutputId = this.outputId.bind(this);
-    const source = transpile(this.editor.getValue());
-    let rval;
-    try {
-      rval = globalEval(source);
-    } catch (e) {
-      this.error(e.stack);
-    }
-    if (rval) { this.log(rval); }
-    if (done) { done(); }
+
+    const source = this.editor.getValue();
+
+    ctx.eval(source).then(({ result, error }) => {
+      if (error) this.error(error.stack);
+      if (done) done();
+    });
   }
 }
 
@@ -217,7 +139,8 @@ window.onload = () => {
 
   const cells = [];
   const scripts = Array.from(document.scripts).filter(
-    (s) => s.type === "notebook");
+    s => s.type === "notebook"
+  );
   for (const s of scripts) {
     s.remove();
     cells.push(new Cell(s.innerText));
