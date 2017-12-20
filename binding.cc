@@ -24,6 +24,8 @@
 
 #define COUNT_OF(array) (sizeof(array) / sizeof(array[0]))
 
+#define BUFSIZE 512
+
 enum AttrType {
   ATTR_STRING,
   ATTR_INT,
@@ -244,6 +246,28 @@ void SetOpAttrs(napi_env env, TFE_Op* op, napi_value attrs) {
   }
 }
 
+napi_value WrapHandle(napi_env env, TFE_TensorHandle* h) {
+  // Get reference to Handle class so we can call its constructor.
+  napi_value handle_class;
+  auto nstatus =
+      napi_get_reference_value(env, handle_class_ref, &handle_class);
+  check(nstatus == napi_ok);
+  napi_value handle_js;
+  // Create a new Handle object, with no constructor arguments.
+  nstatus = napi_new_instance(env, handle_class, 0, NULL, &handle_js);
+  check(nstatus == napi_ok);
+  // Unwrap
+  HandleWrap* handle_wrap;
+  nstatus =
+      napi_unwrap(env, handle_js, reinterpret_cast<void**>(&handle_wrap));
+  check(nstatus == napi_ok);
+  // Set the provided TFE_TensorHandle.
+  check(handle_wrap->env == env);
+  check(handle_wrap->tf_tensor_handle == NULL);
+  handle_wrap->tf_tensor_handle = h;
+  return handle_js;
+}
+
 static napi_value Execute(napi_env env, napi_callback_info info) {
   // Fetch JavaScript `this` object and function arguments.
   size_t argc = 4;
@@ -324,24 +348,9 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
   nstatus = napi_create_array_with_length(env, num_retvals, &js_retvals);
   check(nstatus == napi_ok);
 
-  // Get reference to Handle class so we can call its constructor.
-  napi_value handle_class;
-  nstatus = napi_get_reference_value(env, handle_class_ref, &handle_class);
-  check(nstatus == napi_ok);
-
   // For each retval, wrap the TensorHandle.
   for (int i = 0; i < num_retvals; ++i) {
-    napi_value js_retval;
-    // Create a new Handle object.
-    nstatus = napi_new_instance(env, handle_class, 0, NULL, &js_retval);
-    check(nstatus == napi_ok);
-    // Unwrap
-    HandleWrap* handle_wrap;
-    nstatus =
-        napi_unwrap(env, js_retval, reinterpret_cast<void**>(&handle_wrap));
-    check(nstatus == napi_ok);
-    check(handle_wrap->env == env);
-    handle_wrap->tf_tensor_handle = retvals[i];
+    napi_value js_retval = WrapHandle(env, retvals[i]);
     // Set created js object in output array.
     nstatus = napi_set_element(env, js_retvals, (uint32_t) i, js_retval);
     check(nstatus == napi_ok);
@@ -732,6 +741,44 @@ static napi_value ListDevices(napi_env env, napi_callback_info info) {
   return out;
 }
 
+static napi_value CopyToDevice(napi_env env, napi_callback_info info) {
+  napi_status nstatus;
+  // Expect exactly three arguments.
+  size_t argc = 3;
+  napi_value args[3];
+  nstatus = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+  check(nstatus == napi_ok);
+  check(argc == 3);
+  // Get ContextWrap from args[0].
+  ContextWrap* context_wrap;
+  nstatus = napi_unwrap(env, args[0], reinterpret_cast<void**>(&context_wrap));
+  check(nstatus == napi_ok);
+  // Get HandleWrap from args[1].
+  HandleWrap* handle_wrap;
+  nstatus = napi_unwrap(env, args[1], reinterpret_cast<void**>(&handle_wrap));
+  check(nstatus == napi_ok);
+  // Get device name from args[2].
+  char device_name[BUFSIZE];
+  nstatus =
+      napi_get_value_string_utf8(env, args[2], device_name, BUFSIZE, NULL);
+  check(nstatus == napi_ok);
+
+  auto tf_status = TF_NewStatus();
+  TFE_TensorHandle* new_handle =
+      TFE_TensorHandleCopyToDevice(handle_wrap->tf_tensor_handle,
+                                   context_wrap->tf_context,
+                                   device_name,
+                                   tf_status);
+  if (TF_GetCode(tf_status) != TF_OK) {
+    napi_throw_error(env, NULL, TF_Message(tf_status));
+    TF_DeleteStatus(tf_status);
+    return NULL;
+  }
+
+  TF_DeleteStatus(tf_status);
+  return WrapHandle(env, new_handle);
+}
+
 static napi_value HandleGetShape(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
@@ -828,6 +875,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       {"getDType", NULL, HandleGetDType, NULL, NULL, NULL, napi_default, NULL},
       {"getShape", NULL, HandleGetShape, NULL, NULL, NULL, napi_default, NULL},
       {"listDevices", NULL, ListDevices, NULL, NULL, NULL, napi_default, NULL},
+      {"copyToDevice",
+       NULL,
+       CopyToDevice,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
   };
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
