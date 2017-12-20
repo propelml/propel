@@ -119,6 +119,23 @@ function testListDevices() {
   console.log(devices);
 }
 
+function testCopyToDevice() {
+  // Only do this test if there's more than one device.
+  const devices = binding.listDevices(ctx);
+  if (devices.length < 2) {
+    console.log("Skipping testCopyToDevice because there's only one device.");
+    return;
+  }
+
+  const t = new binding.Handle(new Float32Array([1, 2]), [2], binding.TF_FLOAT);
+
+  const tGPU = binding.copyToDevice(ctx, t, "GPU:0");
+  assertAllEqual(binding.getShape(tGPU), [2]);
+  console.log("tGPU device", binding.getDevice(tGPU));
+  assert(binding.getDevice(tGPU).endsWith("GPU:0"));
+  console.log("copyToDevice ok");
+}
+
 testEquals();
 testMatMul();
 testMul();
@@ -126,3 +143,4 @@ testChaining();
 testReshape();
 testBoolean();
 testListDevices();
+testCopyToDevice();
