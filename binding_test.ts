@@ -108,9 +108,21 @@ function testBoolean() {
   assertAllEqual(result, [0, 1, 0, 1]);
 }
 
+function testListDevices() {
+  const devices = binding.listDevices(ctx);
+  assert(devices.length >= 1);
+  // Assuming first device is always CPU.
+  const cpuDevice = devices[0];
+  assert(cpuDevice["deviceType"] === "CPU");
+  assert(cpuDevice["name"].indexOf("device:CPU:0") > 0);
+  assert(cpuDevice["memoryBytes"] > 1024);
+  console.log(devices);
+}
+
 testEquals();
 testMatMul();
 testMul();
 testChaining();
 testReshape();
 testBoolean();
+testListDevices();
