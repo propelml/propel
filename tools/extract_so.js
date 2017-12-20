@@ -3,10 +3,14 @@
  * http://ci.tensorflow.org/view/Nightly/job/nightly-libtensorflow/TYPE=mac-slave/lastSuccessfulBuild/artifact/lib_package/libtensorflow-cpu-darwin-x86_64.tar.gz
  * http://ci.tensorflow.org/view/Nightly/job/nightly-libtensorflow/TYPE=cpu-slave/lastSuccessfulBuild/artifact/lib_package/libtensorflow-cpu-linux-x86_64.tar.gz
  */
+const hasCuda = (require('child_process').spawnSync('nvidia-smi').status === 0);
+const platform = process.platform + '-' + (hasCuda ? 'gpu' : 'cpu');
+
 const tarFn = {
-  darwin: 'libtensorflow-cpu-darwin-x86_64.tar.gz',
-  linux: 'libtensorflow-cpu-linux-x86_64.tar.gz'
-}[process.platform];
+  'darwin-cpu': 'libtensorflow-cpu-darwin-x86_64.tar.gz',
+  'linux-cpu': 'libtensorflow-cpu-linux-x86_64.tar.gz',
+  'linux-gpu': 'libtensorflow-gpu-linux-x86_64.tar.gz',
+}[platform];
 
 const outDir = process.argv[2] || '';
 console.error('outDir %s', outDir);

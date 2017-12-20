@@ -10,6 +10,7 @@
     {
       'target_name': 'tensorflow-binding',
       'sources': [ 'binding.cc' ],
+      'include_dirs': [ '<@(tensorflow_include_dir)' ],
       'conditions': [
         ['OS=="win"', {
           'defines': [ 'COMPILER_MSVC' ],
