@@ -14,6 +14,12 @@ declare class Handle {
 // TODO this could be improved:
 export type AttrDef = (string | number | boolean)[]
 
+interface DeviceDesc {
+  name: string;
+  deviceType: types.DeviceType;
+  memoryBytes: number;
+}
+
 export interface BindingInterface {
   Handle: typeof Handle;
   Context: typeof Context;
@@ -22,6 +28,7 @@ export interface BindingInterface {
   getDType(h: Handle): DTypeCode;
   getShape(h: Handle): types.Shape;
   getDevice(h: Handle): string;
+  listDevices(ctx: Context): DeviceDesc[];
   execute(ctx: Context, op: string, attrs: AttrDef[],
           inputs: Handle[]): string;
 

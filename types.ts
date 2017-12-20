@@ -8,6 +8,7 @@ export type ShapeDTypeList = Array<null | ShapeDType>;
 // JavaScript objects that can be generally converted to Tensors.
 export type Convertible = number | RegularArray<number> | TypedArray;
 export type TensorLike = BasicTensor | Convertible;
+export type DeviceType = "CPU" | "GPU";
 
 // BasicTensor does not use backprop.
 export interface BasicTensor {

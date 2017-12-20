@@ -665,6 +665,73 @@ static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
   return js_dtype;
 }
 
+static napi_value ListDevices(napi_env env, napi_callback_info info) {
+  napi_status nstatus;
+
+  // Get ContextWrap from args[0].
+  size_t argc = 1;
+  napi_value args[1];
+  nstatus = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+  check(nstatus == napi_ok);
+  check(argc == 1);
+  ContextWrap* context_wrap;
+  nstatus = napi_unwrap(env, args[0], reinterpret_cast<void**>(&context_wrap));
+  check(nstatus == napi_ok);
+
+  // Get the device_list.
+  TF_Status* tf_status = TF_NewStatus();
+  auto device_list =
+      TFE_ContextListDevices(context_wrap->tf_context, tf_status);
+  check(TF_GetCode(tf_status) == TF_OK);
+
+  int device_count = TF_DeviceListCount(device_list);
+
+  napi_value out;
+  nstatus = napi_create_array_with_length(env, device_count, &out);
+  check(nstatus == napi_ok);
+
+  for (int i = 0; i < device_count; ++i) {
+    const char* device_name = TF_DeviceListName(device_list, i, tf_status);
+    check(TF_GetCode(tf_status) == TF_OK);
+    const char* device_type = TF_DeviceListType(device_list, i, tf_status);
+    check(TF_GetCode(tf_status) == TF_OK);
+    int64_t memory_bytes = TF_DeviceListMemoryBytes(device_list, i, tf_status);
+    check(TF_GetCode(tf_status) == TF_OK);
+
+    napi_value device_obj;
+    nstatus = napi_create_object(env, &device_obj);
+    check(nstatus == napi_ok);
+
+    napi_value name_js;
+    nstatus = napi_create_string_utf8(
+        env, device_name, strlen(device_name), &name_js);
+    check(nstatus == napi_ok);
+    nstatus = napi_set_named_property(env, device_obj, "name", name_js);
+    check(nstatus == napi_ok);
+
+    napi_value type_js;
+    nstatus = napi_create_string_utf8(
+        env, device_type, strlen(device_type), &type_js);
+    check(nstatus == napi_ok);
+    nstatus = napi_set_named_property(env, device_obj, "deviceType", type_js);
+    check(nstatus == napi_ok);
+
+    napi_value memory_js;
+    nstatus = napi_create_int32(env, memory_bytes, &memory_js);
+    check(nstatus == napi_ok);
+    nstatus =
+        napi_set_named_property(env, device_obj, "memoryBytes", memory_js);
+    check(nstatus == napi_ok);
+
+    nstatus = napi_set_element(env, out, (uint32_t) i, device_obj);
+    check(nstatus == napi_ok);
+  }
+
+  TF_DeleteStatus(tf_status);
+
+  return out;
+}
+
 static napi_value HandleGetShape(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
@@ -760,6 +827,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
        NULL},
       {"getDType", NULL, HandleGetDType, NULL, NULL, NULL, napi_default, NULL},
       {"getShape", NULL, HandleGetShape, NULL, NULL, NULL, napi_default, NULL},
+      {"listDevices", NULL, ListDevices, NULL, NULL, NULL, napi_default, NULL},
   };
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
