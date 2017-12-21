@@ -41,9 +41,6 @@ async function fail(code) {
   await pass("console.log('hi')");
   await pass("console.log('one');console.log('two');42");
   await fail("import * as x from 'does not exist'; x");
-  await pass(`import * as jquery from
-              'https://code.jquery.com/jquery-3.2.1.slim.min.js'; jquery`);
-  await pass("typeof jquery", "function");
   await pass("import * as u from './util'; u");
   await pass(`// Multi-line inputs are supported.
               (async () => {
