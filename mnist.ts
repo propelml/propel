@@ -8,7 +8,7 @@ interface Elements {
 
 export function makeHref(fn) {
   if (IS_WEB) {
-    return "http://localhost:8000/mnist/" + fn;
+    return "./mnist/" + fn;
   } else {
     // If compiled to JS, this might be in a different directory.
     const path = require("path");
@@ -98,6 +98,10 @@ export function load(split: string, batchSize: number) {
     loadPromise: Promise.all([imagesPromise, labelsPromise]),
     next: (): Promise<Elements> => {
       return new Promise((resolve, reject) => {
+        // Because MNIST is loaded all at once, the async call per batch isn't
+        // really async at all - it's just taking a slice. However other
+        // datasets will be async. Without the setTimeout, looping on new data
+        // will freeze the notebook. A better solution is needed here.
         setTimeout(() => {
           ds.loadPromise.then((_) => {
             if (ds.idx + batchSize >= ds.images.shape[0]) {

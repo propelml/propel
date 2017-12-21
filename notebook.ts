@@ -68,7 +68,11 @@ window["exports"] = {};
 console.log = (...args) => {
   const output = outputEl();
   // messy
-  let s = args.map((a) => a.toString()).join(" ");
+
+  // .toString() will fail if any of the arguments is null or undefined. Using
+  // ("" + a) instead.
+  let s = args.map((a) => "" + a).join(" ");
+
   const last = output.lastChild;
   if (last && last.nodeType !== Node.TEXT_NODE) {
     s = "\n" + s;
@@ -82,7 +86,11 @@ console.log = (...args) => {
 console.error = (...args) => {
   const output = outputEl();
   // messy
-  let s = args.map((a) => a.toString()).join(" ");
+
+  // .toString() will fail if any of the arguments is null or undefined. Using
+  // ("" + a) instead.
+  let s = args.map((a) => "" + a).join(" ");
+
   const last = output.lastChild;
   if (last && last.nodeType !== Node.TEXT_NODE) {
     s = "\n" + s;
