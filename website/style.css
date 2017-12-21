@@ -1,8 +1,68 @@
+pre {
+  white-space: pre-wrap; word-break: keep-all;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: #fafafa;
+}
+
+@media (min-width: 400px) {
+  header .propel {
+    text-align: right;
+  }
+}
+
+header {
+  box-shadow: 0 0 2.25rem #9da5ab;
+  background-color: #fff;
+  border-top: 2px solid rgb(253, 141, 60);
+}
+header .row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 0 ;
+}
+
+header .button {
+  display: block;
+  margin: 0;
+}
+
+header .columns {
+}
+
+.propel {
+}
+
+header h1 {
+}
+header h2 {
+  font-size: 120%;
+}
+header h1, header h2 {
+  margin: 10px 0;
+}
+header .container {
+  padding: 0px;
+  margin-bottom: 50px;
+  vertical-align: middle;
+  background-color: inherit;
+}
+
+.container {
+}
+
+.notebook-cell {
+  margin: 0 0 0px 0;
+}
 
 .CodeMirror {
   height: auto; /* Auto-resizing cells. */
   padding: 10px;
-  background: #eee;
+  background: #f5f5f5;
+  /*background: #283646;*/
   border: 0;
   border-left: 2px solid #eee;
 }
@@ -33,3 +93,4 @@ button.run-button {
 .newCell {
   margin: 50px 10px;
 }
+

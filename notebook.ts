@@ -1,4 +1,5 @@
 import * as CodeMirror from "codemirror";
+import "codemirror/mode/htmlmixed/htmlmixed.js";
 import "codemirror/mode/javascript/javascript.js";
 
 import * as propel from "./api";
@@ -7,7 +8,7 @@ import * as mnist from "./mnist";
 import { assert } from "./util";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
-let cellsElement = null;
+const cellsElement = null;
 const _log = console.log;
 const _error = console.error;
 // If you use the eval function indirectly, by invoking it via a reference
@@ -175,12 +176,14 @@ class Cell {
   id: number;
   static nextId = 1;
 
-  constructor(source?: string) {
+  constructor(source: string, parentDiv: HTMLElement) {
     this.id = Cell.nextId++;
     cellTable.set(this.id, this);
+    parentDiv.classList.add("notebook-cell");
 
-    this.editor = CodeMirror(cellsElement, {
+    this.editor = CodeMirror(parentDiv, {
       lineNumbers: false,
+      mode: "javascript",
       value: source ? source.trim() : "",
       viewportMargin: Infinity,
     });
@@ -193,12 +196,12 @@ class Cell {
     runButton.innerText = "Run";
     runButton.className = "run-button";
     runButton.onclick = this.update.bind(this);
-    cellsElement.appendChild(runButton);
+    parentDiv.appendChild(runButton);
 
     this.output = document.createElement("div");
     this.output.className = "output";
     this.output.id = `output${this.id}`;
-    cellsElement.appendChild(this.output);
+    parentDiv.appendChild(this.output);
   }
 
   focus() {
@@ -236,14 +239,29 @@ class Cell {
 
 function newCellClick() {
   _log("Button click");
-  const cell = new Cell();
+  const parentDiv = document.createElement("div");
+  const cell = new Cell("", parentDiv);
   window.scrollBy(0, 500); // scroll down.
   cell.focus();
 }
 
 window.onload = () => {
-  cellsElement = document.getElementById("cells");
-  document.getElementById("newCell").onclick = newCellClick;
+  const newCell = document.getElementById("newCell");
+  if (newCell) newCell.onclick = newCellClick;
+
+  // Use CodeMirror to syntax highlight read-only <pre> elements.
+  for (const p of Array.from(document.getElementsByTagName("pre"))) {
+    _log("pre", p);
+    const code = p.innerText;
+    p.innerHTML = "";
+    CodeMirror(p, {
+      lineNumbers: false,
+      mode: p.getAttribute("lang") || "javascript",
+      readOnly: true,
+      value: code,
+      viewportMargin: Infinity,
+    });
+  }
 
   // Pre-existing cells are stored as <script type=notebook> elements.
   // These script tags are promptly removed from the DOM and
@@ -253,10 +271,12 @@ window.onload = () => {
 
   const cells = [];
   const scripts = Array.from(document.scripts).filter(
-    (s) => s.type === "notebook");
+    s => s.type === "notebook");
   for (const s of scripts) {
-    s.remove();
-    cells.push(new Cell(s.innerText));
+    const code = s.innerText;
+    const parentDiv = document.createElement("div");
+    replaceWith(s, parentDiv);
+    cells.push(new Cell(code, parentDiv));
   }
 
   let execCounter = 0;
@@ -268,3 +288,10 @@ window.onload = () => {
   }
   execNext();
 };
+
+// Replaces oldElement with newElement at the same place
+// in the DOM tree.
+function replaceWith(oldElement: HTMLElement,
+                     newElement: HTMLElement): void {
+  oldElement.parentNode.replaceChild(newElement, oldElement);
+}
