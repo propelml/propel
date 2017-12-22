@@ -54,6 +54,19 @@ export class TensorDL implements types.BasicTensor {
 }
 
 export class OpsDL implements types.BackendOps {
+
+  copyToDevice(x: TensorDL, device: string): TensorDL {
+    throw new Error("Not implemented.");
+  }
+
+  getDevice(x: TensorDL): string {
+    return "CPU:0"; // TODO
+  }
+
+  listDevices(): string[] {
+    return [ "CPU:0" ]; // TODO
+  }
+
   add(x: TensorDL, y: TensorDL): TensorDL {
     const ndarray = x.math.add(x.ndarray, y.ndarray);
     return new TensorDL(ndarray, x.math);

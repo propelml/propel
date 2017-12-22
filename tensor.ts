@@ -12,7 +12,7 @@ export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
 const $ = convert;
 
 // Tensor wraps a BasicTensor object. This is the main public
-// interface to tensor operatiors. Each instance has a unique id for use in
+// interface to tensor operators. Each instance has a unique id for use in
 // backprop.  Nothing about Tensors is backend specific.
 // Tensor might be renamed to BoxedTensor in the near future. To
 // external users this class is called just Tensor. We use a more specific name
@@ -40,8 +40,30 @@ export class Tensor implements types.BasicTensor {
     return this.shape.length;
   }
 
+  private device_: string;
+  get device(): string {
+    if (!this.device_) {
+      this.device_ = bo.getDevice(this.basic);
+    }
+    return this.device_;
+  }
+
   toString(): string {
     return format.toString(this.shape, this.getData());
+  }
+
+  gpu(): Tensor {
+    if (this.device === "GPU:0") return this;
+    // TODO: support different GPUs.
+    const r = bo.copyToDevice(this.basic, "GPU:0");
+    return new Tensor(r);
+  }
+
+  cpu(): Tensor {
+    if (this.device === "CPU:0") return this;
+    // TODO: support different CPUs? Is that even possible?
+    const r = bo.copyToDevice(this.basic, "CPU:0");
+    return new Tensor(r);
   }
 
   cast(dtype: types.DType): Tensor {
