@@ -43,7 +43,7 @@ export class Tape {
     if (!this.tensorToOp.has(id)) {
       this.tensorToOp.set(id, -1);
     }
-    log("- watch tensor id", id);
+    log("- watch tensor id", id, tensor.device);
   }
 
   recordOp(tapeEntry: types.TapeEntry): void {
@@ -184,7 +184,7 @@ function imperativeGrad(target: Tensor,
     const outGrad = gradients.aggregate(op.outputIds[0]);
 
     log("backprop", tapeEntryToString(op));
-    log("- outGrad %s", outGrad.shape, outGrad.getData());
+    log("- outGrad %s", outGrad.shape);
 
     const inGrads = getBackwardFuncs(op.name).map(
       (bwFunc: null | BWFunc, i): Tensor => {
@@ -234,7 +234,7 @@ function imperativeGrad(target: Tensor,
   const result: Tensor[] = [];
   for (const t of sources) {
     const r = gradients.aggregate(t.id);
-    log("- result", t.id, r.shape);
+    log("- result", t.id, r.shape, r.device);
     result.push(r);
   }
 
@@ -316,7 +316,7 @@ export class GradientCollector {
   private map = new Map<number, Tensor[]>();
 
   append(tid: number, grad: Tensor): void {
-    log("- GradientCollector append", tid, grad.shape);
+    log("- GradientCollector append", tid, grad.shape, grad.device);
     if (this.map.has(tid)) {
       this.map.get(tid).push(grad);
     } else {
