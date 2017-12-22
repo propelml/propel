@@ -80,13 +80,13 @@ async function loadFile(href, split: string, images: boolean) {
     assertEqual(littleEndianToBig(i32[i++]), 28);
     assertEqual(littleEndianToBig(i32[i++]), 28);
   }
-  const tensorData = ui8.slice(4 * i) as Uint8Array;
-  const t = $(tensorData, "uint8");
+  const tensorData = new Int32Array(ui8.slice(4 * i));
+  const t = $(tensorData, "int32");
   const shape = images ? [numExamples, 28, 28] : [numExamples];
   return t.reshape(shape);
 }
 
-export function load(split: string, batchSize: number) {
+export function load(split: string, batchSize: number, useGPU = true) {
   const [labelFn, imageFn] = filenames(split);
   const imagesPromise = loadFile(imageFn, split, true);
   const labelsPromise = loadFile(labelFn, split, false);
@@ -113,8 +113,8 @@ export function load(split: string, batchSize: number) {
             const labelsBatch = ds.labels.slice([ds.idx], [batchSize]);
             ds.idx += batchSize;
             resolve({
-              images: imagesBatch,
-              labels: labelsBatch,
+              images: useGPU ? imagesBatch.gpu() : imagesBatch,
+              labels: useGPU ? labelsBatch.gpu() : labelsBatch,
             });
           });
         }, 0);

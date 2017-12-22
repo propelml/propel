@@ -18,7 +18,7 @@
 import { load } from "mnist";
 import { imshow } from "matplotlib";
 
-datasetTrain = load("train", 256);
+datasetTrain = load("train", 256, false);
 datasetTrain.next().then(({images, labels}) => {
   console.log("labels:", labels);
   for (let i = 0; i < images.shape[0]; i++) {
