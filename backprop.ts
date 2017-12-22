@@ -68,7 +68,12 @@ export function multigrad(f, argnums?: number[]) {
   };
 }
 
-export type ParamsFn = (params: Params) => Tensor;
+// Usually a this is a loss function of some sort. Returned tensor should be a
+// scalar.
+export interface ParamsFn {
+  (params: Params): Tensor;
+}
+
 export function gradParams(f: ParamsFn, names?: string[]) {
   return function(params: Params): [Params, Tensor] {
     pushNewTape();
