@@ -1,5 +1,6 @@
 import { $, arange, backend, DType, fill, grad, linspace, listDevices,
   multigrad, ones, Params, randn, Tensor, TensorLike, zeros } from "./api";
+import * as api from "./api";
 import * as types from "./types";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
@@ -965,11 +966,60 @@ function testDevicePlacement() {
   assertAllEqual(rCpu, [3, 8]);
 }
 
+function testNeuralNet() {
+  for (const [device, $] of deviceTests()) {
+    const inference = (params: Params, images: Tensor) => {
+      let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
+      let outputs;
+      const layerSizes = [ 28 * 28, 64, 10 ];
+      for (let i = 0; i < layerSizes.length - 1; ++i) {
+        const m = layerSizes[i];
+        const n = layerSizes[i + 1];
+        // Initialize or get weights and biases.
+        const w = params.randn(`w${i}`, [m, n], device);
+        const b = params.zeros(`b${i}`, [n], "float32", device);
+        outputs = inputs.matmul(w).add(b);
+        inputs = outputs.relu();
+      }
+      return outputs;
+    };
+
+    // Define the training objective using softmax cross entropy loss.
+    const loss = (images, labels, params: Params): Tensor => {
+      const labels1H = labels.oneHot(10);
+      const logits = inference(params, images);
+      const softmaxLoss = logits.softmaxCE(labels1H).reduceMean();
+      return softmaxLoss;
+    };
+
+    // Just zero data.
+    const images = $(zeros([16, 28, 28], "int32"));
+    const labels = $(zeros([16], "int32"));
+    let params = new Params();
+    const gradFn = api.gradParams((params: Params): Tensor => {
+      return loss(images, labels, params);
+    });
+    const steps = 3;
+    const learningRate = 0.001;
+    for (let i = 0; i < steps; i++) {
+      const [grads, _] = gradFn(params);
+      const updated = new Params();
+      grads.forEach((g, name) => {
+        const p = params.get(name);
+        if (i > 0) {
+          assertShapesEqual(p.shape, g.shape);
+        }
+        updated.set(name, p.sub(g.mul(learningRate)));
+      });
+      params = updated;
+    }
+  }
+}
+
 testLinspace();
 testArange();
 testRandn();
 testConvertWithType();
-
 testInc();
 testMul();
 testSquared();
@@ -1023,3 +1073,4 @@ testOneHot();
 testSoftmaxCE();
 testParams();
 testDevicePlacement();
+testNeuralNet();

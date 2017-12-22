@@ -127,12 +127,15 @@ export class Params {
   // If the given name does not exist in the parameters object, this
   // initializes a new random normal tensor. If the name does exist
   // in the parameters object, this just returns that stored tensor.
-  randn(name: string, shape: types.Shape, scale = 0.1): Tensor {
+  randn(name: string, shape: types.Shape, device= "CPU:0", scale= 0.1): Tensor {
     if (this.has(name)) {
       return this.get(name);
     }
     // Initialize.
-    const t = randn(shape).mul(scale);
+    let t = randn(shape).mul(scale);
+    if (device && device !== "CPU:0") {
+      t = new Tensor(bo.copyToDevice(t.basic, device));
+    }
     this.set(name, t);
     return t;
   }
@@ -141,12 +144,15 @@ export class Params {
   // initializes a new tensor with zero values. If the name does exist
   // in the parameters object, this just returns that stored tensor.
   zeros(name: string, shape: types.Shape, dtype:
-        types.DType = "float32"): Tensor {
+        types.DType = "float32", device= "CPU:0"): Tensor {
     if (this.has(name)) {
       return this.get(name);
     }
     // Initialize.
-    const t = zeros(shape);
+    let t = zeros(shape);
+    if (device && device !== "CPU:0") {
+      t = new Tensor(bo.copyToDevice(t.basic, device));
+    }
     this.set(name, t);
     return t;
   }
