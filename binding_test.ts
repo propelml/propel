@@ -136,6 +136,59 @@ function testCopyToDevice() {
   console.log("copyToDevice ok");
 }
 
+function testCreateSmallHandle() {
+  const types: Array<[number, any]> = [
+    [binding.TF_FLOAT, Float32Array],
+    [binding.TF_INT32, Int32Array]
+  ];
+
+  let h, v, hCpu;
+  for (const [tftype, taConstructor] of types) {
+    // scalar CPU
+    h = binding.createSmallHandle(ctx, tftype, "CPU:0", 42);
+    assert(binding.getDevice(h) === "CPU:0");
+    assert(binding.getShape(h).length === 0);
+    assert(binding.getDType(h) === tftype);
+    v = Array.from(new taConstructor(binding.asArrayBuffer(h)));
+    assertAllEqual(v, [42]);
+
+    // array CPU
+    h = binding.createSmallHandle(ctx, tftype, "CPU:0", [1, 2, 3]);
+    assert(binding.getDevice(h) === "CPU:0");
+    assertAllEqual(binding.getShape(h), [3]);
+    assert(binding.getDType(h) === tftype);
+    v = Array.from(new taConstructor(binding.asArrayBuffer(h)));
+    assertAllEqual(v, [1, 2, 3]);
+
+    // Figure out if we have a GPU to test.
+    const devices = binding.listDevices(ctx);
+    if (devices.length < 2) {
+      console.log("Skip rest of testCreateSmallHandle, no GPU for testing.");
+      return;
+    }
+
+    // scalar GPU
+    h = binding.createSmallHandle(ctx, tftype, "GPU:0", 42);
+    assert(binding.getDevice(h).endsWith("GPU:0"));
+    assert(binding.getShape(h).length === 0);
+    assert(binding.getDType(h) === tftype);
+    hCpu = binding.copyToDevice(ctx, h, "CPU:0");
+    v = Array.from(new taConstructor(binding.asArrayBuffer(hCpu)));
+    assertAllEqual(v, [42]);
+
+    // array GPU
+    h = binding.createSmallHandle(ctx, tftype, "GPU:0", [1, 2, 3]);
+    assert(binding.getDevice(h).endsWith("GPU:0"));
+    assertAllEqual(binding.getShape(h), [3]);
+    assert(binding.getDType(h) === tftype);
+    hCpu = binding.copyToDevice(ctx, h, "CPU:0");
+    v = Array.from(new taConstructor(binding.asArrayBuffer(hCpu)));
+    assertAllEqual(v, [1, 2, 3]);
+
+    console.log("testCreateSmallHandle", taConstructor.name, "ok");
+  }
+}
+
 testEquals();
 testMatMul();
 testMul();
@@ -144,3 +197,4 @@ testReshape();
 testBoolean();
 testListDevices();
 testCopyToDevice();
+testCreateSmallHandle();

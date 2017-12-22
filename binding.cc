@@ -140,6 +140,34 @@ const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
   fatal("Unreachable");
 }
 
+bool IsArray(napi_env env, napi_value val) {
+  bool is_array;
+  auto nstatus = napi_is_array(env, val, &is_array);
+  check(nstatus == napi_ok);
+  return is_array;
+}
+
+double GetDoubleValue(napi_env env, napi_value val_js) {
+  double val;
+  auto nstatus = napi_get_value_double(env, val_js, &val);
+  check(nstatus == napi_ok);
+  return val;
+}
+
+int32_t GetInt32Value(napi_env env, napi_value val_js) {
+  int32_t val;
+  auto nstatus = napi_get_value_int32(env, val_js, &val);
+  check(nstatus == napi_ok);
+  return val;
+}
+
+napi_value GetElement(napi_env env, napi_value arr, uint32_t index) {
+  napi_value out;
+  auto nstatus = napi_get_element(env, arr, index, &out);
+  check(nstatus == napi_ok);
+  return out;
+}
+
 void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
   // Check that the attr is an array.
   bool is_array;
@@ -630,7 +658,11 @@ static napi_value HandleAsArrayBuffer(napi_env env, napi_callback_info info) {
   auto tf_status = TF_NewStatus();
   auto tensor =
       TFE_TensorHandleResolve(handle_wrap->tf_tensor_handle, tf_status);
-  check(TF_GetCode(tf_status) == TF_OK);
+  if (TF_GetCode(tf_status) != TF_OK) {
+    napi_throw_error(env, NULL, TF_Message(tf_status));
+    TF_DeleteStatus(tf_status);
+    return NULL;
+  }
   TF_DeleteStatus(tf_status);
 
   check(handle_wrap->tf_tensor != tensor);
@@ -672,6 +704,114 @@ static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
   check(nstatus == napi_ok);
 
   return js_dtype;
+}
+
+void ReleaseSmallHandle(void* data, size_t len, void* _) {
+  delete static_cast<char*>(data);
+}
+
+// Creates a small CPU tensor from a javascript number or number array.
+// data_js: number | number[]
+TF_Tensor* CreateSmallTensor(napi_env env,
+                             napi_value data_js,
+                             TF_DataType dtype) {
+  if (!IsArray(env, data_js)) {
+    // Scalar
+    switch (dtype) {
+      case TF_FLOAT: {
+        float* data = new float[1];
+        data[0] = GetDoubleValue(env, data_js);
+        return TF_NewTensor(dtype, NULL, 0, data, 4, ReleaseSmallHandle, NULL);
+      }
+
+      case TF_INT32: {
+        int32_t* data = new int32_t[1];
+        data[0] = GetInt32Value(env, data_js);
+        return TF_NewTensor(dtype, NULL, 0, data, 4, ReleaseSmallHandle, NULL);
+      }
+
+      default:
+        check(false && "Not implemented.");
+        return NULL;
+    }
+  } else {
+    // Array
+    uint32_t data_length;
+    auto nstatus = napi_get_array_length(env, data_js, &data_length);
+    check(nstatus == napi_ok);
+
+    // We only support rank one tensors here.
+    int64_t shape[1] = {data_length};
+
+    if (dtype == TF_FLOAT) {
+      auto data = new float[data_length];
+      for (uint32_t i = 0; i < data_length; ++i) {
+        napi_value val = GetElement(env, data_js, i);
+        data[i] = GetDoubleValue(env, val);
+      }
+      return TF_NewTensor(
+          dtype, shape, 1, data, 4 * data_length, ReleaseSmallHandle, NULL);
+
+    } else if (dtype == TF_INT32) {
+      auto data = new int32_t[data_length];
+      for (uint32_t i = 0; i < data_length; ++i) {
+        napi_value val = GetElement(env, data_js, i);
+        data[i] = GetInt32Value(env, val);
+      }
+      return TF_NewTensor(
+          dtype, shape, 1, data, 4 * data_length, ReleaseSmallHandle, NULL);
+
+    } else {
+      check(false && "Not implemented.");
+      return NULL;
+    }
+  }
+  check(false && "Unreachable");
+  return NULL;
+}
+
+// This is an optimization for creating small tensor handles on a specific
+// device. Ops like Slice, Reshape, and Fill take small tensor arguments
+// which are passed to the op as javascript objects.
+// args[0] ctx: Context
+// args[1] dtype: number
+// args[2] device: string
+// args[3] data: number | number[]
+static napi_value CreateSmallHandle(napi_env env, napi_callback_info info) {
+  size_t argc = 4;
+  napi_value args[4];
+  auto nstatus = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+  check(nstatus == napi_ok);
+  check(argc == 4);
+
+  ContextWrap* context_wrap;
+  nstatus = napi_unwrap(env, args[0], reinterpret_cast<void**>(&context_wrap));
+  check(nstatus == napi_ok);
+
+  auto dtype = static_cast<TF_DataType>(GetInt32Value(env, args[1]));
+
+  char device[BUFSIZE];
+  nstatus = napi_get_value_string_utf8(env, args[2], device, BUFSIZE, NULL);
+  check(nstatus == napi_ok);
+
+  auto tensor = CreateSmallTensor(env, args[3], dtype);
+
+  TF_Status* tf_status = TF_NewStatus();
+  auto cpu_handle = TFE_NewTensorHandle(tensor, tf_status);
+  check(TF_GetCode(tf_status) == TF_OK);
+
+  if (strcmp(device, "CPU:0") == 0) {
+    TF_DeleteStatus(tf_status);
+    return WrapHandle(env, cpu_handle);
+  } else {
+    auto gpu_handle = TFE_TensorHandleCopyToDevice(
+        cpu_handle, context_wrap->tf_context, device, tf_status);
+    check(TF_GetCode(tf_status) == TF_OK);
+    TFE_DeleteTensorHandle(cpu_handle);
+    TF_DeleteTensor(tensor);
+    TF_DeleteStatus(tf_status);
+    return WrapHandle(env, gpu_handle);
+  }
 }
 
 static napi_value ListDevices(napi_env env, napi_callback_info info) {
@@ -875,6 +1015,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       {"getDType", NULL, HandleGetDType, NULL, NULL, NULL, napi_default, NULL},
       {"getShape", NULL, HandleGetShape, NULL, NULL, NULL, napi_default, NULL},
       {"listDevices", NULL, ListDevices, NULL, NULL, NULL, napi_default, NULL},
+      {"createSmallHandle",
+       NULL,
+       CreateSmallHandle,
+       NULL,
+       NULL,
+       NULL,
+       napi_default,
+       NULL},
       {"copyToDevice",
        NULL,
        CopyToDevice,
