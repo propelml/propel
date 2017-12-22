@@ -976,7 +976,7 @@ function testNeuralNet() {
         const m = layerSizes[i];
         const n = layerSizes[i + 1];
         // Initialize or get weights and biases.
-        const w = params.randn(`w${i}`, [m, n], device);
+        const w = params.randn(`w${i}`, [m, n], {device});
         const b = params.zeros(`b${i}`, [n], "float32", device);
         outputs = inputs.matmul(w).add(b);
         inputs = outputs.relu();

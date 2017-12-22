@@ -124,10 +124,12 @@ export class Params {
     this.store.forEach(cb);
   }
 
-  // If the given name does not exist in the parameters object, this
-  // initializes a new random normal tensor. If the name does exist
-  // in the parameters object, this just returns that stored tensor.
-  randn(name: string, shape: types.Shape, device= "CPU:0", scale= 0.1): Tensor {
+  /* If the given name does not exist in the parameters object, this
+   * initializes a new random normal tensor. If the name does exist
+   * in the parameters object, this just returns that stored tensor.
+   */
+  randn(name: string, shape: types.Shape,
+        { device = "CPU:0", scale = 0.1 } = {}): Tensor {
     if (this.has(name)) {
       return this.get(name);
     }
@@ -140,11 +142,12 @@ export class Params {
     return t;
   }
 
-  // If the given name does not exist in the parameters object, this
-  // initializes a new tensor with zero values. If the name does exist
-  // in the parameters object, this just returns that stored tensor.
-  zeros(name: string, shape: types.Shape, dtype:
-        types.DType = "float32", device= "CPU:0"): Tensor {
+  /* If the given name does not exist in the parameters object, this
+   * initializes a new tensor with zero values. If the name does exist
+   * in the parameters object, this just returns that stored tensor.
+   */
+  zeros(name: string, shape: types.Shape, dtype: types.DType = "float32",
+        device = "CPU:0"): Tensor {
     if (this.has(name)) {
       return this.get(name);
     }
@@ -205,6 +208,6 @@ export class OptimizerSGD {
     });
     this.params = updated;
     this.steps++;
-    return loss.getData()[0];
+    return loss.cpu().getData()[0];
   }
 }

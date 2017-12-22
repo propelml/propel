@@ -4,6 +4,9 @@
 import { $, OptimizerSGD, Params, Tensor } from "./api";
 import * as mnist from "./mnist";
 
+const useGPU = true;
+const device = useGPU ? "GPU:0" : "CPU:0";
+
 // Hyperparameters
 const learningRate = 0.001;
 const momentum = 0.9;
@@ -12,8 +15,8 @@ const layerSizes = [784, 200, 100, 10];
 const reg = 0.0001;
 
 console.log("Load MNIST...");
-const datasetTrain = mnist.load("train", batchSize);
-const datasetTest = mnist.load("test", batchSize);
+const datasetTrain = mnist.load("train", batchSize, useGPU);
+const datasetTest = mnist.load("test", batchSize, useGPU);
 
 // Implements a fully-connected network with ReLU activations.
 // Returns logits.
@@ -26,8 +29,8 @@ function inference(params: Params, images: Tensor) {
     const m = layerSizes[i];
     const n = layerSizes[i + 1];
     // Initialize or get weights and biases.
-    const w = params.randn(`w${i}`, [m, n]);
-    const b = params.randn(`b${i}`, [n]);
+    const w = params.randn(`w${i}`, [m, n], {device});
+    const b = params.randn(`b${i}`, [n], {device});
     outputs = inputs.matmul(w).add(b);
     inputs = outputs.relu();
   }
