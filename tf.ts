@@ -96,18 +96,22 @@ function dtypePropel2TF(dtype: types.DType): number {
   }
 }
 
-function int32Scalar(v: number): TensorTF {
-  return TensorTF.fromTypedArray(new Int32Array([v]), []);
+function colocateDevice(colocateWith?: TensorTF): string {
+  return colocateWith ? binding.getDevice(colocateWith.handle) : "CPU:0";
 }
 
-function floatScalar(v: number): TensorTF {
-  return TensorTF.fromTypedArray(new Float32Array([v]), []);
+function int32Small(v: number | number[], colocateWith?: TensorTF): TensorTF {
+  return new TensorTF(binding.createSmallHandle(ctx, binding.TF_INT32,
+    colocateDevice(colocateWith), v));
+}
+
+function floatSmall(v: number | number[], colocateWith?: TensorTF): TensorTF {
+  return new TensorTF(binding.createSmallHandle(ctx, binding.TF_FLOAT,
+    colocateDevice(colocateWith), v));
 }
 
 export class TensorTF implements types.BasicTensor {
-  readonly dtype: types.DType;
-  readonly shape: types.Shape;
-  readonly handle: any;  // binding.Handle
+  readonly handle: BindingInterface["Handle"];
   private data?: types.TypedArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
@@ -121,8 +125,14 @@ export class TensorTF implements types.BasicTensor {
 
   constructor(handle: any) {
     this.handle = handle;
-    this.shape = binding.getShape(handle);
-    this.dtype = dtypeTF2Propel(binding.getDType(handle));
+  }
+
+  get shape(): types.Shape {
+    return binding.getShape(this.handle);
+  }
+
+  get dtype(): types.DType {
+    return dtypeTF2Propel(binding.getDType(this.handle));
   }
 
   getData(): types.TypedArray {
@@ -193,9 +203,8 @@ export class OpsTF implements types.BackendOps {
     if (value.shape.length !== 0) {
       throw new Error("Fill value must be a scalar.");
     }
-    const dims = TensorTF.fromTypedArray(new Int32Array(shape),
-      [shape.length]);
-    return execute1("Fill", [dims, value], value.dtype);
+    const shapeT = int32Small(shape, value);
+    return execute1("Fill", [shapeT, value], value.dtype);
   }
 
   square(x: TensorTF): TensorTF {
@@ -231,8 +240,7 @@ export class OpsTF implements types.BackendOps {
   }
 
   randn(shape: types.Shape, seed?: number): TensorTF {
-    const shapeT = TensorTF.fromTypedArray(new Int32Array(shape),
-      [shape.length]);
+    const shapeT = int32Small(shape);
     if (typeof seed !== "number") seed = 0;
     const attrs = [
       ["dtype", binding.ATTR_TYPE, binding.TF_FLOAT], // output
@@ -244,9 +252,9 @@ export class OpsTF implements types.BackendOps {
   }
 
   linspace(start: number, stop: number, num: number): TensorTF {
-    const startT = floatScalar(start);
-    const stopT = floatScalar(stop);
-    const numT = int32Scalar(num);
+    const startT = floatSmall(start);
+    const stopT = floatSmall(stop);
+    const numT = int32Small(num);
     return execute0("LinSpace", [startT, stopT, numT], [
       ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -254,9 +262,9 @@ export class OpsTF implements types.BackendOps {
   }
 
   arange(start: number, limit: number, delta: number): TensorTF {
-    const startT = int32Scalar(start);
-    const limitT = int32Scalar(limit);
-    const deltaT = int32Scalar(delta);
+    const startT = int32Small(start);
+    const limitT = int32Small(limit);
+    const deltaT = int32Small(delta);
     const args = [startT, limitT, deltaT];
     return execute0("Range", args, [
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -285,7 +293,7 @@ export class OpsTF implements types.BackendOps {
   }
 
   argmax(x: TensorTF, axis: number): TensorTF {
-    const axisT = int32Scalar(axis);
+    const axisT = int32Small(axis, x);
     return execute0("ArgMax", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -294,7 +302,7 @@ export class OpsTF implements types.BackendOps {
   }
 
   argmin(x: TensorTF, axis: number): TensorTF {
-    const axisT = int32Scalar(axis);
+    const axisT = int32Small(axis, x);
     return execute0("ArgMin", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -304,7 +312,8 @@ export class OpsTF implements types.BackendOps {
 
   reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
-    const axesT = convertBasic(axes, "int32") as TensorTF;
+    // axesT is expected to be on CPU.
+    const axesT = int32Small(axes);
     return execute0("Sum", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -314,7 +323,8 @@ export class OpsTF implements types.BackendOps {
 
   reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
-    const axesT = convertBasic(axes, "int32") as TensorTF;
+    // axesT is expected to be on CPU.
+    const axesT = int32Small(axes);
     return execute0("Mean", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -324,7 +334,8 @@ export class OpsTF implements types.BackendOps {
 
   reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
-    const axesT = convertBasic(axes, "int32") as TensorTF;
+    // axesT is expected to be on CPU.
+    const axesT = int32Small(axes);
     return execute0("Max", [x, axesT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -361,8 +372,9 @@ export class OpsTF implements types.BackendOps {
   }
 
   slice(x: TensorTF, begin: number[], size: number[]): TensorTF {
-    const beginT = convertBasic(begin, "int32") as TensorTF;
-    const sizeT = convertBasic(size, "int32") as TensorTF;
+    // Slice op expects begin and size to reside on CPU.
+    const beginT = int32Small(begin);
+    const sizeT = int32Small(size);
     return execute0("Slice", [x, beginT, sizeT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Index", binding.ATTR_TYPE, binding.TF_INT32],
@@ -370,7 +382,8 @@ export class OpsTF implements types.BackendOps {
   }
 
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
-    const shapeT = convertBasic(newShape, "int32") as TensorTF;
+    // Reshape op expects newShape to reside on CPU.
+    const shapeT = int32Small(newShape);
     return execute0("Reshape", [x, shapeT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tshape", binding.ATTR_TYPE, binding.getDType(shapeT.handle)],
@@ -397,9 +410,11 @@ export class OpsTF implements types.BackendOps {
     if (x.dtype === "float32") {
       throw new Error("Must use integer type with oneHot.");
     }
-    const depthT = int32Scalar(depth);
-    const onT = floatScalar(onValue);
-    const offT = floatScalar(offValue);
+    // OneHot expects depthT to be on CPU. However onT and offT need to be
+    // colocated with x.
+    const depthT = int32Small(depth);
+    const onT = floatSmall(onValue, x);
+    const offT = floatSmall(offValue, x);
     return execute0("OneHot", [x, depthT, onT, offT], [
       ["T", binding.ATTR_TYPE, binding.getDType(onT.handle)],
       ["TI", binding.ATTR_TYPE, binding.getDType(x.handle)],
