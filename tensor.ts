@@ -9,7 +9,6 @@ export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
   if (t instanceof Tensor) return t;
   return new Tensor(convertBasic(t, dtype));
 }
-const $ = convert;
 
 // Tensor wraps a BasicTensor object. This is the main public
 // interface to tensor operators. Each instance has a unique id for use in
@@ -30,6 +29,20 @@ export class Tensor implements types.BasicTensor {
     this.dtype = t.dtype;
     this.basic = t;
     this.id = Tensor.nextId++;
+  }
+
+  // This is similar convert() - it turns TensorLike objects into Tensors - but
+  // the function further ensures that the returned tensor is on the same
+  // devices as this tensor.
+  private colocate(t: types.TensorLike, dtype?: types.DType): Tensor {
+    if (t instanceof Tensor) {
+      if (t.device === this.device) return t;
+      // TODO Warning! This might be an unnecessary copy. Maybe we should
+      // notify the user? Maybe this shouldn't be allowed even.
+      // For now we stay silent.
+      return new Tensor(bo.copyToDevice(t.basic, this.device));
+    }
+    return new Tensor(convertBasic(t, dtype, this.device));
   }
 
   getData(): types.TypedArray {
@@ -71,23 +84,23 @@ export class Tensor implements types.BasicTensor {
   }
 
   add(x: types.TensorLike): Tensor {
-    return ops.add(this, $(x));
+    return ops.add(this, this.colocate(x));
   }
 
   sub(x: types.TensorLike): Tensor {
-    return ops.sub(this, $(x));
+    return ops.sub(this, this.colocate(x));
   }
 
   mul(x: types.TensorLike): Tensor {
-    return ops.mul(this, $(x));
+    return ops.mul(this, this.colocate(x));
   }
 
   div(x: types.TensorLike): Tensor {
-    return ops.div(this, $(x));
+    return ops.div(this, this.colocate(x));
   }
 
   matmul(x: types.TensorLike): Tensor {
-    return ops.matmul(this, $(x));
+    return ops.matmul(this, this.colocate(x));
   }
 
   neg(): Tensor {
@@ -124,7 +137,7 @@ export class Tensor implements types.BasicTensor {
     if (perm === undefined) {
       perm = arange(this.rank).reverse();
     }
-    perm = $(perm, "int32");
+    perm = this.colocate(perm, "int32");
     return ops.transpose(this, perm);
   }
 
@@ -139,7 +152,7 @@ export class Tensor implements types.BasicTensor {
       ta[i] = 1;
     }
 
-    const dimsT = $(ta, "bool");
+    const dimsT = this.colocate(ta, "bool");
     return ops.reverse(this, dimsT);
   }
 
@@ -185,34 +198,34 @@ export class Tensor implements types.BasicTensor {
 
   // Element-wise comparison. Returns a tensor with dtype == "bool".
   equal(x: types.TensorLike): Tensor {
-    return ops.equal(this, $(x));
+    return ops.equal(this, this.colocate(x));
   }
 
   // Returns a boolean tensor with the truth value of (this > x) element-wise.
   greater(x: types.TensorLike): Tensor {
-    return ops.greater(this, $(x, this.dtype));
+    return ops.greater(this, this.colocate(x, this.dtype));
   }
 
   // Returns a boolean tensor with the truth value of (this >= x) element-wise.
   greaterEqual(x: types.TensorLike): Tensor {
-    return ops.greaterEqual(this, $(x, this.dtype));
+    return ops.greaterEqual(this, this.colocate(x, this.dtype));
   }
 
   // Returns a boolean tensor with the truth value of (this < x) element-wise.
   less(x: types.TensorLike): Tensor {
-    return ops.less(this, $(x, this.dtype));
+    return ops.less(this, this.colocate(x, this.dtype));
   }
 
   // Returns a boolean tensor with the truth value of (this <= x) element-wise.
   lessEqual(x: types.TensorLike): Tensor {
-    return ops.lessEqual(this, $(x, this.dtype));
+    return ops.lessEqual(this, this.colocate(x, this.dtype));
   }
 
   // Selects elements from `t` or `f`, depending on the condition (this).
   // this should be a boolean Tensor.
   select(t: types.TensorLike, f: types.TensorLike): Tensor {
-    const tT = $(t);
-    const fT = $(f, tT.dtype);
+    const tT = this.colocate(t);
+    const fT = this.colocate(f, tT.dtype);
     return ops.select(this, tT, fT);
   }
 
@@ -264,7 +277,7 @@ export class Tensor implements types.BasicTensor {
   // multiplication. For 1D tensors to inner product of vectors (without
   // complex conjugation). Currently higher order tensors are not supported.
   dot(x: types.TensorLike): Tensor {
-    const xx = $(x);
+    const xx = this.colocate(x);
     let left, right;
     let lShape, rShape;
     if (this.rank === 0) {
@@ -317,7 +330,7 @@ export class Tensor implements types.BasicTensor {
   //               distribution. Often labels is one-hot along axis 1.
   softmaxCE(labels: types.TensorLike): Tensor {
     const logits = this;
-    const labelsT = $(labels);
+    const labelsT = this.colocate(labels);
     assert(labelsT.rank === 2);
     assert(logits.rank === 2);
     const logQ = logits.logSoftmax();

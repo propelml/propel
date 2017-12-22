@@ -1,5 +1,5 @@
 // TensorFlow backend.
-import { convertBasic } from "./backend";
+import { bo, convertBasic } from "./backend";
 import { BindingInterface } from "./binding";
 import * as types from "./types";
 import { assert, assertEqual } from "./util";
@@ -115,12 +115,16 @@ export class TensorTF implements types.BasicTensor {
   private data?: types.TypedArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                        dtype?: types.DType): TensorTF {
+                        dtype?: types.DType, device?: string): TensorTF {
     if (dtype === undefined) {
       dtype = types.getDType(data);
     }
     const dtypeTF = dtypePropel2TF(dtype);
-    return new TensorTF(new binding.Handle(data, shape, dtypeTF));
+    let h = new binding.Handle(data, shape, dtypeTF);
+    if (device && device !== "CPU:0") {
+      h = binding.copyToDevice(ctx, h, device);
+    }
+    return new TensorTF(h);
   }
 
   constructor(handle: any) {
@@ -315,7 +319,8 @@ export class OpsTF implements types.BackendOps {
   }
 
   argmax(x: TensorTF, axis: number): TensorTF {
-    const axisT = int32Small(axis, x);
+    // axisT is expected to be on CPU.
+    const axisT = int32Small(axis);
     return execute0("ArgMax", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
@@ -324,7 +329,8 @@ export class OpsTF implements types.BackendOps {
   }
 
   argmin(x: TensorTF, axis: number): TensorTF {
-    const axisT = int32Small(axis, x);
+    // axisT is expected to be on CPU.
+    const axisT = int32Small(axis);
     return execute0("ArgMin", [x, axisT], [
       ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
       ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],

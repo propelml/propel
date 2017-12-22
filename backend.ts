@@ -22,18 +22,15 @@ if (binding) {
   backend = "dl";
 }
 
-function create(data: types.TypedArray, shape: types.Shape,
-    dtype: types.DType): types.BasicTensor {
-  const t = tensorClass.fromTypedArray(data, shape, dtype);
-  return t;
-}
+const create = tensorClass.fromTypedArray;
 
 export function convertBasic(x: types.TensorLike,
-                             dtype?: types.DType): types.BasicTensor {
+    dtype?: types.DType, device?: string): types.BasicTensor {
   if (typeof x === "number") {
-    return create(types.makeTypedArray([x], dtype), [], dtype);
+    // TODO On TF we should take advantage of createSmallHandle for scalars.
+    return create(types.makeTypedArray([x], dtype), [], dtype, device);
   } else if (types.isTypedArray(x)) {
-    return create(x, [x.length], dtype);
+    return create(x, [x.length], dtype, device);
   } else if (Array.isArray(x)) {
     if (!(x instanceof Array)) {
       // Unfortunately deeplearnjs gets confused by an out-of-context array.
@@ -42,7 +39,7 @@ export function convertBasic(x: types.TensorLike,
     }
     const shape = inferShape(x);
     const data = flatten(x) as number[];
-    return create(types.makeTypedArray(data, dtype), shape, dtype);
+    return create(types.makeTypedArray(data, dtype), shape, dtype, device);
   }
   throw new Error("Unreachable");
 }

@@ -1,4 +1,5 @@
 import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
+import { Tensor } from "./tensor";
 import { BasicTensor, FlatVector, isTypedArray, RegularArray, Shape,
   TensorLike } from "./types";
 
@@ -21,6 +22,9 @@ export function allFinite(arr: number[]): boolean {
 }
 
 function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
+  if ((t as Tensor).cpu) {
+    t = (t as Tensor).cpu(); // Copy to CPU if necessary.
+  }
   if ((t as BasicTensor).getData) {
     t = t as BasicTensor;
     return [t.shape, t.getData()];
