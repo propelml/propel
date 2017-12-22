@@ -29,6 +29,8 @@ export interface BindingInterface {
   getShape(h: Handle): types.Shape;
   getDevice(h: Handle): string;
   listDevices(ctx: Context): DeviceDesc[];
+  createSmallHandle(ctx: Context, dtype: DTypeCode, device: string,
+                    data: number | number[]): Handle;
   copyToDevice(ctx: Context, h: Handle, device: string): Handle;
   execute(ctx: Context, op: string, attrs: AttrDef[],
           inputs: Handle[]): string;
