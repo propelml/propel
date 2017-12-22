@@ -5,6 +5,7 @@ import { convert, Tensor } from "./tensor";
 export { Tensor } from "./tensor";
 import * as ops from "./ops";
 import * as types from "./types";
+export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
 
 export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
