@@ -493,42 +493,48 @@ static napi_value NewHandle(napi_env env, napi_callback_info info) {
 
   // Check the provided dtype matches the type of the TypedArray.
   size_t width;
+  bool good_dtype;
   switch (js_array_type) {
     case napi_int8_array:
       width = sizeof(int8_t);
-      check(tf_type == TF_INT8);
+      good_dtype = (tf_type == TF_INT8);
       break;
     case napi_uint8_array:
     case napi_uint8_clamped_array:
       width = sizeof(uint8_t);
-      check(tf_type == TF_UINT8 || tf_type == TF_BOOL);
+      good_dtype = (tf_type == TF_UINT8 || tf_type == TF_BOOL);
       break;
     case napi_int16_array:
       width = sizeof(int16_t);
-      check(tf_type == TF_INT16);
+      good_dtype = (tf_type == TF_INT16);
       break;
     case napi_uint16_array:
       width = sizeof(uint16_t);
-      check(tf_type == TF_UINT16);
+      good_dtype = (tf_type == TF_UINT16);
       break;
     case napi_int32_array:
       width = sizeof(int32_t);
-      check(tf_type == TF_INT32);
+      good_dtype = (tf_type == TF_INT32);
       break;
     case napi_uint32_array:
       width = sizeof(uint32_t);
-      check(tf_type == TF_UINT32);
+      good_dtype = (tf_type == TF_UINT32);
     case napi_float32_array:
       width = sizeof(float);
-      check(tf_type == TF_FLOAT);
+      good_dtype = (tf_type == TF_FLOAT);
       break;
     case napi_float64_array:
       width = sizeof(double);
-      check(tf_type == TF_DOUBLE);
+      good_dtype = (tf_type == TF_DOUBLE);
       break;
     default:
-      napi_throw_type_error(env, "EINVAL", "Unsupported TypedArray type.");
-      return 0;
+      good_dtype = false;
+      break;
+  }
+
+  if (!good_dtype) {
+    napi_throw_type_error(env, "EINVAL", "Unsupported TypedArray type.");
+    return 0;
   }
 
   // Build the array containing the dimensions.
