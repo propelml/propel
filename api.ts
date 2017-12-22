@@ -24,6 +24,11 @@ export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
   return convert(t, dtype);
 }
 
+// Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
+export function listDevices(): string[] {
+  return bo.listDevices();
+}
+
 // Returns the identity matrix of a given size.
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
   const t = bo.eye(size, dtype);

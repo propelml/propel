@@ -1,5 +1,5 @@
-import { $, arange, backend, fill, grad, linspace, multigrad, ones, Params,
-  randn, zeros } from "./api";
+import { $, arange, backend, fill, grad, linspace, listDevices, multigrad,
+  ones, Params, randn, Tensor, zeros } from "./api";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./util";
 
@@ -10,6 +10,10 @@ function checkGrad(f, g, val = 1.0) {
   const expected = a.sub(b).div(2 * epsilon);
   const actual = g(val);
   assertClose(actual, expected);
+}
+
+function gpuAvail(): boolean {
+  return listDevices().length === 1 ? false : true;
 }
 
 // Basic Tests
@@ -904,6 +908,22 @@ function testParams() {
   assertAllEqual(b, bb);
 }
 
+function testDevicePlacement() {
+  if (!gpuAvail()) {
+    console.log("GPU not available. Skipping testDevicePlacement.");
+    return;
+  }
+  const t = $([1, 2]).gpu();
+  const s = $([3, 4]).gpu();
+  const r = t.mul(s);
+  const rCpu = r.cpu();
+  assert(t.device === "GPU:0");
+  assert(s.device === "GPU:0");
+  assert(r.device === "GPU:0");
+  assert(rCpu.device === "CPU:0");
+  assertAllEqual(rCpu, [3, 8]);
+}
+
 testLinspace();
 testArange();
 testRandn();
@@ -961,3 +981,4 @@ testCast();
 testOneHot();
 testSoftmaxCE();
 testParams();
+testDevicePlacement();

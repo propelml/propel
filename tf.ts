@@ -157,7 +157,29 @@ export class TensorTF implements types.BasicTensor {
   }
 }
 
+// TF has rather verbose device names like:
+// '/job:localhost/replica:0/task:0/device:GPU:0'. Until Propel starts thinking
+// about multi-replica configurations, we simplify this string to just "GPU:0".
+function simplifyDeviceName(device: string): string {
+  return device.split("/").pop().replace("device:", "");
+}
+
 export class OpsTF implements types.BackendOps {
+
+  copyToDevice(x: TensorTF, device: string): TensorTF {
+    const h = binding.copyToDevice(ctx, x.handle, device);
+    return new TensorTF(h);
+  }
+
+  getDevice(x: TensorTF): string {
+    return simplifyDeviceName(binding.getDevice(x.handle));
+  }
+
+  listDevices(): string[] {
+    return binding.listDevices(ctx).map(deviceDesc => {
+      return simplifyDeviceName(deviceDesc.name);
+    });
+  }
 
   add(x: TensorTF, y: TensorTF): TensorTF {
     return execute1("Add", [x, y]);

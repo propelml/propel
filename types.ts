@@ -19,6 +19,9 @@ export interface BasicTensor {
 
 // BackendOps do not use backprop.
 export interface BackendOps {
+  copyToDevice(x: BasicTensor, device: string): BasicTensor;
+  getDevice(x: BasicTensor): string;
+  listDevices(): string[];
   add(x: BasicTensor, y: BasicTensor): BasicTensor;
   sub(x: BasicTensor, y: BasicTensor): BasicTensor;
   mul(x: BasicTensor, y: BasicTensor): BasicTensor;
