@@ -3,7 +3,6 @@ var webpack = require('webpack');
 module.exports = {
   entry: {
     'notebook': './notebook.ts',
-    'ts_context': './ts_context.ts',
     'propel': './api.ts',
     'propel.min': './api.ts'
   },
