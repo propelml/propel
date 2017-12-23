@@ -9,6 +9,7 @@
     "@types/codemirror": "0.0.51",
     "@types/d3": "^4.11.1",
     "@types/node": "^8.0.53",
+    "acorn": "^5.2.1",
     "codemirror": "^5.31.0",
     "d3": "^4.11.0",
     "node-fetch": "^1.7.3",
