@@ -58,8 +58,9 @@ export class Tape {
   }
 }
 
-// Returns a function which differentiates f with respect to the given
-// argnum indexes.
+/** Returns a function which differentiates f with respect to the given
+ * argnum indexes.
+ */
 export function multigrad(f, argnums?: number[]) {
   const g = multigradAndVal(f, argnums);
   return function(...args: types.TensorLike[]): Tensor[] {
@@ -129,17 +130,18 @@ export function multigradAndVal(f, argnums?: number[]) {
   };
 }
 
-// grad(f) returns a gradient function. If f is a function that maps
-// R^n to R^m, then the gradient function maps R^n to R^n.
-// When evaluated at a point, it gives the slope in each dimension of
-// the function f. For example:
-//
-//   let f = (x) => $(x).square();
-//
-// Then grad(f) is 2*x (being the derivative of x^2).
-//
-//   g = grad(f);
-//   g(10) // is 2 * 10
+/** grad(f) returns a gradient function. If f is a function that maps
+ * R^n to R^m, then the gradient function maps R^n to R^n.
+ * When evaluated at a point, it gives the slope in each dimension of
+ * the function f. For example:
+ *
+ *   let f = (x) => $(x).square();
+ *
+ * Then grad(f) is 2*x (being the derivative of x^2).
+ *
+ *   g = grad(f);
+ *   g(10) // is 2 * 10
+ */
 export function grad(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
   return function(...args: types.TensorLike[]): Tensor {

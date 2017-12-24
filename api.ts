@@ -13,37 +13,40 @@ export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
 import { gradParams, ParamsFn }
   from "./backprop";
 
-// Turns a javascript array of numbers
-// into a tensor. Like this:
-//
-//    let tensor = $([[1, 2, 3],
-//                    [4, 5, 6]]);
-//    console.log(tensor.square());
-//
-// If a tensor is given to $, it simply returns it.
+/** Turns a javascript array of numbers
+ * into a tensor. Like this:
+ *
+ *    let tensor = $([[1, 2, 3],
+ *                    [4, 5, 6]]);
+ *    console.log(tensor.square());
+ *
+ * If a tensor is given to $, it simply returns it.
+ */
 export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
   return convert(t, dtype);
 }
 
-// Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
+/** Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
+ */
 export function listDevices(): string[] {
   return bo.listDevices();
 }
 
-// Returns the identity matrix of a given size.
+/** Returns the identity matrix of a given size. */
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
   const t = bo.eye(size, dtype);
   return new Tensor(t);
 }
 
-// Returns num evenly spaced samples, calculated over the interval
-// [start, stop].
+/** Returns num evenly spaced samples, calculated over the interval
+ * [start, stop].
+ */
 export const linspace = (start: number, stop: number, num = 50): Tensor => {
   const t = bo.linspace(start, stop, num);
   return new Tensor(t);
 };
 
-// Return evenly spaced numbers over a specified interval.
+/** Return evenly spaced numbers over a specified interval. */
 export const arange = function(...args: number[]): Tensor {
   let start: number, limit: number, delta: number;
   switch (args.length) {
@@ -77,35 +80,36 @@ export function randn(shape: number[]): Tensor {
   return new Tensor(t);
 }
 
-// fill returns a new tensor of the given shape, filled with constant values
-// specified by the `value` argument. `value` must be a scalar tensor.
+/** fill returns a new tensor of the given shape, filled with constant values
+ * specified by the `value` argument. `value` must be a scalar tensor.
+ */
 export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
   return ops.fill($(value), shape);
 }
 
-// Return a new tensor of given shape and dtype, filled with zeros.
+/** Return a new tensor of given shape and dtype, filled with zeros. */
 export function zeros(shape: types.Shape,
                       dtype: types.DType = "float32"): Tensor {
   return ops.zeros(shape, dtype);
 }
 
-// Return a new tensor of given shape and dtype, filled with ones.
+/** Return a new tensor of given shape and dtype, filled with ones. */
 export function ones(shape: types.Shape,
                      dtype: types.DType = "float32"): Tensor {
   return ops.ones(shape, dtype);
 }
 
-// A collection of named Tensors. Used with sgd().
-// Iterate over it like this:
-//
-//    params.forEach((tensor, name) => {
-//      console.log("name", tensor);
-//    });
-//
+/** A collection of named Tensors. Used with sgd().
+ * Iterate over it like this:
+ *
+ *    params.forEach((tensor, name) => {
+ *      console.log("name", tensor);
+ *    });
+ */
 export class Params {
   // Note TS doesn't allow extending Map:
   // https://github.com/Microsoft/TypeScript/issues/10853
-  store = new Map<string, Tensor>();
+  private store = new Map<string, Tensor>();
 
   has(name: string): boolean {
     return this.store.has(name);
@@ -124,7 +128,7 @@ export class Params {
     this.store.forEach(cb);
   }
 
-  /* If the given name does not exist in the parameters object, this
+  /** If the given name does not exist in the parameters object, this
    * initializes a new random normal tensor. If the name does exist
    * in the parameters object, this just returns that stored tensor.
    */
@@ -142,7 +146,7 @@ export class Params {
     return t;
   }
 
-  /* If the given name does not exist in the parameters object, this
+  /** If the given name does not exist in the parameters object, this
    * initializes a new tensor with zero values. If the name does exist
    * in the parameters object, this just returns that stored tensor.
    */
@@ -161,7 +165,7 @@ export class Params {
   }
 }
 
-// Stochastic gradient descent with momentum.
+/** Stochastic gradient descent with momentum. */
 export class OptimizerSGD {
   steps: number;
   params: Params;
