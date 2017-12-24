@@ -169,7 +169,9 @@ class Cell {
 
 function newCellClick() {
   _log("Button click");
+  const cellsDiv = document.getElementById("cells");
   const parentDiv = document.createElement("div");
+  cellsDiv.appendChild(parentDiv);
   const cell = new Cell("", parentDiv);
   window.scrollBy(0, 500); // scroll down.
   cell.focus();
