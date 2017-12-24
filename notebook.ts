@@ -5,24 +5,21 @@ import "codemirror/mode/javascript/javascript.js";
 import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
+import { transpile } from "./nb_transpiler";
 import { assert } from "./util";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 const cellsElement = null;
 const _log = console.log;
 const _error = console.error;
-// If you use the eval function indirectly, by invoking it via a reference
-// other than eval, as of ECMAScript 5 it works in the global scope rather than
-// the local scope. This means, for instance, that function declarations create
-// global functions, and that the code being evaluated doesn't have access to
-// local variables within the scope where it's being called.
-const globalEval = eval;
 
 let lastExecutedCellId = null;
 
-export function evalCell(source, cellId) {
+export async function evalCell(source, cellId): Promise<any> {
+  source = transpile(source);
   source += `\n//# sourceURL=__cell${cellId}__.js`;
-  globalEval(source);
+  const fn = eval(source);
+  return await fn(window, importModule);
 }
 
 // This is to handle asynchronous output situations.
@@ -50,7 +47,7 @@ export function outputId(): string {
   return cell.output.id;
 }
 
-window["require"] = function require(target) {
+async function importModule(target) {
   // _log("require", target);
   const m = {
     matplotlib,
@@ -61,9 +58,7 @@ window["require"] = function require(target) {
     return m;
   }
   throw new Error("Unknown module: " + target);
-};
-
-window["exports"] = {};
+}
 
 // Override console.log so that it goes to the correct cell output.
 console.log = (...args) => {
@@ -101,72 +96,6 @@ console.error = (...args) => {
   output.appendChild(t);
   _error(...args);
 };
-
-// TODO(ry) Replace this with typescript compiler at some point.
-function parseImportLine(line) {
-  const words = line.split(/\s/);
-  if (words.shift() !== "import") return null;
-  const imports = [];
-  let state = "curly-open";
-  while (true) {
-    let word = words.shift();
-    switch (state) {
-      case null:
-        return null;
-      case "curly-open":
-        if (word !== "{") return null;
-        state = "imported";
-        break;
-      case "imported":
-        if (word === "}") {
-          state = "from";
-        } else {
-          if (word[word.length - 1] !== ",") {
-            state = "curly-close";
-          }
-          imports.push(word.replace(/,$/, ""));
-        }
-        break;
-      case "curly-close":
-        if (word !== "}") return null;
-        state = "from";
-        break;
-      case "from":
-        if (word !== "from") return null;
-        state = "modname";
-        break;
-      case "modname":
-        const q = word[0];
-        word = word.replace(/;$/, "");
-        if (word[word.length - 1] !== q) return null;
-        // success
-        return {
-          imports,
-          modname: word,
-        };
-
-      default:
-        assert(false);
-    }
-  }
-}
-
-// TODO Yes, extremely hacky.
-function transpile(source: string): string {
-  const lines = source.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const r = parseImportLine(line);
-    // Replace line with require() calls, if it's an import line.
-    if (r) {
-      lines[i] = "";
-      for (const m of r.imports) {
-        lines[i] += `${m} = require(${r.modname}).${m}; `;
-      }
-    }
-  }
-  return lines.join("\n");
-}
 
 class Cell {
   isLoad: boolean;
@@ -223,17 +152,18 @@ class Cell {
     return this.output.id;
   }
 
-  execute(done?: () => void) {
+  async execute() {
     lastExecutedCellId = this.id;
-    const source = transpile(this.editor.getValue());
+    const source = this.editor.getValue();
     let rval;
     try {
-      rval = evalCell(source, this.id);
+      rval = await evalCell(source, this.id);
     } catch (e) {
       console.error(e.stack);
     }
-    if (rval) { console.log(rval); }
-    if (done) { done(); }
+    if (rval !== undefined ) {
+      console.log(rval);
+    }
   }
 }
 
@@ -245,7 +175,7 @@ function newCellClick() {
   cell.focus();
 }
 
-window.onload = () => {
+window.onload = async() => {
   const newCell = document.getElementById("newCell");
   if (newCell) newCell.onclick = newCellClick;
 
@@ -279,14 +209,9 @@ window.onload = () => {
     cells.push(new Cell(code, parentDiv));
   }
 
-  let execCounter = 0;
-  function execNext() {
-    if (execCounter < cells.length) {
-      const cell = cells[execCounter++];
-      cell.execute(execNext);
-    }
+  for (const cell of cells) {
+    await cell.execute();
   }
-  execNext();
 };
 
 // Replaces oldElement with newElement at the same place

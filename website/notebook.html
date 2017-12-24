@@ -22,14 +22,14 @@ console.log("5*5 =", $(5).mul(5));
 import { grad, linspace } from "propel";
 import { plot } from "matplotlib";
 
-f = (x) => $(x).mul(x);
-x = linspace(-4, 4, 200);
+let f = (x) => $(x).mul(x);
+let x = linspace(-4, 4, 200);
 plot(x, f(x),
      x, grad(f)(x));
 </script>
 
 <script type="notebook">
-tanh = (a) => $(a).tanh();
+let tanh = (a) => $(a).tanh();
 
 plot(x, tanh(x),
      x, grad(tanh)(x),                     // first derivative
@@ -38,6 +38,11 @@ plot(x, tanh(x),
      x, grad(grad(grad(grad(tanh))))(x));  // fourth derivative
 </script>
 
+<script type="notebook">
+let f = await fetch('mnist/README');
+let t = await f.text();
+t;
+</script>
     </div> <!-- #cells -->
     <div class="row">
       <button id="newCell">New Cell</button>
