@@ -3,6 +3,9 @@ set -e -v
 cd `dirname "$0"`; cd ..
 ./node_modules/typescript/bin/tsc
 
+# Backend independent
+node dist/gendoc_test.js
+
 # TensorFlow backend
 node dist/binding_test.js  # TF only
 

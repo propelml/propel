@@ -94,3 +94,44 @@ button.run-button {
   margin: 50px 10px;
 }
 
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  box-shadow: 0 0 2.25rem #9da5ab;
+  background-color: #fff;
+}
+
+.docindex {
+  list-style-type: square;
+  padding: 5px;
+}
+
+.docindex li {
+  margin: 0;
+}
+
+.doc-entries {
+  margin-left: 250px;
+}
+
+.doc-entry .name,
+.doc-entry .typestr, .retType {
+  font-family: monospace;
+}
+
+.doc-entry > .name, .doc-entry > .typestr {
+  display: inline;;
+  font-size: 150%;
+  font-weight: bold;
+  background-color: #ddd;
+}
+
+.doc-entry {
+  margin-top: 2em;
+}
+.doc-entry .args {
+  list-style-type: square;
+}
+
