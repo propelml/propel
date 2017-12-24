@@ -1,15 +1,11 @@
 import { bo } from "./backend";
 import * as backprop from "./backprop";
-export { backend } from "./backend";
-import { convert, Tensor } from "./tensor";
-export { Tensor } from "./tensor";
 import * as ops from "./ops";
+import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
 
-export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
-  from "./backprop";
 import { gradParams, ParamsFn }
   from "./backprop";
 
@@ -31,6 +27,11 @@ export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
 export function listDevices(): string[] {
   return bo.listDevices();
 }
+
+export { Tensor } from "./tensor";
+
+export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
+  from "./backprop";
 
 /** Returns the identity matrix of a given size. */
 export function eye(size: number, dtype: types.DType = "float32"): Tensor {
@@ -215,3 +216,5 @@ export class OptimizerSGD {
     return loss.cpu().getData()[0];
   }
 }
+
+export { backend } from "./backend";
