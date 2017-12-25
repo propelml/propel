@@ -12,13 +12,19 @@ const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 const cellsElement = null;
 const _log = console.log;
 const _error = console.error;
+// If you use the eval function indirectly, by invoking it via a reference
+// other than eval, as of ECMAScript 5 it works in the global scope rather than
+// the local scope. This means, for instance, that function declarations create
+// global functions, and that the code being evaluated doesn't have access to
+// local variables within the scope where it's being called.
+const globalEval = eval;
 
 let lastExecutedCellId = null;
 
 export async function evalCell(source, cellId): Promise<any> {
   source = transpile(source);
   source += `\n//# sourceURL=__cell${cellId}__.js`;
-  const fn = eval(source);
+  const fn = globalEval(source);
   return await fn(window, importModule);
 }
 
