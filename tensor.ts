@@ -1,5 +1,6 @@
 import { arange } from "./api";
 import { bo, convertBasic } from "./backend";
+import * as format from "./format";
 import * as ops from "./ops";
 import * as types from "./types";
 import { allFinite, assert } from "./util";
@@ -40,8 +41,7 @@ export class Tensor implements types.BasicTensor {
   }
 
   toString(): string {
-    // TODO This should pretty print the tensor.
-    return `[${this.getData()}]`;
+    return format.toString(this.shape, this.getData());
   }
 
   cast(dtype: types.DType): Tensor {
