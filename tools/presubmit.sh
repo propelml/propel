@@ -8,4 +8,4 @@ export V=1
 npm build .
 node ./node_modules/webpack/bin/webpack.js
 bash ./tools/test.sh
-echo PASS
+# PASS
