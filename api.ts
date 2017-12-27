@@ -1,22 +1,24 @@
 import { bo } from "./backend";
 import * as backprop from "./backprop";
+import { gradParams, ParamsFn } from "./backprop";
 import * as ops from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
 
-import { gradParams, ParamsFn }
-  from "./backprop";
-
-/** Turns a javascript array of numbers
- * into a tensor. Like this:
+/** Turns a javascript array of numbers into a tensor. Like this:
  *
- *    let tensor = $([[1, 2, 3],
- *                    [4, 5, 6]]);
- *    console.log(tensor.square());
+ *    let tensor = $([[1, 2, 3], [4, 5, 6]]);
+ *    tensor.square();
  *
  * If a tensor is given to $, it simply returns it.
+ *
+ * @arg t - An array of numbers, representing a Tensor. Or a Tensor in which
+ *          case $() acts as the identity function.
+ * @arg dtype - The data type of the returned tensor. For example "int32" or
+ *              "float32".
+ * @returns A Tensor object..
  */
 export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
   return convert(t, dtype);
@@ -100,11 +102,16 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, dtype);
 }
 
-/** A collection of named Tensors. Used with sgd().
+/** A collection of named Tensors. Used with OptimizerSGD.
  * Iterate over it like this:
  *
+ *    import { Params } from "propel";
+ *    let params = new Params()
+ *    params.randn("A", [2]);
+ *    params.zeros("B", [2, 2]);
  *    params.forEach((tensor, name) => {
- *      console.log("name", tensor);
+ *      console.log(name);
+ *      console.log(tensor);
  *    });
  */
 export class Params {
