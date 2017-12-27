@@ -63,13 +63,17 @@ function getLimits(lines): number[] {
 function plotLines(data) {
   const outputId = "#" + notebook.outputId();
   // Make an SVG Container
+  let width = 400;
+  let height = 250;
   const svg = d3.select(outputId).append("svg")
-    .attr("width", 400)
-    .attr("height", 250);
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("width", width)
+    .attr("height", height);
   const m = 30;
   const margin = { top: m, right: m, bottom: m, left: m };
-  const width = +svg.attr("width") - margin.left - margin.right;
-  const height = +svg.attr("height") - margin.top - margin.bottom;
+  width = +svg.attr("width") - margin.left - margin.right;
+  height = +svg.attr("height") - margin.top - margin.bottom;
   const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
