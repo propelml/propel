@@ -1,62 +1,108 @@
-pre {
-  white-space: pre-wrap; word-break: keep-all;
-}
+@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
 body {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   background-color: #fafafa;
 }
 
-@media (min-width: 400px) {
-  header .propel {
-    text-align: right;
+.name,
+.typestr,
+.retType,
+.CodeMirror,
+.docindex *,
+pre,
+.output,
+code {
+  font-family: 'Roboto Mono', monospace;
+}
+
+.CodeMirror *,
+pre {
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+
+/* Don't allow SVGs to get wider than the screen. */
+svg {
+  max-width: 100%;
+}
+
+header, .panel {
+  border-top: 2px solid rgb(253, 141, 60);
+}
+
+.doc-entry {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.doc-entry:target {
+  border-left: 2px solid rgb(31, 119, 180);
+}
+
+
+header {
+  display: flex;
+  box-shadow: 0 0 2.25rem #9da5ab;
+  background-color: #fff;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px;
+}
+header * {
+  margin: 10px auto;
+}
+header .button {
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0; 
+    width: 20%;
+    height: auto;
+    box-shadow: 0 0 2.25rem #9da5ab;
+    overflow-y: auto;
+  }
+
+  header {
+    justify-content: left;
+    flex-direction: row;
+    align-items: left;
+  }
+  header:first-child {
+    padding-left: 20%;
+  }
+
+  header * {
+    margin: auto 20px;
+  }
+
+  .doc-entries {
+    margin-left: 20%;
+    max-width: 800px;
+  }
+
+  .doc-entry {
+    padding-left: 50px;
+    padding-right: 50px;
   }
 }
 
-header {
-  box-shadow: 0 0 2.25rem #9da5ab;
-  background-color: #fff;
-  border-top: 2px solid rgb(253, 141, 60);
-}
-header .row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2px 0 ;
-}
 
-header .button {
-  display: block;
-  margin: 0;
-}
 
-header .columns {
-}
-
-.propel {
-}
-
-header h1 {
-}
-header h2 {
-  font-size: 120%;
-}
-header h1, header h2 {
-  margin: 10px 0;
-}
-header .container {
-  padding: 0px;
-  margin-bottom: 50px;
-  vertical-align: middle;
-  background-color: inherit;
-}
-
-.container {
-}
 
 .notebook-cell {
   margin: 0 0 0px 0;
 }
+
 
 .CodeMirror {
   height: auto; /* Auto-resizing cells. */
@@ -86,7 +132,6 @@ button.run-button {
 
 .output {
   padding: 10px;
-  font-family: monospace;
   white-space: pre-wrap;
   border-left: 2px solid #f5f5f5;
 }
@@ -96,43 +141,56 @@ button.run-button {
 }
 
 .panel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  box-shadow: 0 0 2.25rem #9da5ab;
   background-color: #fff;
 }
 
 .docindex {
-  list-style-type: square;
-  padding: 5px;
-}
-
-.docindex li {
+  list-style-type: none;
+  padding: 0px;
   margin: 0;
 }
 
-.doc-entries {
-  margin-left: 250px;
+.panel > * {
+  margin: 0 10px;
 }
 
-.doc-entry .name,
-.doc-entry .typestr, .retType {
-  font-family: monospace;
+.docindex li {
+  padding: 0px;
+  margin: 0;
+}
+
+.docindex a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.docindex li:hover {
+  color: rgb(31, 119, 180);
+  text-decoration: underline;
 }
 
 .doc-entry > .name, .doc-entry > .typestr {
-  display: inline;;
-  font-size: 150%;
-  font-weight: bold;
-  background-color: #ddd;
+  font-size: inherit;
+  margin: 0;
+  font-weight: 900;
 }
 
-.doc-entry {
-  margin-top: 2em;
+
+.doc-entry .arg-title {
+  font-weight: bold;
 }
+
+.doc-entry p, .doc-entry ol {
+  margin: 0;
+}
+
 .doc-entry .args {
-  list-style-type: square;
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+.doc-entry .args .name::after {
+  content: ": ";
 }
 

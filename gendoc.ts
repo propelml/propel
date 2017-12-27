@@ -26,10 +26,15 @@ export interface ArgEntry {
   docstr?: string;
 }
 
+function toTagName(s: string): string {
+  return s.replace(/[.$]/g, "_");
+}
+
 function toHTMLIndex(docs: DocEntry[]): string {
   let out = `<ol class="docindex">\n`;
   for (const entry of docs) {
-    out += `<li>${entry.name}</li>\n`;
+    const tag = toTagName(entry.name);
+    out += `<li><a href="#${tag}" class=name>${entry.name}</a></li>\n`;
   }
   out += `</ol>\n`;
   return out;
@@ -92,7 +97,6 @@ function htmlBody(inner: string): string {
   <meta charset="utf-8">
   <title>Propel Docs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
   <link rel="stylesheet" href="normalize.css">
   <link rel="stylesheet" href="skeleton.css">
   <link rel="stylesheet" href="codemirror.css"/>
@@ -101,7 +105,7 @@ function htmlBody(inner: string): string {
   <script src="dist/notebook.js"></script>
   <script type=notebook>
   // Common imports for the docs.
-  import { $ } from "propel";
+  import { $, grad } from "propel";
   </script>
 </head>
   <body>${inner}</body>
@@ -110,11 +114,12 @@ function htmlBody(inner: string): string {
 }
 
 export function htmlEntry(entry: DocEntry): string {
-  let out = `<h2 class="name">${entry.name}</h2>\n`;
+  let out = `<h2 class="name" >`;
+  out += `${entry.name}</h2>\n`;
+
   if (entry.typestr) {
     out += `<div class="typestr">${entry.typestr}</div>\n`;
   }
-  out += `<p>${entry.kind}</p>\n`;
 
   if (entry.docstr) {
     const markedUp = markupDocStr(entry.docstr);
@@ -122,7 +127,7 @@ export function htmlEntry(entry: DocEntry): string {
   }
 
   if (entry.args && entry.args.length > 0) {
-    out += `<p>Arguments:</p> <ol class="args">\n`;
+    out += `<p><span class='arg-title'>Arguments</span> <ol class="args">\n`;
     for (const arg of entry.args) {
       out += `<li>\n`;
       out += `<span class="name">${arg.name}</span>\n`;
@@ -135,7 +140,7 @@ export function htmlEntry(entry: DocEntry): string {
     out += `</ol>\n`;
   }
   if (entry.retType) {
-    out += `<p>Returns:</p>`;
+    out += `<p><span class='arg-title'>Returns</span> `;
     out += `<span class="retType">${entry.retType}</span>\n`;
   }
   return out;
@@ -149,9 +154,10 @@ export function toHTML(docs: DocEntry[]): string {
   out += toHTMLIndex(docs);
   out += `</div>\n`;
 
-  out += `<div class="container doc-entries">\n`;
+  out += `<div class="doc-entries">\n`;
   for (const entry of docs) {
-    out += "<div class=\"doc-entry\">\n";
+    const tag = toTagName(entry.name);
+    out += `<div id=${tag} class="doc-entry">\n`;
     out += htmlEntry(entry);
     out += "</div>\n";
   }
