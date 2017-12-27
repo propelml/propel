@@ -35,6 +35,55 @@ function toHTMLIndex(docs: DocEntry[]): string {
   return out;
 }
 
+function isIndented(s: string): boolean {
+  return s.match(/^  +[^\s]/) != null;
+}
+
+function unindent(s: string): string {
+  return s.replace(/^  /, "");
+}
+
+// Given some bit of documentation text, this function can detect indented
+// portions denoting examples and mark them up with <script type=notebook>.
+export function markupDocStr(docstr: string): string {
+  const input = docstr.split("\n");
+  const output = [];
+
+  let state: "normal" | "code" = "normal";
+
+  function out(s) {
+    output.push(state === "code" ? unindent(s) : s);
+  }
+
+  for (let i = 0; i < input.length; ++i) {
+    const line = input[i];
+    switch (state) {
+      case "normal":
+        if (isIndented(line)) {
+          state = "code";
+          out("<script type=notebook>");
+        }
+        out(line);
+        break;
+      case "code":
+        if (isIndented(line)) {
+          out(line);
+        } else {
+          state = "normal";
+          out("</script>");
+          out(line);
+        }
+        break;
+    }
+  }
+
+  if (state === "code") {
+    out("</script>");
+  }
+
+  return output.join("\n");
+}
+
 function htmlBody(inner: string): string {
   return `
 <!DOCTYPE html>
@@ -50,6 +99,10 @@ function htmlBody(inner: string): string {
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="favicon.png">
   <script src="dist/notebook.js"></script>
+  <script type=notebook>
+  // Common imports for the docs.
+  import { $ } from "propel";
+  </script>
 </head>
   <body>${inner}</body>
 </html>
@@ -64,7 +117,8 @@ export function htmlEntry(entry: DocEntry): string {
   out += `<p>${entry.kind}</p>\n`;
 
   if (entry.docstr) {
-    out += `<p class="docstr">${entry.docstr}</p>\n`;
+    const markedUp = markupDocStr(entry.docstr);
+    out += `<p class="docstr">${markedUp}</p>\n`;
   }
 
   if (entry.args && entry.args.length > 0) {

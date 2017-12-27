@@ -88,6 +88,7 @@ button.run-button {
   padding: 10px;
   font-family: monospace;
   white-space: pre-wrap;
+  border-left: 2px solid #f5f5f5;
 }
 
 .newCell {
