@@ -17,6 +17,7 @@ code {
 }
 
 .CodeMirror *,
+.output,
 pre {
   white-space: pre-wrap;
   word-break: keep-all;
@@ -34,8 +35,8 @@ header, .panel {
 .doc-entry {
   padding-top: 50px;
   padding-bottom: 50px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
   border-bottom: 1px solid #eee;
 }
 
@@ -152,11 +153,6 @@ button.run-button {
 
 .panel > * {
   margin: 0 10px;
-}
-
-.docindex li {
-  padding: 0px;
-  margin: 0;
 }
 
 .docindex a {
