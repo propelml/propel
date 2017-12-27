@@ -135,12 +135,9 @@ export function multigradAndVal(f, argnums?: number[]) {
  * When evaluated at a point, it gives the slope in each dimension of
  * the function f. For example:
  *
- *   let f = (x) => $(x).square();
- *
- * Then grad(f) is 2*x (being the derivative of x^2).
- *
- *   g = grad(f);
- *   g(10) // is 2 * 10
+ *    let f = (x) => $(x).square()
+ *    g = grad(f)  // g(x) = 2*x
+ *    g(10) // is 2 * 10
  */
 export function grad(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
