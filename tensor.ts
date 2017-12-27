@@ -104,18 +104,6 @@ export class Tensor implements types.BasicTensor {
     return ops.matmul(this, this.colocate(x));
   }
 
-  neg(): Tensor {
-    return ops.neg(this);
-  }
-
-  exp(): Tensor {
-    return ops.exp(this);
-  }
-
-  log(): Tensor {
-    return ops.log(this);
-  }
-
   onesLike(): Tensor {
     const b = bo.onesLike(this.basic);
     return new Tensor(b);
@@ -126,13 +114,98 @@ export class Tensor implements types.BasicTensor {
     return new Tensor(b);
   }
 
-  square = () => ops.square(this);
-  sinh = () => ops.sinh(this);
-  cosh = () => ops.cosh(this);
-  tanh = () => ops.tanh(this);
-  relu = () => ops.relu(this);
-  sigmoid = () => ops.sigmoid(this);
-  abs = () => ops.abs(this);
+  /** Negates each element of the tensor.
+   *
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.neg())
+   */
+  neg(): Tensor {
+    return ops.neg(this);
+  }
+
+  /** Exponentiates each element of the tensor.
+   *
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.exp())
+   */
+  exp(): Tensor {
+    return ops.exp(this);
+  }
+
+  /** Applies the natural logarithm to each element of the tensor.
+   *
+   *    x = linspace(0.001, 5, 200);
+   *    plot(x, x.log())
+   */
+  log(): Tensor {
+    return ops.log(this);
+  }
+
+  /** Squares each element of the tensor.
+   *
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.square())
+   */
+  square() {
+    return ops.square(this);
+  }
+
+  /** Applies the hyperbolic sine function component-wise.
+   *
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.sinh())
+   */
+  sinh() {
+    return ops.sinh(this);
+  }
+
+  /** Applies the hyperbolic cosine function component-wise.
+   *
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.cosh())
+   */
+  cosh() {
+    return ops.cosh(this);
+  }
+
+  /** Applies the hyperbolic tangent function component-wise.
+   * Where tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).
+   *
+   *    x = linspace(-10, 10, 200);
+   *    plot(x, x.tanh())
+   */
+  tanh(): Tensor {
+    return ops.tanh(this);
+  }
+
+  /** Applies the rectified linear unit function component-wise.
+   * Where relu(x) is defined to be max(x, 0).
+   *
+   *    x = linspace(-10, 10, 200);
+   *    plot(x, x.relu())
+   */
+  relu(): Tensor {
+    return ops.relu(this);
+  }
+
+  /** Applies the sigmoid function component-wise to the tensor.
+   * The sigmoid function is defined as 1 / (1 + exp(-x)).
+   *
+   *    x = linspace(-10, 10, 200);
+   *    plot(x, x.sigmoid())
+   */
+  sigmoid(): Tensor {
+    return ops.sigmoid(this);
+  }
+
+  /** Applies absolute value component-wise to the tensor.
+   *
+   *    x = linspace(-10, 10, 200);
+   *    plot(x, x.abs())
+   */
+  abs(): Tensor {
+    return ops.abs(this);
+  }
 
   transpose(perm?: types.TensorLike): Tensor {
     if (perm === undefined) {
