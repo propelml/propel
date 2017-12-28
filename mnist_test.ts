@@ -1,5 +1,5 @@
 import * as mnist from "./mnist";
-import { assert, assertAllEqual, assertShapesEqual } from "./util";
+import { assert, assertAllEqual, assertShapesEqual } from "./utils";
 
 function testTrainSplit() {
   const dataset = mnist.load("train", 256, false);

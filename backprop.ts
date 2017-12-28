@@ -6,7 +6,7 @@ import { fill, Params } from "./api";
 import { BWFunc, getBackwardFuncs } from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
-import { assert, assertEqual, CounterMap, log } from "./util";
+import { assert, assertEqual, CounterMap, log } from "./utils";
 
 // The global tape stack. The tape stack is used to support higher order
 // gradients.

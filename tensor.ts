@@ -3,7 +3,7 @@ import { bo, convertBasic } from "./backend";
 import * as format from "./format";
 import * as ops from "./ops";
 import * as types from "./types";
-import { allFinite, assert } from "./util";
+import { allFinite, assert } from "./utils";
 
 export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
   if (t instanceof Tensor) return t;
