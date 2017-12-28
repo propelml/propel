@@ -15,6 +15,7 @@ node dist/util_test.js
 node dist/mnist_test.js
 node dist/nb_transpiler_test.js
 node dist/format_test.js
+node dist/nn_example_test.js
 
 # Now using the Deep Learn backend.
 export PROPEL="dl"
@@ -24,3 +25,4 @@ node dist/util_test.js
 node dist/mnist_test.js
 node dist/nb_transpiler_test.js
 node dist/format_test.js
+node dist/nn_example_test.js

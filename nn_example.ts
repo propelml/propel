@@ -4,8 +4,7 @@
 import { $, OptimizerSGD, Params, Tensor } from "./api";
 import * as mnist from "./mnist";
 
-const useGPU = true;
-const device = useGPU ? "GPU:0" : "CPU:0";
+let device;  // Set in train()
 
 // Hyperparameters
 const learningRate = 0.001;
@@ -13,10 +12,6 @@ const momentum = 0.9;
 const batchSize = 256;
 const layerSizes = [784, 200, 100, 10];
 const reg = 0.0001;
-
-console.log("Load MNIST...");
-const datasetTrain = mnist.load("train", batchSize, useGPU);
-const datasetTest = mnist.load("test", batchSize, useGPU);
 
 // Implements a fully-connected network with ReLU activations.
 // Returns logits.
@@ -61,7 +56,7 @@ async function accuracy(params: Params, dataset,
   while (seen < nExamples) {
     const {images, labels} = await dataset.next();
     const logits = inference(params, images);
-    const predicted = logits.argmax(1).cast("uint8");
+    const predicted = logits.argmax(1).cast("int32");
     const a = predicted.equal(labels).cast("float32").reduceSum();
     totalCorrect = totalCorrect.add(a);
     seen += images.shape[0];
@@ -70,9 +65,14 @@ async function accuracy(params: Params, dataset,
   return acc.getData()[0];
 }
 
-async function main() {
+export async function train(useGPU = false, maxSteps = 10000) {
+  device = useGPU ? "GPU:0" : "CPU:0";
+  console.log("Load MNIST...");
+  const datasetTrain = mnist.load("train", batchSize, useGPU);
+  const datasetTest = mnist.load("test", batchSize, useGPU);
+
   const opt = new OptimizerSGD();
-  while (opt.steps < 10000) {
+  while (opt.steps < maxSteps) {
     const {images, labels} = await datasetTrain.next();
 
     // Take a step of SGD. Update the parameters opt.params.
@@ -93,5 +93,3 @@ async function main() {
     }
   }
 }
-
-main();
