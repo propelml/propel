@@ -75,6 +75,8 @@ export async function train(useGPU = false, maxSteps = 10000) {
   while (opt.steps < maxSteps) {
     const {images, labels} = await datasetTrain.next();
 
+    console.log("step", opt.steps);
+
     // Take a step of SGD. Update the parameters opt.params.
     const l = opt.step(learningRate, momentum, (params: Params) => {
       return loss(images, labels, params);

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>NN Example</title>
+<script src="/dist/nn_example.js"> </script>
+<script>
+// Due to webpack nn_example is put into "propel"
+let train = propel.train;
+console.assert(train);
+console.log("attempting to train...");
+train(true);
+</script>
+</head>
+<body>
+  <h1>Open dev tools</h1>
+
+</body>
+</html>
