@@ -1,6 +1,10 @@
 // Deep Learn JS backend.
-import { NDArrayMathCPU }
-  from "./deps/deeplearnjs/src/math/backends/backend_cpu";
+
+// These files call a top-level registerBackend, which must be run before doing
+// any work with DL.
+import "./deps/deeplearnjs/src/math/backends/backend_cpu";
+import "./deps/deeplearnjs/src/math/backends/backend_webgl";
+
 import { MatrixOrientation }
   from "./deps/deeplearnjs/src/math/backends/types/matmul";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
@@ -9,7 +13,17 @@ import { Array2D, Array3D, Array4D, NDArray, Scalar }
 import * as types from "./types";
 import { assert } from "./util";
 
-const cpuMath: NDArrayMathCPU = new NDArrayMathCPU();
+const deviceRegistry = new Map<string, NDArrayMath>();
+function lookupMath(device: string): NDArrayMath {
+  assert(deviceRegistry.has(device));
+  return deviceRegistry.get(device);
+}
+
+const cpuMath = new NDArrayMath("cpu", false);
+// Is it necessary to call ENV.setMath(cpuMath) here? setMath seems to be only
+// used for DL's tracing, which we don't use. However this note suggest
+// that it should be called https://git.io/vbbYO
+deviceRegistry.set("CPU:0", cpuMath);
 
 // TODO Propel largely follows the dtype scheme layed out by DL, but
 // additonally adds the uint8 type. This function will map that down to int32.
@@ -33,12 +47,16 @@ export class TensorDL implements types.BasicTensor {
   readonly ndarray: NDArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                        dtype?: types.DType): TensorDL {
-    if (dtype === undefined) {
+                        dtype?: types.DType, device?: string): TensorDL {
+    if (dtype == null) {
       dtype = types.getDType(data);
     }
-    const ndarray = NDArray.make(shape, { values: data }, dtype as any);
-    return new TensorDL(ndarray, cpuMath);
+    if (device == null) {
+      device = "CPU:0";
+    }
+    const math = lookupMath(device);
+    const ndarray = NDArray.make(shape, { values: data }, dtype as any, math);
+    return new TensorDL(ndarray, math);
   }
 
   constructor(ndarray: NDArray, math: NDArrayMath = cpuMath) {
