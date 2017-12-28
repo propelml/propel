@@ -876,9 +876,8 @@ function testSlice() {
     assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
                    [[[3, 3, 3], [4, 4, 4]]]);
 
-    const s2 = $([1, 2, 3]).slice([1], [1]);
-    // FIXME
-    // assert(s2.dtype === "uint8");
+    const s2 = $([1, 2, 3], "int32").slice([1], [1]);
+    assert(s2.dtype === "int32");
     assertAllEqual(s2, [2]);
     const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
     const g = grad(f);

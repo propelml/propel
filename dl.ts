@@ -339,6 +339,10 @@ export class OpsDL implements types.BackendOps {
         throw new Error("Slicing for tensors rank higher than " +
                         "4 not yet supported.");
     }
+    // DL has a bug. No matter what the dtype being sliced, it always returns a
+    // float32. The proper thing would be to fix the bug inside DL, but we're
+    // going to hack it for now.
+    nd = nd.asType(x.dtype);
     return new TensorDL(nd, x.math);
   }
 
