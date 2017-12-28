@@ -9,7 +9,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
-import { assert } from "./util";
+import { assert } from "./utils";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";

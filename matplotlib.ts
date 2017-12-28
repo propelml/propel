@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { $, Tensor } from "./api";
 import * as notebook from "./notebook";
-import { assert, assertEqual } from "./util";
+import { assert, assertEqual } from "./utils";
 
 const currentPlot = null;
 // TODO colors should match those used by the syntax highlighting.

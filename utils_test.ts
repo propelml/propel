@@ -1,8 +1,8 @@
-import * as util from "./util";
-import { assert, assertEqual, assertShapesEqual } from "./util";
+import * as utils from "./utils";
+import { assert, assertEqual, assertShapesEqual } from "./utils";
 
 function testCounterMap() {
-  const m = new util.CounterMap();
+  const m = new utils.CounterMap();
   assertEqual(m.get(0), 0);
   m.inc(0);
   m.inc(0);
@@ -20,7 +20,7 @@ function testCounterMap() {
 
 function testDeepCloneArray() {
   const arr1 = [[1, 2], [3, 4]];
-  const arr2 = util.deepCloneArray(arr1);
+  const arr2 = utils.deepCloneArray(arr1);
   // Verify that arrays have different identity.
   assert(arr1 !== arr2);
   assert(arr1[0] !== arr2[0]);
@@ -33,43 +33,43 @@ function testDeepCloneArray() {
 }
 
 function testBcastGradientArgs() {
-  let [r0, r1] = util.bcastGradientArgs([2, 3, 5], [1]);
+  let [r0, r1] = utils.bcastGradientArgs([2, 3, 5], [1]);
   assertShapesEqual(r0, []);
   assertShapesEqual(r1, [0, 1, 2]);
 
-  [r0, r1] = util.bcastGradientArgs([1], [2, 3, 5]);
+  [r0, r1] = utils.bcastGradientArgs([1], [2, 3, 5]);
   assertShapesEqual(r0, [0, 1, 2]);
   assertShapesEqual(r1, []);
 
-  [r0, r1] = util.bcastGradientArgs([2, 3, 5], [5]);
+  [r0, r1] = utils.bcastGradientArgs([2, 3, 5], [5]);
   assertShapesEqual(r0, []);
   assertShapesEqual(r1, [0, 1]);
 
-  [r0, r1] = util.bcastGradientArgs([5], [2, 3, 5]);
+  [r0, r1] = utils.bcastGradientArgs([5], [2, 3, 5]);
   assertShapesEqual(r0, [0, 1]);
   assertShapesEqual(r1, []);
 
-  [r0, r1] = util.bcastGradientArgs([2, 3, 5], [3, 5]);
+  [r0, r1] = utils.bcastGradientArgs([2, 3, 5], [3, 5]);
   assertShapesEqual(r0, []);
   assertShapesEqual(r1, [0]);
 
-  [r0, r1] = util.bcastGradientArgs([3, 5], [2, 3, 5]);
+  [r0, r1] = utils.bcastGradientArgs([3, 5], [2, 3, 5]);
   assertShapesEqual(r0, [0]);
   assertShapesEqual(r1, []);
 
-  [r0, r1] = util.bcastGradientArgs([2, 3, 5], [3, 1]);
+  [r0, r1] = utils.bcastGradientArgs([2, 3, 5], [3, 1]);
   assertShapesEqual(r0, []);
   assertShapesEqual(r1, [0, 2]);
 
-  [r0, r1] = util.bcastGradientArgs([3, 1], [2, 3, 5]);
+  [r0, r1] = utils.bcastGradientArgs([3, 1], [2, 3, 5]);
   assertShapesEqual(r0, [0, 2]);
   assertShapesEqual(r1, []);
 
-  [r0, r1] = util.bcastGradientArgs([2, 1, 5], [3, 1]);
+  [r0, r1] = utils.bcastGradientArgs([2, 1, 5], [3, 1]);
   assertShapesEqual(r0, [1]);
   assertShapesEqual(r1, [0, 2]);
 
-  [r0, r1] = util.bcastGradientArgs([3, 1], [2, 1, 5]);
+  [r0, r1] = utils.bcastGradientArgs([3, 1], [2, 1, 5]);
   assertShapesEqual(r0, [0, 2]);
   assertShapesEqual(r1, [1]);
 }
