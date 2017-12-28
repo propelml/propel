@@ -22,7 +22,10 @@ export function $(t: types.TensorLike, args?: types.TensorOpts): Tensor {
   return convert(t, args);
 }
 
-/** Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
+/** Returns a list of available device names.
+ *
+ *    import { listDevices } from "propel";
+ *    listDevices();
  */
 export function listDevices(): string[] {
   return bo.listDevices();
@@ -209,10 +212,12 @@ export class OptimizerSGD {
         assertShapesEqual(p.shape, g.shape);
         assertShapesEqual(p.shape, v.shape);
       }
-      //  v = m * v - (1 - m) * g
+      //  vv = (m - 1) * g - m * v
       // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
       // 10% from g (grad).
-      v = this.velocity.set(name, v.mul(m).sub(g.mul(1 - m)));
+      const vv = g.mul(m - 1).sub(v.mul(m));
+      assert(g.device === vv.device);
+      v = this.velocity.set(name, vv);
       // p += v * lr
       updated.set(name, p.add(v.mul(learningRate)));
     });
