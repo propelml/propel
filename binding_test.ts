@@ -1,5 +1,5 @@
 import { binding, ctx } from "./tf";
-import { assert, assertAllEqual, assertEqual } from "./util";
+import { assert, assertAllEqual, assertEqual } from "./utils";
 
 function testEquals() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);

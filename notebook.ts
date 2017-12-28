@@ -6,7 +6,7 @@ import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { assert } from "./util";
+import { assert } from "./utils";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 const cellsElement = null;

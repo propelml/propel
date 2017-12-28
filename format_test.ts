@@ -1,5 +1,5 @@
 import * as format from "./format";
-import { assert } from "./util";
+import { assert } from "./utils";
 
 function test1DInt32() {
   const actual = format.toString([4], new Int32Array([1, 2, 3, 4]));

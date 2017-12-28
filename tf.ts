@@ -2,7 +2,7 @@
 import { bo, convertBasic } from "./backend";
 import { BindingInterface } from "./binding";
 import * as types from "./types";
-import { assert, assertEqual } from "./util";
+import { assert, assertEqual } from "./utils";
 
 function maybeRequireBinding(): BindingInterface | null {
   // If we're in the browser, don't even attempt it.
