@@ -66,6 +66,15 @@ export class Tensor implements types.BasicTensor {
     return format.toString(this.shape, this.getData());
   }
 
+  /** Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").
+   * If device is unspecified, it makse a copy on the same device.
+   */
+  copy(device?: string): Tensor {
+    if (!device) device = this.device;
+    const r = bo.copyToDevice(this.basic, device);
+    return new Tensor(r);
+  }
+
   gpu(): Tensor {
     if (this.device === "GPU:0") return this;
     // TODO: support different GPUs.
