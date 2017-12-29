@@ -1,5 +1,5 @@
 import * as gendoc from "./gendoc";
-import { assert } from "./utils";
+import { assert } from "./util";
 
 function testSmoke() {
   const docs = gendoc.genJSON();

@@ -6,7 +6,7 @@ import { bo } from "./backend";
 import * as backprop from "./backprop";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
-import { assert, bcastGradientArgs, shapesEqual } from "./utils";
+import { assert, bcastGradientArgs, shapesEqual } from "./util";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
 // never use Tensors, only BasicTensors. These forward pass functions
