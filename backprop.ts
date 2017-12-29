@@ -198,7 +198,8 @@ function imperativeGrad(target: Tensor,
           // Null backwards function, return a zero tensor of the same shape and
           // dtype as the input.
           const shapeDType = op.inputShapeDTypes[i];
-          const zero = convert(0, shapeDType[1]);
+          const zero = convert(0,
+            {dtype: shapeDType[1], device: outGrad.device});
           return fill(zero, shapeDType[0]);
         }
       });

@@ -20,11 +20,11 @@ function gpuAvail(): boolean {
 
 // This is the type signature of the $ and gpuConvert.
 interface ConvertFn {
-  (x: TensorLike, dtype?: DType): Tensor;
+  (x: TensorLike, args?: types.TensorOpts): Tensor;
 }
 
-function gpuConvert(x: TensorLike, dtype?: DType): Tensor {
-  return $(x, dtype).gpu();
+function gpuConvert(x: TensorLike, args?: types.TensorOpts): Tensor {
+  return $(x, {dtype: args ? args.dtype : null, device: "GPU:0"});
 }
 
 // Allows tests to run on CPU:0 and GPU:0 (if available).
@@ -63,7 +63,7 @@ function testRandn() {
 }
 
 function testConvertWithType() {
-  const t = $([1, 2, 3], "int32");
+  const t = $([1, 2, 3], {dtype: "int32"});
   assert(t.dtype === "int32");
   const ta = t.getData();
   assert(ta instanceof Int32Array);
@@ -609,7 +609,7 @@ function testSelect() {
   const cond = $([
     [1, 0, 1],
     [0, 1, 0],
-  ], "bool");
+  ], {dtype: "bool"});
   const r = cond.select(t, f);
   assertAllEqual(r, [
     [ 1, 8,  3],
@@ -746,7 +746,7 @@ function testZerosOnes() {
   assertAllEqual(z1, [[0, 0, 0], [0, 0, 0]]);
   assert(z1.dtype === "float32");
 
-  const z2 = zeros([2, 3], "int32");
+  const z2 = zeros([2, 3], {dtype: "int32"});
   assertAllEqual(z2, [[0, 0, 0], [0, 0, 0]]);
   assert(z2.dtype === "int32");
 
@@ -754,7 +754,7 @@ function testZerosOnes() {
   assertAllEqual(o1, [[1, 1, 1], [1, 1, 1]]);
   assert(o1.dtype === "float32");
 
-  const o2 = ones([2, 3], "int32");
+  const o2 = ones([2, 3], {dtype: "int32"});
   assertAllEqual(o2, [[1, 1, 1], [1, 1, 1]]);
   assert(o2.dtype === "int32");
 }
@@ -885,7 +885,7 @@ function testSlice() {
     assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
                    [[[3, 3, 3], [4, 4, 4]]]);
 
-    const s2 = $([1, 2, 3], "int32").slice([1], [1]);
+    const s2 = $([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
     assert(s2.dtype === "int32");
     assertAllEqual(s2, [2]);
     const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
@@ -895,7 +895,7 @@ function testSlice() {
 }
 
 function testCast() {
-  const a = $([255, 127, 0], "uint8");
+  const a = $([255, 127, 0], {dtype: "uint8"});
   assert(a.dtype === "uint8");
   const r = a.cast("float32").div(255);
   assertAllClose(r, [1.0, 127 / 255, 0]);
@@ -903,7 +903,7 @@ function testCast() {
 
 function testOneHot() {
   for (const [device, $] of deviceTests()) {
-    const a = $([0, 1, 3, 4], "uint8");
+    const a = $([0, 1, 3, 4], {dtype: "uint8"});
     assertAllEqual(a.oneHot(6), [
       [1, 0, 0, 0, 0, 0],
       [0, 1, 0, 0, 0, 0],
@@ -911,7 +911,7 @@ function testOneHot() {
       [0, 0, 0, 0, 1, 0],
     ]);
 
-    const b = $([0, 1, 3, 4], "int32");
+    const b = $([0, 1, 3, 4], {dtype: "int32"});
     assertAllEqual(b.oneHot(5, 0.5, -0.5), [
       [ 0.5, -0.5, -0.5, -0.5, -0.5],
       [-0.5,  0.5, -0.5, -0.5, -0.5],
@@ -926,13 +926,13 @@ function testSoftmaxCE() {
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
     [0.3, 0.0, 0.7],
-  ], "float32");
+  ], {dtype: "float32"});
   const f = (x) => $(x).softmaxCE(labels);
   const logits = $([
     [-2, 2, 10],
     [-2, 2, 10],
     [-2, 2, 10],
-  ], "float32");
+  ], {dtype: "float32"});
   const ce = f(logits);
   assertAllClose(ce, [12.00034142, 8.00034142, 3.6003418]);
   const g = grad(f);
@@ -1001,8 +1001,8 @@ function testNeuralNet() {
     };
 
     // Just zero data.
-    const images = $(zeros([16, 28, 28], "int32"));
-    const labels = $(zeros([16], "int32"));
+    const images = $(zeros([16, 28, 28], {dtype: "int32"}));
+    const labels = $(zeros([16], {dtype: "int32"}));
     let params = new Params();
     const gradFn = api.gradParams((params: Params): Tensor => {
       return loss(images, labels, params);

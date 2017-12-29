@@ -114,3 +114,12 @@ export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
       throw new Error("Not implemented");
   }
 }
+
+/** TensorOpts are used to build Tensors in functions like $() and zeros().
+ * Note that Tensors themselves implement the TensorOpts interface, so existing
+ * tensors can be used to construct similiarly typed and located tensors.
+ */
+export interface TensorOpts {
+  dtype: DType;
+  device?: string;
+}

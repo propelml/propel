@@ -81,7 +81,7 @@ async function loadFile(href, split: string, images: boolean) {
     assertEqual(littleEndianToBig(i32[i++]), 28);
   }
   const tensorData = new Int32Array(ui8.slice(4 * i));
-  const t = $(tensorData, "int32");
+  const t = $(tensorData, {dtype: "int32"});
   const shape = images ? [numExamples, 28, 28] : [numExamples];
   return t.reshape(shape);
 }

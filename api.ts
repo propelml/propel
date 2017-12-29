@@ -16,12 +16,10 @@ import { assert, assertShapesEqual } from "./util";
  *
  * @arg t - An array of numbers, representing a Tensor. Or a Tensor in which
  *          case $() acts as the identity function.
- * @arg dtype - The data type of the returned tensor. For example "int32" or
- *              "float32".
- * @returns A Tensor object..
+ * @arg args - An object like this { dtype: "int32", device: "GPU:0" }
  */
-export function $(t: types.TensorLike, dtype?: types.DType): Tensor {
-  return convert(t, dtype);
+export function $(t: types.TensorLike, args?: types.TensorOpts): Tensor {
+  return convert(t, args);
 }
 
 /** Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
@@ -92,14 +90,14 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
 
 /** Return a new tensor of given shape and dtype, filled with zeros. */
 export function zeros(shape: types.Shape,
-                      dtype: types.DType = "float32"): Tensor {
-  return ops.zeros(shape, dtype);
+                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  return ops.zeros(shape, opts);
 }
 
 /** Return a new tensor of given shape and dtype, filled with ones. */
 export function ones(shape: types.Shape,
-                     dtype: types.DType = "float32"): Tensor {
-  return ops.ones(shape, dtype);
+                     opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  return ops.ones(shape, opts);
 }
 
 /** A collection of named Tensors. Used with OptimizerSGD.
