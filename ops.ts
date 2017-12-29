@@ -134,12 +134,12 @@ export function getBackwardFuncs(name: string): BWFunc[] {
   return ops[name].bwFuncs;
 }
 
-export function ones(shape, dtype) {
-  return fill(convert(1, dtype), shape);
+export function ones(shape: types.Shape, opts: types.TensorOpts) {
+  return fill(convert(1, opts), shape);
 }
 
-export function zeros(shape, dtype) {
-  return fill(convert(0, dtype), shape);
+export function zeros(shape: types.Shape, opts: types.TensorOpts) {
+  return fill(convert(0, opts), shape);
 }
 
 function addGrad(firstArg: boolean) {
@@ -247,7 +247,10 @@ export const square = defFW("square", (x) => {
   saveForBackward(x);
   return bo.square(x);
 });
-defBW("square", (g, x) => mul(g, mul(x, convert(2, x.dtype))));
+defBW("square", (g, x) => {
+  const two = convert(2, x);
+  return mul(g, mul(x, two));
+});
 
 export const sinh = defFW("sinh", (x) => {
   saveForBackward(x);
@@ -348,7 +351,7 @@ defBW("reduceMean", (g, axes, shape, dtype) => {
     n *= shape[j];
     gs[j] = 1;
   }
-  const a = convert(1 / n, "float32");
+  const a = convert(1 / n, {dtype: "float32", device: g.device});
   return g.reshape(gs).mul(fill(a, shape));
 });
 

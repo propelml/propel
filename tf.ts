@@ -92,7 +92,7 @@ function dtypePropel2TF(dtype: types.DType): number {
     case "uint8":
       return binding.TF_UINT8;
     default:
-      throw new Error(`Not Implemented`);
+      throw new Error(`Not Implemented ${dtype}`);
   }
 }
 
@@ -116,7 +116,7 @@ export class TensorTF implements types.BasicTensor {
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
                         dtype?: types.DType, device?: string): TensorTF {
-    if (dtype === undefined) {
+    if (dtype == null) {
       dtype = types.getDType(data);
     }
     const dtypeTF = dtypePropel2TF(dtype);

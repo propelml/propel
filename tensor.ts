@@ -5,9 +5,10 @@ import * as ops from "./ops";
 import * as types from "./types";
 import { allFinite, assert } from "./util";
 
-export function convert(t: types.TensorLike, dtype?: types.DType): Tensor {
+export function convert(t: types.TensorLike,
+                        opts?: types.TensorOpts): Tensor {
   if (t instanceof Tensor) return t;
-  return new Tensor(convertBasic(t, dtype));
+  return new Tensor(convertBasic(t, opts));
 }
 
 /** Tensor wraps a BasicTensor object. This is the main public
@@ -43,7 +44,7 @@ export class Tensor implements types.BasicTensor {
       // For now we stay silent.
       return new Tensor(bo.copyToDevice(t.basic, this.device));
     }
-    return new Tensor(convertBasic(t, dtype, this.device));
+    return new Tensor(convertBasic(t, {dtype, device: this.device}));
   }
 
   getData(): types.TypedArray {

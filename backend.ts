@@ -24,7 +24,9 @@ if (binding) {
 const create = tensorClass.fromTypedArray;
 
 export function convertBasic(x: types.TensorLike,
-    dtype?: types.DType, device?: string): types.BasicTensor {
+                             opts?: types.TensorOpts): types.BasicTensor {
+  const dtype = opts ? opts.dtype : undefined;
+  const device = (opts ? opts.device : null) || "CPU:0";
   if (typeof x === "number") {
     // TODO On TF we should take advantage of createSmallHandle for scalars.
     return create(types.makeTypedArray([x], dtype), [], dtype, device);
