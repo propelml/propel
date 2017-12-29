@@ -5,7 +5,7 @@ import * as ops from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
-import { assert, assertShapesEqual } from "./utils";
+import { assert, assertShapesEqual } from "./util";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *

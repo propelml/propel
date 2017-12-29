@@ -1,5 +1,5 @@
 import { $, Tensor } from "./api";
-import { assert, assertEqual, IS_WEB, log } from "./utils";
+import { assert, assertEqual, IS_WEB, log } from "./util";
 
 interface Elements {
   images: Tensor;

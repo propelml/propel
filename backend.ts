@@ -5,7 +5,7 @@ import { flatten, inferShape } from "./deps/deeplearnjs/src/util";
 import { OpsDL, TensorDL } from "./dl";
 import { binding, OpsTF, TensorTF } from "./tf";
 import * as types from "./types";
-import { deepCloneArray } from "./utils";
+import { deepCloneArray } from "./util";
 
 let tensorClass: any;
 export let backend: string;
