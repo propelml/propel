@@ -1,15 +1,16 @@
 import * as gendoc from "./gendoc";
+import { test } from "./test";
 import { assert } from "./util";
 
-function testSmoke() {
+test(function testSmoke() {
   const docs = gendoc.genJSON();
   assert(docs.length > 5);
   assert(docs.map(e => e.name).indexOf("Tensor") >= 0);
   const html = gendoc.toHTML(docs);
   assert(html.length > 0);
-}
+});
 
-function testMarkupDocStr() {
+test(function testMarkupDocStr() {
   const docstr = [
     "hello",
     "",
@@ -30,9 +31,9 @@ function testMarkupDocStr() {
   // console.log("actual", JSON.stringify(actual));
   // console.log("expected", JSON.stringify(expected));
   assert(actual === expected);
-}
+});
 
-function testMarkupDocStr2() {
+test(function testMarkupDocStr2() {
   const docstr = [
     "like this:",
     "",
@@ -53,8 +54,4 @@ function testMarkupDocStr2() {
   // console.log("actual", JSON.stringify(actual));
   // console.log("expected", JSON.stringify(expected));
   assert(actual === expected);
-}
-
-testSmoke();
-testMarkupDocStr();
-testMarkupDocStr2();
+});

@@ -7,6 +7,5 @@ export V=1
 ./deps/cpplint/cpplint.py *.cc
 ./tools/stylelint.sh
 npm build .
-node ./node_modules/webpack/bin/webpack.js
 bash ./tools/test.sh
 # PASS
