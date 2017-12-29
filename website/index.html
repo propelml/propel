@@ -25,10 +25,16 @@
 	<pre lang="htmlmixed">&lt;script src="//propelml.org/propel-3.0.min.js"&gt;&lt;/script&gt;</pre>
 	<p>Or to use it in Node:</p>
 	<pre lang="shell">npm install propel</pre>
-	<p>In both environments Propel is able to use GPU hardware for computations. In Node it
-        uses native TensorFlow bindings, in the browser it uses WebGL.</p>
-	<p>Here is an example of the API. Plotting the function
-           <code>tanh()</code> between the points -4 and 4.</p>
+
+  <p>In both environments Propel is able to use GPU hardware for computations.
+  In Node it uses native TensorFlow bindings, in the browser it uses WebGL.</p>
+
+  <p>Propel aims to provide a familiar, guessable API for anyone coming from
+  scientific programming in Python. Propel wants to provide a complete solution
+  to data science work, from plotting to stochastic gradient decent.
+
+  <p>Here is an of plotting the function <code>tanh()</code> between the points
+  -4 and 4.</p>
 
 <script type="notebook">
 import { linspace } from "propel";
@@ -36,6 +42,7 @@ import { plot } from "matplotlib";
 x = linspace(-4, 4, 200);
 plot(x, x.tanh())
 </script>
+
 	<p>The library exposes backprop as a low-level function called
 	<code>grad()</code>.  This grad function, along with the ability to
 	utilize GPUs, provides a foundation on which modern neural network
@@ -49,6 +56,7 @@ plot(x, f(x), x, g(x))
 </script>
 
         <p>See more examples in <a href="notebook.html">Notebook</a>.</p>
+        <p><a href="references.html">References</a>.</p>
     </div>
   </div>
 </body>
