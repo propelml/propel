@@ -15,6 +15,8 @@ function t(src, out) {
 
 /* tslint:disable:max-line-length */
 
+t("",
+  "(async (__global, __import) => {\n\n})");
 t("import defaultExport from 'module-name';",
   "(async (__global, __import) => {\nvoid (({_:{default:__global.defaultExport}} = {_:await __import('module-name')}))\n})");
 t("import * as name from 'module-name';",
