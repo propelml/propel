@@ -618,6 +618,15 @@ function testSelect() {
   // select isn't differentiable.
   const g = grad((c) => c.select(t, f));
   assertAllEqual(g(cond), [ [0, 0, 0], [0, 0, 0] ]);
+
+  function f2(x) {
+    x = $(x);
+    const y = x.sub(1).relu();
+    const z = $(-1).sub(x).relu();
+    return x.greater(x.zerosLike()).select(y, z);
+  }
+  assertAllEqual(grad(f2)([-3, -0.5, 0.5, 3]),
+                 [-1, 0, 0, 1]);
 }
 
 function testSign() {
