@@ -15,9 +15,7 @@
     <div id=cells class="doc-entry">
 <script type="notebook">
 import { $ } from "propel";
-
 t = $([[2, 3], [30, 20]])
-
 t.mul(5)
 </script>
 
@@ -45,6 +43,18 @@ plot(x, tanh(x),
 f = await fetch('mnist/README');
 t = await f.text();
 t;
+</script>
+
+<script type="notebook">
+function f(x) {
+  x = $(x);
+  let y = x.sub(1).relu();
+  let z = $(-1).sub(x).relu();
+  return x.greater(x.zerosLike()).select(y,z);
+}
+x = linspace(-5, 5, 100)
+plot(x, f(x))
+grad(f)([-3, -0.5, 0.5, 3])
 </script>
     </div> <!-- #cells -->
     <div class="row">

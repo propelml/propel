@@ -376,9 +376,12 @@ export let lessEqual = defFW("lessEqual", (x, y) => bo.lessEqual(x, y));
 defBW("lessEqual", null, null); // Not differentiable.
 
 export let select = defFW("select", (cond, x, y) => {
+  saveForBackward(cond);
   return bo.select(cond, x, y);
 });
-defBW("select", null, null, null); // Not differentiable.
+defBW("select", null,
+  (g, cond) => cond.cast(g.dtype).mul(g),
+  (g, cond) => cond.cast(g.dtype).neg().add(1).mul(g));
 
 export const sign = defFW("sign", (x) => bo.sign(x));
 defBW("sign", null); // Not differentiable.
