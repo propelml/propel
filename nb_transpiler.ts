@@ -284,10 +284,12 @@ export function transpile(src: string): string {
   );
 
   // If the last statement is an expression, turn it into a return statement.
-  const last = body.body[body.body.length - 1];
-  if (last.type === "ExpressionStatement") {
-    edit.prepend(last, "return (");
-    edit.append(last.expression, ")");
+  if (body.body.length > 0) {
+    const last = body.body[body.body.length - 1];
+    if (last.type === "ExpressionStatement") {
+      edit.prepend(last, "return (");
+      edit.append(last.expression, ")");
+    }
   }
 
   src = edit.text();
