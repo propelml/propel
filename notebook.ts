@@ -105,6 +105,7 @@ console.error = (...args) => {
 
 class Cell {
   isLoad: boolean;
+  parentDiv: HTMLElement;
   output: HTMLElement;
   editor: CodeMirror.Editor;
   runButton: HTMLElement;
@@ -115,6 +116,8 @@ class Cell {
     this.id = Cell.nextId++;
     cellTable.set(this.id, this);
     parentDiv.classList.add("notebook-cell");
+    (parentDiv as any).cell = this;
+    this.parentDiv = parentDiv;
 
     this.editor = CodeMirror(parentDiv, {
       lineNumbers: false,
@@ -123,7 +126,8 @@ class Cell {
       viewportMargin: Infinity,
     });
     this.editor.setOption("extraKeys", {
-      "Shift-Enter": this.update.bind(this),
+      "Ctrl-Enter": () =>  { this.update(); return true; },
+      "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
     });
 
     const runButton = document.createElement("button");
@@ -143,11 +147,22 @@ class Cell {
     this.editor.focus();
   }
 
-  update(cm) {
+  update() {
     _log("update");
     this.output.innerText = ""; // Clear output.
     this.execute();
     return false;
+  }
+
+  nextCell() {
+    for (let el = this.parentDiv.nextSibling; el; el = el.nextSibling) {
+      const cell = (el as any).cell;
+      if (cell instanceof Cell) {
+        cell.focus();
+        return;
+      }
+    }
+    createCell();
   }
 
   appendOutput(svg) {
@@ -173,9 +188,12 @@ class Cell {
   }
 }
 
-function newCellClick() {
-  _log("Button click");
+function createCell() {
   const cellsDiv = document.getElementById("cells");
+  if (!cellsDiv) {
+    _log("Can't create cell - no element named 'cells' exists.");
+    return;
+  }
   const parentDiv = document.createElement("div");
   cellsDiv.appendChild(parentDiv);
   const cell = new Cell("", parentDiv);
@@ -185,7 +203,7 @@ function newCellClick() {
 
 window.onload = async() => {
   const newCell = document.getElementById("newCell");
-  if (newCell) newCell.onclick = newCellClick;
+  if (newCell) newCell.onclick = createCell;
 
   // Use CodeMirror to syntax highlight read-only <pre> elements.
   for (const p of Array.from(document.getElementsByTagName("pre"))) {
