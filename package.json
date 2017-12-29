@@ -25,5 +25,10 @@
   "scripts": {
     "webpack": "node ./node_modules/webpack/bin/webpack.js --verbose"
   },
-  "gypfile": true
+  "gypfile": true,
+  "devDependencies": {
+    "stylelint": "^8.4.0",
+    "stylelint-config-recommended": "^2.0.1",
+    "stylelint-config-standard": "^18.0.0"
+  }
 }
