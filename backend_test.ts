@@ -1,4 +1,5 @@
 import { bo, convertBasic } from "./backend";
+import { test } from "./test";
 import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const $ = convertBasic;
@@ -49,8 +50,8 @@ function testReluGrad() {
   assertAllClose(actual, [[0, 42], [-3,  0]]);
 }
 
-testShapes();
-testMul();
-testSquare();
-testCosh();
-testReluGrad();
+test(testShapes);
+test(testMul);
+test(testSquare);
+test(testCosh);
+test(testReluGrad);

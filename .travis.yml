@@ -6,4 +6,5 @@ git:
 node_js:
 - '8.8'
 script:
+- npm rebuild puppeteer
 - ./tools/presubmit.sh
