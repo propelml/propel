@@ -1,9 +1,10 @@
 import * as mnist from "./mnist";
+import { test } from "./test";
 import { assert, assertAllEqual, assertShapesEqual } from "./util";
 
-function testTrainSplit() {
+test(function testTrainSplit() {
   const dataset = mnist.load("train", 256, false);
-  dataset.next().then(({images, labels}) => {
+  return dataset.next().then(({images, labels}) => {
     assertShapesEqual(images.shape, [256, 28, 28]);
     console.log("images dtype", images.dtype);
     // assert(images.dtype === "uint8");
@@ -15,11 +16,11 @@ function testTrainSplit() {
     assertAllEqual(labels.slice([0], [8]), [5, 0, 4, 1, 9, 2, 1, 3]);
     console.log("TrainSplit ok");
   });
-}
+});
 
-function testTestSplit() {
+test(function testTestSplit() {
   const dataset = mnist.load("test", 16, false);
-  dataset.next().then(({images, labels}) => {
+  return dataset.next().then(({images, labels}) => {
     assertShapesEqual(images.shape, [16, 28, 28]);
     // assert(images.dtype === "uint8");
     assertShapesEqual(labels.shape, [16]);
@@ -27,7 +28,4 @@ function testTestSplit() {
     assertAllEqual(labels.slice([0], [3]), [7, 2, 1]);
     console.log("TestSplit ok");
   });
-}
-
-testTrainSplit();
-testTestSplit();
+});

@@ -1,9 +1,8 @@
 import { listDevices } from "./api";
 import { train } from "./nn_example";
+import { test } from "./test";
 
-function testSmoke() {
+test(async function testNNExample() {
   const useGPU = (listDevices().length > 1);
-  train(useGPU, 2);  // Train for two steps.
-}
-
-testSmoke();
+  await train(useGPU, 2);  // Train for two steps.
+});

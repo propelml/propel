@@ -4,7 +4,8 @@ module.exports = {
   entry: {
     'notebook': './notebook.ts',
     'propel': './api.ts',
-    'propel.min': './api.ts'
+    'propel.min': './api.ts',
+    'test_isomorphic': './test_isomorphic.ts'
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({

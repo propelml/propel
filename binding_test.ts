@@ -1,3 +1,4 @@
+import { test } from "./test";
 import { binding, ctx } from "./tf";
 import { assert, assertAllEqual, assertEqual } from "./util";
 
@@ -189,12 +190,12 @@ function testCreateSmallHandle() {
   }
 }
 
-testEquals();
-testMatMul();
-testMul();
-testChaining();
-testReshape();
-testBoolean();
-testListDevices();
-testCopyToDevice();
-testCreateSmallHandle();
+test(testEquals);
+test(testMatMul);
+test(testMul);
+test(testChaining);
+test(testReshape);
+test(testBoolean);
+test(testListDevices);
+test(testCopyToDevice);
+test(testCreateSmallHandle);

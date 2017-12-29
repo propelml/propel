@@ -1,17 +1,19 @@
 
 import { transpile } from "./nb_transpiler";
+import { test } from "./test";
 import { assert } from "./util";
 
-function t(src, out) {
-  const transpiled = transpile(src);
-  assert(transpiled === out,
-         "Actual:   " + JSON.stringify(transpiled) + "\n" +
-         "Expected: " + JSON.stringify(out));
-  // Try to eval the transpiled source code. Note that this only verifies that
-  // the transpiled code can be parsed correctly; the function body isn't run.
-  const fn = eval(transpiled);
-  assert(typeof fn === "function");
-}
+const t = (src, out) => test(
+  function testTranspile() {
+    const transpiled = transpile(src);
+    assert(transpiled === out,
+           "Actual:   " + JSON.stringify(transpiled) + "\n" +
+           "Expected: " + JSON.stringify(out));
+    // Try to eval the transpiled source code. Note that this only verifies that
+    // the transpiled code can be parsed correctly; the function body isn't run.
+    const fn = eval(transpiled);
+    assert(typeof fn === "function");
+  });
 
 /* tslint:disable:max-line-length */
 
