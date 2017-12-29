@@ -11,7 +11,7 @@ import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
 import { Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./deps/deeplearnjs/src/math/ndarray";
 import * as types from "./types";
-import { assert } from "./utils";
+import { assert } from "./util";
 
 const deviceRegistry = new Map<string, NDArrayMath>();
 function lookupMath(device: string): NDArrayMath {

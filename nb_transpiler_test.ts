@@ -1,6 +1,6 @@
 
 import { transpile } from "./nb_transpiler";
-import { assert } from "./utils";
+import { assert } from "./util";
 
 function t(src, out) {
   const transpiled = transpile(src);

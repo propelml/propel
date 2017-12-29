@@ -3,7 +3,7 @@ import { $, arange, backend, DType, fill, grad, linspace, listDevices,
 import * as api from "./api";
 import * as types from "./types";
 import { assert, assertAllClose, assertAllEqual, assertClose,
-  assertShapesEqual } from "./utils";
+  assertShapesEqual } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;

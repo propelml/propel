@@ -1,5 +1,5 @@
 import { bo, convertBasic } from "./backend";
-import { assertAllClose, assertAllEqual, assertShapesEqual } from "./utils";
+import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const $ = convertBasic;
 
