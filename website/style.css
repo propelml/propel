@@ -120,15 +120,19 @@ header .button {
 }
 
 button.run-button {
-  visibility: hidden;
-  transition: visibility 0s .5s;
-  position: absolute;
+  position: relative;
+  float: right;
+  bottom: 46px;
   right: 8px;
+  opacity:.25;
+  transition: opacity .25s;
+  background: #fff;
+  z-index: 3;
 }
 
+button.run-button:hover,
 .CodeMirror-focused + button.run-button {
-  visibility: visible;
-  transition: none;
+  opacity: 1;
 }
 
 .output {
