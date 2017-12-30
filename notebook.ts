@@ -134,7 +134,7 @@ class Cell {
     this.runButton = runButton;
     runButton.innerText = "Run";
     runButton.className = "run-button";
-    runButton.onclick = this.update.bind(this);
+    runButton.onclick = () => { this.update(); return false; };
     parentDiv.appendChild(runButton);
 
     this.output = document.createElement("div");
@@ -147,11 +147,16 @@ class Cell {
     this.editor.focus();
   }
 
-  update() {
+  async update() {
     _log("update");
     this.output.innerText = ""; // Clear output.
-    this.execute();
-    return false;
+    const classList = this.parentDiv.classList;
+    classList.add("notebook-cell-running");
+    try {
+      await this.execute();
+    } finally {
+      setTimeout(() => classList.remove("notebook-cell-running"), 1);
+    }
   }
 
   nextCell() {
