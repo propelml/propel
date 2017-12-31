@@ -1,24 +1,23 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
 body {
-  font-family: 'Roboto', sans-serif;
   background-color: #fafafa;
+  font-family: 'Roboto', sans-serif;
 }
 
 .name,
 .typestr,
 .retType,
 .CodeMirror,
-.docindex *,
+.docindex,
 pre,
 .output,
 code {
   font-family: 'Roboto Mono', monospace;
 }
 
-.CodeMirror *,
-.output,
-pre {
+pre,
+.output {
   white-space: pre-wrap;
   word-break: keep-all;
 }
@@ -28,62 +27,48 @@ svg {
   max-width: 100%;
 }
 
-header, .panel {
+header,
+.panel {
   border-top: 2px solid rgb(253, 141, 60);
 }
 
 .doc-entry {
-  padding-top: 50px;
-  padding-bottom: 50px;
-  padding-left: 10px;
-  padding-right: 10px;
   border-bottom: 1px solid #eee;
+  padding: 50px 10px;
 }
 
 .doc-entry:target {
   border-left: 2px solid rgb(31, 119, 180);
 }
 
-
 header {
-  display: flex;
-  box-shadow: 0 0 2.25rem #9da5ab;
-  background-color: #fff;
-  justify-content: center;
   align-items: center;
+  background-color: #fff;
+  box-shadow: 0 0 2.25rem #9da5ab;
+  display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 10px;
 }
+
 header * {
   margin: 10px auto;
 }
+
 header .button {
-  display: block;
+  display: inline-block;
 }
 
 @media (min-width: 600px) {
   .panel {
+    bottom: 0;
+    box-shadow: 0 0 2.25rem #9da5ab;
+    height: auto;
+    left: 0;
+    overflow-y: auto;
     position: fixed;
     top: 0;
-    bottom: 0;
-    left: 0; 
     width: 20%;
-    height: auto;
-    box-shadow: 0 0 2.25rem #9da5ab;
-    overflow-y: auto;
-  }
-
-  header {
-    justify-content: left;
-    flex-direction: row;
-    align-items: left;
-  }
-  header:first-child {
-    padding-left: 20%;
-  }
-
-  header * {
-    margin: auto 20px;
   }
 
   .doc-entries {
@@ -101,12 +86,10 @@ header .button {
   margin: 0;
 }
 
-
 .CodeMirror {
   height: auto; /* Auto-resizing cells. */
   padding: 10px;
   background: #f5f5f5;
-  /*background: #283646;*/
   border: 0;
   border-left: 2px solid #eee;
   transition: border-left-color 1s;
@@ -128,8 +111,8 @@ button.run-button {
   float: right;
   bottom: 46px;
   right: 8px;
-  opacity:.25;
-  transition: opacity .25s;
+  opacity: 0.25;
+  transition: opacity 0.25s;
   background: #fff;
   z-index: 3;
 }
@@ -140,9 +123,9 @@ button.run-button:hover,
 }
 
 .output {
+  border-left: 2px solid #f5f5f5;
   padding: 10px;
   white-space: pre-wrap;
-  border-left: 2px solid #f5f5f5;
 }
 
 .newCell {
@@ -155,17 +138,18 @@ button.run-button:hover,
 
 .docindex {
   list-style-type: none;
-  padding: 0px;
   margin: 0;
+  padding: 0;
 }
 
-.panel > * {
+h1,
+.doxindex {
   margin: 0 10px;
 }
 
 .docindex a {
-  display: block;
   color: inherit;
+  display: block;
   text-decoration: none;
 }
 
@@ -174,18 +158,19 @@ button.run-button:hover,
   text-decoration: underline;
 }
 
-.doc-entry > .name, .doc-entry > .typestr {
+.doc-entry > .name,
+.doc-entry > .typestr {
   font-size: inherit;
-  margin: 0;
   font-weight: 900;
+  margin: 0;
 }
-
 
 .doc-entry .arg-title {
   font-weight: bold;
 }
 
-.doc-entry p, .doc-entry ol {
+.doc-entry p,
+.doc-entry ol {
   margin: 0;
 }
 
