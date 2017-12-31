@@ -155,7 +155,11 @@ class Cell {
     try {
       await this.execute();
     } finally {
-      setTimeout(() => classList.remove("notebook-cell-running"), 1);
+      classList.add("notebook-cell-updating");
+      setTimeout(() => {
+        classList.remove("notebook-cell-updating");
+        classList.remove("notebook-cell-running");
+      }, 100);
     }
   }
 
