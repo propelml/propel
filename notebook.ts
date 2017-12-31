@@ -122,6 +122,7 @@ class Cell {
     this.editor = CodeMirror(parentDiv, {
       lineNumbers: false,
       mode: "javascript",
+      theme: "syntax",
       value: source ? source.trim() : "",
       viewportMargin: Infinity,
     });
@@ -223,6 +224,7 @@ window.onload = async() => {
       lineNumbers: false,
       mode: p.getAttribute("lang") || "javascript",
       readOnly: true,
+      theme: "syntax",
       value: code,
       viewportMargin: Infinity,
     });

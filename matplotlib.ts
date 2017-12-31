@@ -102,7 +102,7 @@ function plotLines(data) {
     .append("path")
     .attr("d", line as any)
     .style("fill", "none")
-    .style("stroke-width", "2px")
+    .style("stroke-width", "1px")
     .style("stroke", (d, i) => {
       return color(i as any);
     });

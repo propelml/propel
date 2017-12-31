@@ -3,9 +3,10 @@
 <head>
   <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <script src="dist/notebook.js"></script>
-  <link rel="stylesheet" href="normalize.css">
-  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="normalize.css"/>
+  <link rel="stylesheet" href="skeleton.css"/>
   <link rel="stylesheet" href="codemirror.css"/>
+  <link rel="stylesheet" href="syntax.css"/>
   <link rel="stylesheet" href="style.css"/>
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Propel Notebook</title>
@@ -30,16 +31,6 @@ plot(x, f(x),
 </script>
 
 <script type="notebook">
-let tanh = (a) => $(a).tanh();
-
-plot(x, tanh(x),
-     x, grad(tanh)(x),                     // first derivative
-     x, grad(grad(tanh))(x),               // second derivative
-     x, grad(grad(grad(tanh)))(x),         // third derivative
-     x, grad(grad(grad(grad(tanh))))(x));  // fourth derivative
-</script>
-
-<script type="notebook">
 f = await fetch('mnist/README');
 t = await f.text();
 t;
@@ -47,13 +38,13 @@ t;
 
 <script type="notebook">
 function f(x) {
-  x = $(x);
-  let y = x.sub(1).relu();
-  let z = $(-1).sub(x).relu();
-  return x.greater(x.zerosLike()).select(y,z);
+  let y = x.sub(1);
+  let z = $(-1).sub(x);
+  return x.greater(0).select(y,z).relu();
 }
 x = linspace(-5, 5, 100)
 plot(x, f(x))
+plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 </script>
     </div> <!-- #cells -->

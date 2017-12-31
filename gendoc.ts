@@ -97,10 +97,11 @@ function htmlBody(inner: string): string {
   <meta charset="utf-8">
   <title>Propel Docs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="normalize.css">
-  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="normalize.css"/>
+  <link rel="stylesheet" href="skeleton.css"/>
   <link rel="stylesheet" href="codemirror.css"/>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="syntax.css"/>
+  <link rel="stylesheet" href="style.css"/>
   <link rel="icon" type="image/png" href="favicon.png">
   <script src="dist/notebook.js"></script>
   <script type=notebook>

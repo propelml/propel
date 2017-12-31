@@ -57,6 +57,10 @@ header * {
 
 header .button {
   display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding: 0;
+  min-width: 150px;
 }
 
 @media (min-width: 600px) {
@@ -180,7 +184,6 @@ h1,
   font-weight: bold;
 }
 
-.doc-entry p,
 .doc-entry ol {
   margin: 0;
 }
