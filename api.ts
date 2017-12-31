@@ -9,8 +9,7 @@ import { assert, assertShapesEqual } from "./util";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
- *    let tensor = $([[1, 2, 3], [4, 5, 6]]);
- *    tensor.square();
+ *    $([[1, 2, 3], [4, 5, 6]]).square();
  *
  * If a tensor is given to $, it simply returns it.
  *

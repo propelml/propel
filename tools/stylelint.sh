@@ -5,4 +5,5 @@ cd `dirname "$0"`; cd ..
 exec ./node_modules/.bin/stylelint \
   --config stylelint.json \
   website/style.css  \
+  website/syntax.css  \
   $@
