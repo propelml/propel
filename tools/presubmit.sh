@@ -5,6 +5,7 @@ cd `dirname "$0"`; cd ..
 export V=1
 ./tools/tslint.sh
 ./deps/cpplint/cpplint.py *.cc
+./tools/stylelint.sh
 npm build .
 node ./node_modules/webpack/bin/webpack.js
 bash ./tools/test.sh
