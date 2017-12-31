@@ -86,6 +86,12 @@ header .button {
   margin: 0;
 }
 
+.output {
+  border-left: 2px solid #f5f5f5;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
 .CodeMirror {
   height: auto; /* Auto-resizing cells. */
   padding: 10px;
@@ -101,9 +107,20 @@ header .button {
   transition: border-left-color 0s;
 }
 
+.CodeMirror,
+.output,
+svg {
+  transition: border-left-color 0.5s;
+  transition: background-color 0.5s ease;
+}
+
 .notebook-cell-running .CodeMirror {
-  border-left-color: rgb(214, 39, 40);
-  transition: border-left-color 0s;
+  border-left-color: #dadaeb;
+}
+
+.notebook-cell-updating svg,
+.notebook-cell-updating .output {
+  background-color: #dadaeb;
 }
 
 button.run-button {
@@ -120,12 +137,6 @@ button.run-button {
 button.run-button:hover,
 .CodeMirror-focused + button.run-button {
   opacity: 1;
-}
-
-.output {
-  border-left: 2px solid #f5f5f5;
-  padding: 10px;
-  white-space: pre-wrap;
 }
 
 .newCell {
