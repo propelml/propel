@@ -347,17 +347,31 @@ export class Tensor implements types.BasicTensor {
     return ops.slice(this, begin, size);
   }
 
-  /** Reshapes the tensor without changing its data. */
+  /** Reshapes the tensor without changing its data. O(1).
+   *
+   *    import { arange } from "propel";
+   *    n = 5
+   *    m = 2
+   *    t = arange(m*n)
+   *    console.log(t.reshape([n, m]))
+   *    console.log(t.reshape([m, n]))
+   */
   reshape(newShape: types.Shape): Tensor {
     return ops.reshape(this, newShape);
   }
 
-  /** Return a copy of the tensor collapsed into one dimension. */
+  /** Return a copy of the tensor collapsed into one dimension.
+   *
+   *    $([[1, 2], [3, 4]]).flatten()
+   */
   flatten(): Tensor {
     return this.reshape([-1]);
   }
 
-  /** Remove single-dimensional axes from the shape of a tensor. */
+  /** Remove single-dimensional axes from the shape of a tensor.
+   *
+   *    $([[[2, 3, 4]]]).squeeze()
+   */
   squeeze(): Tensor {
     const newShape = this.shape.filter((d) => d > 1);
     return this.reshape(newShape);
@@ -417,6 +431,11 @@ export class Tensor implements types.BasicTensor {
     return left.matmul(right).reshape(outShape);
   }
 
+  /** Build a one-hot tensor from labels.
+   *
+   *    let labels = $([1, 3, 0], {dtype: "int32"});
+   *    labels.oneHot(5);
+   */
   oneHot(depth: number, onValue = 1.0, offValue = 0.0): Tensor {
     if (this.dtype === "float32") {
       throw new Error("Must use integer type with oneHot.");

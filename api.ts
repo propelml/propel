@@ -40,14 +40,21 @@ export function eye(size: number, dtype: types.DType = "float32"): Tensor {
 
 /** Returns num evenly spaced samples, calculated over the interval
  * [start, stop].
+ *
+ *    import { linspace } from "propel"
+ *    linspace(-1, 1, 5);
  */
-export const linspace = (start: number, stop: number, num = 50): Tensor => {
+export function linspace(start: number, stop: number, num = 50): Tensor {
   const t = bo.linspace(start, stop, num);
   return new Tensor(t);
-};
+}
 
-/** Return evenly spaced numbers over a specified interval. */
-export const arange = function(...args: number[]): Tensor {
+/** Return evenly spaced numbers over a specified interval.
+ *
+ *    import { arange } from "propel"
+ *    arange(10);
+ */
+export function arange(...args: number[]): Tensor {
   let start: number, limit: number, delta: number;
   switch (args.length) {
     case 1:
@@ -73,8 +80,14 @@ export const arange = function(...args: number[]): Tensor {
   }
   const t = bo.arange(start, limit, delta);
   return new Tensor(t);
-};
+}
 
+/** Produces a new tensor with random values, drawn from the stanard normal
+ * distribution.
+ *
+ *    import { randn } from "propel"
+ *    randn([3, 4])
+ */
 export function randn(shape: number[]): Tensor {
   const t = bo.randn(shape);
   return new Tensor(t);
@@ -82,18 +95,29 @@ export function randn(shape: number[]): Tensor {
 
 /** fill returns a new tensor of the given shape, filled with constant values
  * specified by the `value` argument. `value` must be a scalar tensor.
+ *
+ *    import { fill } from "propel"
+ *    fill(31337, [2, 2])
  */
 export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
   return ops.fill($(value), shape);
 }
 
-/** Return a new tensor of given shape and dtype, filled with zeros. */
+/** Return a new tensor of given shape and dtype, filled with zeros.
+ *
+ *    import { zeros } from "propel"
+ *    zeros([5, 2])
+ */
 export function zeros(shape: types.Shape,
                       opts: types.TensorOpts = {dtype: "float32"}): Tensor {
   return ops.zeros(shape, opts);
 }
 
-/** Return a new tensor of given shape and dtype, filled with ones. */
+/** Return a new tensor of given shape and dtype, filled with ones.
+ *
+ *    import { ones } from "propel"
+ *    ones([2, 3])
+ */
 export function ones(shape: types.Shape,
                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
   return ops.ones(shape, opts);
