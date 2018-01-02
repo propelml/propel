@@ -96,7 +96,8 @@ function htmlBody(inner: string): string {
 <head>
   <meta charset="utf-8">
   <title>Propel Docs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta id="viewport" name="viewport" content="width=device-width,
+    minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <link rel="stylesheet" href="normalize.css"/>
   <link rel="stylesheet" href="skeleton.css"/>
   <link rel="stylesheet" href="codemirror.css"/>
