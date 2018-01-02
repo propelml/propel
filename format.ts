@@ -1,33 +1,62 @@
 // This module is just to implement tensor.toString.
 import * as types from "./types";
 
-function formatNumber(value: number, precision: number,
-                      targetWidth = 0): string {
-  const s1 = value.toString();
-  const s2 = value.toPrecision(precision);
+interface FormatOptions {
+  precision: number;
+  dtype: types.DType;
+  maxBefore: number;
+  maxAfter: number;
+}
 
-  if (s1.length <= s2.length && s2.length > targetWidth) {
-    return s1;
-  } else {
-    return s2;
+function split(s, precision): [string, string] {
+  return s.toFixed(precision).replace(/0+$/, "").split(".", 2);
+}
+
+function preprocess(shape: types.Shape, data: types.TypedArray,
+                    precision: number): FormatOptions {
+  const dtype = types.getDType(data);
+  let maxBefore = 0;
+  let maxAfter = 0;
+  for (let i = 0; i < data.length; i++) {
+    const [before, after] = data[i].toFixed(precision)
+                                   .replace(/0+$/, "")
+                                   .split(".", 2);
+    if (maxBefore < before.length) maxBefore = before.length;
+    if (maxAfter < after.length) maxAfter = after.length;
+  }
+  return { precision, dtype, maxBefore, maxAfter };
+}
+
+function formatNumber(value: number, opts: FormatOptions): string {
+  switch (opts.dtype) {
+      case "int32":
+      case "uint8":
+        return "" + value;
+      case "float32":
+        const [before, after] = split(value, opts.precision);
+        const b = 1 + opts.maxBefore - before.length;
+        const a = opts.maxAfter - after.length;
+        return " ".repeat(b) + before + "." + after + " ".repeat(a);
+      default:
+        throw new Error("Bad dtype.");
   }
 }
 
 export function toString(shape: types.Shape, data: types.TypedArray): string {
   const PRECISION = 3;
   let s;
-
+  const opts = preprocess(shape, data, PRECISION);
   switch (shape.length) {
     case 0:
-      return "Tensor() " + data[0];
+      return formatNumber(data[0], opts);
 
     case 1:
       s = "[";
       for (let i = 0; i < shape[0]; i++) {
-        s += i === 0 ? " " : ", ";
-        s += formatNumber(data[i], PRECISION);
+        s += i === 0 ? "" : ", ";
+        s += formatNumber(data[i], opts);
       }
-      s += " ]";
+      s += "]";
       return s;
 
     case 2:
@@ -35,7 +64,7 @@ export function toString(shape: types.Shape, data: types.TypedArray): string {
       for (let y = 0; y < shape[0]; y++) {
         for (let x = 0; x < shape[1]; x++) {
           const off = y * shape[1] + x;
-          const val = formatNumber(data[off], PRECISION);
+          const val = formatNumber(data[off], opts);
           if (val.length > w) {
             w = val.length;
           }
@@ -44,20 +73,20 @@ export function toString(shape: types.Shape, data: types.TypedArray): string {
 
       s = "[";
       for (let y = 0; y < shape[0]; y++) {
-        s += y === 0 ? " [" : "\n  [";
+        s += y === 0 ? "[" : "\n [";
         for (let x = 0; x < shape[1]; x++) {
           const off = y * shape[1] + x;
-          const val = formatNumber(data[off], PRECISION, w);
-          s += x === 0 ? " " : ", ";
+          const val = formatNumber(data[off], opts);
+          s += x === 0 ? "" : ", ";
           s += (val as any).padStart(w);
         }
-        s += " ]";
+        s += "]";
         // Add trailing comma to row.
         if (y !== shape[0] - 1) {
           s += ",";
         }
       }
-      s += " ]";
+      s += "]";
       return s;
 
     default:
