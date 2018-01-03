@@ -4,7 +4,7 @@ import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const $ = convertBasic;
 
-test(function testShapes() {
+test(async function backend_shapes() {
   const a = $([[1, 2], [3, 4]]);
   assertShapesEqual(a.shape, [2, 2]);
 
@@ -15,7 +15,7 @@ test(function testShapes() {
   assertShapesEqual($([42]).shape, [1]);
 });
 
-test(function testMul() {
+test(async function backend_mul() {
   const a = $([[1, 2], [3, 4]]);
   const expected = $([[1, 4], [9, 16]]);
   const actual = bo.mul(a, a);
@@ -23,7 +23,7 @@ test(function testMul() {
   assertAllEqual(actual, expected);
 });
 
-test(function testSquare() {
+test(async function backend_square() {
   const a = $([[1, 2], [3, 4]]);
   const expected = $([[1, 4], [9, 16]]);
   const actual = bo.square(a);
@@ -31,7 +31,7 @@ test(function testSquare() {
   assertAllEqual(actual, expected);
 });
 
-test(function testCosh() {
+test(async function backend_cosh() {
   const a = $([[1, 2], [3, 4]]);
   const actual = bo.cosh(a);
   assertAllEqual(actual.shape, [2, 2]);
@@ -42,7 +42,7 @@ test(function testCosh() {
   assertAllClose(actual, expected);
 });
 
-test(function testReluGrad() {
+test(async function backend_reluGrad() {
   const grad = $([[-1, 42], [-3, 4]]);
   const ans = $([[-7, 4], [ 0.1, -9 ]]);
   const actual = bo.reluGrad(grad, ans);

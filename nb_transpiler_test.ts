@@ -4,7 +4,7 @@ import { test } from "./test";
 import { assert } from "./util";
 
 const t = (src, out) => test(
-  function testTranspile() {
+  function nb_transpiler() {
     const transpiled = transpile(src);
     assert(transpiled === out,
            "Actual:   " + JSON.stringify(transpiled) + "\n" +
