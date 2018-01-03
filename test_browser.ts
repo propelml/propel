@@ -2,8 +2,6 @@ import { createServer } from "http-server";
 import * as puppeteer from "puppeteer";
 import { format } from "util";
 
-const DEBUG = false;
-const PORT = 8081;
 const TESTS = [
   // This page loads and runs all the webpack'ed unit tests.
   // The test harness logs "DONE bla bla" to the console when done.
@@ -18,6 +16,8 @@ const TESTS = [
   { href: "notebook_mnist.html" }
 ];
 
+const debug = !!process.env.PP_DEBUG;
+
 (async() => {
   let passed = 0, failed = 0;
 
@@ -25,7 +25,7 @@ const TESTS = [
   server.listen();
   const port = server.server.address().port;
 
-  const browser = await puppeteer.launch({ headless: !DEBUG });
+  const browser = await puppeteer.launch({ headless: !debug });
 
   for (let i = 0; i < TESTS.length; i++) {
     const test = TESTS[i];
@@ -37,7 +37,7 @@ const TESTS = [
     }
   }
 
-  if (DEBUG) {
+  if (debug) {
     await new Promise((res) => process.stdin.once("data", res));
   }
 
@@ -83,7 +83,7 @@ async function runTest(browser, url, { href, doneMsg = null, timeout = 1000 }) {
     console.log(`FAIL: ${href}\n`);
     return false;
   } finally {
-    if (!DEBUG) await page.close();
+    if (!debug) await page.close();
     cancelTimer();
   }
 
