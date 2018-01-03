@@ -12,7 +12,7 @@ declare class Handle {
 }
 
 // TODO this could be improved:
-export type AttrDef = (string | number | boolean)[]
+export type AttrDef = Array<string | number | boolean>;
 
 interface DeviceDesc {
   name: string;
@@ -74,4 +74,3 @@ export interface BindingInterface {
   ATTR_TYPE_LIST: AttrType;
   ATTR_SHAPE_LIST: AttrType;
 }
-
