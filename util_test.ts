@@ -2,7 +2,7 @@ import { test } from "./test";
 import * as util from "./util";
 import { assert, assertEqual, assertShapesEqual } from "./util";
 
-test(function testCounterMap() {
+test(async function util_counterMap() {
   const m = new util.CounterMap();
   assertEqual(m.get(0), 0);
   m.inc(0);
@@ -19,7 +19,7 @@ test(function testCounterMap() {
   console.log(k);
 });
 
-test(function testDeepCloneArray() {
+test(async function util_deepCloneArray() {
   const arr1 = [[1, 2], [3, 4]];
   const arr2 = util.deepCloneArray(arr1);
   // Verify that arrays have different identity.
@@ -33,7 +33,7 @@ test(function testDeepCloneArray() {
   assert(arr1[1][1] === arr2[1][1]);
 });
 
-test(function testBcastGradientArgs() {
+test(async function util_bcastGradientArgs() {
   let [r0, r1] = util.bcastGradientArgs([2, 3, 5], [1]);
   assertShapesEqual(r0, []);
   assertShapesEqual(r1, [0, 1, 2]);
