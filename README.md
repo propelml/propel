@@ -20,6 +20,9 @@ ts-node test_browser
 ts-node util_test           # all tests defined in util_test.ts
 ts-node test_node mat       # tests that have 'mat' in the name
 ts-node test_node "^mnist"  # tests names matching the regex /^mnist/i
+
+# Debug tests (web browser)
+PP_DEBUG=1 ts-node test_browser
 ```
 
 If puppeteer complains that chromium hasn't been downloaded, make it so:
