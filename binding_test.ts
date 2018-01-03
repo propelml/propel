@@ -2,7 +2,7 @@ import { test } from "./test";
 import { binding, ctx } from "./tf";
 import { assert, assertAllEqual, assertEqual } from "./util";
 
-function testEquals() {
+test(function testEquals() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
   const b = new binding.Handle(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
 
@@ -19,9 +19,9 @@ function testEquals() {
   const r2 = binding.execute(ctx, "Equal", opAttrs, [a, b])[0];
   const result2 = Array.from(new Uint8Array(binding.asArrayBuffer(r2)));
   assertAllEqual(result2, [1, 0]);
-}
+});
 
-function testMatMul() {
+test(function testMatMul() {
   assert(ctx instanceof binding.Context);
 
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
@@ -42,9 +42,9 @@ function testMatMul() {
   assert(binding.getDevice(r) === "CPU:0");
   const result = Array.from(new Float32Array(binding.asArrayBuffer(r)));
   assertAllEqual(result, [22, 28, 49, 64]);
-}
+});
 
-function testMul() {
+test(function testMul() {
   const typedArray = new Float32Array([2, 5]);
   const a = new binding.Handle(typedArray, [2], binding.TF_FLOAT);
   const b = new binding.Handle(typedArray, [2], binding.TF_FLOAT);
@@ -62,9 +62,9 @@ function testMul() {
   assert(binding.getDevice(r) === "CPU:0");
   const result = Array.from(new Float32Array(binding.asArrayBuffer(r)));
   assertAllEqual(result, [4, 25]);
-}
+});
 
-function testChaining() {
+test(function testChaining() {
   // Do an Equal followed by ReduceAll.
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
   const b = new binding.Handle(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
@@ -85,9 +85,9 @@ function testChaining() {
   const r2 = binding.execute(ctx, "All", opAttrs2, [r, reductionIndices])[0];
   const result2 = Array.from(new Uint8Array(binding.asArrayBuffer(r2)));
   assertAllEqual(result2, [1]);
-}
+});
 
-function testReshape() {
+test(function testReshape() {
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
   const t = new binding.Handle(typedArray, [2, 3], binding.TF_FLOAT);
   const shape = new binding.Handle(new Int32Array([3, 2]), [2],
@@ -98,18 +98,18 @@ function testReshape() {
   ];
   const r = binding.execute(ctx, "Reshape", opAttrs, [t, shape])[0];
   assertAllEqual(binding.getShape(r), [3, 2]);
-}
+});
 
-function testBoolean() {
+test(function testBoolean() {
   const ta = new Uint8Array([0, 1, 0, 1]);
   const t = new binding.Handle(ta, [3], binding.TF_BOOL);
   assert(binding.getDType(t) === binding.TF_BOOL);
   assertAllEqual(binding.getShape(t), [3]);
   const result = Array.from(new Uint8Array(binding.asArrayBuffer(t)));
   assertAllEqual(result, [0, 1, 0, 1]);
-}
+});
 
-function testListDevices() {
+test(function testListDevices() {
   const devices = binding.listDevices(ctx);
   assert(devices.length >= 1);
   // Assuming first device is always CPU.
@@ -118,9 +118,9 @@ function testListDevices() {
   assert(cpuDevice["name"].indexOf("device:CPU:0") > 0);
   assert(cpuDevice["memoryBytes"] > 1024);
   console.log(devices);
-}
+});
 
-function testCopyToDevice() {
+test(function testCopyToDevice() {
   // Only do this test if there's more than one device.
   const devices = binding.listDevices(ctx);
   if (devices.length < 2) {
@@ -135,9 +135,9 @@ function testCopyToDevice() {
   console.log("tGPU device", binding.getDevice(tGPU));
   assert(binding.getDevice(tGPU).endsWith("GPU:0"));
   console.log("copyToDevice ok");
-}
+});
 
-function testCreateSmallHandle() {
+test(function testCreateSmallHandle() {
   const types: Array<[number, any]> = [
     [binding.TF_FLOAT, Float32Array],
     [binding.TF_INT32, Int32Array]
@@ -188,14 +188,4 @@ function testCreateSmallHandle() {
 
     console.log("testCreateSmallHandle", taConstructor.name, "ok");
   }
-}
-
-test(testEquals);
-test(testMatMul);
-test(testMul);
-test(testChaining);
-test(testReshape);
-test(testBoolean);
-test(testListDevices);
-test(testCopyToDevice);
-test(testCreateSmallHandle);
+});
