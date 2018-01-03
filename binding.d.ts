@@ -33,7 +33,8 @@ export interface BindingInterface {
                     data: number | number[]): Handle;
   copyToDevice(ctx: Context, h: Handle, device: string): Handle;
   execute(ctx: Context, op: string, attrs: AttrDef[],
-          inputs: Handle[]): string;
+          inputs: Handle[]): Handle[];
+  dispose(h: Handle): void;
 
   TF_FLOAT: DTypeCode;
   TF_DOUBLE: DTypeCode;

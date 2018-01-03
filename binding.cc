@@ -84,11 +84,15 @@ static void ReleaseTypedArray(void* data, size_t len, void* js_ref_ptr) {
 static void DeleteHandle(napi_env env, void* handle_wrap_ptr, void* hint) {
   auto handle_wrap = static_cast<HandleWrap*>(handle_wrap_ptr);
 
-  if (handle_wrap->tf_tensor_handle != NULL)
+  if (handle_wrap->tf_tensor_handle != NULL) {
     TFE_DeleteTensorHandle(handle_wrap->tf_tensor_handle);
+    handle_wrap->tf_tensor_handle = NULL;
+  }
 
-  if (handle_wrap->tf_tensor != NULL)
+  if (handle_wrap->tf_tensor != NULL) {
     TF_DeleteTensor(handle_wrap->tf_tensor);
+    handle_wrap->tf_tensor = NULL;
+  }
 
   delete handle_wrap;
 }
@@ -651,7 +655,10 @@ HandleWrap* HandleFromFirstArg(napi_env env, napi_callback_info info) {
   check(argc == 1);
   HandleWrap* handle_wrap;
   nstatus = napi_unwrap(env, args[0], reinterpret_cast<void**>(&handle_wrap));
-  check(nstatus == napi_ok);
+  if (nstatus != napi_ok) {
+    napi_throw_error(env, NULL, "Cannot unwrap binding.Handle");
+    return NULL;
+  }
   return handle_wrap;
 }
 
@@ -659,6 +666,7 @@ static napi_value HandleAsArrayBuffer(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   auto handle_wrap = HandleFromFirstArg(env, info);
+  if (handle_wrap == NULL) return NULL;
 
   // Resolve TFE_TensorHandle into TF_Tensor
   auto tf_status = TF_NewStatus();
@@ -684,6 +692,7 @@ static napi_value HandleGetDevice(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   auto handle_wrap = HandleFromFirstArg(env, info);
+  if (handle_wrap == NULL) return NULL;
 
   // Ask tensorflow for the device name.
   const char* device =
@@ -701,6 +710,7 @@ static napi_value HandleGetDType(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   auto handle_wrap = HandleFromFirstArg(env, info);
+  if (handle_wrap == NULL) return NULL;
 
   // Ask tensorflow for the dtype.
   TF_DataType dtype = TFE_TensorHandleDataType(handle_wrap->tf_tensor_handle);
@@ -887,6 +897,26 @@ static napi_value ListDevices(napi_env env, napi_callback_info info) {
   return out;
 }
 
+napi_value Dispose(napi_env env, napi_callback_info info) {
+  auto handle_wrap = HandleFromFirstArg(env, info);
+  if (handle_wrap == NULL) return NULL;
+
+  if (handle_wrap->tf_tensor_handle != NULL) {
+    TFE_DeleteTensorHandle(handle_wrap->tf_tensor_handle);
+    handle_wrap->tf_tensor_handle = NULL;
+  }
+
+  if (handle_wrap->tf_tensor != NULL) {
+    TF_DeleteTensor(handle_wrap->tf_tensor);
+    handle_wrap->tf_tensor = NULL;
+  }
+
+  napi_value undefined;
+  auto nstatus = napi_get_undefined(env, &undefined);
+  check(nstatus == napi_ok);
+  return undefined;
+}
+
 static napi_value CopyToDevice(napi_env env, napi_callback_info info) {
   napi_status nstatus;
   // Expect exactly three arguments.
@@ -929,6 +959,7 @@ static napi_value HandleGetShape(napi_env env, napi_callback_info info) {
   napi_status nstatus;
 
   auto handle_wrap = HandleFromFirstArg(env, info);
+  if (handle_wrap == NULL) return NULL;
 
   auto th = handle_wrap->tf_tensor_handle;
   int rank = TFE_TensorHandleNumDims(th);
@@ -1021,6 +1052,7 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
       {"getDType", NULL, HandleGetDType, NULL, NULL, NULL, napi_default, NULL},
       {"getShape", NULL, HandleGetShape, NULL, NULL, NULL, napi_default, NULL},
       {"listDevices", NULL, ListDevices, NULL, NULL, NULL, napi_default, NULL},
+      {"dispose", NULL, Dispose, NULL, NULL, NULL, napi_default, NULL},
       {"createSmallHandle",
        NULL,
        CreateSmallHandle,
