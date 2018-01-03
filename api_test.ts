@@ -39,21 +39,21 @@ function deviceTests(): Array<[string, ConvertFn]> {
 
 // Basic Tests
 
-function testLinspace() {
+test(function testLinspace() {
   const x = linspace(-4, 4, 6);
   assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
-}
+});
 
-function testArange() {
+test(function testArange() {
   const r1 = arange(-2, 2);
   assertAllEqual(r1, [-2, -1, 0, 1]);
   const r2 = arange(4);
   assertAllEqual(r2, [0, 1, 2, 3]);
   const r3 = arange(4, 10, 2);
   assertAllEqual(r3, [4, 6, 8]);
-}
+});
 
-function testRandn() {
+test(function testRandn() {
   const t = randn([2, 3]);
   assertAllEqual(t.shape, [2, 3]);
   const d = t.getData();
@@ -61,9 +61,9 @@ function testRandn() {
   // TODO this isn't the best test...
   assert(d[0] !== d[1]);
   assert(d[1] !== d[2]);
-}
+});
 
-function testConvertWithType() {
+test(function testConvertWithType() {
   const t = $([1, 2, 3], {dtype: "int32"});
   assert(t.dtype === "int32");
   const ta = t.getData();
@@ -73,11 +73,11 @@ function testConvertWithType() {
   const t2 = $(ta2);
   assert(t2.dtype === "int32");
   assert(t2.getData() instanceof Int32Array);
-}
+});
 
 // Backprop Tests
 
-function testInc() {
+test(function testInc() {
   function f(x) {
     return $(x).add(1);
   }
@@ -86,18 +86,18 @@ function testInc() {
   const g = grad(f);
   assertClose(g(1.0), 1.);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testMul() {
+test(function testMul() {
   const f = (x) => $(42).mul(x);
   assertClose(f(1), 42);
   assertClose(f(2), 84);
   const g = grad(f);
   assertClose(g(1.), 42.);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testSquared() {
+test(function testSquared() {
   // f(x) = x^2
   function f(x) {
     return $(x).mul(x);
@@ -108,9 +108,9 @@ function testSquared() {
   assertClose(g(1), 2);
   assertClose(g(10), 20);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testSquaredMatrix() {
+test(function testSquaredMatrix() {
   // f(x) = x^2
   function f(x) {
     return $(x).mul(x);
@@ -120,9 +120,9 @@ function testSquaredMatrix() {
   const v = g([[1, 2], [3, 4]]);
   assertAllEqual(v.shape, [2, 2]);
   assertAllEqual(v, [[2, 4], [6, 8]]);
-}
+});
 
-function testDiv() {
+test(function testDiv() {
   // f(x) = (1 + x) / x
   function f(x) {
     x = $(x);
@@ -134,18 +134,18 @@ function testDiv() {
   assertClose(g(1), -1);
   assertClose(g(10), -1 / 100);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testConstant() {
+test(function testConstant() {
   const f = (_) => 42;
   assertClose(f(1), 42);
   assertClose(f(-1), 42);
   const g = grad(f);
   assertClose(g(1.0), 0.);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testExp() {
+test(function testExp() {
   // f(x) = exp(1+x)
   function f(x) {
     return $(x).add(1).exp();
@@ -156,9 +156,9 @@ function testExp() {
   assertClose(g(1), 7.3890);
   assertClose(g(2), 20.0855);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testLog() {
+test(function testLog() {
   // f(x) = log(x)/log(base)
   function f(x, base) {
     return $(x).log().div($(base).log());
@@ -172,9 +172,9 @@ function testLog() {
   assertClose(g(9, 3), 1 / (9 * Math.log(3)));
   assertClose(g(64, 4), 1 / (64 * Math.log(4)));
   assertClose(g(625, 5), 1 / (625 * Math.log(5)));
-}
+});
 
-function testSub() {
+test(function testSub() {
   function f(x) {
     return $(1).sub(x);
   }
@@ -184,9 +184,9 @@ function testSub() {
   assertClose(g(1), -1);
   assertClose(g(2), -1);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testDiv2() {
+test(function testDiv2() {
   function f(x) {
     x = $(x);
     return $(1).sub(x).div(x.add(1));
@@ -197,9 +197,9 @@ function testDiv2() {
   assertClose(g(1), -2 / 4);
   assertClose(g(2), -2 / 9);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testDiv3() {
+test(function testDiv3() {
   function f(x) {
     const y = $(x).exp();
     return y.div(y);
@@ -210,18 +210,18 @@ function testDiv3() {
   assertClose(g(1), 0.);
   assertClose(g(2), 0.);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testTanh() {
+test(function testTanh() {
   const f = (x) => $(x).tanh();
   assertClose(f(1), 0.7615);
   assertClose(f(16), 0.9999);
   const g = grad(f);
   assertClose(g(1), 0.4199);
   checkGrad(f, g, 1.0);
-}
+});
 
-function testRelu() {
+test(function testRelu() {
   const f = (x) => $(x).relu();
   assertAllEqual(f([-5, 0, 5]), [0, 0, 5]);
   const g = grad(f);
@@ -230,27 +230,27 @@ function testRelu() {
   checkGrad(f, g, -1.0);
   const g2 = grad(g);
   assertAllClose(g2([-5, 0.1, 5]), [0, 0, 0]);
-}
+});
 
-function testSigmoid() {
+test(function testSigmoid() {
   const f = (x) => $(x).sigmoid();
   assertAllClose(f([-1, 0, 1]), [0.26894142, 0.5, 0.73105858]);
   const g = grad(f);
   assertAllClose(g([-1, 0, 1]), [0.19661193, 0.25, 0.19661193]);
   checkGrad(f, g, 1.0);
   checkGrad(f, g, -1.0);
-}
+});
 
-function testAbs() {
+test(function testAbs() {
   const f = (x) => $(x).abs();
   assertAllEqual(f([-5, 0, 5]), [5, 0, 5]);
   const g = grad(f);
   assertAllClose(g([-5, 0.1, 5]), [-1, 1, 1]);
   checkGrad(f, g, 1.0);
   checkGrad(f, g, -1.0);
-}
+});
 
-function testMultigrad() {
+test(function testMultigrad() {
   function f(a, b) {
     return $(a).mul(2).add($(b).mul(3));
   }
@@ -261,44 +261,44 @@ function testMultigrad() {
   assertClose(g(1, 1)[1], 3);
   assertClose(g(4, 2)[0], 2);
   assertClose(g(4, 2)[1], 3);
-}
+});
 
-function testGradGradTanh() {
+test(function testGradGradTanh() {
   const f = (x) => $(x).tanh();
   assertAllClose(f([1, 16]), [0.7615, 0.9999]);
   const g = grad(grad(f));
   // def g(x): return -2 * np.tanh(x) / np.square(np.cosh(x))
   assertAllClose(g([1, 2]), [-0.6397, -0.13621]);
-}
+});
 
-function testSinh() {
+test(function testSinh() {
   const f = (x) => $(x).sinh();
   const v = $([1, 2]);
   assertAllClose(f(v), [1.17520119,  3.62686041]);
   // The derivtive of sinh is cosh.
   const g = grad(f);
   assertAllClose(g(v), v.cosh());
-}
+});
 
-function testFill() {
+test(function testFill() {
   const f = (x) => fill(x, [2, 3]);
   assertAllEqual(f(1), [[1, 1, 1], [1, 1, 1]]);
   assertAllEqual(f(42), [[42, 42, 42], [42, 42, 42]]);
   // TODO
   // const g = grad(f);
   // assertAllEqual(g(1), [1]);
-}
+});
 
-function testSquare() {
+test(function testSquare() {
   const f = (x) => $(x).square();
   const v = $([2, 4, -1]);
   assertAllClose(f(v), [4, 16, 1]);
   // The derivtive of x^2 is 2x
   const g = grad(f);
   assertAllClose(g(v), [4, 8, -2]);
-}
+});
 
-function testTranspose() {
+test(function testTranspose() {
   const f = (x) => $(x).transpose();
   const a = $([[1, 2], [3, 4]]);
   const aT = $([[1, 3], [2, 4]]);
@@ -309,9 +309,9 @@ function testTranspose() {
   const f2 = (x) => $(x).transpose().mul(2);
   const g2 = grad(f2);
   assertAllEqual(g2(a), [[2, 2], [2, 2]]);
-}
+});
 
-function testReverse() {
+test(function testReverse() {
   assertAllEqual($([1, 2, 3, 4]).reverse(), [4, 3, 2, 1]);
 
   const t = $([[[[ 0,  1,  2,  3],
@@ -349,9 +349,9 @@ function testReverse() {
   const f = (x) => $(x).reverse().mul(2);
   const g = grad(f);
   assertAllEqual(g([1, 2, 3]), [2, 2, 2]);
-}
+});
 
-function testMatMul() {
+test(function testMatMul() {
   function f(x, y) {
     return $(x).matmul(y);
   }
@@ -382,9 +382,9 @@ function testMatMul() {
     [13, 13],
     [11, 11],
   ]);
-}
+});
 
-function testReduceSum() {
+test(function testReduceSum() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 8, 7],
@@ -417,9 +417,9 @@ function testReduceSum() {
       [1, 1, 1],
     ]);
   }
-}
+});
 
-function testReduceMean() {
+test(function testReduceMean() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 8, 7],
@@ -454,9 +454,9 @@ function testReduceMean() {
       [t, t, t],
     ]);
   }
-}
+});
 
-function testReduceMax() {
+test(function testReduceMax() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
@@ -474,9 +474,9 @@ function testReduceMax() {
     assertAllEqual(g(a), [[1, 0, 1], [0, 1, 0]]);
     */
   }
-}
+});
 
-function testOnesAndZerosLike() {
+test(function testOnesAndZerosLike() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
@@ -489,9 +489,9 @@ function testOnesAndZerosLike() {
     assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
     assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
   }
-}
+});
 
-function testEqual() {
+test(function testEqual() {
   const a = $([
     [9, 5, 7],
     [6, 8, 4],
@@ -511,9 +511,9 @@ function testEqual() {
   const g = multigrad(f, [0, 1]);
   assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
-}
+});
 
-function testGreater() {
+test(function testGreater() {
   const a = $([
     [9, 5, 7],
     [6, 8, 2],
@@ -532,9 +532,9 @@ function testGreater() {
   const g = multigrad(f, [0, 1]);
   assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
-}
+});
 
-function testGreaterEqual() {
+test(function testGreaterEqual() {
   const a = $([
     [9, 5, 7],
     [6, 8, 2],
@@ -553,9 +553,9 @@ function testGreaterEqual() {
   const g = multigrad(f, [0, 1]);
   assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
-}
+});
 
-function testLess() {
+test(function testLess() {
   const a = $([
     [9, 5, 7],
     [6, 8, 2],
@@ -574,9 +574,9 @@ function testLess() {
   const g = multigrad(f, [0, 1]);
   assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
-}
+});
 
-function testLessEqual() {
+test(function testLessEqual() {
   const a = $([
     [9, 5, 7],
     [6, 8, 2],
@@ -595,9 +595,9 @@ function testLessEqual() {
   const g = multigrad(f, [0, 1]);
   assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
   assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
-}
+});
 
-function testSelect() {
+test(function testSelect() {
   const t = $([
     [1, 2, 3],
     [4, 5, 6],
@@ -628,17 +628,17 @@ function testSelect() {
   }
   assertAllEqual(grad(f2)([-3, -0.5, 0.5, 3]),
                  [-1, 0, 0, 1]);
-}
+});
 
-function testSign() {
+test(function testSign() {
   const x = $([-2, 5, -1, 3]);
   assertAllEqual(x.sign(), [-1, 1, -1, 1]);
   // sign isn't differentiable.
   const g = grad((c) => c.sign());
   assertAllEqual(g(x), [0, 0, 0, 0]);
-}
+});
 
-function testReshape() {
+test(function testReshape() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
@@ -658,48 +658,48 @@ function testReshape() {
       [1, 1, 1],
     ]);
   }
-}
+});
 
-function testFlatten() {
+test(function testFlatten() {
   const a = $([[1, 2], [3, 4]]);
   assertAllEqual(a.flatten(), [1, 2, 3, 4]);
-}
+});
 
-function testSqueeze() {
+test(function testSqueeze() {
   const a = $([[[0], [1], [2]]]);
   assertShapesEqual(a.shape, [1, 3, 1]);
   const b = a.squeeze();
   assertAllEqual(b, [0, 1, 2]);
   const c = $([[1, 2], [3, 4]]);
   assertAllEqual(c.squeeze(), c);
-}
+});
 
-function testReduceLogSumExp() {
+test(function testReduceLogSumExp() {
   assertClose($([1, 2, 3, 4]).reduceLogSumExp(), 4.44018969856);
   const f = (x) => $(x).reduceLogSumExp();
   const g = grad(f);
   assertAllClose(g([2, 3]), [0.26894142, 0.73105858]);
-}
+});
 
-function testSoftmax() {
+test(function testSoftmax() {
   const f = (x) => $(x).softmax();
   assertAllClose(f([1, 2, 3, 4]),
     [0.0320586, 0.08714432, 0.23688281, 0.64391422]);
   // Derivative of softmax isn't numerically stable.
   const g = grad(f);
   assertAllClose(g([1, 2, 3, 4]), [0, 0, 0, 0]);
-}
+});
 
-function testLogSoftmax() {
+test(function testLogSoftmax() {
   const f = (x) => $(x).logSoftmax();
   assertAllClose(f([1, 2, 3, 4]),
     [-3.44018984, -2.44018984, -1.44018972, -0.44018975]);
   const g = grad(f);
   assertAllClose(g([1, 2, 3, 4]),
     [0.87176559, 0.65142273, 0.05246873, -1.57565704]);
-}
+});
 
-function testArgMaxAndMin() {
+test(function testArgMaxAndMin() {
   for (const [device, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
@@ -721,9 +721,9 @@ function testArgMaxAndMin() {
       [0, 0, 0],
     ]);
   }
-}
+});
 
-function testDot() {
+test(function testDot() {
   assertAllEqual($(3).dot(4), 12);
   assertAllEqual($([[3]]).dot([[4]]), [[12]]);
   const r = $([9, 5, 7]).dot([6, 8, 4]);
@@ -740,9 +740,9 @@ function testDot() {
   assertAllEqual(m1.dot(m2), [[90, 114], [54, 69]]);
   assertAllEqual(m1.dot([1, 2, 3]), [46, 28]);
   assertAllEqual($([1, 2, 3]).dot(m2), [30, 36]);
-}
+});
 
-function testZerosOnes() {
+test(function testZerosOnes() {
   const z1 = zeros([2, 3]);
   assertAllEqual(z1, [[0, 0, 0], [0, 0, 0]]);
   assert(z1.dtype === "float32");
@@ -758,9 +758,9 @@ function testZerosOnes() {
   const o2 = ones([2, 3], {dtype: "int32"});
   assertAllEqual(o2, [[1, 1, 1], [1, 1, 1]]);
   assert(o2.dtype === "int32");
-}
+});
 
-function testBcastAdd() {
+test(function testBcastAdd() {
   const a = $([
     [1, 2],
     [3, 4],
@@ -785,9 +785,9 @@ function testBcastAdd() {
     [1, 1],
   ]);
   assertAllEqual(gab[1], [4, 4]);
-}
+});
 
-function testBcastSub() {
+test(function testBcastSub() {
   const a = $([
     [1, 2],
     [3, 4],
@@ -812,9 +812,9 @@ function testBcastSub() {
     [1, 1],
   ]);
   assertAllEqual(gab[1], [-4, -4]);
-}
+});
 
-function testBcastMul() {
+test(function testBcastMul() {
   const a = $([
     [1, 2],
     [3, 4],
@@ -839,9 +839,9 @@ function testBcastMul() {
     [42, 43],
   ]);
   assertAllEqual(gab[1], [16, 20]);
-}
+});
 
-function testBcastDiv() {
+test(function testBcastDiv() {
   const a = $([
     [1, 2],
     [3, 4],
@@ -866,9 +866,9 @@ function testBcastDiv() {
     [0.02380952, 0.02325581],
   ]);
   assertAllClose(gab[1], [-0.00907029, -0.01081666]);
-}
+});
 
-function testSlice() {
+test(function testSlice() {
   for (const [device, $] of deviceTests()) {
     const a = $([[[1, 1, 1], [2, 2, 2]],
                  [[3, 3, 3], [4, 4, 4]],
@@ -893,16 +893,16 @@ function testSlice() {
     const g = grad(f);
     // TODO figure out backwards pass.
   }
-}
+});
 
-function testCast() {
+test(function testCast() {
   const a = $([255, 127, 0], {dtype: "uint8"});
   assert(a.dtype === "uint8");
   const r = a.cast("float32").div(255);
   assertAllClose(r, [1.0, 127 / 255, 0]);
-}
+});
 
-function testOneHot() {
+test(function testOneHot() {
   for (const [device, $] of deviceTests()) {
     const a = $([0, 1, 3, 4], {dtype: "uint8"});
     assertAllEqual(a.oneHot(6), [
@@ -920,9 +920,9 @@ function testOneHot() {
       [-0.5, -0.5, -0.5, -0.5,  0.5],
     ]);
   }
-}
+});
 
-function testSoftmaxCE() {
+test(function testSoftmaxCE() {
   const labels = $([
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
@@ -942,9 +942,9 @@ function testSoftmaxCE() {
     [  6.14211376e-06,  -9.99664664e-01,   9.99658465e-01],
     [ -2.99993873e-01,   3.35348042e-04,   2.99658477e-01]
   ]);
-}
+});
 
-function testParams() {
+test(function testParams() {
   const params = new Params();
   // randn
   const a = params.randn("a", [2, 3]);
@@ -957,9 +957,9 @@ function testParams() {
   assertAllEqual(b, [[0, 0, 0], [0, 0, 0]]);
   const bb = params.zeros("b", [2, 3]);
   assertAllEqual(b, bb);
-}
+});
 
-function testDevicePlacement() {
+test(function testDevicePlacement() {
   if (!gpuAvail()) {
     console.log("GPU not available. Skipping testDevicePlacement.");
     return;
@@ -973,9 +973,9 @@ function testDevicePlacement() {
   assert(r.device === "GPU:0");
   assert(rCpu.device === "CPU:0");
   assertAllEqual(rCpu, [3, 8]);
-}
+});
 
-function testNeuralNet() {
+test(function testNeuralNet() {
   for (const [device, $] of deviceTests()) {
     const inference = (params: Params, images: Tensor) => {
       let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
@@ -1023,63 +1023,4 @@ function testNeuralNet() {
       params = updated;
     }
   }
-}
-
-test(testLinspace);
-test(testArange);
-test(testRandn);
-test(testConvertWithType);
-test(testInc);
-test(testMul);
-test(testSquared);
-test(testDiv);
-test(testConstant);
-test(testExp);
-test(testLog);
-test(testSub);
-test(testDiv2);
-test(testDiv3);
-test(testTanh);
-test(testRelu);
-test(testSigmoid);
-test(testAbs);
-test(testMultigrad);
-test(testSquaredMatrix);
-test(testGradGradTanh);
-test(testSinh);
-test(testFill);
-test(testSquare);
-test(testTranspose);
-test(testReverse);
-test(testMatMul);
-test(testReduceSum);
-test(testReduceMean);
-test(testReduceMax);
-test(testOnesAndZerosLike);
-test(testEqual);
-test(testGreater);
-test(testGreaterEqual);
-test(testLess);
-test(testLessEqual);
-test(testSelect);
-test(testSign);
-test(testReshape);
-test(testFlatten);
-test(testSqueeze);
-test(testReduceLogSumExp);
-test(testSoftmax);
-test(testLogSoftmax);
-test(testArgMaxAndMin);
-test(testDot);
-test(testZerosOnes);
-test(testBcastAdd);
-test(testBcastSub);
-test(testBcastMul);
-test(testBcastDiv);
-test(testSlice);
-test(testCast);
-test(testOneHot);
-test(testSoftmaxCE);
-test(testParams);
-test(testDevicePlacement);
-test(testNeuralNet);
+});
