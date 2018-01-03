@@ -189,3 +189,16 @@ test(async function binding_createSmallHandle() {
     console.log("testCreateSmallHandle", taConstructor.name, "ok");
   }
 });
+
+test(async function testDispose() {
+  const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
+  binding.dispose(a);
+
+  let didThrow = false;
+  try {
+  binding.dispose(null);
+  } catch (e) {
+    didThrow = true;
+  }
+  assert(didThrow);
+});
