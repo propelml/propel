@@ -30,11 +30,32 @@ function toTagName(s: string): string {
   return s.replace(/[.$]/g, "_");
 }
 
-function toHTMLIndex(docs: DocEntry[]): string {
+function splitName(name): [string, string] {
+  const [a, b] = name.split(".", 2);
+  if (b) {
+    return [a, b];
+  } else {
+    return [null, a];
+  }
+}
+
+function pad(name: string, size: number): string {
+  // Requires monospaced font.
+  return "&nbsp;".repeat(size - name.length) + name;
+}
+
+function toHTMLIndex(docs: DocEntry[], largestPrefix: number): string {
   let out = `<ol class="docindex">\n`;
   for (const entry of docs) {
     const tag = toTagName(entry.name);
-    out += `<li><a href="#${tag}" class=name>${entry.name}</a></li>\n`;
+    const [prefix, name] = splitName(entry.name);
+    let outName;
+    if (prefix != null) {
+      outName = pad(prefix, largestPrefix) + "." + name;
+    } else {
+      outName = pad("", largestPrefix + 1) + name;
+    }
+    out += `<li><a href="#${tag}" class=name>${outName}</a></li>\n`;
   }
   out += `</ol>\n`;
   return out;
@@ -152,9 +173,23 @@ export function htmlEntry(entry: DocEntry): string {
 export function toHTML(docs: DocEntry[]): string {
   let out = "";
 
+  let largestPrefix = 0;
+  docs = docs.sort((a, b) => {
+    const [aPrefix, an]  = splitName(a.name);
+    const [bPrefix, bn] = splitName(b.name);
+
+    // Only necessary to do this on the a's because of how sorting works.
+    if (aPrefix && aPrefix.length > largestPrefix) {
+      largestPrefix = aPrefix.length;
+    }
+    if (an === bn) return 0;
+    if (an < bn) return -1;
+    return 1;
+  });
+
   out += `<div class="panel">\n`;
   out += `<h1>Propel</h1>\n`;
-  out += toHTMLIndex(docs);
+  out += toHTMLIndex(docs, largestPrefix);
   out += `</div>\n`;
 
   out += `<div class="doc-entries">\n`;
