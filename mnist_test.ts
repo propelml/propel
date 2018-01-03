@@ -2,7 +2,7 @@ import * as mnist from "./mnist";
 import { test } from "./test";
 import { assert, assertAllEqual, assertShapesEqual } from "./util";
 
-test(async function testMnistTrainSplit() {
+test(async function mnist_trainSplit() {
   const dataset = mnist.load("train", 256, false);
   const {images, labels} = await dataset.next();
   assertShapesEqual(images.shape, [256, 28, 28]);
@@ -17,7 +17,7 @@ test(async function testMnistTrainSplit() {
   console.log("TrainSplit ok");
 });
 
-test(async function testMnistTestSplit() {
+test(async function mnist_testSplit() {
   const dataset = mnist.load("test", 16, false);
   const {images, labels} = await dataset.next();
   assertShapesEqual(images.shape, [16, 28, 28]);

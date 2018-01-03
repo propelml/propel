@@ -2,7 +2,7 @@ import * as gendoc from "./gendoc";
 import { test } from "./test";
 import { assert } from "./util";
 
-test(function testSmoke() {
+test(async function gendoc_smoke() {
   const docs = gendoc.genJSON();
   assert(docs.length > 5);
   assert(docs.map(e => e.name).indexOf("Tensor") >= 0);
@@ -10,7 +10,7 @@ test(function testSmoke() {
   assert(html.length > 0);
 });
 
-test(function testMarkupDocStr() {
+test(async function gendoc_markupDocStr() {
   const docstr = [
     "hello",
     "",
@@ -33,7 +33,7 @@ test(function testMarkupDocStr() {
   assert(actual === expected);
 });
 
-test(function testMarkupDocStr2() {
+test(async function gendoc_markupDocStr2() {
   const docstr = [
     "like this:",
     "",
