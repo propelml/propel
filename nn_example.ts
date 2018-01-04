@@ -2,8 +2,11 @@
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
 import { $, OptimizerSGD, Params, Tensor } from "./api";
+import * as plt from "./matplotlib";
 import * as mnist from "./mnist";
+import { assert, IS_WEB } from "./util";
 
+const debug = true;
 let device;  // Set in train()
 
 // Hyperparameters
@@ -26,6 +29,8 @@ function inference(params: Params, images: Tensor) {
     // Initialize or get weights and biases.
     const w = params.randn(`w${i}`, [m, n], {device});
     const b = params.randn(`b${i}`, [n], {device});
+    assert(w.device === device);
+    assert(b.device === device);
     outputs = inputs.matmul(w).add(b);
     inputs = outputs.relu();
   }
@@ -42,11 +47,11 @@ function loss(images, labels, params: Params): Tensor {
 
 // Regularization loss. Computes L2 norm of all the params scaled by reg.
 function regLoss(params: Params): Tensor {
-  let s = $(0);
+  let s = 0;
   params.forEach((p) => {
-    s = s.add(p.square().reduceSum());
+    s = p.square().reduceSum().add(s);
   });
-  return s.mul(reg);
+  return $(s).mul(reg);
 }
 
 async function accuracy(params: Params, dataset,
@@ -65,30 +70,76 @@ async function accuracy(params: Params, dataset,
   return acc.getData()[0];
 }
 
-export async function train(useGPU = false, maxSteps = 10000) {
-  device = useGPU ? "GPU:0" : "CPU:0";
-  console.log("Load MNIST...");
-  const datasetTrain = mnist.load("train", batchSize, useGPU);
-  const datasetTest = mnist.load("test", batchSize, useGPU);
+export class Trainer {
+  datasetTrain: any;
+  datasetTest: any;
+  opt: OptimizerSGD;
+  durationSum = 0;
+  durationCount = 0;
+  lossSum = 0;
+  lossCount = 0;
 
-  const opt = new OptimizerSGD();
-  while (opt.steps < maxSteps) {
-    const {images, labels} = await datasetTrain.next();
+  constructor(useGPU = false) {
+    device = useGPU ? "GPU:0" : "CPU:0";
+    this.datasetTrain = mnist.load("train", batchSize, useGPU);
+    this.datasetTest = mnist.load("test", batchSize, useGPU);
+    this.opt = new OptimizerSGD();
+
+    if (IS_WEB) {
+      plt.register(() => {
+        return document.querySelector("#output");
+      });
+    }
+  }
+
+  readonly lossSteps: number[] = [];
+  readonly lossValues: number[] = [];
+
+  async step() {
+    const {images, labels} = await this.datasetTrain.next();
+    const start = new Date();
 
     // Take a step of SGD. Update the parameters opt.params.
-    const l = opt.step(learningRate, momentum, (params: Params) => {
+    const l = this.opt.step(learningRate, momentum, (params: Params) => {
       return loss(images, labels, params);
     });
 
-    if (opt.steps % 100 === 0) {
-      const trainAcc = await accuracy(opt.params, datasetTrain, 2 * batchSize);
-      console.log("step", opt.steps,
-                  "loss", l.toFixed(3),
-                  "train accuracy", (100 * trainAcc).toFixed(1));
+    this.lossSum += l;
+    this.lossCount += 1;
+
+    this.durationSum += ((new Date()).getTime() - start.getTime());
+    this.durationCount += 1;
+
+    // Check that the params are on the right device.
+    this.opt.params.forEach((t, name) => {
+      assert(t.device === device, `param ${name} is on device ${t.device}`);
+    });
+
+    if (this.opt.steps % 10 === 0) {
+      const lossAvg = this.lossSum / this.lossCount;
+      this.lossSum = this.lossCount = 0;
+      this.lossSteps.push(this.opt.steps);
+      this.lossValues.push(lossAvg);
+      const x = $(this.lossSteps);
+      const y = $(this.lossValues);
+      plt.plot(x, y);
     }
 
-    if (opt.steps % 1000 === 0) {
-      const testAcc = await accuracy(opt.params, datasetTest, 10 * batchSize);
+    if (this.opt.steps % 100 === 0) {
+      const rate = this.durationCount / (this.durationSum / 1000);
+      this.durationSum = this.durationCount = 0;
+
+      const trainAcc = await accuracy(this.opt.params, this.datasetTrain,
+                                      2 * batchSize);
+      console.log("step", this.opt.steps,
+                  "loss", l.toFixed(3),
+                  "train accuracy", (100 * trainAcc).toFixed(1),
+                  "steps/sec", rate.toFixed(1));
+    }
+
+    if (this.opt.steps % 1000 === 0) {
+      const testAcc = await accuracy(this.opt.params, this.datasetTest,
+                                     10 * batchSize);
       console.log("test accuracy", (100 * testAcc).toFixed(1));
     }
   }
