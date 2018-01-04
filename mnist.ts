@@ -65,31 +65,41 @@ async function fetch2(href): Promise<ArrayBuffer> {
   }
 }
 
-async function loadFile(href, split: string, images: boolean) {
+async function loadFile(href, split: string, isImages: boolean,
+                        device: string) {
   const ab = await fetch2(href);
   const i32 = new Int32Array(ab);
   const ui8 = new Uint8Array(ab);
 
-  const magicValue = images ? 2051 : 2049;
+  const magicValue = isImages ? 2051 : 2049;
   const numExamples = split === "train" ? 60000 : 10000;
   let i = 0;
   assertEqual(littleEndianToBig(i32[i++]), magicValue);
   assertEqual(littleEndianToBig(i32[i++]), numExamples);
 
-  if (images) {
+  let t;
+  if (isImages) {
     assertEqual(littleEndianToBig(i32[i++]), 28);
     assertEqual(littleEndianToBig(i32[i++]), 28);
+    // TODO Small performance hack here. DL has an expensive cast operation,
+    // and because nn_example uses float32 versions of mnist images, we cast
+    // the entire dataset here upfront.
+    // Ideally casts should be almost free, like they are in TF.
+    const tensorData = new Float32Array(ui8.slice(4 * i));
+    t = $(tensorData, {dtype: "float32", device});
+  } else {
+    const tensorData = new Int32Array(ui8.slice(4 * i));
+    t = $(tensorData, {dtype: "int32", device});
   }
-  const tensorData = new Int32Array(ui8.slice(4 * i));
-  const t = $(tensorData, {dtype: "int32"});
-  const shape = images ? [numExamples, 28, 28] : [numExamples];
+  const shape = isImages ? [numExamples, 28, 28] : [numExamples];
   return t.reshape(shape);
 }
 
 export function load(split: string, batchSize: number, useGPU = true) {
   const [labelFn, imageFn] = filenames(split);
-  const imagesPromise = loadFile(imageFn, split, true);
-  const labelsPromise = loadFile(labelFn, split, false);
+  const device = useGPU ? "GPU:0" : "CPU:0";
+  const imagesPromise = loadFile(imageFn, split, true, device);
+  const labelsPromise = loadFile(labelFn, split, false, device);
 
   const ds = {
     idx: 0,
@@ -108,13 +118,16 @@ export function load(split: string, batchSize: number, useGPU = true) {
               // Wrap around.
               ds.idx = 0;
             }
+            assert(ds.images.device === device);
+            assert(ds.labels.device === device);
+
             const imagesBatch = ds.images.slice([ds.idx, 0, 0],
                                                 [batchSize, -1, -1]);
             const labelsBatch = ds.labels.slice([ds.idx], [batchSize]);
             ds.idx += batchSize;
             resolve({
-              images: useGPU ? imagesBatch.gpu() : imagesBatch,
-              labels: useGPU ? labelsBatch.gpu() : labelsBatch,
+              images: imagesBatch,
+              labels: labelsBatch,
             });
           });
         }, 0);

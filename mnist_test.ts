@@ -5,9 +5,15 @@ import { assert, assertAllEqual, assertShapesEqual } from "./util";
 test(async function mnist_trainSplit() {
   const dataset = mnist.load("train", 256, false);
   const {images, labels} = await dataset.next();
+
   assertShapesEqual(images.shape, [256, 28, 28]);
-  console.log("images dtype", images.dtype);
-  // assert(images.dtype === "uint8");
+  // TODO Ultimately the mnist dataset should return uint8 tensors for the
+  // images. However due to a performance workaround, we are using float32
+  // for now.
+  assert(images.dtype === "float32");
+  assertAllEqual(images.reduceMax(), 255);
+  assertAllEqual(images.reduceMean(), 32.7086296081543);
+
   assertShapesEqual(labels.shape, [256]);
   // assert(labels.dtype === "uint8");
   // > hexdump deps/mnist/train-labels-idx1-ubyte | head -1
