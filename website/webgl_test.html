@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta id="viewport" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>NN Example</title>
+<script src="/dist/nn_example.js"> </script>
+</head>
+<body>
+  <h1>Training MNIST classifier</h1>
+
+  <div id="output">
+</body>
+<script>
+// FIXME Due to webpack nn_example is put into "propel"
+let Trainer = propel.Trainer;
+let useGPU = true;
+async function main() {
+  let trainer = new Trainer(useGPU);
+  while (trainer.opt.steps < 10000) {
+    await trainer.step();
+    let s = trainer.opt.steps;
+    if (s % 20 == 0) console.log("step", s);
+  }
+}
+main()
+</script>
+</html>

@@ -2,7 +2,7 @@ import { bo } from "./backend";
 import * as backprop from "./backprop";
 import { gradParams, ParamsFn } from "./backprop";
 import * as ops from "./ops";
-import { convert, Tensor } from "./tensor";
+import { convert, gc, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
@@ -220,37 +220,46 @@ export class OptimizerSGD {
   step(learningRate: number, momentum: number, lossFn: ParamsFn): number {
     const m = momentum;
     assert(0 <= m && m <= 1.0);
-    // Get gradient of objective using autograd.
-    // TODO it's possible that calling gradParams every step is killing the
-    // possibility of a good optimization in backprop. Re-evaluate later.
-    const gradFn = gradParams(lossFn);
-    // Forward/Backward pass
-    const [grads, loss] = gradFn(this.params);
-    assert(loss.rank === 0);
-    assert(grads instanceof Params);
+    let lossValue;
 
-    // TODO allow access to grads.
-    // this.grads = grads;
+    gc((keep) => {
+      // Get gradient of objective using autograd.
+      // TODO it's possible that calling gradParams every step is killing the
+      // possibility of a good optimization in backprop. Re-evaluate later.
+      const gradFn = gradParams(lossFn);
+      // Forward/Backward pass
+      const [grads, loss] = gradFn(this.params);
+      assert(loss.rank === 0);
+      assert(grads instanceof Params);
 
-    // Update each param tensor.
-    const updated = new Params();
-    grads.forEach((g, name) => {
-      const p = this.params.get(name);
-      let v = this.velocity.zeros(name, p.shape);
-      if (this.steps > 0) {
-        assertShapesEqual(p.shape, g.shape);
-        assertShapesEqual(p.shape, v.shape);
-      }
-      //  v = m * v - (1 - m) * g
-      // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
-      // 10% from g (grad).
-      v = this.velocity.set(name, v.mul(m).sub(g.mul(1 - m)));
-      // p += v * lr
-      updated.set(name, p.add(v.mul(learningRate)));
+      // TODO allow access to grads.
+      // this.grads = grads;
+
+      // Update each param tensor.
+      grads.forEach((g, name) => {
+        const p = this.params.get(name);
+        const v = this.velocity.zeros(name, p.shape);
+        if (this.steps > 0) {
+          assertShapesEqual(p.shape, g.shape);
+          assertShapesEqual(p.shape, v.shape);
+        }
+
+        // v = m * v - (1 - m) * g
+        // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
+        // 10% from g (grad).
+        v.assign(g.mul(1 - m).sub(v.mul(m)).neg());
+        keep(v);
+        assert(g.device === v.device);
+        // p += v * lr
+        p.assign(p.add(v.mul(learningRate)));
+        keep(p);
+      });
+
+      this.steps++;
+      lossValue = loss.cpu().getData()[0];
     });
-    this.params = updated;
-    this.steps++;
-    return loss.cpu().getData()[0];
+
+    return lossValue;
   }
 }
 
