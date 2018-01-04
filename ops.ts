@@ -249,7 +249,7 @@ export const square = defFW("square", (x) => {
 });
 defBW("square", (g, x) => {
   const two = convert(2, x);
-  return mul(g, mul(x, two));
+  return g.mul(x.mul(two));
 });
 
 export const sinh = defFW("sinh", (x) => {
