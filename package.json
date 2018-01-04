@@ -14,6 +14,7 @@
     "d3": "^4.11.0",
     "http-server": "^0.10.0",
     "node-fetch": "^1.7.3",
+    "parcel-bundler": "^1.4.1",
     "puppeteer": "^0.13.0",
     "seedrandom": "^2.4.3",
     "tar": "^4.0.2",
