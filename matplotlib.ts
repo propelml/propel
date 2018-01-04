@@ -1,7 +1,28 @@
 import * as d3 from "d3";
 import { $, Tensor } from "./api";
-import * as notebook from "./notebook";
 import { assert, assertEqual } from "./util";
+
+interface OutputHandler {
+  (): Element;
+}
+
+let h: OutputHandler;
+
+/** This function allows different systems to register the HTML divs that will
+ * produce output. It is used inside of notebook.ts but can be used by
+ * stand-alone pages for plotting.  Note currently there is only one global
+ * handler. It gets replaced it register is called twice.
+ */
+export function register(handler: OutputHandler): void {
+  if (h == null) {
+    console.warn("Warning replacing existing OutputHandler.");
+  }
+  h = handler;
+}
+
+export function outputEl(): Element {
+  return h();
+}
 
 const currentPlot = null;
 // TODO colors should match those used by the syntax highlighting.
@@ -61,11 +82,15 @@ function getLimits(lines): number[] {
 }
 
 function plotLines(data) {
-  const outputId = "#" + notebook.outputId();
+  const outputId_ = "#" + outputEl().id;
   // Make an SVG Container
   let width = 400;
   let height = 250;
-  const svg = d3.select(outputId).append("svg")
+
+  // No append.
+  d3.select(outputId_).select("svg").remove();
+
+  const svg = d3.select(outputId_).append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", width)
@@ -146,7 +171,7 @@ export function plot(...args) {
 }
 
 export function imshow(image: Tensor): void {
-  const output = notebook.outputEl();
+  const output = outputEl();
   assert(output != null);
   const canvas = document.createElement("canvas");
   // Assuming image shape is [3, height, width] for RGB.
