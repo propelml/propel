@@ -11,10 +11,13 @@ export type TensorLike = BasicTensor | Convertible;
 export type DeviceType = "CPU" | "GPU";
 
 // BasicTensor does not use backprop.
+// TODO rename BasicTensor to Storage like in pytorch
+// http://pytorch.org/docs/0.3.0/storage.html
 export interface BasicTensor {
   readonly shape: Shape;
   readonly dtype: DType;
   getData(): TypedArray;
+  dispose(): void;
 }
 
 // BackendOps do not use backprop.

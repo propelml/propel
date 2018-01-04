@@ -163,6 +163,12 @@ export class TensorTF implements types.BasicTensor {
     }
     return this.data;
   }
+
+  dispose(): void {
+    assert(this.handle != null);
+    binding.dispose(this.handle);
+    this.handle = null;
+  }
 }
 
 // TF has rather verbose device names like:
