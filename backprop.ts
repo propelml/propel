@@ -188,7 +188,7 @@ function imperativeGrad(target: Tensor,
     const outGrad = gradients.aggregate(op.outputIds[0]);
 
     log("backprop", tapeEntryToString(op));
-    log("- outGrad %s", outGrad.shape);
+    log("- outGrad %s", outGrad.shape, outGrad.device);
 
     const inGrads = getBackwardFuncs(op.name).map(
       (bwFunc: null | BWFunc, i): Tensor => {
@@ -204,7 +204,9 @@ function imperativeGrad(target: Tensor,
         }
       });
 
-    log("- inGrad shapes", inGrads.map((g) => g ? g.shape : null));
+    log("- inGrad", inGrads.map((g) => {
+      return g ? [g.device, g.shape] : null;
+    }));
 
     for (let i = 0; i < op.inputIds.length; i++) {
       const tid: null | number = op.inputIds[i];
