@@ -1,6 +1,6 @@
 // TensorFlow backend.
 import { bo, convertBasic } from "./backend";
-import { BindingInterface } from "./binding";
+import { BindingInterface, Handle } from "./binding";
 import * as types from "./types";
 import { assert, assertEqual } from "./util";
 
@@ -111,7 +111,7 @@ function floatSmall(v: number | number[], colocateWith?: TensorTF): TensorTF {
 }
 
 export class TensorTF implements types.BasicTensor {
-  readonly handle: BindingInterface["Handle"];
+  handle: null | Handle;
   private data?: types.TypedArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
@@ -127,7 +127,7 @@ export class TensorTF implements types.BasicTensor {
     return new TensorTF(h);
   }
 
-  constructor(handle: any) {
+  constructor(handle: Handle) {
     this.handle = handle;
   }
 
@@ -137,6 +137,10 @@ export class TensorTF implements types.BasicTensor {
 
   get dtype(): types.DType {
     return dtypeTF2Propel(binding.getDType(this.handle));
+  }
+
+  get device(): string {
+    return simplifyDeviceName(binding.getDevice(this.handle));
   }
 
   getData(): types.TypedArray {
@@ -176,7 +180,7 @@ export class OpsTF implements types.BackendOps {
   }
 
   getDevice(x: TensorTF): string {
-    return simplifyDeviceName(binding.getDevice(x.handle));
+    return x.device;
   }
 
   listDevices(): string[] {
