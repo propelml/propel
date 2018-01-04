@@ -53,8 +53,12 @@ function dtypeDL(propelDtype: types.DType): DTypeDL {
 export class TensorDL implements types.BasicTensor {
   readonly dtype: types.DType;
   readonly shape: types.Shape;
+  // We are aware that ndarray already has a math object on it.  We want more
+  // explicit control over how DL operates, plus ndarray.math is private. So we
+  // just make an extra reference to it here.
   readonly math: NDArrayMath;
   readonly ndarray: NDArray;
+  private isDisposed: boolean;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
                         dtype?: types.DType, device?: string): TensorDL {
@@ -74,10 +78,24 @@ export class TensorDL implements types.BasicTensor {
     this.shape = ndarray.shape;
     this.math = math;
     this.ndarray = ndarray;
+    this.isDisposed = false;
+    assert((this.ndarray as any).isDisposed === false);
   }
 
   getData(): types.TypedArray {
+    assert(!this.isDisposed);
     return this.ndarray.getValues();
+  }
+
+  dispose(): void {
+    // Currently this asserts that TensorDL should only have dispose() called
+    // once on it. However, there may be legitimate situations where calling
+    // dispose() twice could occur. Leaving it for now.
+    assert(!this.isDisposed);
+    if ((this.ndarray as any).isDisposed) {
+      this.ndarray.dispose();
+    }
+    this.isDisposed = true;
   }
 }
 

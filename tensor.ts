@@ -3,7 +3,7 @@ import { bo, convertBasic } from "./backend";
 import * as format from "./format";
 import * as ops from "./ops";
 import * as types from "./types";
-import { allFinite, assert } from "./util";
+import { allFinite, assert, assertShapesEqual } from "./util";
 
 export function convert(t: types.TensorLike,
                         opts?: types.TensorOpts): Tensor {
@@ -20,17 +20,46 @@ export function convert(t: types.TensorLike,
  * Propel.
  */
 export class Tensor implements types.BasicTensor {
-  readonly dtype: types.DType;
-  readonly shape: types.Shape;
-  readonly basic: types.BasicTensor;
+  /* TODO The basic property should be private. Probably better would be if
+   * Tensor was an interface.
+   * Users should not access the basic tensor.
+   * But it is mutable, and thus tensors are mutable.
+   */
+  basic: null | types.BasicTensor;
+
   private static nextId = 1;
   readonly id: number;
 
   constructor(t: types.BasicTensor) {
-    this.shape = t.shape;
-    this.dtype = t.dtype;
     this.basic = t;
     this.id = Tensor.nextId++;
+    track(this);
+  }
+
+  /** Manually collect garbage. This is required in some form or another
+   * when using the DL/WebGL backend, see also gc().
+   */
+  dispose(): void {
+    this.basic.dispose();
+    this.basic = null;
+    untrack(this);
+  }
+
+  /** In-place replacement of a tensor.
+   * The argument passed to assign is destroyed and cannot be used after this
+   * call. (FIXME this behavior is very aggressive.)
+   */
+  assign(t: Tensor): void {
+    // Do we want to relax any of these constraints?
+    // assert(t.device === this.device);
+    assertShapesEqual(t.shape, this.shape);
+    assert(t.dtype === this.dtype);
+
+    this.dispose();
+    this.basic = t.basic;
+    // It would be nice to not forcably destroy the argument here, but
+    // that would require reference counting basic.
+    t.basic = null;
   }
 
   // This is similar convert() - it turns TensorLike objects into Tensors - but
@@ -55,12 +84,16 @@ export class Tensor implements types.BasicTensor {
     return this.shape.length;
   }
 
-  private device_: string;
   get device(): string {
-    if (!this.device_) {
-      this.device_ = bo.getDevice(this.basic);
-    }
-    return this.device_;
+    return bo.getDevice(this.basic);
+  }
+
+  get dtype(): types.DType {
+    return this.basic.dtype;
+  }
+
+  get shape(): types.Shape {
+    return this.basic.shape;
   }
 
   toString(): string {
@@ -485,3 +518,73 @@ function softmaxHelper(t: Tensor, axis: number, op): Tensor {
   const result = op(t.reshape([-1, numClasses]));
   return result.reshape(origShape);
 }
+
+/* Manual memory management.
+ *  - WebGL textures are not garbage collected. Therefore we need to destory
+ *    them manually.
+ *  - Although TensorFlow tensors are properly GCed we can help by destroying
+ *    tensors we know will not be used again.
+ *  - Interally we will use this during backprop and each SGD step.
+ *  - Ideally this would not be exposed to the public API. But given the
+ *    state of WebGL it doesn't seem likely that we can completely abstract
+ *    away memory management.
+ */
+
+type GCScopeFn = (keep: (t: Tensor) => void) => void;
+
+export function gc(fn: GCScopeFn) {
+  const s = new GCScope();
+  scopes.push(s);
+  const keep = (t: Tensor): void => { s.keep(t); };
+  try {
+    fn(keep);
+  } finally {
+    assert(s === scopes.pop());
+    s.clean();
+  }
+}
+
+function track(t: Tensor) {
+  if (scopes.length > 0) {
+    scopes[scopes.length - 1].track(t);
+  }
+}
+
+function untrack(t: Tensor) {
+  for (const s of scopes) {
+    s.untrack(t);
+  }
+}
+
+class GCScope {
+  private keeping = new Set<Tensor>();
+  private tensors = new Set<Tensor>();
+
+  track(t: Tensor): void {
+    this.tensors.add(t);
+  }
+
+  untrack(t: Tensor): void {
+    this.tensors.delete(t);
+    this.keeping.delete(t);
+  }
+
+  keep(t: Tensor): void {
+    this.keeping.add(t);
+  }
+
+  clean(): void {
+    this.tensors.forEach(t => {
+      // If we're not keeping it, nor have we already
+      // disposed of it (which happens with assign)
+      // then we dispose.
+      if (!this.keeping.has(t) && t.basic != null) {
+        t.dispose();
+      }
+    });
+    this.tensors.clear();
+    this.keeping.clear();
+  }
+}
+
+const scopes: GCScope[] = [];
