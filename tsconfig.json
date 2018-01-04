@@ -4,7 +4,8 @@
     "sourceMap": true,
     "outDir": "dist/",
     "diagnostics": true,
-    "target": "es5"
+    "target": "es2017",
+    "module": "CommonJS"
   },
   "include": [ "**/*.ts" ],
   "exclude": [
