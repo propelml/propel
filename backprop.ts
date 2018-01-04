@@ -193,7 +193,7 @@ function imperativeGrad(target: Tensor,
     const inGrads = getBackwardFuncs(op.name).map(
       (bwFunc: null | BWFunc, i): Tensor => {
         if (bwFunc) {
-          return bwFunc(outGrad, ...op.savedForBackward);
+          return bwFunc(outGrad, ...op.savedForBackward || []);
         } else {
           // Null backwards function, return a zero tensor of the same shape and
           // dtype as the input.
