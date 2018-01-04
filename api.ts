@@ -201,7 +201,10 @@ export class Params {
 export class OptimizerSGD {
   steps: number;
   params: Params;
-  grads?: Params;
+
+  // TODO access to grads.
+  // grads?: Params;
+
   // TODO Design note. The name "Params" doesn't fit well with what velocity
   // is. Maybe "Params" should be named more generically, like
   // "NamedTensors".  But I prefer to have a more nuanced name than
@@ -223,9 +226,12 @@ export class OptimizerSGD {
     const gradFn = gradParams(lossFn);
     // Forward/Backward pass
     const [grads, loss] = gradFn(this.params);
-    this.grads = grads;
     assert(loss.rank === 0);
     assert(grads instanceof Params);
+
+    // TODO allow access to grads.
+    // this.grads = grads;
+
     // Update each param tensor.
     const updated = new Params();
     grads.forEach((g, name) => {
