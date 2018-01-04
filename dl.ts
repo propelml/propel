@@ -5,6 +5,9 @@
 import "./deps/deeplearnjs/src/math/backends/backend_cpu";
 import "./deps/deeplearnjs/src/math/backends/backend_webgl";
 
+import { ENV } from "./deps/deeplearnjs/src/environment";
+import { MathBackendWebGL, NDArrayMathGPU }
+ from "./deps/deeplearnjs/src/math/backends/backend_webgl";
 import { MatrixOrientation }
   from "./deps/deeplearnjs/src/math/backends/types/matmul";
 import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
@@ -24,6 +27,13 @@ const cpuMath = new NDArrayMath("cpu", false);
 // used for DL's tracing, which we don't use. However this note suggest
 // that it should be called https://git.io/vbbYO
 deviceRegistry.set("CPU:0", cpuMath);
+
+let gpuMath;
+const webglBackend = ENV.getBackend("webgl") as MathBackendWebGL;
+if (webglBackend) {
+  gpuMath = new NDArrayMath("webgl", false);
+  deviceRegistry.set("GPU:0", gpuMath);
+}
 
 // TODO Propel largely follows the dtype scheme layed out by DL, but
 // additonally adds the uint8 type. This function will map that down to int32.
@@ -74,15 +84,27 @@ export class TensorDL implements types.BasicTensor {
 export class OpsDL implements types.BackendOps {
 
   copyToDevice(x: TensorDL, device: string): TensorDL {
-    throw new Error("Not implemented.");
+    const nd = NDArray.like(x.ndarray);
+    if (device === "GPU:0") {
+      webglBackend.getTexture(nd.id);  // Causes upload to GPU.
+      return new TensorDL(nd, gpuMath);
+    } else if (device === "CPU:0") {
+      // Is this correct?
+      return new TensorDL(nd, cpuMath);
+    }
+    assert(false, "unreachable");
   }
 
   getDevice(x: TensorDL): string {
-    return "CPU:0"; // TODO
+    if (x.math === cpuMath) return "CPU:0";
+    if (x.math === gpuMath) return "GPU:0";
+    throw new Error("Unreachable");
   }
 
   listDevices(): string[] {
-    return [ "CPU:0" ]; // TODO
+    const d = ["CPU:0"];
+    if (webglBackend) d.push("GPU:0");
+    return d;
   }
 
   add(x: TensorDL, y: TensorDL): TensorDL {
@@ -382,7 +404,7 @@ export class OpsDL implements types.BackendOps {
   }
 
   cast(x: TensorDL, dtype: types.DType): TensorDL {
-    const nd = NDArray.make(x.shape, { values: x.getData() }, dtype as any);
+    const nd = x.ndarray.asType(dtype as any);
     return new TensorDL(nd, x.math);
   }
 
