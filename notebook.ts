@@ -215,6 +215,8 @@ window.onload = async() => {
   const newCell = document.getElementById("newCell");
   if (newCell) newCell.onclick = createCell;
 
+  matplotlib.register(outputEl);
+
   // Use CodeMirror to syntax highlight read-only <pre> elements.
   for (const p of Array.from(document.getElementsByTagName("pre"))) {
     _log("pre", p);
