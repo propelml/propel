@@ -21,7 +21,10 @@ export function $(t: types.TensorLike, args?: types.TensorOpts): Tensor {
   return convert(t, args);
 }
 
-/** Returns a list of available device names. EG ["CPU:0", "GPU:0", "GPU:1"].
+/** Returns a list of available device names.
+ *
+ *    import { listDevices } from "propel";
+ *    listDevices();
  */
 export function listDevices(): string[] {
   return bo.listDevices();
