@@ -2,11 +2,11 @@
 import { bo, convertBasic } from "./backend";
 import { BindingInterface, Handle } from "./binding";
 import * as types from "./types";
-import { assert, assertEqual } from "./util";
+import { assert, assertEqual, IS_WEB } from "./util";
 
 function maybeRequireBinding(): BindingInterface | null {
   // If we're in the browser, don't even attempt it.
-  if (typeof window !== "undefined") return null;
+  if (IS_WEB) return null;
 
   // This is to set the backend to either web or tensorflow.
   // Use this on the command line:
