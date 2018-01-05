@@ -410,13 +410,29 @@ export class OpsTF implements types.BackendOps {
   }
 
   slice(x: TensorTF, begin: number[], size: number[]): TensorTF {
+    let handle;
+    // It seems that if x.dtype is int32 this must be done on CPU:
+    // https://git.io/vNTSv
+    if (x.dtype === "int32" &&
+        !binding.getDevice(x.handle).endsWith("CPU:0")) {
+      console.warn("Slice on GPU not supported for int32. Copying to CPU.");
+      handle = binding.copyToDevice(ctx, x.handle, "CPU:0");
+    } else {
+      handle = x.handle;
+    }
+
     // Slice op expects begin and size to reside on CPU.
     const beginT = int32Small(begin);
     const sizeT = int32Small(size);
-    return execute0("Slice", [x, beginT, sizeT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+
+    const handles = [handle, beginT.handle, sizeT.handle];
+    const attrs = [
+      ["T", binding.ATTR_TYPE, binding.getDType(handle)],
       ["Index", binding.ATTR_TYPE, binding.TF_INT32],
-    ]);
+    ];
+    const r = binding.execute(ctx, "Slice", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
   }
 
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
