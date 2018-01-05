@@ -401,7 +401,7 @@ export let reshape = defFW("reshape", (x, newShape) => {
   saveForBackward(x.shape);
   return bo.reshape(x, newShape);
 });
-defBW("reshape", (g, origShape) => reshape(g, origShape));
+defBW("reshape", (g, origShape) => g.reshape(origShape));
 
 export let reduceLogSumExp = defFW("reduceLogSumExp",
   (x, axes: number[], keepDims = false) => {
