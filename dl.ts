@@ -92,7 +92,7 @@ export class TensorDL implements types.BasicTensor {
     // once on it. However, there may be legitimate situations where calling
     // dispose() twice could occur. Leaving it for now.
     assert(!this.isDisposed);
-    if ((this.ndarray as any).isDisposed) {
+    if (!(this.ndarray as any).isDisposed) {
       this.ndarray.dispose();
     }
     this.isDisposed = true;
