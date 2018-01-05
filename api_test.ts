@@ -25,7 +25,7 @@ interface ConvertFn {
 }
 
 function gpuConvert(x: TensorLike, args?: types.TensorOpts): Tensor {
-  return $(x, {dtype: args ? args.dtype : null, device: "GPU:0"});
+  return $(x, args).gpu();
 }
 
 // Allows tests to run on CPU:0 and GPU:0 (if available).
