@@ -37,9 +37,7 @@ function lookupMath(device: string): NDArrayMath {
 }
 
 const cpuMath = new NDArrayMath("cpu", false);
-// Is it necessary to call ENV.setMath(cpuMath) here? setMath seems to be only
-// used for DL's tracing, which we don't use. However this note suggest
-// that it should be called https://git.io/vbbYO
+ENV.setMath(cpuMath);
 deviceRegistry.set("CPU:0", cpuMath);
 
 let gpuMath;
@@ -287,7 +285,9 @@ export class OpsDL implements types.BackendOps {
     // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
     const resultValues = types.makeTypedArray(a.size, x.dtype);
     const values = a.getValues();
-    const result = NDArray.make(a.shape, {values: resultValues});
+    const dtype = dtypeDL(x.dtype);
+    const result = NDArray.make(a.shape, {values: resultValues},
+                                dtype) as typeof x.ndarray;
     for (let i = 0; i < a.size; ++i) {
       const loc = a.indexToLoc(i);
       // Reverse location.
@@ -358,7 +358,7 @@ export class OpsDL implements types.BackendOps {
 
   select(cond: TensorDL, t: TensorDL, f: TensorDL): TensorDL {
     const math = t.math;
-    const condArray = cond.ndarray.asType("bool");
+    const condArray = math.cast(cond.ndarray, "bool");
     const ndarray = math.select(condArray, t.ndarray, f.ndarray);
     return new TensorDL(ndarray, math);
   }
@@ -436,7 +436,7 @@ export class OpsDL implements types.BackendOps {
   }
 
   cast(x: TensorDL, dtype: types.DType): TensorDL {
-    const nd = x.ndarray.asType(dtype as any);
+    const nd = x.math.cast(x.ndarray, dtypeDL(dtype));
     return new TensorDL(nd, x.math);
   }
 
