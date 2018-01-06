@@ -1,8 +1,28 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
+.sans-serif {
+    font-family: -apple-system, BlinkMacSystemFont, 'avenir next', avenir, helvetica, 'helvetica neue', ubuntu, roboto, noto, 'segoe ui', arial, sans-serif;
+}
 
 body {
-  background-color: #fafafa;
-  font-family: 'Roboto', sans-serif;
+    background-color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'avenir next', avenir, helvetica, 'helvetica neue', ubuntu, roboto, noto, 'segoe ui', arial, sans-serif;
+    color: #4a4a4a;
+}
+
+body p {
+    font-size: 16px;
+    line-height: 32px;
+    color: #4a4a4a;
+}
+
+a {
+    color: #0000FF;
+    text-decoration: none;
+}
+
+a:hover a:focus a:active {
+    text-decoration: underline;
+    color: #0000FF;
 }
 
 .name,
@@ -13,187 +33,246 @@ body {
 pre,
 .output,
 code {
-  font-family: 'Roboto Mono', monospace;
+    font-family: 'Roboto Mono', monospace;
 }
 
 pre,
 .output {
-  white-space: pre-wrap;
-  word-break: keep-all;
+    white-space: pre-wrap;
+    word-break: keep-all;
 }
+
+.splash {
+    max-width: 100%;
+    padding-bottom: 32px;
+}
+
+.explainer {
+    width: 100%;
+    background-color: rgba(0, 0, 255, .025);
+    padding: 4em 0;
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.explainer-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+
+.explainer-content {
+    padding-bottom: 24px;
+    border-bottom: 1px solid #0000FF;
+    margin-bottom: 24px;
+}
+
+.footer {
+    width: 100%;
+    padding: 48px 0;
+    text-align: center;
+}
+
+.footer-inside {}
+
 
 /* Don't allow SVGs to get wider than the screen. */
-svg {
-  max-width: 100%;
-}
 
-header,
-.panel {
-  border-top: 2px solid rgb(253, 141, 60);
+svg {
+    max-width: 100%;
 }
 
 .doc-entry {
-  border-bottom: 1px solid #eee;
-  padding: 50px 10px;
+    padding: 0;
+    height: auto;
+    margin-top: 40px;
 }
 
 .doc-entry:target {
-  border-left: 2px solid rgb(31, 119, 180);
+    border-left: 2px solid rgb(31, 119, 180);
+}
+
+.snippet-title {
+    font-weight: 500;
+    margin-bottom: -8px;
 }
 
 header {
-  align-items: center;
-  background-color: #fff;
-  box-shadow: 0 0 2.25rem #9da5ab;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 10px;
+    align-items: center;
+    background-color: #fff;
+    box-shadow: inset 0 -1px 0 0 #0000FF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #4a4a4a;
+    background-image: url(logomark.svg);
+    background-repeat: no-repeat;
 }
 
 header * {
-  margin: 10px auto;
+    margin: 8px auto;
+}
+
+header p {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 100;
+    margin-top: -2px;
 }
 
 header .button {
-  display: inline-block;
-  margin-left: 10px;
-  margin-right: 10px;
-  padding: 0;
-  min-width: 150px;
+    display: inline-block;
+    margin-right: 10px;
+    padding: 0;
+    min-width: 150px;
+}
+
+header h1 {
+    margin-top: 40px;
+}
+
+.button,
+.button-primary,
+.header-button {
+    background-color: #0000FF;
+    border-color: #0000FF;
 }
 
 @media (min-width: 600px) {
-  .panel {
-    bottom: 0;
-    box-shadow: 0 0 2.25rem #9da5ab;
-    height: auto;
-    left: 0;
-    overflow-y: auto;
-    position: fixed;
-    top: 0;
-    width: 20%;
-  }
-
-  .doc-entries {
-    margin-left: 20%;
-    max-width: 800px;
-  }
-
-  .doc-entry {
-    padding-left: 50px;
-    padding-right: 50px;
-  }
+    .panel {
+        bottom: 0;
+        box-shadow: 0 0 2.25rem #9da5ab;
+        height: auto;
+        left: 0;
+        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        width: 20%;
+    }
+    .doc-entries {
+        margin-left: 0;
+        max-width: 800px;
+    }
+    .doc-entry {
+        margin-top: 40px;
+        padding-left: 0px;
+    }
+    .splash {
+        padding-top: 24px;
+        height: 90vh;
+    }
 }
 
 .notebook-cell {
-  margin: 0;
+    margin: 0;
 }
 
 .output {
-  border-left: 2px solid #f5f5f5;
-  padding: 10px;
-  white-space: pre-wrap;
+    border-left: 2px solid #f5f5f5;
+    padding: 10px;
+    white-space: pre-wrap;
 }
 
 .CodeMirror {
-  height: auto; /* Auto-resizing cells. */
-  padding: 10px;
-  background: #f5f5f5;
-  border: 0;
-  border-left: 2px solid #eee;
-  transition: border-left-color 1s;
+    height: auto;
+    /* Auto-resizing cells. */
+    padding: 10px;
+    background: #4a4a4a;
+    border: 0;
+    border-left: 2px solid #eee;
+    transition: border-left-color 1s;
 }
 
 .CodeMirror-focused {
-  /* Color matches D3 lines. */
-  border-left-color: rgb(31, 119, 180);
-  transition: border-left-color 0s;
+    /* Color matches D3 lines. */
+    border-left-color: rgb(0, 0, 255);
+    transition: border-left-color 0s;
 }
 
 .CodeMirror,
 .output,
 svg {
-  transition: border-left-color 0.5s;
-  transition: background-color 0.5s ease;
+    transition: border-left-color 0.5s;
+    transition: background-color 0.5s ease;
 }
 
 .notebook-cell-running .CodeMirror {
-  border-left-color: #dadaeb;
+    border-left-color: #dadaeb;
 }
 
 .notebook-cell-updating svg,
 .notebook-cell-updating .output {
-  background-color: #dadaeb;
+    background-color: #dadaeb;
 }
 
 button.run-button {
-  position: relative;
-  float: right;
-  bottom: 46px;
-  right: 8px;
-  opacity: 0.25;
-  transition: opacity 0.25s;
-  background: #fff;
-  z-index: 3;
+    position: relative;
+    float: right;
+    bottom: 46px;
+    right: 8px;
+    opacity: 0.25;
+    transition: opacity 0.25s;
+    background: #fff;
+    z-index: 3;
 }
 
 button.run-button:hover,
-.CodeMirror-focused + button.run-button {
-  opacity: 1;
+.CodeMirror-focused+button.run-button {
+    opacity: 1;
 }
 
 .newCell {
-  margin: 50px 10px;
+    margin: 50px 10px;
 }
 
 .panel {
-  background-color: #fff;
+    background-color: #fff;
 }
 
 .docindex {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 
 h1,
 .doxindex {
-  margin: 0 10px;
+    margin: 0;
+    font-weight: 500;
 }
 
 .docindex a {
-  color: inherit;
-  display: block;
-  text-decoration: none;
+    color: inherit;
+    display: block;
+    text-decoration: none;
 }
 
 .docindex li:hover {
-  color: rgb(31, 119, 180);
-  text-decoration: underline;
+    color: rgb(31, 119, 180);
+    text-decoration: underline;
 }
 
-.doc-entry > .name,
-.doc-entry > .typestr {
-  font-size: inherit;
-  font-weight: 900;
-  margin: 0;
+.doc-entry>.name,
+.doc-entry>.typestr {
+    font-size: inherit;
+    font-weight: 900;
+    margin: 0;
 }
 
 .doc-entry .arg-title {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .doc-entry ol {
-  margin: 0;
+    margin: 0;
 }
 
 .doc-entry .args {
-  list-style-type: none;
-  padding-left: 10px;
+    list-style-type: none;
+    padding-left: 10px;
 }
 
 .doc-entry .args .name::after {
-  content: ": ";
+    content: ": ";
 }
-

@@ -1,79 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Propel ML</title>
-  <meta id="viewport" name="viewport" content="width=device-width,
-    minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <link rel="stylesheet" href="normalize.css"/>
-  <link rel="stylesheet" href="skeleton.css"/>
-  <link rel="stylesheet" href="codemirror.css"/>
-  <link rel="stylesheet" href="syntax.css"/>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="dist/notebook.js"></script>
-  <link rel="icon" type="image/png" href="favicon.png">
+    <meta charset="utf-8">
+    <title>Propel ML</title>
+    <meta id="viewport" name="viewport" content="width=device-width,
+    minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="normalize.css" />
+    <link rel="stylesheet" href="skeleton.css" />
+    <link rel="stylesheet" href="codemirror.css" />
+    <link rel="stylesheet" href="syntax.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="dist/notebook.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
+
 <body>
-  <header>
-    <h1>Propel</h1>
-    <p>Mathematics for JavaScript</p>
-    <div>
-      <a class="button button-primary" href="docs.html">API Ref</a>
-      <a class="button button-primary" href="notebook.html">Notebook</a>
-    </div>
-  </header>
-  <div class="doc-entries">
-    <div class="doc-entry">
+    <section class="splash">
+        <header class="container">
+            <div class="one-half column">
+                <h1>Propel</h1>
+                <p>Mathematics for JavaScript</p>
+                <div>
+                    <a class="button button-primary header-button" href="docs.html">API Ref</a>
+                    <a class="button button-primary header-button" href="notebook.html">Notebook</a>
+                </div>
+            </div>
+        </header>
+        <div class="container">
+            <div class="one-half column doc-entry">
 
-  <p>In 2018, JavaScript is a first class language. It
-  <a href="https://benchmarksgame.alioth.debian.org/u64q/compare.php?lang=node&amp;lang2=python3">runs
-  everywhere</a>, it
-  <a href="https://www.quora.com/Is-JavaScript-v8-faster-than-Python">outperforms
-  other dynamic languages</a>,
-  and <a href="https://www.typescriptlang.org/">has a beautiful modern type
-  system</a>.
+                <p>In 2018, JavaScript is a first class language. It
+                    <a href="https://benchmarksgame.alioth.debian.org/u64q/compare.php?lang=node&amp;lang2=python3">runs everywhere
+          </a>, it
+                    <a href="https://www.quora.com/Is-JavaScript-v8-faster-than-Python">outperforms other dynamic languages</a>, and
+                    <a href="https://www.typescriptlang.org/">has a beautiful modern type system
+          </a>.
 
-  <p><b>JavaScript deserves to have a first class mathematics framework.</b>
-  This project intends to deliver that, with a special emphasis on
-  machine learning.
-
-  <p>Use it in Node:</p>
-  <pre>npm install propel
+                    <p>
+                        <b>JavaScript deserves to have a first class mathematics framework.</b> This project intends to deliver that, with a special emphasis on machine learning.</p>
+            </div>
+            <div class="doc-entry one-half column">
+                <p class="snippet-title">Use it in Node:</p>
+                <pre>npm install propel
 import { $ } from "propel";</pre>
-  <p>Use it in a browser:</p>
-  <pre lang="htmlmixed">&lt;script src="//propelml.org/propel-1.0.min.js"&gt;&lt;/script&gt;</pre>
+                <p class="snippet-title">Use it in a browser:</p>
+                <pre lang="htmlmixed">&lt;script src="propel-1.js"&gt;&lt;/script&gt;</pre>
+            </div>
+        </div>
+    </section>
+    <section class="explainer">
+        <div class="container explainer-inner">
+            <div class="one-half column">
+                <p><span style="font-weight:700;">Propel</span> provides a familiar API to those used to doing scientific programming in Python. However Propel is carefully crafted to the JavaScript environment.</p>
 
-  <p>Propel provides a familiar API to those used to doing scientific
-  programming in Python. However Propel is
-  carefully crafted to the JavaScript environment.
+                <p>Propel runs run both in the browser and natively from Node. In both environment Propel is able to use GPU hardware for computations. In the browser it utilizies WebGL and on Node it uses TensorFlow's
+                    <a href="https://www.tensorflow.org/install/install_c">C API</a>.</p>
+            </div>
+        </div>
+        <div class="container explainer-inner">
+            <div class="one-half column">
+                <p>Propel embraces imperative style ML. To achieve this, Propel provides a general purpose "gradient function" (implemented with backprop) on which all sorts of variants of stochastic gradient decent are built.
 
-  <p>Propel runs run both in the
-  browser and natively from Node.  In both environment Propel is able to use
-  GPU hardware for computations.  In the browser it utilizies WebGL and on Node
-  it uses
-  TensorFlow's <a href="https://www.tensorflow.org/install/install_c">C API</a>.
-
-  <p>Propel embraces imperative style ML.
-  To achieve this, Propel provides a general purpose "gradient function"
-  (implemented with backprop) on which all sorts of variants of stochastic
-  gradient decent are built.
-
-<script type="notebook">
-import { grad, linspace } from "propel";
-// TODO import { plot } from "propel";
-// Remove matplotlib library.
-import { plot } from "matplotlib";
-f = x => x.tanh();
-x = linspace(-4, 4, 200);
-plot(x, f(x),
-     x, grad(f)(x),
-     x, grad(grad(f))(x),
-     x, grad(grad(grad(f)))(x),
-     x, grad(grad(grad(grad(f))))(x))
-</script>
-
-        <p><a href="references.html">References</a>.</p>
+                    <script type="notebook">
+                        import { grad, linspace } from "propel";
+                    </script>
+            </div>
+        </div>
+    </section>
+    <section class="footer">
+        <p>
+            <a href="references.html">References</a></p>
+        <p>📈 📉</p>
+    </section>
     </div>
-  </div>
+    </div>
 </body>
+
 </html>
