@@ -1,8 +1,49 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
+.sans-serif {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'avenir next',
+    avenir,
+    helvetica,
+    'helvetica neue',
+    ubuntu,
+    roboto,
+    noto,
+    'segoe ui',
+    arial,
+    sans-serif;
+}
+
 body {
-  background-color: #fafafa;
-  font-family: 'Roboto', sans-serif;
+  background-color: #e4e4ea;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'avenir next',
+    avenir,
+    helvetica,
+    'helvetica neue',
+    ubuntu,
+    roboto,
+    noto,
+    'segoe ui',
+    arial,
+    sans-serif;
+  color: #4a4a4a;
+}
+
+body p {
+  font-size: 16px;
+  line-height: 32px;
+  color: #4a4a4a;
+  margin: 16px 12px;
+}
+
+a {
+  color: #00f;
+  text-decoration: none;
 }
 
 .name,
@@ -22,67 +63,224 @@ pre,
   word-break: keep-all;
 }
 
+.container {
+  padding: 0;
+}
+
+.splash {
+  max-width: 100%;
+  padding-bottom: 32px;
+  background-color: #e4e4ea;
+}
+
+.explainer {
+  width: 100%;
+  background-color: #f0f0f7;
+  padding: 4em 0;
+  border-top: 1px solid #cbcbd0;
+  border-bottom: 1px solid #cbcbd0;
+}
+
+.explainer-inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+}
+
+.explainer-content {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #00f;
+  margin-bottom: 24px;
+}
+
+.footer {
+  width: 100%;
+  padding: 48px 0;
+  text-align: center;
+  background-color: #fff;
+}
+
 /* Don't allow SVGs to get wider than the screen. */
+
 svg {
   max-width: 100%;
 }
 
-header,
-.panel {
-  border-top: 2px solid rgb(253, 141, 60);
+h1,
+.doxindex {
+  margin: 0;
+  font-weight: 500;
+}
+
+.doc-entries {
+  overflow-x: hidden;
+  background-color: #f0f0f7;
 }
 
 .doc-entry {
-  border-bottom: 1px solid #eee;
-  padding: 50px 10px;
+  padding: 32px 0 16px 0;
+  height: auto;
+  padding-left: 0;
+  border-top: 1px solid #cbcbd0;
 }
 
 .doc-entry:target {
-  border-left: 2px solid rgb(31, 119, 180);
+  background-color: #fafaff;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  border-left: 1px solid #00f;
+}
+
+.snippet-title {
+  font-weight: 500;
+  margin-bottom: -8px;
+}
+
+.button,
+.header-button,
+.button-primary {
+  background-color: #00f;
+  border-color: #00f;
 }
 
 header {
   align-items: center;
-  background-color: #fff;
-  box-shadow: 0 0 2.25rem #9da5ab;
+  background-color: #e4e4ea;
+  box-shadow: inset 0 -1px 0 0 #4a4a4a;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 10px;
+  color: #4a4a4a;
 }
 
 header * {
-  margin: 10px auto;
+  margin: 8px auto;
+}
+
+header p {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 100;
+  margin-top: -2px;
 }
 
 header .button {
   display: inline-block;
-  margin-left: 10px;
   margin-right: 10px;
   padding: 0;
   min-width: 150px;
 }
 
+header h1 {
+  margin: 40px 0 0 12px;
+}
+
+.nav-buttons {
+  text-align: center;
+}
+
+.splash header {
+  background-image: url(logomark.svg);
+  background-repeat: no-repeat;
+}
+
+.panel {
+  bottom: 0;
+  height: auto;
+  left: 0;
+  top: 0;
+  width: auto;
+  padding: 16px 12px 32px 8px;
+  background-color: #e4e4ea;
+}
+
+.panel h1 {
+  font-size: 24px;
+  line-height: 32px;
+  border-bottom: 1px solid #4a4a4a;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  letter-spacing: 0.1px;
+}
+
+.doc-entry > .typestr {
+  font-size: 14px;
+  line-height: 20px;
+  color: #777;
+  letter-spacing: 0.2px;
+  font-weight: 200;
+  margin-bottom: 16px;
+  padding: 0 0 12px 12px;
+}
+
+@media (min-width: 1440px) {
+  .splash {
+    height: 800px;
+  }
+}
+
+@media (max-width: 960px) {
+  .splash {
+    padding-top: 0;
+  }
+}
+
 @media (min-width: 600px) {
+  .nav-buttons {
+    text-align: left;
+    padding-left: 12px;
+  }
+
   .panel {
     bottom: 0;
-    box-shadow: 0 0 2.25rem #9da5ab;
     height: auto;
     left: 0;
     overflow-y: auto;
     position: fixed;
     top: 0;
-    width: 20%;
+    width: 240px;
+    padding: 16px 12px 32px 8px;
+    background-color: #e4e4ea;
+  }
+
+  .panel h1 {
+    font-size: 24px;
+    line-height: 32px;
+    border-bottom: 1px solid #4a4a4a;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   .doc-entries {
-    margin-left: 20%;
-    max-width: 800px;
+    margin-left: 244px;
+    padding-left: 16px;
+    max-width: auto;
   }
 
-  .doc-entry {
-    padding-left: 50px;
-    padding-right: 50px;
+  .docstr,
+  .arg-title,
+  .args {
+    padding-left: 16px;
+  }
+
+  .doc-entry > .typestr {
+    font-size: 14px;
+    line-height: 24px;
+    color: #777;
+    letter-spacing: 0.2px;
+    font-weight: 200;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .args {
+    list-style-type: none;
+    padding-left: 16px;
+  }
+
+  .splash {
+    height: 80vh;
   }
 }
 
@@ -91,23 +289,26 @@ header .button {
 }
 
 .output {
-  border-left: 2px solid #f5f5f5;
   padding: 10px;
   white-space: pre-wrap;
+  background-color: #cbcbd0;
+  margin: 0 auto;
 }
 
 .CodeMirror {
-  height: auto; /* Auto-resizing cells. */
+  height: auto;
+
+  /* Auto-resizing cells. */
   padding: 10px;
-  background: #f5f5f5;
+  background: #283646;
   border: 0;
-  border-left: 2px solid #eee;
   transition: border-left-color 1s;
+  color: #ddd;
 }
 
 .CodeMirror-focused {
   /* Color matches D3 lines. */
-  border-left-color: rgb(31, 119, 180);
+  border-left-color: rgb(0, 0, 255);
   transition: border-left-color 0s;
 }
 
@@ -124,7 +325,7 @@ svg {
 
 .notebook-cell-updating svg,
 .notebook-cell-updating .output {
-  background-color: #dadaeb;
+  background-color: #cbcbd0;
 }
 
 button.run-button {
@@ -147,25 +348,10 @@ button.run-button:hover,
   margin: 50px 10px;
 }
 
-.panel {
-  background-color: #fff;
-}
-
 .docindex {
   list-style-type: none;
   margin: 0;
   padding: 0;
-}
-
-h1,
-.doxindex {
-  margin: 0 10px;
-}
-
-.docindex a {
-  color: inherit;
-  display: block;
-  text-decoration: none;
 }
 
 .docindex li:hover {
@@ -173,11 +359,13 @@ h1,
   text-decoration: underline;
 }
 
-.doc-entry > .name,
-.doc-entry > .typestr {
-  font-size: inherit;
-  font-weight: 900;
+.doc-entry > .name {
+  font-size: 20px;
+  color: #00f;
+  letter-spacing: 0.2px;
+  font-weight: 300;
   margin: 0;
+  padding: 12px 0 8px 12px;
 }
 
 .doc-entry .arg-title {
@@ -185,15 +373,39 @@ h1,
 }
 
 .doc-entry ol {
-  margin: 0;
-}
-
-.doc-entry .args {
-  list-style-type: none;
-  padding-left: 10px;
+  margin: 0 16px;
 }
 
 .doc-entry .args .name::after {
   content: ": ";
 }
 
+/* notebook */
+
+.nb-entry {
+  padding: 24px 0;
+  border-bottom: 1px solid #cbcbd0;
+}
+
+.nb-entry:last-child {
+  border-bottom: none;
+}
+
+.nb-footer {
+  text-align: center;
+}
+
+#newCell {
+  margin: 24px auto;
+  width: 100%;
+}
+
+::selection {
+  background: #00f;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: #00f;
+  color: #fff;
+}
