@@ -102,8 +102,8 @@ function plotLines(data) {
   const outputId_ = "#" + el.id;
 
   // Make an SVG Container
-  let width = 400;
-  let height = 250;
+  let width = 440;
+  let height = 300;
 
   // No append.
   d3.select(outputId_).select("svg").remove();
@@ -145,7 +145,7 @@ function plotLines(data) {
     .append("path")
     .attr("d", line as any)
     .style("fill", "none")
-    .style("stroke-width", "1px")
+    .style("stroke-width", "2px")
     .style("stroke", (d, i) => {
       return color(i as any);
     });
