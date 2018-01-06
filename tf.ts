@@ -436,12 +436,28 @@ export class OpsTF implements types.BackendOps {
   }
 
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
+    // Reshape, like Slice, does not have an int32 GPU implementation
+    // https://git.io/vNTd5
+    let handle;
+    if (x.dtype === "int32" &&
+        !binding.getDevice(x.handle).endsWith("CPU:0")) {
+      console.warn("Reshape on GPU not supported for int32. Copying to CPU.");
+      handle = binding.copyToDevice(ctx, x.handle, "CPU:0");
+    } else {
+      handle = x.handle;
+    }
+
     // Reshape op expects newShape to reside on CPU.
     const shapeT = int32Small(newShape);
-    return execute0("Reshape", [x, shapeT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tshape", binding.ATTR_TYPE, binding.getDType(shapeT.handle)],
-    ]);
+
+    const handles = [handle, shapeT.handle];
+    const attrs = [
+      ["T", binding.ATTR_TYPE, binding.getDType(handle)],
+      ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
+    ];
+    const r = binding.execute(ctx, "Reshape", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
   }
 
   softmax(x: TensorTF): TensorTF {

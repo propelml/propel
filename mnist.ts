@@ -92,7 +92,10 @@ async function loadFile(href, split: string, isImages: boolean,
     t = $(tensorData, {dtype: "int32", device});
   }
   const shape = isImages ? [numExamples, 28, 28] : [numExamples];
-  return t.reshape(shape);
+
+  // TODO the copy() below is to work around a bug where reshaping a int32
+  // tensor on TF/GPU must be copied to CPU. It should be removed in the limit.
+  return t.reshape(shape).copy(device);
 }
 
 export function load(split: string, batchSize: number, useGPU = true) {
