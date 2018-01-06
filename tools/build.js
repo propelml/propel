@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const run = require('./run');
+const { spawnSync: spawn, execSync: exec } = require("child_process");
 
 const binDir = path.dirname(process.execPath);
 const nodeDir = path.dirname(binDir);
@@ -74,5 +75,28 @@ if (process.platform === "darwin" || process.platform === "linux") {
   run.sh(`clang ${cflags}`);
   run.sh(`clang ${ldflags}`);
 } else if (process.platform === "win32") {
-  throw new Error("Implement me");
+  process.chdir(buildDir);
+  exec(`node "${__dirname}/extract_dll.js" Release`);
+  const cc = exec("where cl.exe clang-cl.exe", { encoding: "utf8" })
+    .replace(/\r?\n.*/, "");
+  const cmd = `
+    "${cc}"
+    "..\\binding.cc"
+    /I "C:\\Users\\BertBelder\\.node-gyp\\8.9.0\\include\\node"
+    /I "..\\deps\\libtensorflow\\include"
+    /D COMPILER_MSVC
+    /D BUILDING_NODE_EXTENSION
+    /EHsc
+    /Ox
+    /link
+      "C:\\Users\\BertBelder\\.node-gyp\\8.9.0\\x64\\node.lib"
+      "Release\\obj\\tensorflow-binding\\tensorflow.lib"
+      /DLL
+      /OUT:"Release\\tensorflow-binding.node"
+    `.replace(/\s*\n\s*/g, " ");
+  console.log(cmd);
+  const { status: r } = spawn(cmd, { shell: true, stdio: "inherit" });
+  if (r !== 0 && r !== 2) process.exit(r);
 }
+
+require("../build/Release/tensorflow-binding.node");
