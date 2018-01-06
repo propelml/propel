@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <meta id="viewport" name="viewport" content="width=device-width,
     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <script src="dist/notebook.js"></script>
@@ -12,9 +13,18 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Propel Notebook</title>
 </head>
-<body>
-  <div class="doc-entries">
-    <div id=cells class="doc-entry">
+<body class="notebook">
+
+    <header class="container">
+      <div class="one-half column">
+        <p><a href="index.html">← Propel</a></p>
+<h1>Notebook</h1>
+</div>
+</header>
+<div class="container">
+
+<div id="cells"> <!-- #cells is magical. Don't remove. -->
+
 <script type="notebook">
 import { $ } from "propel";
 t = $([[2, 3], [30, 20]])
@@ -47,11 +57,14 @@ plot(x, f(x))
 plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 </script>
-    </div> <!-- #cells -->
-    <div class="row">
-      <button id="newCell">New Cell</button>
-    </div>
-  </div> <!-- container -->
+
+</div> <!-- #cells -->
+
+<div class="container nb-footer">
+  <button id="newCell">New Cell</button>
+</div>
+
+</div> <!-- container -->
 
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
