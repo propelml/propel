@@ -239,7 +239,7 @@ export class OpsTF implements types.BackendOps {
     if (value.shape.length !== 0) {
       throw new Error("Fill value must be a scalar.");
     }
-    const shapeT = int32Small(shape, value);
+    const shapeT = int32Small(shape);
     return execute1("Fill", [shapeT, value], value.dtype);
   }
 
