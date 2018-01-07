@@ -544,7 +544,7 @@ function softmaxHelper(t: Tensor, axis: number, op): Tensor {
  *    away memory management.
  */
 
-type GCScopeFn = (keep: (t: Tensor) => void) => void;
+export type GCScopeFn = (keep: (t: Tensor) => void) => void;
 
 export function gc(fn: GCScopeFn) {
   const s = new GCScope();
