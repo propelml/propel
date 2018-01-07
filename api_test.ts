@@ -4,7 +4,7 @@ import * as api from "./api";
 import { test } from "./test";
 import * as types from "./types";
 import { assert, assertAllClose, assertAllEqual, assertClose,
-  assertShapesEqual } from "./util";
+  assertShapesEqual, IS_NODE } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -1024,3 +1024,11 @@ test(async function api_neuralNet() {
     }
   }
 });
+
+if (IS_NODE) {
+  test(async function api_inspect() {
+    const t = $([1, 2, 3]);
+    const actual = require("util").inspect(t);
+    assert("[ 1.,  2.,  3.]" === actual);
+  });
+}

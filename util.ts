@@ -8,6 +8,13 @@ export const IS_WEB = typeof window !== "undefined";
 export const IS_NODE = !IS_WEB;
 
 if (IS_NODE) {
+  // This is currently node.js specific.
+  // TODO: move to api.js once it can be shared with the browser.
+  const s = require("util").inspect.custom;
+  Tensor.prototype[s] = function(depth, opts) {
+    return this.toString();
+  };
+
   process.on("unhandledRejection", (error) => {
     throw error;
   });
