@@ -15,7 +15,7 @@
 import { $, Tensor } from "./api";
 import { assert, assertEqual, IS_WEB, log } from "./util";
 
-interface Elements {
+export interface Elements {
   images: Tensor;
   labels: Tensor;
 }

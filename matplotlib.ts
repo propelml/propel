@@ -16,7 +16,7 @@ import * as d3 from "d3";
 import { $, Tensor } from "./api";
 import { assert, assertEqual } from "./util";
 
-interface OutputHandler {
+export interface OutputHandler {
   (): Element;
 }
 
