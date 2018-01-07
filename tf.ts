@@ -34,6 +34,7 @@ function maybeRequireBinding(): BindingInterface | null {
   // When using ts-node, we are in the root dir, after compiling to
   // javascript, we are in the dist dir.
   const toAttempt = [
+    "./tensorflow-binding.node",
     "../build/Debug/tensorflow-binding.node",
     "../build/Release/tensorflow-binding.node",
     "./build/Debug/tensorflow-binding.node",

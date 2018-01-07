@@ -1,15 +1,12 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "diagnostics": false,
     "lib": ["es5", "dom", "es2015"],
-    "sourceMap": true,
+    "module": "commonjs",
     "outDir": "dist/",
-    "diagnostics": true,
-    "target": "es2017",
-    "module": "CommonJS"
+    "sourceMap": true,
+    "target": "es2017"
   },
-  "include": [ "**/*.ts" ],
-  "exclude": [
-    "node_modules",
-    "deps"
-  ]
+  "include": ["api.ts", "*_test.ts", "test_*.ts"]
 }
