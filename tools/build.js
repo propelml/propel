@@ -77,11 +77,16 @@ if (process.platform === "darwin" || process.platform === "linux") {
 } else if (process.platform === "win32") {
   process.chdir(buildDir);
   exec(`node "${__dirname}/extract_dll.js" Release`);
+  exec(`node "${__dirname}/generate_def.js" ` +
+       `../deps/libtensorflow/include/tensorflow/c/c_api.h ` +
+       `../deps/libtensorflow/include/tensorflow/c/eager/c_api.h ` +
+       `>tensorflow.def`);
   const cc = exec("where cl.exe clang-cl.exe", { encoding: "utf8" })
     .replace(/\r?\n.*/, "");
   const cmd = `
     "${cc}"
     "..\\binding.cc"
+    "tensorflow.def"
     /I "C:\\Users\\BertBelder\\.node-gyp\\8.9.0\\include\\node"
     /I "..\\deps\\libtensorflow\\include"
     /D COMPILER_MSVC
@@ -90,7 +95,6 @@ if (process.platform === "darwin" || process.platform === "linux") {
     /Ox
     /link
       "C:\\Users\\BertBelder\\.node-gyp\\8.9.0\\x64\\node.lib"
-      "Release\\obj\\tensorflow-binding\\tensorflow.lib"
       /DLL
       /OUT:"Release\\tensorflow-binding.node"
     `.replace(/\s*\n\s*/g, " ");
