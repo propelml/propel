@@ -44,32 +44,16 @@ function toTagName(s: string): string {
   return s.replace(/[.$]/g, "_");
 }
 
-function splitName(name): [string, string] {
-  const [a, b] = name.split(".", 2);
-  if (b) {
-    return [a, b];
-  } else {
-    return [null, a];
-  }
+function startsWithUpperCase(s: string): boolean {
+  return s[0].toLowerCase() !== s[0];
 }
 
-function pad(name: string, size: number): string {
-  // Requires monospaced font.
-  return "&nbsp;".repeat(size - name.length) + name;
-}
-
-function toHTMLIndex(docs: DocEntry[], largestPrefix: number): string {
+function toHTMLIndex(docs: DocEntry[]): string {
   let out = `<ol class="docindex">\n`;
   for (const entry of docs) {
     const tag = toTagName(entry.name);
-    const [prefix, name] = splitName(entry.name);
-    let outName;
-    if (prefix != null) {
-      outName = pad(prefix, largestPrefix) + "." + name;
-    } else {
-      outName = pad("", largestPrefix + 1) + name;
-    }
-    out += `<li><a href="#${tag}" class=name>${outName}</a></li>\n`;
+    const classes = "name " + entry.kind;
+    out += `<li><a href="#${tag}" class="${classes}">${entry.name}</a></li>\n`;
   }
   out += `</ol>\n`;
   return out;
@@ -186,23 +170,21 @@ export function htmlEntry(entry: DocEntry): string {
 export function toHTML(docs: DocEntry[]): string {
   let out = "";
 
-  let largestPrefix = 0;
   docs = docs.sort((a, b) => {
-    const [aPrefix, an]  = splitName(a.name);
-    const [bPrefix, bn] = splitName(b.name);
-
-    // Only necessary to do this on the a's because of how sorting works.
-    if (aPrefix && aPrefix.length > largestPrefix) {
-      largestPrefix = aPrefix.length;
+    if (!startsWithUpperCase(a.name) && startsWithUpperCase(b.name)) {
+      return -1;
     }
-    if (an === bn) return 0;
-    if (an < bn) return -1;
-    return 1;
+    if (startsWithUpperCase(a.name) && !startsWithUpperCase(b.name)) {
+      return 1;
+    }
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
   });
 
   out += `<div class="panel">\n`;
   out += `<h1>Propel</h1>\n`;
-  out += toHTMLIndex(docs, largestPrefix);
+  out += toHTMLIndex(docs);
   out += `</div>\n`;
 
   out += `<div class="doc-entries">\n`;
