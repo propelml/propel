@@ -34,8 +34,8 @@ export function register(handler: OutputHandler): void {
   h = handler;
 }
 
-export function outputEl(): Element {
-  return h();
+export function outputEl(): null | Element {
+  return h ? h() : null;
 }
 
 const currentPlot = null;
@@ -96,7 +96,11 @@ function getLimits(lines): number[] {
 }
 
 function plotLines(data) {
-  const outputId_ = "#" + outputEl().id;
+  const el = outputEl();
+  // Don't try to plot if there's not output registered.
+  if (!el) return;
+  const outputId_ = "#" + el.id;
+
   // Make an SVG Container
   let width = 400;
   let height = 250;
@@ -186,7 +190,7 @@ export function plot(...args) {
 
 export function imshow(image: Tensor): void {
   const output = outputEl();
-  assert(output != null);
+  if (!output) return;
   const canvas = document.createElement("canvas");
   // Assuming image shape is [3, height, width] for RGB.
   // [height, width] for monochrome.

@@ -278,3 +278,5 @@ export class OptimizerSGD {
 }
 
 export { backend } from "./backend";
+
+export { plot, imshow } from "./matplotlib";
