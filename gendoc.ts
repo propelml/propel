@@ -142,8 +142,7 @@ function htmlBody(inner: string): string {
   <script src="dist/notebook.js"></script>
   <script type=notebook>
   // Common imports for the docs.
-  import { $, grad, linspace } from "propel";
-  import { plot } from "matplotlib";
+  import { $, grad, linspace, plot } from "propel";
   </script>
 </head>
   <body>${inner}</body>
