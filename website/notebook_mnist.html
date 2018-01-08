@@ -16,8 +16,7 @@
     <div id=cells>
 
 <script type="notebook">
-import { load } from "mnist";
-import { imshow } from "matplotlib";
+import { load, imshow } from "mnist";
 
 datasetTrain = load("train", 256, false);
 datasetTrain.next().then(({images, labels}) => {

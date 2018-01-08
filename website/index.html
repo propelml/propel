@@ -58,10 +58,7 @@ import { $ } from "propel";</pre>
   gradient decent are built.
 
 <script type="notebook">
-import { grad, linspace } from "propel";
-// TODO import { plot } from "propel";
-// Remove matplotlib library.
-import { plot } from "matplotlib";
+import { grad, linspace, plot } from "propel";
 f = x => x.tanh();
 x = linspace(-4, 4, 200);
 plot(x, f(x),

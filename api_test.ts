@@ -1046,3 +1046,13 @@ if (IS_NODE) {
     assert("[ 1.,  2.,  3.]" === actual);
   });
 }
+
+test(async function api_plotSmoke() {
+  // Just make sure we can import and call some matplotlib function without
+  // crashing.
+  const x = $([1, 2, 3]);
+  const y = $([4, 5, 6]);
+  api.plot(x, y);
+  const im = zeros([9, 9]);
+  api.imshow(im);
+});
