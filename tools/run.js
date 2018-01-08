@@ -18,6 +18,7 @@ function sh(cmd, env = {}) {
   if (exe === "node") exe = process.execPath;
   let r = spawnSync(exe, args, {
     stdio: 'inherit',
+    env: { ...process.env, ...env }
   });
   if (r.error) throw r.error;
   if (r.status) {
