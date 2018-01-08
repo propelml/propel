@@ -16,17 +16,17 @@
 
 // These files call a top-level registerBackend, which must be run before doing
 // any work with DL.
-import "./deps/deeplearnjs/src/math/backends/backend_cpu";
-import "./deps/deeplearnjs/src/math/backends/backend_webgl";
+import "./dl/math/backends/backend_cpu";
+import "./dl/math/backends/backend_webgl";
 
-import { ENV } from "./deps/deeplearnjs/src/environment";
+import { ENV } from "./dl/environment";
 import { MathBackendWebGL, NDArrayMathGPU }
- from "./deps/deeplearnjs/src/math/backends/backend_webgl";
+ from "./dl/math/backends/backend_webgl";
 import { MatrixOrientation }
-  from "./deps/deeplearnjs/src/math/backends/types/matmul";
-import { NDArrayMath } from "./deps/deeplearnjs/src/math/math";
+  from "./dl/math/backends/types/matmul";
+import { NDArrayMath } from "./dl/math/math";
 import { Array2D, Array3D, Array4D, NDArray, Scalar }
-  from "./deps/deeplearnjs/src/math/ndarray";
+  from "./dl/math/ndarray";
 import * as types from "./types";
 import { assert } from "./util";
 
