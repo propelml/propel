@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Propel ML</title>
@@ -14,7 +13,6 @@
   <script src="dist/notebook.js"></script>
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
-
 <body>
   <section class="splash">
     <header class="container">
@@ -30,7 +28,8 @@
       </div>
     </header>
     <div class="container">
-      <div class="one-half column doc-entry">
+      <div class="one-half column">
+        <p></p>
         <p>In 2018, JavaScript is a first class language. It
           <a href="https://benchmarksgame.alioth.debian.org/u64q/compare.php?lan
           g=node&amp;lang2=python3">runs everywhere</a>,
@@ -45,7 +44,8 @@
           </b>This project intends to deliver that, with a special emphasis
           on machine learning.</p>
       </div>
-      <div class="doc-entry one-half column">
+      <div class="one-half column">
+        <p></p>
         <p class="snippet-title">Use it in Node:</p>
         <pre>npm install propel import { $ } from "propel";</pre>
         <p class="snippet-title">Use it in a browser:</p>
@@ -59,10 +59,10 @@
       <div class="one-half column">
         <p>
         <b>Propel</b> provides a familiar API to those used to doing scientific
-          programming in Python. However Propel is carefully crafted to
-          the JavaScript environment.</p>
+        programming in Python. However Propel is carefully crafted to
+        the JavaScript environment.</p>
         <p>Propel runs run both in the browser and natively from Node. In
-          both environment Propel is able to use GPU hardware for computations.
+        both environment Propel is able to use GPU hardware for computations.
           In the browser it utilizies WebGL and on Node it uses TensorFlow's
           <a href="https://www.tensorflow.org/install/install_c">C API</a>.</p>
       </div>
@@ -74,7 +74,7 @@
           on which all sorts of variants of stochastic gradient decent
           are built.
           <script type="notebook">
-            import { grad, linspace } from "propel";
+          import { grad, linspace } from "propel";
           </script>
       </div>
     </div>
@@ -85,5 +85,4 @@
     <p>📈 📉</p>
   </section>
 </body>
-
 </html>

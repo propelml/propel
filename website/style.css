@@ -112,13 +112,16 @@ h1,
 }
 
 .doc-entry {
-  padding: 0;
+  padding: 24px 8px 24px 0;
   height: auto;
-  margin-top: 40px;
+  padding-left: 12px;
 }
 
 .doc-entry:target {
-  border-left: 2px solid rgb(31, 119, 180);
+  background-color: #fafaff;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  border-left: 1px solid #00f;
 }
 
 .snippet-title {
@@ -141,8 +144,6 @@ header {
   flex-direction: column;
   justify-content: center;
   color: #4a4a4a;
-  background-image: url(logomark.svg);
-  background-repeat: no-repeat;
 }
 
 header * {
@@ -167,26 +168,95 @@ header h1 {
   margin-top: 40px;
 }
 
+.splash header {
+  background-image: url(logomark.svg);
+  background-repeat: no-repeat;
+}
+
+.panel {
+  bottom: 0;
+  height: auto;
+  left: 0;
+  top: 0;
+  width: auto;
+  padding: 16px 12px 32px 8px;
+  background-color: #fafaff;
+}
+
+.panel h1 {
+  font-size: 24px;
+  line-height: 32px;
+  border-bottom: 1px solid #00f;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  letter-spacing: 0.1px;
+}
+
+.doc-entry > .typestr {
+  font-size: 14px;
+  line-height: 20px;
+  color: #222;
+  letter-spacing: 0.2px;
+  font-weight: 200;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
 @media (min-width: 600px) {
   .panel {
     bottom: 0;
-    box-shadow: 0 0 2.25rem #9da5ab;
     height: auto;
     left: 0;
     overflow-y: auto;
     position: fixed;
     top: 0;
-    width: 20%;
+    width: 320px;
+    padding: 16px 12px 32px 8px;
+    background-color: #fafaff;
+  }
+
+  .panel h1 {
+    font-size: 24px;
+    line-height: 32px;
+    border-bottom: 1px solid #00f;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   .doc-entries {
-    margin-left: 0;
+    margin-left: 328px;
+    padding-left: 16px;
     max-width: 800px;
   }
 
   .doc-entry {
     margin-top: 40px;
-    padding-left: 0;
+    padding-left: 24px;
+    padding-right: 8px;
+  }
+
+  .docstr,
+  .arg-title,
+  .args {
+    padding-left: 16px;
+  }
+
+  .doc-entry > .typestr {
+    font-size: 14px;
+    line-height: 24px;
+    color: #222;
+    letter-spacing: 0.2px;
+    font-weight: 200;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .doc-entry,
+  .args {
+    list-style-type: none;
+    padding-left: 16px;
   }
 
   .splash {
@@ -210,10 +280,11 @@ header h1 {
 
   /* Auto-resizing cells. */
   padding: 10px;
-  background: #4a4a4a;
+  background: #283646;
   border: 0;
   border-left: 2px solid #eee;
   transition: border-left-color 1s;
+  color: #ddd;
 }
 
 .CodeMirror-focused {
@@ -258,10 +329,6 @@ button.run-button:hover,
   margin: 50px 10px;
 }
 
-.panel {
-  background-color: #fff;
-}
-
 .docindex {
   list-style-type: none;
   margin: 0;
@@ -273,10 +340,11 @@ button.run-button:hover,
   text-decoration: underline;
 }
 
-.doc-entry > .name,
-.doc-entry > .typestr {
-  font-size: inherit;
-  font-weight: 900;
+.doc-entry > .name {
+  font-size: 20px;
+  color: #00f;
+  letter-spacing: 0.2px;
+  font-weight: 300;
   margin: 0;
 }
 
@@ -286,11 +354,6 @@ button.run-button:hover,
 
 .doc-entry ol {
   margin: 0;
-}
-
-.doc-entry .args {
-  list-style-type: none;
-  padding-left: 10px;
 }
 
 .doc-entry .args .name::after {
