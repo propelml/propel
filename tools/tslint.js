@@ -4,4 +4,4 @@
 const run = require('./run');
 const extra = process.argv.slice(2).join(" ");
 run.sh(`node ./node_modules/tslint/bin/tslint
-  ${extra} -p ${run.root} -e **/deeplearnjs/**/*`);
+  ${extra} -p ${run.root} -e ${run.root}/dl/**/*`);
