@@ -4,9 +4,9 @@
     "diagnostics": false,
     "lib": ["es5", "dom", "es2015"],
     "module": "commonjs",
-    "outDir": "dist/",
     "sourceMap": true,
     "target": "es2017"
   },
-  "include": ["api.ts", "*_test.ts", "test_*.ts"]
+  "exclude": ["deps", "node_modules"]
 }
+
