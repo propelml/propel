@@ -20,6 +20,7 @@ const debug = false;
 const J = JSON.stringify;
 export const IS_WEB = typeof window !== "undefined";
 export const IS_NODE = !IS_WEB;
+export const global = (0, eval)(IS_WEB ? "window" : "global");
 
 if (IS_NODE) {
   // This is currently node.js specific.
