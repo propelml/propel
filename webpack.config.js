@@ -5,6 +5,7 @@ module.exports = {
     'nn_example': './nn_example.ts',
     'notebook': './notebook.ts',
     'propel': './api.ts',
+    'test_dl': './test_dl.ts',
     'test_isomorphic': './test_isomorphic.ts'
   },
   plugins: [

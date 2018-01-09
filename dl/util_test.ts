@@ -14,7 +14,8 @@
  * limitations under the License.
  * =============================================================================
  */
-
+ 
+import "../test";
 import {Array1D, NDArray, Scalar} from './math/ndarray';
 import * as test_util from './test_util';
 import {MathTests} from './test_util';

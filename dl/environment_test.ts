@@ -33,23 +33,23 @@ describe('disjoint query timer enabled', () => {
   it('webgl 1', () => {
     const features: Features = {'WEBGL_VERSION': 1};
 
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string) => {
-        if (context === 'webgl' || context === 'experimental-webgl') {
-          return {
-            getExtension: (extensionName: string) => {
-              if (extensionName === 'EXT_disjoint_timer_query') {
-                return {};
-              } else if (extensionName === 'WEBGL_lose_context') {
-                return {loseContext: () => {}};
-              }
-              return null;
-            }
-          };
-        }
-        return null;
-      }
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string) => {
+    //    if (context === 'webgl' || context === 'experimental-webgl') {
+    //      return {
+    //        getExtension: (extensionName: string) => {
+    //          if (extensionName === 'EXT_disjoint_timer_query') {
+    //            return {};
+    //          } else if (extensionName === 'WEBGL_lose_context') {
+    //            return {loseContext: () => {}};
+    //          }
+    //          return null;
+    //        }
+    //      };
+    //    }
+    //    return null;
+    //  }
+    //});
 
     ENV.setFeatures(features);
 
@@ -59,23 +59,23 @@ describe('disjoint query timer enabled', () => {
   it('webgl 2', () => {
     const features: Features = {'WEBGL_VERSION': 2};
 
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string) => {
-        if (context === 'webgl2') {
-          return {
-            getExtension: (extensionName: string) => {
-              if (extensionName === 'EXT_disjoint_timer_query_webgl2') {
-                return {};
-              } else if (extensionName === 'WEBGL_lose_context') {
-                return {loseContext: () => {}};
-              }
-              return null;
-            }
-          };
-        }
-        return null;
-      }
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string) => {
+    //    if (context === 'webgl2') {
+    //      return {
+    //        getExtension: (extensionName: string) => {
+    //          if (extensionName === 'EXT_disjoint_timer_query_webgl2') {
+    //            return {};
+    //          } else if (extensionName === 'WEBGL_lose_context') {
+    //            return {loseContext: () => {}};
+    //          }
+    //          return null;
+    //        }
+    //      };
+    //    }
+    //    return null;
+    //  }
+    //});
 
     ENV.setFeatures(features);
     expect(ENV.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED')).toBe(true);
@@ -100,7 +100,7 @@ describe('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE', () => {
   it('disjoint query timer enabled, mobile', () => {
     const features:
         Features = {'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED': true};
-    spyOn(device_util, 'isMobile').and.returnValue(true);
+    //spyOn(device_util, 'isMobile').and.returnValue(true);
 
     const env = new Environment(features);
 
@@ -111,7 +111,7 @@ describe('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE', () => {
   it('disjoint query timer enabled, not mobile', () => {
     const features:
         Features = {'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED': true};
-    spyOn(device_util, 'isMobile').and.returnValue(false);
+    //spyOn(device_util, 'isMobile').and.returnValue(false);
 
     const env = new Environment(features);
 
@@ -125,23 +125,23 @@ describe('WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED', () => {
   });
 
   beforeEach(() => {
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string) => {
-        if (context === 'webgl2') {
-          return {
-            getExtension: (extensionName: string) => {
-              if (extensionName === 'WEBGL_get_buffer_sub_data_async') {
-                return {};
-              } else if (extensionName === 'WEBGL_lose_context') {
-                return {loseContext: () => {}};
-              }
-              return null;
-            }
-          };
-        }
-        return null;
-      }
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string) => {
+    //    if (context === 'webgl2') {
+    //      return {
+    //        getExtension: (extensionName: string) => {
+    //          if (extensionName === 'WEBGL_get_buffer_sub_data_async') {
+    //            return {};
+    //          } else if (extensionName === 'WEBGL_lose_context') {
+    //            return {loseContext: () => {}};
+    //          }
+    //          return null;
+    //        }
+    //      };
+    //    }
+    //    return null;
+    //  }
+    //});
   });
 
   it('WebGL 2 enabled', () => {
@@ -169,45 +169,45 @@ describe('WebGL version', () => {
   });
 
   it('webgl 1', () => {
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string) => {
-        if (context === 'webgl') {
-          return {
-            getExtension: (a: string) => {
-              return {loseContext: () => {}};
-            }
-          };
-        }
-        return null;
-      }
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string) => {
+    //    if (context === 'webgl') {
+    //      return {
+    //        getExtension: (a: string) => {
+    //          return {loseContext: () => {}};
+    //        }
+    //      };
+    //    }
+    //    return null;
+    //  }
+    //});
 
     const env = new Environment();
     expect(env.get('WEBGL_VERSION')).toBe(1);
   });
 
   it('webgl 2', () => {
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string) => {
-        if (context === 'webgl2') {
-          return {
-            getExtension: (a: string) => {
-              return {loseContext: () => {}};
-            }
-          };
-        }
-        return null;
-      }
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string) => {
+    //    if (context === 'webgl2') {
+    //      return {
+    //        getExtension: (a: string) => {
+    //          return {loseContext: () => {}};
+    //        }
+    //      };
+    //    }
+    //    return null;
+    //  }
+    //});
 
     const env = new Environment();
     expect(env.get('WEBGL_VERSION')).toBe(2);
   });
 
   it('no webgl', () => {
-    spyOn(document, 'createElement').and.returnValue({
-      getContext: (context: string): WebGLRenderingContext => null
-    });
+    //spyOn(document, 'createElement').and.returnValue({
+    //  getContext: (context: string): WebGLRenderingContext => null
+    //});
 
     const env = new Environment();
     expect(env.get('WEBGL_VERSION')).toBe(0);

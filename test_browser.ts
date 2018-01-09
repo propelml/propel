@@ -22,6 +22,7 @@ const TESTS = [
   // If this message doesn't appear, or an unhandled error is thrown on the
   // page, the test fails.
   { href: "test_isomorphic.html", doneMsg: /^DONE/, timeout: 20000 },
+  { href: "test_dl.html", doneMsg: /^DONE.*failed: 0/, timeout: 2 * 60 * 1000 },
 
   // These web pages are simply loaded; the test passes if no unhandled
   // exceptions are thrown on the page.
