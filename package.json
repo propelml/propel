@@ -1,19 +1,16 @@
 {
   "name": "propel",
-  "main": "api.js",
-  "types": "api.d.ts",
-  "version": "2.99.0",
-  "license": "Apache-2.0",
-  "private": true,
-  "engines": {
-    "node": ">=8.0.0"
-  },
+  "version": "2.99.2",
   "description": "Differentiable Programming in JavaScript",
+  "license": "Apache-2.0",
+  "main": "api.ts",
+  "private": true,
+  "engines": { "node": ">=8.0.0" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/propelml/propel.git"
   },
-  "dependencies": {
+  "devDependencies": {
     "@types/codemirror": "0.0.51",
     "@types/d3": "^4.12.0",
     "@types/node": "^8.5.5",
@@ -36,6 +33,5 @@
     "uglifyjs-webpack-plugin": "^1.1.5",
     "webpack": "^3.10.0",
     "yauzl": "^2.9.1"
-  },
-  "bundledDependencies": [ "seedrandom" ]
+  }
 }
