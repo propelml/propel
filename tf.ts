@@ -13,50 +13,21 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import { bo, convertBasic } from "./backend";
 import { BindingInterface, Handle } from "./binding";
 import * as types from "./types";
 import { assert, assertEqual, IS_WEB } from "./util";
 
-function maybeRequireBinding(): BindingInterface | null {
-  // If we're in the browser, don't even attempt it.
-  if (IS_WEB) return null;
-
-  // This is to set the backend to either web or tensorflow.
-  // Use this on the command line:
-  //   PROPEL=web node myprogram.js
-  // This is used in tools/presubmit.sh to run tests on both backends through
-  // node.
-  const opts = (process.env.PROPEL || "").split(",");
-  if (opts.indexOf("dl") >= 0) return null;
-
-  // Now require the compiled tensorflow-binding.node
-  // When using ts-node, we are in the root dir, after compiling to
-  // javascript, we are in the dist dir.
-  const toAttempt = [
-    "./tensorflow-binding.node",
-    "../build/Debug/tensorflow-binding.node",
-    "../build/Release/tensorflow-binding.node",
-    "./build/Debug/tensorflow-binding.node",
-    "./build/Release/tensorflow-binding.node",
-  ];
-  const fs = require("fs");
-  const path = require("path");
-  for (const fn of toAttempt) {
-    if (fs.existsSync(path.join(__dirname, fn))) {
-      return require(fn);
-    }
-  }
-  console.log("TF binding not found. Falling back to DLJS.");
-  return null;
-}
-
-export let binding = maybeRequireBinding();
-
-// Auto create context for now.
+export let binding;
 export let ctx;
-if (binding) {
-  ctx = new binding.Context();
+
+export function loadBinding(): boolean {
+  binding = require("./load_binding");
+  if (binding) {
+    ctx = new binding.Context(); // Auto create context for now.
+    return true;
+  } else {
+    return false;
+  }
 }
 
 // Sugar for single value ops.

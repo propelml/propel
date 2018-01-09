@@ -12,35 +12,70 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 // BasicTensor abstracts TensorFlow and DeepLearn BackendOps. Operations on
 // BasicTensors are not traced in backprop and the class is not exposed to the
 // public API.
-import { OpsDL, TensorDL } from "./dl";
-import { binding, OpsTF, TensorTF } from "./tf";
-import * as types from "./types";
-import { deepCloneArray, flatten, inferShape } from "./util";
 
+import * as dl from "./dl";
+import * as tf from "./tf";
+import * as config from "./tools/config";
+import * as types from "./types";
+import { assert, deepCloneArray, flatten, inferShape, IS_WEB } from "./util";
+
+// These globals will be set by onLoad
 let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
-if (binding) {
-  console.log("Using TF backend.");
-  tensorClass = TensorTF;
-  bo = new OpsTF();
-  backend = "tf";
-} else {
-  console.log("Using DL backend.");
-  tensorClass = TensorDL;
-  bo = new OpsDL();
-  backend = "dl";
-}
+const tfModule = null;
 
-const create = tensorClass.fromTypedArray;
+let onLoadCalled = false;
+(function onLoad() {
+  if (onLoadCalled) {
+    console.warn("Warning: backend.onLoad called more than once.");
+    return;
+  }
+  onLoadCalled = true;
+
+  if (preferTF() && tf.loadBinding()) {
+    console.log("Using TF backend.");
+    tensorClass = tf.TensorTF;
+    bo = new tf.OpsTF();
+    backend = "tf";
+  } else {
+    console.log("Using DL backend.");
+    tensorClass = dl.TensorDL;
+    bo = new dl.OpsDL();
+    backend = "dl";
+  }
+})();
+
+function preferTF(): boolean {
+  // If we're in the browser, don't even attempt it.
+  if (IS_WEB) return false;
+
+  // This is to set the backend to either web or tensorflow.
+  // Use this on the command line:
+  //   PROPEL=web node myprogram.js
+  // This is used in tools/test.js to run tests on both backends.
+  if (!process.env.PROPEL || process.env.PROPEL === "tf") {
+     // continue
+  } else if (process.env.PROPEL === "dl") {
+    return false;
+  } else {
+    throw Error("Bad value for env var PROPEL.");
+  }
+  return true;
+}
 
 export function convertBasic(x: types.TensorLike,
                              opts?: types.TensorOpts): types.BasicTensor {
+  // Alias fromTypedArray for brevity.
+  const create = tensorClass.fromTypedArray;
+
   const dtype = opts ? opts.dtype : undefined;
   const device = (opts ? opts.device : null) || "CPU:0";
+
   if (typeof x === "number") {
     // TODO On TF we should take advantage of createSmallHandle for scalars.
     return create(types.makeTypedArray([x], dtype), [], dtype, device);
