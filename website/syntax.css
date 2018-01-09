@@ -18,7 +18,7 @@
 .syntax.solar-violet { color: #ddd; }
 .syntax.solar-blue { color: #39adff; }
 .syntax.solar-cyan { color: #86b9f5; }
-.syntax.solar-green { color: #0fff58; }
+.syntax.solar-green { color: #fee937; }
 
 /* Color scheme for code-mirror */
 
@@ -58,14 +58,14 @@
   font-style: italic;
 }
 
-.cm-s-syntax .cm-string { color: #0fff58; }
+.cm-s-syntax .cm-string { color: #fee937; }
 .cm-s-syntax .cm-string-2 { color: #fee937; }
 
-.cm-s-syntax .cm-meta { color: #0fff58; }
+.cm-s-syntax .cm-meta { color: #fee937; }
 .cm-s-syntax .cm-qualifier { color: #fee937; }
 .cm-s-syntax .cm-builtin { color: #ddd; }
 .cm-s-syntax .cm-bracket { color: #ff8240; }
-.cm-s-syntax .CodeMirror-matchingbracket { color: #0fff58; }
+.cm-s-syntax .CodeMirror-matchingbracket { color: #fee937; }
 .cm-s-syntax .CodeMirror-nonmatchingbracket { color: #ed4142; }
 .cm-s-syntax .cm-tag { color: #ddd; }
 .cm-s-syntax .cm-attribute { color: #86b9f5; }
