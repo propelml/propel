@@ -129,7 +129,18 @@ function htmlBody(inner: string): string {
   import { $, grad, linspace, plot } from "propel";
   </script>
 </head>
-  <body>${inner}</body>
+  <body>${inner}
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async
+  src="https://www.googletagmanager.com/gtag/js?id=UA-112187805-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-112187805-1');
+</script>
+  </body>
 </html>
   `;
 }
