@@ -39,7 +39,10 @@ const debug = !!process.env.PP_DEBUG;
   server.listen();
   const port = server.server.address().port;
 
-  const browser = await puppeteer.launch({ headless: !debug });
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: !debug,
+  });
 
   for (let i = 0; i < TESTS.length; i++) {
     const test = TESTS[i];
