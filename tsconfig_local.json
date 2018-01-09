@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": false,
+    "outDir": "build/"
+  },
+  "include": ["load_binding.js", "api.ts", "*_test.ts", "test_*.ts"]
+}

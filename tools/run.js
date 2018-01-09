@@ -41,7 +41,13 @@ function rmrf(d) {
   }
 }
 
+function version() {
+  let pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  return pkg.version;
+}
+
 exports.sh = sh;
 exports.mkdir = mkdir;
 exports.rmrf = rmrf;
 exports.root = root;
+exports.version = version;
