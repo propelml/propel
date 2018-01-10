@@ -133,12 +133,8 @@ class Cell {
     (parentDiv as any).cell = this;
     this.parentDiv = parentDiv;
 
-    this.editor = CodeMirror(parentDiv, {
-      lineNumbers: false,
-      mode: "javascript",
-      theme: "syntax",
+    this.editor = createCM(parentDiv, {
       value: source ? source.trim() : "",
-      viewportMargin: Infinity,
     });
     this.editor.setOption("extraKeys", {
       "Ctrl-Enter": () =>  { this.update(); return true; },
@@ -225,6 +221,18 @@ function createCell() {
   cell.focus();
 }
 
+function createCM(parentDiv, options) {
+  const defaults = {
+    lineNumbers: false,
+    lineWrapping: true,
+    mode: "javascript",
+    theme: "syntax",
+    viewportMargin: Infinity,
+  };
+  options = Object.assign(defaults, options);
+  return CodeMirror(parentDiv, options);
+}
+
 window.onload = async() => {
   const newCell = document.getElementById("newCell");
   if (newCell) newCell.onclick = createCell;
@@ -236,13 +244,9 @@ window.onload = async() => {
     _log("pre", p);
     const code = p.innerText;
     p.innerHTML = "";
-    CodeMirror(p, {
-      lineNumbers: false,
+    createCM(p, {
       mode: p.getAttribute("lang") || "javascript",
-      readOnly: true,
-      theme: "syntax",
       value: code,
-      viewportMargin: Infinity,
     });
   }
 

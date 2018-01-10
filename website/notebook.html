@@ -12,15 +12,25 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Propel Notebook</title>
 </head>
-<body>
-  <div class="doc-entries">
-    <div id=cells class="doc-entry">
+<body class="notebook">
+<body >
+    <header class="container">
+      <div class="one-half column">
+        <p><a href="index.html">← Propel</a></p>
+<h1>Notebook</h1>
+</div>
+</header>
+<div class="container">
+  <p></p>
+<div class="nb-entry">
 <script type="notebook">
 import { $ } from "propel";
 t = $([[2, 3], [30, 20]])
 t.mul(5)
 </script>
+</div>
 
+<div class="nb-entry">
 <script type="notebook">
 import { grad, linspace, plot } from "propel";
 
@@ -29,13 +39,17 @@ x = linspace(-4, 4, 200);
 plot(x, f(x),
      x, grad(f)(x));
 </script>
+</div>
 
+<div class="nb-entry">
 <script type="notebook">
 f = await fetch('mnist/README');
 t = await f.text();
 t;
 </script>
+</div>
 
+<div class="nb-entry">
 <script type="notebook">
 function f(x) {
   let y = x.sub(1);
@@ -47,8 +61,9 @@ plot(x, f(x))
 plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 </script>
+</div>
     </div> <!-- #cells -->
-    <div class="row">
+    <div class="container nb-footer">
       <button id="newCell">New Cell</button>
     </div>
   </div> <!-- container -->
