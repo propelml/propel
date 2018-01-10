@@ -31,18 +31,18 @@ body {
     'segoe ui',
     arial,
     sans-serif;
-  color: #4a4a4a;
+  color: #1D2936;
 }
 
 body p {
   font-size: 16px;
   line-height: 32px;
-  color: #4a4a4a;
+  color: #1D2936;
   margin: 16px 12px;
 }
 
 a {
-  color: #00f;
+  color: #1163c2;
   text-decoration: none;
 }
 
@@ -132,23 +132,19 @@ h1,
   margin-bottom: -8px;
 }
 
-.button,
-.header-button,
-.button-primary {
-  background-color: #86b9f5;
-  color: #000;
-  border-color: #000;
-  font-family: inherit;
+.button:hover {
+  text-decoration: none;
 }
+
 
 header {
   align-items: center;
   background-color: #e4e4ea;
-  border-bottom: 1px solid #4a4a4a;
+  border-bottom: 1px solid #1D2936;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: #4a4a4a;
+  color: #1D2936;
 }
 
 header * {
@@ -177,11 +173,6 @@ header h1 {
   text-align: center;
 }
 
-.splash header {
-  background-image: url(logomark.svg);
-  background-repeat: no-repeat;
-}
-
 .panel {
   bottom: 0;
   height: auto;
@@ -195,7 +186,7 @@ header h1 {
 .panel h1 {
   font-size: 24px;
   line-height: 32px;
-  border-bottom: 1px solid #4a4a4a;
+  border-bottom: 1px solid #1D2936;
   padding-bottom: 8px;
   margin-bottom: 16px;
   letter-spacing: 0.1px;
@@ -238,7 +229,7 @@ header h1 {
   .panel h1 {
     font-size: 24px;
     line-height: 32px;
-    border-bottom: 1px solid #4a4a4a;
+    border-bottom: 1px solid #1D2936;
     padding-bottom: 8px;
     margin-bottom: 16px;
   }
@@ -287,7 +278,7 @@ header h1 {
 
   /* Auto-resizing cells. */
   padding: 10px;
-  background: #283646;
+  background: #1D2936;
   border: 0;
   transition: border-left-color 1s;
   color: #ddd;
@@ -348,7 +339,7 @@ button.run-button:hover,
 
 .doc-entry > .name {
   font-size: 20px;
-  color: #00f;
+  color: #1163c2;
   letter-spacing: 0.2px;
   font-weight: 300;
   margin: 0;
