@@ -17,7 +17,7 @@
 }
 
 body {
-  background-color: #E4E4EA;
+  background-color: #e4e4ea;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -70,15 +70,15 @@ pre,
 .splash {
   max-width: 100%;
   padding-bottom: 32px;
-  background-color: #E4E4EA;
+  background-color: #e4e4ea;
 }
 
 .explainer {
   width: 100%;
-  background-color: #F0F0F7;
+  background-color: #f0f0f7;
   padding: 4em 0;
-  border-top: 1px solid #CBCBD0;
-  border-bottom: 1px solid #CBCBD0;
+  border-top: 1px solid #cbcbd0;
+  border-bottom: 1px solid #cbcbd0;
 }
 
 .explainer-inner {
@@ -114,15 +114,15 @@ h1,
 }
 
 .doc-entries {
-  overflow-x: hidden; 
-  background-color: #F0F0F7;
+  overflow-x: hidden;
+  background-color: #f0f0f7;
 }
 
 .doc-entry {
-  padding: 24px 0px 24px 0;
+  padding: 32px 0 16px 0;
   height: auto;
-  padding-left:0;
-  border-top: 1px solid #E4E4EA;
+  padding-left: 0;
+  border-top: 1px solid #cbcbd0;
 }
 
 .doc-entry:target {
@@ -146,7 +146,7 @@ h1,
 
 header {
   align-items: center;
-  background-color: #E4E4EA;
+  background-color: #e4e4ea;
   box-shadow: inset 0 -1px 0 0 #4a4a4a;
   display: flex;
   flex-direction: column;
@@ -192,7 +192,7 @@ header h1 {
   top: 0;
   width: auto;
   padding: 16px 12px 32px 8px;
-  background-color: #E4E4EA;
+  background-color: #e4e4ea;
 }
 
 .panel h1 {
@@ -207,7 +207,7 @@ header h1 {
 .doc-entry > .typestr {
   font-size: 14px;
   line-height: 20px;
-  color: #777777;
+  color: #777;
   letter-spacing: 0.2px;
   font-weight: 200;
   margin-bottom: 16px;
@@ -220,11 +220,18 @@ header h1 {
   }
 }
 
+@media (max-width: 960px) {
+  .splash {
+    padding-top: 0;
+  }
+}
+
 @media (min-width: 600px) {
   .nav-buttons {
     text-align: left;
     padding-left: 12px;
   }
+
   .panel {
     bottom: 0;
     height: auto;
@@ -232,9 +239,9 @@ header h1 {
     overflow-y: auto;
     position: fixed;
     top: 0;
-    width: 288px;
+    width: 240px;
     padding: 16px 12px 32px 8px;
-    background-color: #E4E4EA;
+    background-color: #e4e4ea;
   }
 
   .panel h1 {
@@ -246,13 +253,9 @@ header h1 {
   }
 
   .doc-entries {
-    margin-left: 292px;
+    margin-left: 244px;
     padding-left: 16px;
     max-width: auto;
-  }
-
-  .doc-entry {
-    margin-top: 40px;
   }
 
   .docstr,
@@ -277,7 +280,6 @@ header h1 {
   }
 
   .splash {
-    padding-top: 24px;
     height: 80vh;
   }
 }
@@ -289,7 +291,8 @@ header h1 {
 .output {
   padding: 10px;
   white-space: pre-wrap;
-  background-color: #E4E4EA
+  background-color: #cbcbd0;
+  margin: 0 auto;
 }
 
 .CodeMirror {
@@ -322,7 +325,7 @@ svg {
 
 .notebook-cell-updating svg,
 .notebook-cell-updating .output {
-  background-color: #E4E4EA;
+  background-color: #cbcbd0;
 }
 
 button.run-button {
@@ -375,4 +378,34 @@ button.run-button:hover,
 
 .doc-entry .args .name::after {
   content: ": ";
+}
+
+/* notebook */
+
+.nb-entry {
+  padding: 24px 0;
+  border-bottom: 1px solid #cbcbd0;
+}
+
+.nb-entry:last-child {
+  border-bottom: none;
+}
+
+.nb-footer {
+  text-align: center;
+}
+
+#newCell {
+  margin: 24px auto;
+  width: 100%;
+}
+
+::selection {
+  background: #00f;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: #00f;
+  color: #fff;
 }
