@@ -219,7 +219,11 @@ async function runTests() {
   } else if (IS_NODE) {
     process.exit(1);
   } else {
-    throw new Error(`There were ${failed} test failures.`);
+    // Use setTimeout to avoid the error being ignored due to unhandled
+    // promise rejections being swallowed.
+    setTimeout(() => {
+      throw new Error(`There were ${failed} test failures.`);
+    }, 0);
   }
 }
 
