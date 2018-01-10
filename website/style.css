@@ -68,24 +68,19 @@ pre,
 }
 
 .splash {
-  max-width: 100%;
   padding-bottom: 32px;
   background-color: #e4e4ea;
 }
 
-.explainer {
-  width: 100%;
+.explainer-container {
   background-color: #f0f0f7;
-  padding: 4em 0;
-  border-top: 1px solid #cbcbd0;
-  border-bottom: 1px solid #cbcbd0;
 }
 
-.explainer-inner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: auto;
+.explainer {
+  padding: 4em 0;
+  margin: 0;
+  border-top: 1px solid #cbcbd0;
+  border-bottom: 1px solid #cbcbd0;
 }
 
 .explainer-content {
@@ -140,14 +135,16 @@ h1,
 .button,
 .header-button,
 .button-primary {
-  background-color: #00f;
-  border-color: #00f;
+  background-color: #86b9f5;
+  color: #000;
+  border-color: #000;
+  font-family: inherit;
 }
 
 header {
   align-items: center;
   background-color: #e4e4ea;
-  box-shadow: inset 0 -1px 0 0 #4a4a4a;
+  border-bottom: 1px solid #4a4a4a;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -214,12 +211,6 @@ header h1 {
   padding: 0 0 12px 12px;
 }
 
-@media (min-width: 1440px) {
-  .splash {
-    height: 800px;
-  }
-}
-
 @media (max-width: 960px) {
   .splash {
     padding-top: 0;
@@ -278,10 +269,6 @@ header h1 {
     list-style-type: none;
     padding-left: 16px;
   }
-
-  .splash {
-    height: 80vh;
-  }
 }
 
 .notebook-cell {
@@ -291,7 +278,7 @@ header h1 {
 .output {
   padding: 10px;
   white-space: pre-wrap;
-  background-color: #cbcbd0;
+  background-color: inherit;
   margin: 0 auto;
 }
 
@@ -333,7 +320,7 @@ button.run-button {
   float: right;
   bottom: 46px;
   right: 8px;
-  opacity: 0.25;
+  opacity: 0;
   transition: opacity 0.25s;
   background: #fff;
   z-index: 3;
@@ -341,7 +328,7 @@ button.run-button {
 
 button.run-button:hover,
 .CodeMirror-focused + button.run-button {
-  opacity: 1;
+  opacity: 0.7;
 }
 
 .newCell {
@@ -383,8 +370,7 @@ button.run-button:hover,
 /* notebook */
 
 .nb-entry {
-  padding: 24px 0;
-  border-bottom: 1px solid #cbcbd0;
+  margin: 24px 0;
 }
 
 .nb-entry:last-child {
