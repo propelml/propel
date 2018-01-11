@@ -5,62 +5,109 @@
 const run = require("./run");
 const fs = require("fs");
 const path = require("path");
+const config = require("./config");
 const {execSync} = require("child_process");
 
-let distDir = path.join(run.root + "/dist");
-run.rmrf(distDir)
-run.mkdir(distDir)
-run.sh("./tools/tsc.js");
+const clean = process.argv.includes("clean");
 
-function createPackageJson(src, dst) {
+if (clean) {
+  run.rmrf("build")
+}
+
+// Build the binding.
+run.sh("node tools/build_binding.js");
+
+
+function createPackageJson(src, dst, packageJson = {}) {
   let p = JSON.parse(fs.readFileSync(src, "utf8"));
+  p = Object.assign(p, packageJson);
   delete p["dependencies"];
-  delete p["devDependendies"];
-  delete p["peerDependendies"];
+  delete p["devDependencies"];
   delete p["private"];
   let s = JSON.stringify(p, null, 2);
   fs.writeFileSync(dst, s);
   console.log("Wrote " + dst);
 }
 
-// Create the package.json.
-createPackageJson("package.json", distDir + "/package.json");
+function npmPack(name, cb) {
+  const distDir = run.root + "/build/" + name;
+  if (clean) {
+    run.rmrf(distDir)
+  }
+  run.mkdir(distDir)
+  fs.writeFileSync(distDir + "/README.md", "See http://p_____.org\n");
+  if (cb) cb(distDir);
+  process.chdir(distDir);
+  console.log("npm pack");
+  const pkgFn = path.resolve(execSync("npm pack", {encoding: "utf8"}));
+  process.chdir(run.root);
+  console.log("pkgFn", pkgFn);
+  return pkgFn;
+}
 
-// Copy other files.
-fs.writeFileSync(distDir + "/README.md", "See http://p_____.org\n");
+function webpackIfDNE(configName, fn) {
+  if (clean  || !fs.existsSync(fn)) {
+    console.log("Webpack %s", fn, configName);
+    run.sh("./tools/webpack.js --config-name=" + configName)
+  } else {
+    console.log("Skipping webpack %s", fn, configName);
+  }
+}
 
-// Copy over the TF binding.
-// mac only at the moment.
-fs.copyFileSync("build/Release/tensorflow-binding.node",
-                distDir + "/tensorflow-binding.node");
-fs.copyFileSync("build/Release/libtensorflow.so",
-                distDir + "/libtensorflow.so");
-fs.copyFileSync("build/Release/libtensorflow_framework.so",
-                distDir + "/libtensorflow_framework.so");
 
-process.chdir(distDir);
-console.log("npm pack");
-let pkgFn = execSync("npm pack", {encoding: "utf8"});
-pkgFn = path.join(distDir, pkgFn);
-console.log("pkgFn", pkgFn);
+let propelPkgFn = npmPack("propel", (distDir) => {
+  webpackIfDNE("propel_node", distDir + "/propel_node.js");
+  webpackIfDNE("propel_web", distDir + "/propel_web.js");
+  // webpackIfDNE("tests_node", distDir + "/tests_node.js");
+  // webpackIfDNE("tests_web", distDir + "/tests_web.js");
+  createPackageJson("package.json", distDir + "/package.json", {
+    name: "propel",
+    main: "propel_node.js",
+    unpkg: "propel_web.js",
+  });
+});
+
+let tfPkgFn = npmPack(config.tfPkg, (distDir) => {
+  fs.copyFileSync("load_binding.js", distDir + "/load_binding.js");
+  // Copy over the TF binding.
+  // TODO Mac only at the moment. Make this work on windows.
+  fs.copyFileSync("build/Release/tensorflow-binding.node",
+                  distDir + "/tensorflow-binding.node");
+  fs.copyFileSync("build/Release/libtensorflow.so",
+                  distDir + "/libtensorflow.so");
+  fs.copyFileSync("build/Release/libtensorflow_framework.so",
+                  distDir + "/libtensorflow_framework.so");
+  createPackageJson("package.json", distDir + "/package.json", {
+    name: config.tfPkg,
+    main: "load_binding.js",
+  });
+});
 
 // Now test the package
 const testDir = "/tmp/propel_npm_test";
 run.rmrf(testDir);
 run.mkdir(testDir);
-// Copy package.json into the npm directory so it doesn't warn
-// about not having description or repository fields. -_-
-// Pretend we're the tar module.
+
+// Pretend we're the tar module. Copy package.json into the npm directory so it
+// doesn't warn about not having description or repository fields.
 createPackageJson(run.root + "/node_modules/tar/package.json",
                   path.join(testDir, "package.json"));
 
 process.chdir(testDir);
-run.sh("npm install " + pkgFn);
+run.sh("npm install " + propelPkgFn);
+run.sh("npm install " + tfPkgFn);
 
 // Quick test that it works.
-fs.writeFileSync("test.js", "require('propel/api_test')\n");
+fs.writeFileSync("test.js", `
+  let propel = require('propel');
+  let $ = require('propel').$;
+  console.log($([1, 2, 3]).mul(42));
+  console.log("Using backend: %s", propel.backend);
+  if (propel.backend !== "tf") throw Error("Bad backend");
+`);
 run.sh("node test.js");
 
-console.log("package tested and ready", pkgFn);
-console.log("To publish, run: npm publish", pkgFn);
+console.log("\n\nPackage tested and ready.");
+console.log("npm publish %s", propelPkgFn);
+console.log("npm publish %s", tfPkgFn);
 

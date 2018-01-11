@@ -1,8 +1,7 @@
-
-/* Extract libtensorflow binaries mirrored from the TensorFlow CI.
- * Original URL:
- * http://ci.tensorflow.org/view/Nightly/job/nightly-libtensorflow-windows/lastStableBuild/artifact/lib_package/libtensorflow-cpu-windows-x86_64.zip
- */
+// Extract libtensorflow binaries mirrored from the TensorFlow CI.
+// Original URL:
+// tslint:disable-next-line:max-line-length
+// http://ci.tensorflow.org/view/Nightly/job/nightly-libtensorflow-windows/lastStableBuild/artifact/lib_package/libtensorflow-cpu-windows-x86_64.zip
 
 // Work around a bug where node-gyp on windows adds a trailing " to PRODUCT_DIR.
 let outDir = process.argv[2] || '';
