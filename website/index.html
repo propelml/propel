@@ -34,9 +34,9 @@
           </p>
 	  <p class="snippet-title">Use it in Node:</p>
 	  <pre>npm install propel
-import { $ } from "propel";</pre>
+import { grad } from "propel";</pre>
 	  <p class="snippet-title">Use it in a browser:</p>
-          <pre lang="htmlmixed">&lt;script src="http://propelml.org/propel-2.99.1.js"&gt;&lt;/script&gt;</pre>
+          <pre lang="htmlmixed">&lt;script src="http://ar.propelml.org/propel-2.99.2/propel_web.js"&gt;&lt;/script&gt;</pre>
 	</div>
       </div> <!-- row -->
     </section> <!--  splash -->
@@ -48,21 +48,38 @@ import { $ } from "propel";</pre>
 	  <div class="one-half column">
 	    <p>
 	    <b>Propel</b>
-	    aims to provide a GPU-backed numpy-like infrastructure
-	    for scientific computing in JavaScript.
-	    JavaScript is a fast dynamic (optionally typed) language which, we
-	    think, could be an ideal workflow for statisticians of all
-	    flavors.
+      provides a GPU-backed numpy-like infrastructure for scientific computing
+      in JavaScript.  JavaScript is a fast, dynamic language which, we think,
+      could act as an ideal workflow for scientific programmers of all sorts.
 
-	    <p>Propel runs run both in the browser and natively from Node. In
+	    <p>Propel runs both in the browser and natively from Node. In
 	    both environment Propel is able to use GPU hardware for computations.
-	    In the browser it utilizies WebGL through DeepLearn.JS
-	    and on Node it uses TensorFlow's <a href="https://www.tensorflow.org/install/install_c">C API</a>.</p>
+      In the browser it utilizies WebGL through
+      <a href="https://deeplearnjs.org/">deeplearn.js</a>
+      and on Node it uses TensorFlow's <a
+        href="https://www.tensorflow.org/install/install_c">C API</a>.</p>
 
-	    <p>Propel embraces imperative style ML. To achieve this, Propel provides
-	      a general purpose "gradient function" (implemented with backprop)
-	      on which all sorts of variants of stochastic gradient decent
-	      are built.</p>
+      <p>Propel has an imperative <a href="">autograd</a>-style API, unlike
+      TensorFlow.  Computation graphs are traced as you run them&mdash;
+      a general purpose <i>gradient function</i>
+      provides an elegant interface to backpropigation. </p>
+
+      <p>Browsers are great for demos, but they are not a great numerics
+      platform. WebGL is a far cry from CUDA. By running Propel outside
+      of the browser, users will be able to target multiple GPUs and make
+      TCP connections. The models developed server-side will be much easier
+      to deploy as HTML demos.
+
+      <p>The basic <code>propel</code> npm package is javascript only,
+      without TensorFlow bindings. To upgrade your speed dramatically
+      install
+
+<pre>
+npm install propel_mac
+npm install propel_windows
+npm install propel_linux
+npm install propel_linux_gpu</pre>
+
 	  </div>
 
 	  <div class="one-half column">
