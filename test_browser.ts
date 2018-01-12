@@ -15,6 +15,7 @@
 import { createServer } from "http-server";
 import * as puppeteer from "puppeteer";
 import { format } from "util";
+import "./util"; // To make unhandled rejections crash node.
 
 const TESTS = [
   // This page loads and runs all the webpack'ed unit tests.
