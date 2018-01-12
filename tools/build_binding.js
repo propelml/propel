@@ -2,6 +2,7 @@
 // build script for binding.cc
 // There are literally two compile commands to call. Just call them here.
 
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const run = require('./run');
@@ -74,5 +75,5 @@ if (process.platform === "darwin" || process.platform === "linux") {
   run.sh(`clang ${cflags}`);
   run.sh(`clang ${ldflags}`);
 } else if (process.platform === "win32") {
-  throw new Error("Implement me");
+  execSync("node-gyp rebuild", { cwd: `${__dirname}/..`, stdio: "inherit" });
 }
