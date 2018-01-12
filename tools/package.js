@@ -23,10 +23,10 @@ run.sh("node tools/build_binding.js");
 
 function createPackageJson(src, dst, packageJson = {}) {
   let p = JSON.parse(fs.readFileSync(src, "utf8"));
-  p = Object.assign(p, packageJson);
   delete p["dependencies"];
   delete p["devDependencies"];
   delete p["private"];
+  p = Object.assign(p, packageJson);
   let s = JSON.stringify(p, null, 2);
   fs.writeFileSync(dst, s);
   console.log("Wrote " + dst);
@@ -83,6 +83,7 @@ function buildAndTest() {
     createPackageJson("package.json", distDir + "/package.json", {
       name: config.tfPkg,
       main: "load_binding.js",
+      dependencies: { "propel": v },
     });
   });
 

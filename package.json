@@ -1,6 +1,6 @@
 {
   "name": "propel",
-  "version": "2.99.2",
+  "version": "3.0.0",
   "description": "Differentiable Programming in JavaScript",
   "license": "Apache-2.0",
   "main": "api.ts",

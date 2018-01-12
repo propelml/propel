@@ -1,4 +1,4 @@
 [submodule "deps"]
 	path = deps
-	url = git@github.com:propelml/propel_deps
+	url = https://github.com/propelml/propel_deps.git
 	shallow = true
