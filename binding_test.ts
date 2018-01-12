@@ -13,8 +13,12 @@
    limitations under the License.
  */
 import { test } from "./test";
-import { binding, ctx } from "./tf";
+import * as tf from "./tf";
 import { assert, assertAllEqual, assertEqual } from "./util";
+
+assert(tf.loadBinding());
+const binding = tf.binding;
+const ctx = tf.ctx;
 
 test(async function binding_equals() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
