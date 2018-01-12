@@ -74,13 +74,13 @@ pre,
 
 .explainer-container {
   background-color: #f0f0f7;
+  border-top: 1px solid #cbcbd0;
+  border-bottom: 1px solid #cbcbd0;
 }
 
 .explainer {
   padding: 4em 0;
   margin: 0;
-  border-top: 1px solid #cbcbd0;
-  border-bottom: 1px solid #cbcbd0;
 }
 
 .explainer-content {
@@ -114,17 +114,26 @@ h1,
 }
 
 .doc-entry {
-  padding: 32px 0 16px 0;
+  padding: 16px 0 16px 0;
   height: auto;
   padding-left: 0;
-  border-top: 1px solid #cbcbd0;
+  border-top: 1px solid #e4e4ea;
+  border-bottom: 1px solid #e4e4ea;
+  margin-bottom: 16px;
+  -webkit-box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+  -moz-box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+  background-color: #fff;
 }
 
 .doc-entry:target {
   background-color: #fafaff;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
-  border-left: 1px solid #00f;
+  border-left: 2px solid #1163c2;
+  -webkit-box-shadow: 0px 2px 2px 0px rgba(17,99,194,0.3);
+  -moz-box-shadow: 0px 2px 2px 0px rgba(17,99,194,0.3);
+  box-shadow: 0px 2px 2px 0px rgba(17,99,194,0.3);
 }
 
 .snippet-title {
@@ -136,7 +145,6 @@ header .button {
   display: inline-block;
   margin-right: 10px;
   padding: 0;
-  min-width: 150px;
 }
 
 .button:hover {
@@ -178,7 +186,7 @@ header h1 {
   left: 0;
   top: 0;
   width: auto;
-  padding: 16px 12px 32px 8px;
+  padding: 8px 12px 32px 8px;
   background-color: #e4e4ea;
 }
 
@@ -239,6 +247,11 @@ header h1 {
     max-width: auto;
   }
 
+  .doc-entry {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
   .docstr,
   .arg-title,
   .args {
@@ -248,7 +261,7 @@ header h1 {
   .doc-entry > .typestr {
     font-size: 14px;
     line-height: 24px;
-    color: #777;
+    color: #666;
     letter-spacing: 0.2px;
     font-weight: 200;
     margin-bottom: 16px;
@@ -278,7 +291,7 @@ header h1 {
   letter-spacing: 0.2px;
   font-weight: 300;
   margin: 0;
-  padding: 12px 0 8px 12px;
+  padding: 8px 0 4px 12px;
 }
 
 .doc-entry .arg-title {
