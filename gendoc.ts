@@ -11,6 +11,9 @@ import * as path from "path";
 import * as ts from "typescript";
 import { assert } from "../util";
 
+// Displays text for arguments and return value.
+const printArgs = false;
+
 export interface DocEntry {
   kind: "class" | "method" | "property";
   name: string;
@@ -143,7 +146,7 @@ export function htmlEntry(entry: DocEntry): string {
     out += markupDocStr(entry.docstr);
   }
 
-  if (entry.args && entry.args.length > 0) {
+  if (printArgs && entry.args && entry.args.length > 0) {
     out += `<p><span class='arg-title'>Arguments</span> <ol class="args">\n`;
     for (const arg of entry.args) {
       out += `<li>\n`;
@@ -156,7 +159,7 @@ export function htmlEntry(entry: DocEntry): string {
     }
     out += `</ol>\n`;
   }
-  if (entry.retType) {
+  if (printArgs && entry.retType) {
     out += `<p><span class='arg-title'>Returns</span> `;
     out += `<span class="retType">${entry.retType}</span>\n`;
   }
