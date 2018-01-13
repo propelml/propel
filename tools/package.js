@@ -6,12 +6,12 @@ const run = require("./run");
 const fs = require("fs");
 const path = require("path");
 const config = require("./config");
-const {execSync} = require("child_process");
+const { execSync } = require("child_process");
 
 const clean = process.argv.includes("clean");
 
 if (clean) {
-  run.rmrf("build")
+  run.rmrf("build");
 }
 
 const v = run.version();
@@ -19,7 +19,6 @@ console.log("version", v);
 
 // Build the binding.
 run.sh("node tools/build_binding.js");
-
 
 function createPackageJson(src, dst, packageJson = {}) {
   let p = JSON.parse(fs.readFileSync(src, "utf8"));
@@ -35,30 +34,30 @@ function createPackageJson(src, dst, packageJson = {}) {
 function npmPack(name, cb) {
   const distDir = run.root + "/build/" + name;
   if (clean) {
-    run.rmrf(distDir)
+    run.rmrf(distDir);
   }
-  run.mkdir(distDir)
+  run.mkdir(distDir);
   fs.writeFileSync(distDir + "/README.md", "See http://propelml.org\n");
   if (cb) cb(distDir);
   process.chdir(distDir);
   console.log("npm pack");
-  const pkgFn = path.resolve(execSync("npm pack", {encoding: "utf8"}));
+  const pkgFn = path.resolve(execSync("npm pack", { encoding: "utf8" }));
   process.chdir(run.root);
   console.log("pkgFn", pkgFn);
   return pkgFn;
 }
 
 function webpackIfDNE(configName, fn) {
-  if (clean  || !fs.existsSync(fn)) {
+  if (clean || !fs.existsSync(fn)) {
     console.log("Webpack %s", fn, configName);
-    run.sh("./tools/webpack.js --config-name=" + configName)
+    run.sh("node ./tools/webpack.js --config-name=" + configName);
   } else {
     console.log("Skipping webpack %s", fn, configName);
   }
 }
 
 function buildAndTest() {
-  const propelPkgFn = npmPack("propel", (distDir) => {
+  const propelPkgFn = npmPack("propel", distDir => {
     webpackIfDNE("propel_node", distDir + "/propel_node.js");
     webpackIfDNE("propel_web", distDir + "/propel_web.js");
     // webpackIfDNE("tests_node", distDir + "/tests_node.js");
@@ -66,24 +65,29 @@ function buildAndTest() {
     createPackageJson("package.json", distDir + "/package.json", {
       name: "propel",
       main: "propel_node.js",
-      unpkg: "propel_web.js",
+      unpkg: "propel_web.js"
     });
   });
 
-  const tfPkgFn = npmPack(config.tfPkg, (distDir) => {
+  const tfPkgFn = npmPack(config.tfPkg, distDir => {
     fs.copyFileSync("load_binding.js", distDir + "/load_binding.js");
     // Copy over the TF binding.
-    // TODO Mac only at the moment. Make this work on windows.
     fs.copyFileSync("build/Release/tensorflow-binding.node",
-                    distDir + "/tensorflow-binding.node");
-    fs.copyFileSync("build/Release/libtensorflow.so",
-                    distDir + "/libtensorflow.so");
-    fs.copyFileSync("build/Release/libtensorflow_framework.so",
-                    distDir + "/libtensorflow_framework.so");
+                    distDir + "/tensorflow-binding.node"
+    );
+    if (process.platform === "win32") {
+      fs.copyFileSync("build/Release/tensorflow.dll",
+                      distDir + "/tensorflow.dll");
+    } else {
+      fs.copyFileSync("build/Release/libtensorflow.so",
+                      distDir + "/libtensorflow.so");
+      fs.copyFileSync("build/Release/libtensorflow_framework.so",
+                      distDir + "/libtensorflow_framework.so");
+    }
     createPackageJson("package.json", distDir + "/package.json", {
       name: config.tfPkg,
       main: "load_binding.js",
-      dependencies: { "propel": v },
+      dependencies: { propel: v }
     });
   });
 
@@ -98,8 +102,8 @@ function buildAndTest() {
                     path.join(testDir, "package.json"));
 
   process.chdir(testDir);
-  run.sh("npm install " + propelPkgFn);
-  run.sh("npm install " + tfPkgFn);
+  execSync("npm install " + propelPkgFn, { stdio: "inherit" });
+  execSync("npm install " + tfPkgFn, { stdio: "inherit" });
 
   // Quick test that it works.
   fs.writeFileSync("test.js", `
@@ -119,7 +123,7 @@ function buildAndTest() {
 function symlink(a, b) {
   console.log("symlink", a, b);
   try {
-    fs.symlinkSync(a, b)
+    fs.symlinkSync(a, b, "junction");
   } catch (e) {
     if (e.code === "EEXIST") {
       console.log("EEXIST");
@@ -128,7 +132,6 @@ function symlink(a, b) {
     }
   }
 }
-
 
 if (true) {
   buildAndTest();
@@ -140,7 +143,6 @@ process.chdir(run.root + "/build");
 console.log("\n\nPackage tested and ready.");
 for (const name of ["propel", config.tfPkg]) {
   let vname = `${name}-${v}`;
-  symlink(name, vname)
+  symlink(name, vname);
   console.log("./tools/ar.js %s", "build/" + vname);
 }
-
