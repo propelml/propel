@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="syntax.css"/>
   <link rel="stylesheet" href="style.css"/>
   <link rel="icon" type="image/png" href="favicon.png">
-  <script src="dist/notebook.js"></script>
+  <script src="propel_website/notebook.js"></script>
   <script type=notebook>
   // Common imports for the docs.
   import { $, grad, linspace, plot } from "propel";
@@ -113,297 +113,127 @@
 <div id=_ class="doc-entry">
 <h2 class="name" >$</h2>
 <div class="typestr">(t: TensorLike, args?: TensorOpts): Tensor</div>
-<p class="docstr">Turns a javascript array of numbers into a tensor. Like this:
+<p class='docstr'>Turns a javascript array of numbers into a tensor. Like this:
 
-<script type=notebook>
+</p><script type=notebook>
 $([[1, 2, 3], [4, 5, 6]]).square();
-</script>
+</script><p>
 
-If a tensor is given to $, it simply returns it.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">t</span>
-<span class="typestr">TensorLike</span>
-<span class="docstr">- An array of numbers, representing a Tensor. Or a Tensor in which
-   case $() acts as the identity function.</span>
-</li>
-<li>
-<span class="name">args</span>
-<span class="typestr">TensorOpts</span>
-<span class="docstr">- An object like this { dtype: "int32", device: "GPU:0" }</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+If a tensor is given to $, it simply returns it.<p></div>
 <div id=arange class="doc-entry">
 <h2 class="name" >arange</h2>
 <div class="typestr">(...args: number[]): Tensor</div>
-<p class="docstr">Return evenly spaced numbers over a specified interval.
+<p class='docstr'>Return evenly spaced numbers over a specified interval.
 
-<script type=notebook>
+</p><script type=notebook>
 import { arange } from "propel"
 arange(10);
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">args</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=eye class="doc-entry">
 <h2 class="name" >eye</h2>
 <div class="typestr">(size: number, dtype?: DType): Tensor</div>
-<p class="docstr">Returns the identity matrix of a given size. </p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">size</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">dtype</span>
-<span class="typestr">DType</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns the identity matrix of a given size. <p></div>
 <div id=fill class="doc-entry">
 <h2 class="name" >fill</h2>
 <div class="typestr">(value: TensorLike, shape: number[]): Tensor</div>
-<p class="docstr">fill returns a new tensor of the given shape, filled with constant values
+<p class='docstr'>fill returns a new tensor of the given shape, filled with constant values
 specified by the `value` argument. `value` must be a scalar tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 import { fill } from "propel"
 fill(31337, [2, 2])
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">value</span>
-<span class="typestr">TensorLike</span>
-</li>
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=grad class="doc-entry">
 <h2 class="name" >grad</h2>
 <div class="typestr">(f: any, argnum?: number): (...args: TensorLike[]) => Tensor</div>
-<p class="docstr">grad(f) returns a gradient function. If f is a function that maps
+<p class='docstr'>grad(f) returns a gradient function. If f is a function that maps
 R^n to R^m, then the gradient function maps R^n to R^n.
 When evaluated at a point, it gives the slope in each dimension of
 the function f. For example:
 
-<script type=notebook>
+</p><script type=notebook>
 let f = (x) => $(x).square()
 g = grad(f)  // g(x) = 2*x
 g(10) // is 2 * 10
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">f</span>
-<span class="typestr">any</span>
-</li>
-<li>
-<span class="name">argnum</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">(...args: TensorLike[]) => Tensor</span>
-</div>
+</script><p><p></div>
 <div id=gradAndVal class="doc-entry">
 <h2 class="name" >gradAndVal</h2>
 <div class="typestr">(f: any, argnum?: number): (...args: TensorLike[]) => [Tensor, Tensor]</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">f</span>
-<span class="typestr">any</span>
-</li>
-<li>
-<span class="name">argnum</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">(...args: TensorLike[]) => [Tensor, Tensor]</span>
 </div>
 <div id=gradParams class="doc-entry">
 <h2 class="name" >gradParams</h2>
 <div class="typestr">(f: ParamsFn, names?: string[]): (params: Params) => [Params, Tensor]</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">f</span>
-<span class="typestr">ParamsFn</span>
-</li>
-<li>
-<span class="name">names</span>
-<span class="typestr">string[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">(params: Params) => [Params, Tensor]</span>
 </div>
 <div id=imshow class="doc-entry">
 <h2 class="name" >imshow</h2>
 <div class="typestr">(image: Tensor): void</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">image</span>
-<span class="typestr">Tensor</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">void</span>
 </div>
 <div id=linspace class="doc-entry">
 <h2 class="name" >linspace</h2>
 <div class="typestr">(start: number, stop: number, num?: number): Tensor</div>
-<p class="docstr">Returns num evenly spaced samples, calculated over the interval
+<p class='docstr'>Returns num evenly spaced samples, calculated over the interval
 [start, stop].
 
-<script type=notebook>
+</p><script type=notebook>
 import { linspace } from "propel"
 linspace(-1, 1, 5);
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">start</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">stop</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">num</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=listDevices class="doc-entry">
 <h2 class="name" >listDevices</h2>
 <div class="typestr">(): string[]</div>
-<p class="docstr">Returns a list of available device names.
+<p class='docstr'>Returns a list of available device names.
 
-<script type=notebook>
+</p><script type=notebook>
 import { listDevices } from "propel";
 listDevices();
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">string[]</span>
-</div>
+</script><p><p></div>
 <div id=multigrad class="doc-entry">
 <h2 class="name" >multigrad</h2>
 <div class="typestr">(f: any, argnums?: number[]): (...args: TensorLike[]) => Tensor[]</div>
-<p class="docstr">Returns a function which differentiates f with respect to the given
-argnum indexes.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">f</span>
-<span class="typestr">any</span>
-</li>
-<li>
-<span class="name">argnums</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">(...args: TensorLike[]) => Tensor[]</span>
-</div>
+<p class='docstr'>Returns a function which differentiates f with respect to the given
+argnum indexes.<p></div>
 <div id=multigradAndVal class="doc-entry">
 <h2 class="name" >multigradAndVal</h2>
 <div class="typestr">(f: any, argnums?: number[]): (...args: TensorLike[]) => [Tensor[], Tensor]</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">f</span>
-<span class="typestr">any</span>
-</li>
-<li>
-<span class="name">argnums</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">(...args: TensorLike[]) => [Tensor[], Tensor]</span>
 </div>
 <div id=ones class="doc-entry">
 <h2 class="name" >ones</h2>
 <div class="typestr">(shape: number[], opts?: TensorOpts): Tensor</div>
-<p class="docstr">Return a new tensor of given shape and dtype, filled with ones.
+<p class='docstr'>Return a new tensor of given shape and dtype, filled with ones.
 
-<script type=notebook>
+</p><script type=notebook>
 import { ones } from "propel"
 ones([2, 3])
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">opts</span>
-<span class="typestr">TensorOpts</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=plot class="doc-entry">
 <h2 class="name" >plot</h2>
 <div class="typestr">(...args: any[]): void</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">args</span>
-<span class="typestr">any[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">void</span>
 </div>
 <div id=randn class="doc-entry">
 <h2 class="name" >randn</h2>
 <div class="typestr">(shape: number[]): Tensor</div>
-<p class="docstr">Produces a new tensor with random values, drawn from the stanard normal
+<p class='docstr'>Produces a new tensor with random values, drawn from the stanard normal
 distribution.
 
-<script type=notebook>
+</p><script type=notebook>
 import { randn } from "propel"
 randn([3, 4])
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=zeros class="doc-entry">
 <h2 class="name" >zeros</h2>
 <div class="typestr">(shape: number[], opts?: TensorOpts): Tensor</div>
-<p class="docstr">Return a new tensor of given shape and dtype, filled with zeros.
+<p class='docstr'>Return a new tensor of given shape and dtype, filled with zeros.
 
-<script type=notebook>
+</p><script type=notebook>
 import { zeros } from "propel"
 zeros([5, 2])
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">opts</span>
-<span class="typestr">TensorOpts</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=OptimizerSGD class="doc-entry">
 <h2 class="name" >OptimizerSGD</h2>
-<p class="docstr">Stochastic gradient descent with momentum. </p>
-</div>
+<p class='docstr'>Stochastic gradient descent with momentum. <p></div>
 <div id=OptimizerSGD_constructor class="doc-entry">
 <h2 class="name" >OptimizerSGD.constructor</h2>
 <div class="typestr">(): OptimizerSGD</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">OptimizerSGD</span>
 </div>
 <div id=OptimizerSGD_params class="doc-entry">
 <h2 class="name" >OptimizerSGD.params</h2>
@@ -412,21 +242,6 @@ zeros([5, 2])
 <div id=OptimizerSGD_step class="doc-entry">
 <h2 class="name" >OptimizerSGD.step</h2>
 <div class="typestr">(learningRate: number, momentum: number, lossFn: ParamsFn): number</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">learningRate</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">momentum</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">lossFn</span>
-<span class="typestr">ParamsFn</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">number</span>
 </div>
 <div id=OptimizerSGD_steps class="doc-entry">
 <h2 class="name" >OptimizerSGD.steps</h2>
@@ -438,10 +253,10 @@ zeros([5, 2])
 </div>
 <div id=Params class="doc-entry">
 <h2 class="name" >Params</h2>
-<p class="docstr">A collection of named Tensors. Used with OptimizerSGD.
+<p class='docstr'>A collection of named Tensors. Used with OptimizerSGD.
 Iterate over it like this:
 
-<script type=notebook>
+</p><script type=notebook>
 import { Params } from "propel";
 let params = new Params()
 params.randn("A", [2]);
@@ -450,176 +265,71 @@ params.forEach((tensor, name) => {
   console.log(name);
   console.log(tensor);
 });
-</script></p>
-</div>
+</script><p><p></div>
 <div id=Params_forEach class="doc-entry">
 <h2 class="name" >Params.forEach</h2>
 <div class="typestr">(cb: any): void</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">cb</span>
-<span class="typestr">any</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">void</span>
 </div>
 <div id=Params_get class="doc-entry">
 <h2 class="name" >Params.get</h2>
 <div class="typestr">(name: string): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">name</span>
-<span class="typestr">string</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Params_has class="doc-entry">
 <h2 class="name" >Params.has</h2>
 <div class="typestr">(name: string): boolean</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">name</span>
-<span class="typestr">string</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">boolean</span>
 </div>
 <div id=Params_randn class="doc-entry">
 <h2 class="name" >Params.randn</h2>
 <div class="typestr">(name: string, shape: number[], {device, scale}?: { device?: string; scale?: number; }): Tensor</div>
-<p class="docstr">If the given name does not exist in the parameters object, this
+<p class='docstr'>If the given name does not exist in the parameters object, this
 initializes a new random normal tensor. If the name does exist
-in the parameters object, this just returns that stored tensor.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">name</span>
-<span class="typestr">string</span>
-</li>
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">__2</span>
-<span class="typestr">{ device?: string; scale?: number; }</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+in the parameters object, this just returns that stored tensor.<p></div>
 <div id=Params_set class="doc-entry">
 <h2 class="name" >Params.set</h2>
 <div class="typestr">(name: string, t: Tensor): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">name</span>
-<span class="typestr">string</span>
-</li>
-<li>
-<span class="name">t</span>
-<span class="typestr">Tensor</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Params_zeros class="doc-entry">
 <h2 class="name" >Params.zeros</h2>
 <div class="typestr">(name: string, shape: number[], dtype?: DType, device?: string): Tensor</div>
-<p class="docstr">If the given name does not exist in the parameters object, this
+<p class='docstr'>If the given name does not exist in the parameters object, this
 initializes a new tensor with zero values. If the name does exist
-in the parameters object, this just returns that stored tensor.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">name</span>
-<span class="typestr">string</span>
-</li>
-<li>
-<span class="name">shape</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">dtype</span>
-<span class="typestr">DType</span>
-</li>
-<li>
-<span class="name">device</span>
-<span class="typestr">string</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+in the parameters object, this just returns that stored tensor.<p></div>
 <div id=Tensor class="doc-entry">
 <h2 class="name" >Tensor</h2>
-<p class="docstr">Tensor wraps a BasicTensor object. This is the main public
+<p class='docstr'>Tensor wraps a BasicTensor object. This is the main public
 interface to tensor operatiors. Each instance has a unique id for use in
 backprop.  Nothing about Tensors is backend specific.
 Tensor might be renamed to BoxedTensor in the near future. To
 external users this class is called just Tensor. We use a more specific name
 internally so as not to confuse it with the many other tensor classes in
-Propel.</p>
-</div>
+Propel.<p></div>
 <div id=Tensor_abs class="doc-entry">
 <h2 class="name" >Tensor.abs</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies absolute value component-wise to the tensor.
+<p class='docstr'>Applies absolute value component-wise to the tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.abs())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_add class="doc-entry">
 <h2 class="name" >Tensor.add</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_argmax class="doc-entry">
 <h2 class="name" >Tensor.argmax</h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class="docstr">Returns the index with the largest value across an axis of a tensor.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axis</span>
-<span class="typestr">number</span>
-<span class="docstr">defaults to 0.</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns the index with the largest value across an axis of a tensor.<p></div>
 <div id=Tensor_argmin class="doc-entry">
 <h2 class="name" >Tensor.argmin</h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class="docstr">Returns the index with the smallest value across an axis of a tensor.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axis</span>
-<span class="typestr">number</span>
-<span class="docstr">defaults to 0.</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns the index with the smallest value across an axis of a tensor.<p></div>
 <div id=Tensor_assign class="doc-entry">
 <h2 class="name" >Tensor.assign</h2>
 <div class="typestr">(t: Tensor): void</div>
-<p class="docstr">In-place replacement of a tensor.
+<p class='docstr'>In-place replacement of a tensor.
 The argument passed to assign is destroyed and cannot be used after this
-call. (FIXME this behavior is very aggressive.)</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">t</span>
-<span class="typestr">Tensor</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">void</span>
-</div>
+call. (FIXME this behavior is very aggressive.)<p></div>
 <div id=Tensor_basic class="doc-entry">
 <h2 class="name" >Tensor.basic</h2>
 <div class="typestr">BasicTensor</div>
@@ -627,53 +337,28 @@ call. (FIXME this behavior is very aggressive.)</p>
 <div id=Tensor_cast class="doc-entry">
 <h2 class="name" >Tensor.cast</h2>
 <div class="typestr">(dtype: DType): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">dtype</span>
-<span class="typestr">DType</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_constructor class="doc-entry">
 <h2 class="name" >Tensor.constructor</h2>
 <div class="typestr">(t: BasicTensor): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">t</span>
-<span class="typestr">BasicTensor</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_copy class="doc-entry">
 <h2 class="name" >Tensor.copy</h2>
 <div class="typestr">(device?: string): Tensor</div>
-<p class="docstr">Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").
-If device is unspecified, it makse a copy on the same device.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">device</span>
-<span class="typestr">string</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").
+If device is unspecified, it makse a copy on the same device.<p></div>
 <div id=Tensor_cosh class="doc-entry">
 <h2 class="name" >Tensor.cosh</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the hyperbolic cosine function component-wise.
+<p class='docstr'>Applies the hyperbolic cosine function component-wise.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.cosh())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_cpu class="doc-entry">
 <h2 class="name" >Tensor.cpu</h2>
 <div class="typestr">(): Tensor</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_device class="doc-entry">
 <h2 class="name" >Tensor.device</h2>
@@ -682,35 +367,18 @@ plot(x, x.cosh())
 <div id=Tensor_dispose class="doc-entry">
 <h2 class="name" >Tensor.dispose</h2>
 <div class="typestr">(): void</div>
-<p class="docstr">Manually collect garbage. This is required in some form or another
-when using the DL/WebGL backend, see also gc().</p>
-<p><span class='arg-title'>Returns</span> <span class="retType">void</span>
-</div>
+<p class='docstr'>Manually collect garbage. This is required in some form or another
+when using the DL/WebGL backend, see also gc().<p></div>
 <div id=Tensor_div class="doc-entry">
 <h2 class="name" >Tensor.div</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_dot class="doc-entry">
 <h2 class="name" >Tensor.dot</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Dot product of two tensors. For 2D tensors it is equivalent to matrix
+<p class='docstr'>Dot product of two tensors. For 2D tensors it is equivalent to matrix
 multiplication. For 1D tensors to inner product of vectors (without
-complex conjugation). Currently higher order tensors are not supported.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+complex conjugation). Currently higher order tensors are not supported.<p></div>
 <div id=Tensor_dtype class="doc-entry">
 <h2 class="name" >Tensor.dtype</h2>
 <div class="typestr">DType</div>
@@ -718,72 +386,42 @@ complex conjugation). Currently higher order tensors are not supported.</p>
 <div id=Tensor_equal class="doc-entry">
 <h2 class="name" >Tensor.equal</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Element-wise comparison. Returns a tensor with dtype == "bool". </p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Element-wise comparison. Returns a tensor with dtype == "bool". <p></div>
 <div id=Tensor_exp class="doc-entry">
 <h2 class="name" >Tensor.exp</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Exponentiates each element of the tensor.
+<p class='docstr'>Exponentiates each element of the tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.exp())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_flatten class="doc-entry">
 <h2 class="name" >Tensor.flatten</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Return a copy of the tensor collapsed into one dimension.
+<p class='docstr'>Return a copy of the tensor collapsed into one dimension.
 
-<script type=notebook>
+</p><script type=notebook>
 $([[1, 2], [3, 4]]).flatten()
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_getData class="doc-entry">
 <h2 class="name" >Tensor.getData</h2>
 <div class="typestr">(): TypedArray</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">TypedArray</span>
 </div>
 <div id=Tensor_gpu class="doc-entry">
 <h2 class="name" >Tensor.gpu</h2>
 <div class="typestr">(): Tensor</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_greater class="doc-entry">
 <h2 class="name" >Tensor.greater</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Returns a boolean tensor with the truth value of (this > x)
-element-wise.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns a boolean tensor with the truth value of (this > x)
+element-wise.<p></div>
 <div id=Tensor_greaterEqual class="doc-entry">
 <h2 class="name" >Tensor.greaterEqual</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Returns a boolean tensor with the truth value of (this >= x)
-element-wise.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns a boolean tensor with the truth value of (this >= x)
+element-wise.<p></div>
 <div id=Tensor_id class="doc-entry">
 <h2 class="name" >Tensor.id</h2>
 <div class="typestr">number</div>
@@ -791,114 +429,55 @@ element-wise.</p>
 <div id=Tensor_less class="doc-entry">
 <h2 class="name" >Tensor.less</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Returns a boolean tensor with the truth value of (this < x)
-element-wise.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns a boolean tensor with the truth value of (this < x)
+element-wise.<p></div>
 <div id=Tensor_lessEqual class="doc-entry">
 <h2 class="name" >Tensor.lessEqual</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class="docstr">Returns a boolean tensor with the truth value of (this <= x)
-element-wise.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns a boolean tensor with the truth value of (this <= x)
+element-wise.<p></div>
 <div id=Tensor_log class="doc-entry">
 <h2 class="name" >Tensor.log</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the natural logarithm to each element of the tensor.
+<p class='docstr'>Applies the natural logarithm to each element of the tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(0.001, 5, 200);
 plot(x, x.log())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_logSoftmax class="doc-entry">
 <h2 class="name" >Tensor.logSoftmax</h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class="docstr">Numerically stable log(softmax(x)). </p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axis</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Numerically stable log(softmax(x)). <p></div>
 <div id=Tensor_matmul class="doc-entry">
 <h2 class="name" >Tensor.matmul</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_mul class="doc-entry">
 <h2 class="name" >Tensor.mul</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_neg class="doc-entry">
 <h2 class="name" >Tensor.neg</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Negates each element of the tensor.
+<p class='docstr'>Negates each element of the tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.neg())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_oneHot class="doc-entry">
 <h2 class="name" >Tensor.oneHot</h2>
 <div class="typestr">(depth: number, onValue?: number, offValue?: number): Tensor</div>
-<p class="docstr">Build a one-hot tensor from labels.
+<p class='docstr'>Build a one-hot tensor from labels.
 
-<script type=notebook>
+</p><script type=notebook>
 let labels = $([1, 3, 0], {dtype: "int32"});
 labels.oneHot(5);
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">depth</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">onValue</span>
-<span class="typestr">number</span>
-</li>
-<li>
-<span class="name">offValue</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_onesLike class="doc-entry">
 <h2 class="name" >Tensor.onesLike</h2>
 <div class="typestr">(): Tensor</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_rank class="doc-entry">
 <h2 class="name" >Tensor.rank</h2>
@@ -907,131 +486,51 @@ labels.oneHot(5);
 <div id=Tensor_reduceLogSumExp class="doc-entry">
 <h2 class="name" >Tensor.reduceLogSumExp</h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axes</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">keepDims</span>
-<span class="typestr">boolean</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_reduceMax class="doc-entry">
 <h2 class="name" >Tensor.reduceMax</h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class="docstr">Take the maximum value over the given axes.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axes</span>
-<span class="typestr">number[]</span>
-<span class="docstr">defaults to all.</span>
-</li>
-<li>
-<span class="name">keepDims</span>
-<span class="typestr">boolean</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Take the maximum value over the given axes.<p></div>
 <div id=Tensor_reduceMean class="doc-entry">
 <h2 class="name" >Tensor.reduceMean</h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class="docstr">Mean the tensor over the given axes.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axes</span>
-<span class="typestr">number[]</span>
-<span class="docstr">defaults to all.</span>
-</li>
-<li>
-<span class="name">keepDims</span>
-<span class="typestr">boolean</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Mean the tensor over the given axes.<p></div>
 <div id=Tensor_reduceSum class="doc-entry">
 <h2 class="name" >Tensor.reduceSum</h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class="docstr">Sum the tensor over the given axes.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axes</span>
-<span class="typestr">number[]</span>
-<span class="docstr">defaults to all</span>
-</li>
-<li>
-<span class="name">keepDims</span>
-<span class="typestr">boolean</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Sum the tensor over the given axes.<p></div>
 <div id=Tensor_relu class="doc-entry">
 <h2 class="name" >Tensor.relu</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the rectified linear unit function component-wise.
+<p class='docstr'>Applies the rectified linear unit function component-wise.
 Where relu(x) is defined to be max(x, 0).
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.relu())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_reshape class="doc-entry">
 <h2 class="name" >Tensor.reshape</h2>
 <div class="typestr">(newShape: number[]): Tensor</div>
-<p class="docstr">Reshapes the tensor without changing its data. O(1).
+<p class='docstr'>Reshapes the tensor without changing its data. O(1).
 
-<script type=notebook>
+</p><script type=notebook>
 import { arange } from "propel";
 n = 5
 m = 2
 t = arange(m*n)
 console.log(t.reshape([n, m]))
 console.log(t.reshape([m, n]))
-</script></p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">newShape</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_reverse class="doc-entry">
 <h2 class="name" >Tensor.reverse</h2>
 <div class="typestr">(dims?: number[]): Tensor</div>
-<p class="docstr">Reverses specific dimensions of a tensor. </p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">dims</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Reverses specific dimensions of a tensor. <p></div>
 <div id=Tensor_select class="doc-entry">
 <h2 class="name" >Tensor.select</h2>
 <div class="typestr">(t: TensorLike, f: TensorLike): Tensor</div>
-<p class="docstr">Selects elements from `t` or `f`, depending on the condition (this).
-this should be a boolean Tensor.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">t</span>
-<span class="typestr">TensorLike</span>
-</li>
-<li>
-<span class="name">f</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Selects elements from `t` or `f`, depending on the condition (this).
+this should be a boolean Tensor.<p></div>
 <div id=Tensor_shape class="doc-entry">
 <h2 class="name" >Tensor.shape</h2>
 <div class="typestr">number[]</div>
@@ -1039,146 +538,88 @@ this should be a boolean Tensor.</p>
 <div id=Tensor_sigmoid class="doc-entry">
 <h2 class="name" >Tensor.sigmoid</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the sigmoid function component-wise to the tensor.
+<p class='docstr'>Applies the sigmoid function component-wise to the tensor.
 The sigmoid function is defined as 1 / (1 + exp(-x)).
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.sigmoid())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_sign class="doc-entry">
 <h2 class="name" >Tensor.sign</h2>
 <div class="typestr">(): Tensor</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_sinh class="doc-entry">
 <h2 class="name" >Tensor.sinh</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the hyperbolic sine function component-wise.
+<p class='docstr'>Applies the hyperbolic sine function component-wise.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.sinh())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_slice class="doc-entry">
 <h2 class="name" >Tensor.slice</h2>
 <div class="typestr">(begin: number[], size: number[]): Tensor</div>
-<p class="docstr">Return a slice from 'input'.
+<p class='docstr'>Return a slice from 'input'.
 The output tensor is a tensor with dimensions described by 'size' whose
 values are extracted from 'input' starting at the offsets in 'begin'.
 begin[i] specifies the offset into the ith dimension of 'input' to slice
 from.  size[i] specifies the number of elements of the ith dimension of
 'input' to slice. If size[i] is -1, all remaining elements in dimension
 are included in the slice -- this is equivalent to setting
-size[i] = input.shape[i] - begin[i]</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">begin</span>
-<span class="typestr">number[]</span>
-</li>
-<li>
-<span class="name">size</span>
-<span class="typestr">number[]</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+size[i] = input.shape[i] - begin[i]<p></div>
 <div id=Tensor_softmax class="doc-entry">
 <h2 class="name" >Tensor.softmax</h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class="docstr">Returns the softmax activations of a tensor. </p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">axis</span>
-<span class="typestr">number</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Returns the softmax activations of a tensor. <p></div>
 <div id=Tensor_softmaxCE class="doc-entry">
 <h2 class="name" >Tensor.softmaxCE</h2>
 <div class="typestr">(labels: TensorLike): Tensor</div>
-<p class="docstr">Computes softmax cross entropy on logits.
-This is known as softmax_cross_entropy_with_logits in TF.</p>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">labels</span>
-<span class="typestr">TensorLike</span>
-<span class="docstr">A batch_size x num_classes matrix. The caller must ensure
-that each batch of labels represents a valid probability
-distribution. Often labels is one-hot along axis 1.</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+<p class='docstr'>Computes softmax cross entropy on logits.
+This is known as softmax_cross_entropy_with_logits in TF.<p></div>
 <div id=Tensor_square class="doc-entry">
 <h2 class="name" >Tensor.square</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Squares each element of the tensor.
+<p class='docstr'>Squares each element of the tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.square())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_squeeze class="doc-entry">
 <h2 class="name" >Tensor.squeeze</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Remove single-dimensional axes from the shape of a tensor.
+<p class='docstr'>Remove single-dimensional axes from the shape of a tensor.
 
-<script type=notebook>
+</p><script type=notebook>
 $([[[2, 3, 4]]]).squeeze()
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_sub class="doc-entry">
 <h2 class="name" >Tensor.sub</h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">x</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_tanh class="doc-entry">
 <h2 class="name" >Tensor.tanh</h2>
 <div class="typestr">(): Tensor</div>
-<p class="docstr">Applies the hyperbolic tangent function component-wise.
+<p class='docstr'>Applies the hyperbolic tangent function component-wise.
 Where tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).
 
-<script type=notebook>
+</p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.tanh())
-</script></p>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
-</div>
+</script><p><p></div>
 <div id=Tensor_toString class="doc-entry">
 <h2 class="name" >Tensor.toString</h2>
 <div class="typestr">(): string</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">string</span>
 </div>
 <div id=Tensor_transpose class="doc-entry">
 <h2 class="name" >Tensor.transpose</h2>
 <div class="typestr">(perm?: TensorLike): Tensor</div>
-<p><span class='arg-title'>Arguments</span> <ol class="args">
-<li>
-<span class="name">perm</span>
-<span class="typestr">TensorLike</span>
-</li>
-</ol>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 <div id=Tensor_zerosLike class="doc-entry">
 <h2 class="name" >Tensor.zerosLike</h2>
 <div class="typestr">(): Tensor</div>
-<p><span class='arg-title'>Returns</span> <span class="retType">Tensor</span>
 </div>
 </div>
 

@@ -36,6 +36,7 @@
 /x64/
 /website/dist/
 /Win32/
+/gendoc
 
 /CMakeCache.txt
 /cmake_install.cmake
