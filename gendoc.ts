@@ -1,17 +1,3 @@
-/*!
-   Copyright 2018 Propel http://propel.site/.  All rights reserved.
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 /* A custom AST walker for documentation. This was written because
  - TypeDoc is unable to generate documentation for a single exported module, as
    we have with api.ts,
@@ -23,7 +9,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
-import { assert } from "./util";
+import { assert } from "../util";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";
@@ -85,7 +71,7 @@ export function markupDocStr(docstr: string): string {
       case "normal":
         if (isIndented(line)) {
           state = "code";
-          out("<script type=notebook>");
+          out("</p><script type=notebook>");
         }
         out(line);
         break;
@@ -94,7 +80,7 @@ export function markupDocStr(docstr: string): string {
           out(line);
         } else {
           state = "normal";
-          out("</script>");
+          out("</script><p>");
           out(line);
         }
         break;
@@ -102,10 +88,10 @@ export function markupDocStr(docstr: string): string {
   }
 
   if (state === "code") {
-    out("</script>");
+    out("</script><p>");
   }
 
-  return output.join("\n");
+  return "<p class='docstr'>" + output.join("\n") + "<p>";
 }
 
 function htmlBody(inner: string): string {
@@ -123,7 +109,7 @@ function htmlBody(inner: string): string {
   <link rel="stylesheet" href="syntax.css"/>
   <link rel="stylesheet" href="style.css"/>
   <link rel="icon" type="image/png" href="favicon.png">
-  <script src="dist/notebook.js"></script>
+  <script src="propel_website/notebook.js"></script>
   <script type=notebook>
   // Common imports for the docs.
   import { $, grad, linspace, plot } from "propel";
@@ -154,8 +140,7 @@ export function htmlEntry(entry: DocEntry): string {
   }
 
   if (entry.docstr) {
-    const markedUp = markupDocStr(entry.docstr);
-    out += `<p class="docstr">${markedUp}</p>\n`;
+    out += markupDocStr(entry.docstr);
   }
 
   if (entry.args && entry.args.length > 0) {
@@ -442,10 +427,15 @@ export function genJSON(): DocEntry[] {
 }
 
 function writeHTML() {
+  const target = process.argv[2];
+  if (!target) {
+    console.log("Usage: node gendoc/gendoc.ts ./website/docs.html");
+    process.exit(1)
+  }
   const docs = genJSON();
   console.log(JSON.stringify(docs, null, 2));
   const html = toHTML(docs);
-  const fn = path.resolve(__dirname, "website/docs.html");
+  const fn = target;
   fs.writeFileSync(fn, html);
   console.log("Wrote", fn);
 }
