@@ -377,7 +377,9 @@ export class Tensor implements types.BasicTensor {
   /** Returns an element-wise indication of the sign of a number.
    * -1 for negative values and 1 for positive values.
    */
-  sign = () => ops.sign(this);
+  sign(): Tensor {
+    return ops.sign(this);
+  }
 
   /** Return a slice from 'input'.
    * The output tensor is a tensor with dimensions described by 'size' whose
