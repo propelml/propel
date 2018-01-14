@@ -13,11 +13,12 @@
    limitations under the License.
  */
 import * as gendoc from "./gendoc";
-import { test } from "./test";
-import { assert } from "./util";
+import { test } from "../test";
+import { assert } from "../util";
 
 test(async function gendoc_smoke() {
   const docs = gendoc.genJSON();
+  console.log("length", docs.length);
   assert(docs.length > 5);
   assert(docs.map(e => e.name).indexOf("Tensor") >= 0);
   const html = gendoc.toHTML(docs);
@@ -34,13 +35,13 @@ test(async function gendoc_markupDocStr() {
   ].join("\n");
   const actual = gendoc.markupDocStr(docstr);
   const expected = [
-    "hello",
+    "<p class='docstr'>hello",
     "",
-    "<script type=notebook>",
+    "</p><script type=notebook>",
     "x = 1 + 2;",
-    "</script>",
+    "</script><p>",
     "",
-    "world",
+    "world</p>",
   ].join("\n");
   // console.log("actual", JSON.stringify(actual));
   // console.log("expected", JSON.stringify(expected));
@@ -57,9 +58,9 @@ test(async function gendoc_markupDocStr2() {
   ].join("\n");
   const actual = gendoc.markupDocStr(docstr);
   const expected = [
-    "like this:",
+    "<p class='docstr'>like this:",
     "",
-    "<script type=notebook>",
+    "</p><script type=notebook>",
     "params.forEach((tensor, name) => {",
     "  console.log(tensor);",
     "});",

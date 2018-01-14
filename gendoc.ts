@@ -94,7 +94,8 @@ export function markupDocStr(docstr: string): string {
     out("</script><p>");
   }
 
-  return "<p class='docstr'>" + output.join("\n") + "<p>";
+  const f = "<p class='docstr'>" + output.join("\n") + "</p>";
+  return f.replace("<p></p>", "");
 }
 
 function htmlBody(inner: string): string {
@@ -241,8 +242,9 @@ export function genJSON(): DocEntry[] {
 
     // Find the SourceFile object corresponding to our rootFile.
     let rootSourceFile = null;
+    let rootBaseName = path.basename(rootFile);
     for (const sourceFile of program.getSourceFiles()) {
-      if (sourceFile.fileName.endsWith(rootFile)) {
+      if (sourceFile.fileName.endsWith(rootBaseName)) {
         rootSourceFile = sourceFile;
         break;
       }
@@ -421,7 +423,7 @@ export function genJSON(): DocEntry[] {
   }
 
   // TODO use tsconfig.json instead of supplying config.
-  gen("api.ts", {
+  gen(__dirname + "/../api.ts", {
     target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS
   });
 
