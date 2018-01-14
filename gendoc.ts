@@ -6,7 +6,7 @@
    full control.
 */
 // tslint:disable:object-literal-sort-keys
-import { execSync } from "child_process";
+import { spawnSync, execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
@@ -41,24 +41,52 @@ function startsWithUpperCase(s: string): boolean {
   return s[0].toLowerCase() !== s[0];
 }
 
-const fileCommitShas = new Map<string, string>();
+const fileGithubUrls = new Map<string, string>();
 
-// Get the commit hash for that most recent commit that updated a file.
-// This is done to reduce churn in the generated documentation; as long as a
-// file doesn't change, the "source" links in the documentation won't change
-// either.
-function getCommitShaForFile(fileName: string) {
-  if (fileCommitShas.has(fileName)) {
-    return fileCommitShas.get(fileName);
+function getGithubUrlForFile(fileName: string) {
+  if (fileGithubUrls.has(fileName)) {
+    return fileGithubUrls.get(fileName);
   }
 
-  const stdout = execSync(`git log -n1 --pretty="%H" -- "${fileName}"`, {
+  const baseName = path.basename(fileName);
+
+  // Sanity check: verify that the file in it's current form has been
+  // committed.
+  let stdout = execSync(`git status --porcelain -- "${fileName}"`, {
+    encoding: "utf8"
+  });
+  if (/\S/.test(stdout)) {
+    throw new Error(`File has been modified since last commit: ${baseName}.`);
+  }
+
+  // Get the commit hash for that most recent commit that updated a file.
+  // This is done to reduce churn in the generated documentation; as long as a
+  // file doesn't change, the "source" links in the documentation won't change
+  // either.
+  stdout = execSync(`git log -n1 --pretty="%H" -- "${fileName}"`, {
     cwd: `${__dirname}/..`,
     encoding: "utf8"
   });
-  const sha = stdout.match(/^\s*([0-9a-fA-F]{40})\s*$/)[1];
-  fileCommitShas.set(fileName, sha);
-  return sha;
+  const commitSha = stdout.match(/^\s*([0-9a-fA-F]{40})\s*$/)[1];
+  const githubUrl = `${repoBaseUrl}/blob/${commitSha}/${baseName}`;
+
+  // Sanity check: verify that the inferred github url can actually be
+  // loaded.
+  const { status, stderr } = spawnSync(
+    process.execPath,
+    [`${__dirname}/check_url.js`, githubUrl],
+    { encoding: "utf8" }
+  );
+  if (status !== 0) {
+    const msg =
+      `File committed but not available on github: ${baseName}\n` +
+      `You probably need to push your branch to github.\n` +
+      stderr;
+    throw new Error(msg);
+  }
+
+  fileGithubUrls.set(fileName, githubUrl);
+  return githubUrl;
 }
 
 function toHTMLIndex(docs: DocEntry[]): string {
@@ -389,7 +417,6 @@ export function genJSON(): DocEntry[] {
 
   function getSourceUrl(node: ts.Node): string {
     const sourceFile = node.getSourceFile();
-    const fileName = path.basename(sourceFile.fileName);
     const docNodes = (node as any).jsDoc; // No public API for this?
     const startNode = (docNodes && docNodes[0]) || node;
     const [startLine, endLine] = [
@@ -398,8 +425,8 @@ export function genJSON(): DocEntry[] {
     ].map(pos => sourceFile.getLineAndCharacterOfPosition(pos).line + 1);
     const sourceRange =
       endLine > startLine ? `L${startLine}-L${endLine}` : `L${startLine}`;
-    const commitSha = getCommitShaForFile(sourceFile.fileName);
-    return `${repoBaseUrl}/blob/${commitSha}/${fileName}#${sourceRange}`;
+    const githubUrl = getGithubUrlForFile(sourceFile.fileName);
+    return `${githubUrl}#${sourceRange}`;
   }
 
   function visitClass(node: ts.ClassDeclaration) {
