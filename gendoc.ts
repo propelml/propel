@@ -6,10 +6,13 @@
    full control.
 */
 // tslint:disable:object-literal-sort-keys
+import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
 import { assert } from "../util";
+
+const repoBaseUrl = "https://github.com/propelml/propel";
 
 // Displays text for arguments and return value.
 const printArgs = false;
@@ -21,6 +24,7 @@ export interface DocEntry {
   docstr?: string;
   args?: ArgEntry[];
   retType?: string;
+  sourceUrl?: string;
 }
 
 export interface ArgEntry {
@@ -35,6 +39,26 @@ function toTagName(s: string): string {
 
 function startsWithUpperCase(s: string): boolean {
   return s[0].toLowerCase() !== s[0];
+}
+
+const fileCommitShas = new Map<string, string>();
+
+// Get the commit hash for that most recent commit that updated a file.
+// This is done to reduce churn in the generated documentation; as long as a
+// file doesn't change, the "source" links in the documentation won't change
+// either.
+function getCommitShaForFile(fileName: string) {
+  if (fileCommitShas.has(fileName)) {
+    return fileCommitShas.get(fileName);
+  }
+
+  const stdout = execSync(`git log -n1 --pretty="%H" -- "${fileName}"`, {
+    cwd: `${__dirname}/..`,
+    encoding: "utf8"
+  });
+  const sha = stdout.match(/^\s*([0-9a-fA-F]{40})\s*$/)[1];
+  fileCommitShas.set(fileName, sha);
+  return sha;
 }
 
 function toHTMLIndex(docs: DocEntry[]): string {
@@ -136,8 +160,11 @@ function htmlBody(inner: string): string {
 }
 
 export function htmlEntry(entry: DocEntry): string {
-  let out = `<h2 class="name" >`;
-  out += `${entry.name}</h2>\n`;
+  let out = `<h2 class="name">${entry.name}`;
+  if (entry.sourceUrl) {
+    out += ` <a class="source-link" href="${entry.sourceUrl}">source</a>`;
+  }
+  out += `</h2>\n`;
 
   if (entry.typestr) {
     out += `<div class="typestr">${entry.typestr}</div>\n`;
@@ -349,6 +376,7 @@ export function genJSON(): DocEntry[] {
       args: argEntries,
       retType: checker.typeToString(retType),
       docstr,
+      sourceUrl: getSourceUrl(methodNode)
     });
   }
 
@@ -357,6 +385,21 @@ export function genJSON(): DocEntry[] {
       return ts.displayPartsToString(sym.getDocumentationComment());
     }
     return undefined;
+  }
+
+  function getSourceUrl(node: ts.Node): string {
+    const sourceFile = node.getSourceFile();
+    const fileName = path.basename(sourceFile.fileName);
+    const docNodes = (node as any).jsDoc; // No public API for this?
+    const startNode = (docNodes && docNodes[0]) || node;
+    const [startLine, endLine] = [
+      startNode.getStart(),
+      node.getEnd()
+    ].map(pos => sourceFile.getLineAndCharacterOfPosition(pos).line + 1);
+    const sourceRange =
+      endLine > startLine ? `L${startLine}-L${endLine}` : `L${startLine}`;
+    const commitSha = getCommitShaForFile(sourceFile.fileName);
+    return `${repoBaseUrl}/blob/${commitSha}/${fileName}#${sourceRange}`;
   }
 
   function visitClass(node: ts.ClassDeclaration) {
@@ -371,6 +414,7 @@ export function genJSON(): DocEntry[] {
       name: className,
       kind: "class",
       docstr,
+      sourceUrl: getSourceUrl(node)
     });
 
     for (const m of node.members) {
@@ -415,6 +459,7 @@ export function genJSON(): DocEntry[] {
       kind: "property",
       typestr: checker.typeToString(t),
       docstr: getFlatDocstr(symbol),
+      sourceUrl: getSourceUrl(node)
     });
   }
 
