@@ -294,6 +294,11 @@ header h1 {
   padding: 8px 0 4px 12px;
 }
 
+.doc-entry > .name > .source-link {
+  font-size: 10px;
+  color: #666;
+}
+
 .doc-entry .arg-title {
   font-weight: bold;
 }
