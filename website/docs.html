@@ -111,7 +111,7 @@
 </div>
 <div class="doc-entries">
 <div id=_ class="doc-entry">
-<h2 class="name">$ <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L24-L36">source</a></h2>
+<h2 class="name">$ <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L24-L36">source</a></h2>
 <div class="typestr">(t: TensorLike, args?: TensorOpts): Tensor</div>
 <p class='docstr'>Turns a javascript array of numbers into a tensor. Like this:
 
@@ -119,22 +119,22 @@
 $([[1, 2, 3], [4, 5, 6]]).square();
 </script><p>
 
-If a tensor is given to $, it simply returns it.<p></div>
+If a tensor is given to $, it simply returns it.</p></div>
 <div id=arange class="doc-entry">
-<h2 class="name">arange <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L69-L100">source</a></h2>
+<h2 class="name">arange <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L69-L100">source</a></h2>
 <div class="typestr">(...args: number[]): Tensor</div>
 <p class='docstr'>Return evenly spaced numbers over a specified interval.
 
 </p><script type=notebook>
 import { arange } from "propel"
 arange(10);
-</script><p><p></div>
+</script></div>
 <div id=eye class="doc-entry">
-<h2 class="name">eye <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L52-L56">source</a></h2>
+<h2 class="name">eye <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L52-L56">source</a></h2>
 <div class="typestr">(size: number, dtype?: DType): Tensor</div>
-<p class='docstr'>Returns the identity matrix of a given size. <p></div>
+<p class='docstr'>Returns the identity matrix of a given size. </p></div>
 <div id=fill class="doc-entry">
-<h2 class="name">fill <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L113-L121">source</a></h2>
+<h2 class="name">fill <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L113-L121">source</a></h2>
 <div class="typestr">(value: TensorLike, shape: number[]): Tensor</div>
 <p class='docstr'>fill returns a new tensor of the given shape, filled with constant values
 specified by the `value` argument. `value` must be a scalar tensor.
@@ -142,9 +142,9 @@ specified by the `value` argument. `value` must be a scalar tensor.
 </p><script type=notebook>
 import { fill } from "propel"
 fill(31337, [2, 2])
-</script><p><p></div>
+</script></div>
 <div id=grad class="doc-entry">
-<h2 class="name">grad <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/backprop.ts#L147-L161">source</a></h2>
+<h2 class="name">grad <a class="source-link" href="https://github.com/propelml/propel/blob/ddf2d176317b64cc2e8ebfb80e8e81750038b4e6/backprop.ts#L147-L161">source</a></h2>
 <div class="typestr">(f: any, argnum?: number): (...args: TensorLike[]) => Tensor</div>
 <p class='docstr'>grad(f) returns a gradient function. If f is a function that maps
 R^n to R^m, then the gradient function maps R^n to R^n.
@@ -155,21 +155,21 @@ the function f. For example:
 let f = (x) => $(x).square()
 g = grad(f)  // g(x) = 2*x
 g(10) // is 2 * 10
-</script><p><p></div>
+</script></div>
 <div id=gradAndVal class="doc-entry">
-<h2 class="name">gradAndVal <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/backprop.ts#L163-L170">source</a></h2>
+<h2 class="name">gradAndVal <a class="source-link" href="https://github.com/propelml/propel/blob/ddf2d176317b64cc2e8ebfb80e8e81750038b4e6/backprop.ts#L163-L170">source</a></h2>
 <div class="typestr">(f: any, argnum?: number): (...args: TensorLike[]) => [Tensor, Tensor]</div>
 </div>
 <div id=gradParams class="doc-entry">
-<h2 class="name">gradParams <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/backprop.ts#L92-L124">source</a></h2>
+<h2 class="name">gradParams <a class="source-link" href="https://github.com/propelml/propel/blob/ddf2d176317b64cc2e8ebfb80e8e81750038b4e6/backprop.ts#L92-L124">source</a></h2>
 <div class="typestr">(f: ParamsFn, names?: string[]): (params: Params) => [Params, Tensor]</div>
 </div>
 <div id=imshow class="doc-entry">
-<h2 class="name">imshow <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/matplotlib.ts#L191-L217">source</a></h2>
+<h2 class="name">imshow <a class="source-link" href="https://github.com/propelml/propel/blob/f843cbd8409da061ae613d4d7085305c8656a31c/matplotlib.ts#L191-L217">source</a></h2>
 <div class="typestr">(image: Tensor): void</div>
 </div>
 <div id=linspace class="doc-entry">
-<h2 class="name">linspace <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L58-L67">source</a></h2>
+<h2 class="name">linspace <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L58-L67">source</a></h2>
 <div class="typestr">(start: number, stop: number, num?: number): Tensor</div>
 <p class='docstr'>Returns num evenly spaced samples, calculated over the interval
 [start, stop].
@@ -177,40 +177,40 @@ g(10) // is 2 * 10
 </p><script type=notebook>
 import { linspace } from "propel"
 linspace(-1, 1, 5);
-</script><p><p></div>
+</script></div>
 <div id=listDevices class="doc-entry">
-<h2 class="name">listDevices <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L38-L45">source</a></h2>
+<h2 class="name">listDevices <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L38-L45">source</a></h2>
 <div class="typestr">(): string[]</div>
 <p class='docstr'>Returns a list of available device names.
 
 </p><script type=notebook>
 import { listDevices } from "propel";
 listDevices();
-</script><p><p></div>
+</script></div>
 <div id=multigrad class="doc-entry">
-<h2 class="name">multigrad <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/backprop.ts#L75-L84">source</a></h2>
+<h2 class="name">multigrad <a class="source-link" href="https://github.com/propelml/propel/blob/ddf2d176317b64cc2e8ebfb80e8e81750038b4e6/backprop.ts#L75-L84">source</a></h2>
 <div class="typestr">(f: any, argnums?: number[]): (...args: TensorLike[]) => Tensor[]</div>
 <p class='docstr'>Returns a function which differentiates f with respect to the given
-argnum indexes.<p></div>
+argnum indexes.</p></div>
 <div id=multigradAndVal class="doc-entry">
-<h2 class="name">multigradAndVal <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/backprop.ts#L126-L145">source</a></h2>
+<h2 class="name">multigradAndVal <a class="source-link" href="https://github.com/propelml/propel/blob/ddf2d176317b64cc2e8ebfb80e8e81750038b4e6/backprop.ts#L126-L145">source</a></h2>
 <div class="typestr">(f: any, argnums?: number[]): (...args: TensorLike[]) => [Tensor[], Tensor]</div>
 </div>
 <div id=ones class="doc-entry">
-<h2 class="name">ones <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L133-L141">source</a></h2>
+<h2 class="name">ones <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L133-L141">source</a></h2>
 <div class="typestr">(shape: number[], opts?: TensorOpts): Tensor</div>
 <p class='docstr'>Return a new tensor of given shape and dtype, filled with ones.
 
 </p><script type=notebook>
 import { ones } from "propel"
 ones([2, 3])
-</script><p><p></div>
+</script></div>
 <div id=plot class="doc-entry">
-<h2 class="name">plot <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/matplotlib.ts#L154-L189">source</a></h2>
+<h2 class="name">plot <a class="source-link" href="https://github.com/propelml/propel/blob/f843cbd8409da061ae613d4d7085305c8656a31c/matplotlib.ts#L154-L189">source</a></h2>
 <div class="typestr">(...args: any[]): void</div>
 </div>
 <div id=randn class="doc-entry">
-<h2 class="name">randn <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L102-L111">source</a></h2>
+<h2 class="name">randn <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L102-L111">source</a></h2>
 <div class="typestr">(shape: number[]): Tensor</div>
 <p class='docstr'>Produces a new tensor with random values, drawn from the stanard normal
 distribution.
@@ -218,41 +218,41 @@ distribution.
 </p><script type=notebook>
 import { randn } from "propel"
 randn([3, 4])
-</script><p><p></div>
+</script></div>
 <div id=zeros class="doc-entry">
-<h2 class="name">zeros <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L123-L131">source</a></h2>
+<h2 class="name">zeros <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L123-L131">source</a></h2>
 <div class="typestr">(shape: number[], opts?: TensorOpts): Tensor</div>
 <p class='docstr'>Return a new tensor of given shape and dtype, filled with zeros.
 
 </p><script type=notebook>
 import { zeros } from "propel"
 zeros([5, 2])
-</script><p><p></div>
+</script></div>
 <div id=OptimizerSGD class="doc-entry">
-<h2 class="name">OptimizerSGD</h2>
-<p class='docstr'>Stochastic gradient descent with momentum. <p></div>
+<h2 class="name">OptimizerSGD <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L214-L278">source</a></h2>
+<p class='docstr'>Stochastic gradient descent with momentum. </p></div>
 <div id=OptimizerSGD_constructor class="doc-entry">
-<h2 class="name">OptimizerSGD.constructor <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L228-L232">source</a></h2>
+<h2 class="name">OptimizerSGD.constructor <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L228-L232">source</a></h2>
 <div class="typestr">(): OptimizerSGD</div>
 </div>
 <div id=OptimizerSGD_params class="doc-entry">
-<h2 class="name">OptimizerSGD.params</h2>
+<h2 class="name">OptimizerSGD.params <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L217">source</a></h2>
 <div class="typestr">Params</div>
 </div>
 <div id=OptimizerSGD_step class="doc-entry">
-<h2 class="name">OptimizerSGD.step <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L234-L277">source</a></h2>
+<h2 class="name">OptimizerSGD.step <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L234-L277">source</a></h2>
 <div class="typestr">(learningRate: number, momentum: number, lossFn: ParamsFn): number</div>
 </div>
 <div id=OptimizerSGD_steps class="doc-entry">
-<h2 class="name">OptimizerSGD.steps</h2>
+<h2 class="name">OptimizerSGD.steps <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L216">source</a></h2>
 <div class="typestr">number</div>
 </div>
 <div id=OptimizerSGD_velocity class="doc-entry">
-<h2 class="name">OptimizerSGD.velocity</h2>
+<h2 class="name">OptimizerSGD.velocity <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L226">source</a></h2>
 <div class="typestr">Params</div>
 </div>
 <div id=Params class="doc-entry">
-<h2 class="name">Params</h2>
+<h2 class="name">Params <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L143-L212">source</a></h2>
 <p class='docstr'>A collection of named Tensors. Used with OptimizerSGD.
 Iterate over it like this:
 
@@ -265,242 +265,242 @@ params.forEach((tensor, name) => {
   console.log(name);
   console.log(tensor);
 });
-</script><p><p></div>
+</script></div>
 <div id=Params_forEach class="doc-entry">
-<h2 class="name">Params.forEach <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L173-L175">source</a></h2>
+<h2 class="name">Params.forEach <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L173-L175">source</a></h2>
 <div class="typestr">(cb: any): void</div>
 </div>
 <div id=Params_get class="doc-entry">
-<h2 class="name">Params.get <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L164-L166">source</a></h2>
+<h2 class="name">Params.get <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L164-L166">source</a></h2>
 <div class="typestr">(name: string): Tensor</div>
 </div>
 <div id=Params_has class="doc-entry">
-<h2 class="name">Params.has <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L160-L162">source</a></h2>
+<h2 class="name">Params.has <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L160-L162">source</a></h2>
 <div class="typestr">(name: string): boolean</div>
 </div>
 <div id=Params_randn class="doc-entry">
-<h2 class="name">Params.randn <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L177-L193">source</a></h2>
+<h2 class="name">Params.randn <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L177-L193">source</a></h2>
 <div class="typestr">(name: string, shape: number[], {device, scale}?: { device?: string; scale?: number; }): Tensor</div>
 <p class='docstr'>If the given name does not exist in the parameters object, this
 initializes a new random normal tensor. If the name does exist
-in the parameters object, this just returns that stored tensor.<p></div>
+in the parameters object, this just returns that stored tensor.</p></div>
 <div id=Params_set class="doc-entry">
-<h2 class="name">Params.set <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L168-L171">source</a></h2>
+<h2 class="name">Params.set <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L168-L171">source</a></h2>
 <div class="typestr">(name: string, t: Tensor): Tensor</div>
 </div>
 <div id=Params_zeros class="doc-entry">
-<h2 class="name">Params.zeros <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/api.ts#L195-L211">source</a></h2>
+<h2 class="name">Params.zeros <a class="source-link" href="https://github.com/propelml/propel/blob/2cdd5598ac4a8c1ead2b3e7979b4fa1cf1a9b2ec/api.ts#L195-L211">source</a></h2>
 <div class="typestr">(name: string, shape: number[], dtype?: DType, device?: string): Tensor</div>
 <p class='docstr'>If the given name does not exist in the parameters object, this
 initializes a new tensor with zero values. If the name does exist
-in the parameters object, this just returns that stored tensor.<p></div>
+in the parameters object, this just returns that stored tensor.</p></div>
 <div id=Tensor class="doc-entry">
-<h2 class="name">Tensor</h2>
+<h2 class="name">Tensor <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L28-L510">source</a></h2>
 <p class='docstr'>Tensor wraps a BasicTensor object. This is the main public
 interface to tensor operatiors. Each instance has a unique id for use in
 backprop.  Nothing about Tensors is backend specific.
 Tensor might be renamed to BoxedTensor in the near future. To
 external users this class is called just Tensor. We use a more specific name
 internally so as not to confuse it with the many other tensor classes in
-Propel.<p></div>
+Propel.</p></div>
 <div id=Tensor_abs class="doc-entry">
-<h2 class="name">Tensor.abs <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L258-L265">source</a></h2>
+<h2 class="name">Tensor.abs <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L258-L265">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies absolute value component-wise to the tensor.
 
 </p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.abs())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_add class="doc-entry">
-<h2 class="name">Tensor.add <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L144-L146">source</a></h2>
+<h2 class="name">Tensor.add <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L144-L146">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_argmax class="doc-entry">
-<h2 class="name">Tensor.argmax <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L290-L296">source</a></h2>
+<h2 class="name">Tensor.argmax <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L290-L296">source</a></h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class='docstr'>Returns the index with the largest value across an axis of a tensor.<p></div>
+<p class='docstr'>Returns the index with the largest value across an axis of a tensor.</p></div>
 <div id=Tensor_argmin class="doc-entry">
-<h2 class="name">Tensor.argmin <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L298-L304">source</a></h2>
+<h2 class="name">Tensor.argmin <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L298-L304">source</a></h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class='docstr'>Returns the index with the smallest value across an axis of a tensor.<p></div>
+<p class='docstr'>Returns the index with the smallest value across an axis of a tensor.</p></div>
 <div id=Tensor_assign class="doc-entry">
-<h2 class="name">Tensor.assign <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L62-L77">source</a></h2>
+<h2 class="name">Tensor.assign <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L62-L77">source</a></h2>
 <div class="typestr">(t: Tensor): void</div>
 <p class='docstr'>In-place replacement of a tensor.
 The argument passed to assign is destroyed and cannot be used after this
-call. (FIXME this behavior is very aggressive.)<p></div>
+call. (FIXME this behavior is very aggressive.)</p></div>
 <div id=Tensor_basic class="doc-entry">
-<h2 class="name">Tensor.basic</h2>
+<h2 class="name">Tensor.basic <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L42">source</a></h2>
 <div class="typestr">BasicTensor</div>
 </div>
 <div id=Tensor_cast class="doc-entry">
-<h2 class="name">Tensor.cast <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L140-L142">source</a></h2>
+<h2 class="name">Tensor.cast <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L140-L142">source</a></h2>
 <div class="typestr">(dtype: DType): Tensor</div>
 </div>
 <div id=Tensor_constructor class="doc-entry">
-<h2 class="name">Tensor.constructor <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L47-L51">source</a></h2>
+<h2 class="name">Tensor.constructor <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L47-L51">source</a></h2>
 <div class="typestr">(t: BasicTensor): Tensor</div>
 </div>
 <div id=Tensor_copy class="doc-entry">
-<h2 class="name">Tensor.copy <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L117-L124">source</a></h2>
+<h2 class="name">Tensor.copy <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L117-L124">source</a></h2>
 <div class="typestr">(device?: string): Tensor</div>
 <p class='docstr'>Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").
-If device is unspecified, it makse a copy on the same device.<p></div>
+If device is unspecified, it makse a copy on the same device.</p></div>
 <div id=Tensor_cosh class="doc-entry">
-<h2 class="name">Tensor.cosh <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L219-L226">source</a></h2>
+<h2 class="name">Tensor.cosh <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L219-L226">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the hyperbolic cosine function component-wise.
 
 </p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.cosh())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_cpu class="doc-entry">
-<h2 class="name">Tensor.cpu <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L133-L138">source</a></h2>
+<h2 class="name">Tensor.cpu <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L133-L138">source</a></h2>
 <div class="typestr">(): Tensor</div>
 </div>
 <div id=Tensor_device class="doc-entry">
-<h2 class="name">Tensor.device</h2>
+<h2 class="name">Tensor.device <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L101-L103">source</a></h2>
 <div class="typestr">string</div>
 </div>
 <div id=Tensor_dispose class="doc-entry">
-<h2 class="name">Tensor.dispose <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L53-L60">source</a></h2>
+<h2 class="name">Tensor.dispose <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L53-L60">source</a></h2>
 <div class="typestr">(): void</div>
 <p class='docstr'>Manually collect garbage. This is required in some form or another
-when using the DL/WebGL backend, see also gc().<p></div>
+when using the DL/WebGL backend, see also gc().</p></div>
 <div id=Tensor_div class="doc-entry">
-<h2 class="name">Tensor.div <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L156-L158">source</a></h2>
+<h2 class="name">Tensor.div <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L156-L158">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_dot class="doc-entry">
-<h2 class="name">Tensor.dot <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L437-L479">source</a></h2>
+<h2 class="name">Tensor.dot <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L439-L481">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 <p class='docstr'>Dot product of two tensors. For 2D tensors it is equivalent to matrix
 multiplication. For 1D tensors to inner product of vectors (without
-complex conjugation). Currently higher order tensors are not supported.<p></div>
+complex conjugation). Currently higher order tensors are not supported.</p></div>
 <div id=Tensor_dtype class="doc-entry">
-<h2 class="name">Tensor.dtype</h2>
+<h2 class="name">Tensor.dtype <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L105-L107">source</a></h2>
 <div class="typestr">DType</div>
 </div>
 <div id=Tensor_equal class="doc-entry">
-<h2 class="name">Tensor.equal <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L335-L338">source</a></h2>
+<h2 class="name">Tensor.equal <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L335-L338">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
-<p class='docstr'>Element-wise comparison. Returns a tensor with dtype == "bool". <p></div>
+<p class='docstr'>Element-wise comparison. Returns a tensor with dtype == "bool". </p></div>
 <div id=Tensor_exp class="doc-entry">
-<h2 class="name">Tensor.exp <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L183-L190">source</a></h2>
+<h2 class="name">Tensor.exp <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L183-L190">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Exponentiates each element of the tensor.
 
 </p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.exp())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_flatten class="doc-entry">
-<h2 class="name">Tensor.flatten <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L410-L416">source</a></h2>
+<h2 class="name">Tensor.flatten <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L412-L418">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Return a copy of the tensor collapsed into one dimension.
 
 </p><script type=notebook>
 $([[1, 2], [3, 4]]).flatten()
-</script><p><p></div>
+</script></div>
 <div id=Tensor_getData class="doc-entry">
-<h2 class="name">Tensor.getData <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L93-L95">source</a></h2>
+<h2 class="name">Tensor.getData <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L93-L95">source</a></h2>
 <div class="typestr">(): TypedArray</div>
 </div>
 <div id=Tensor_gpu class="doc-entry">
-<h2 class="name">Tensor.gpu <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L126-L131">source</a></h2>
+<h2 class="name">Tensor.gpu <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L126-L131">source</a></h2>
 <div class="typestr">(): Tensor</div>
 </div>
 <div id=Tensor_greater class="doc-entry">
-<h2 class="name">Tensor.greater <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L340-L345">source</a></h2>
+<h2 class="name">Tensor.greater <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L340-L345">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 <p class='docstr'>Returns a boolean tensor with the truth value of (this > x)
-element-wise.<p></div>
+element-wise.</p></div>
 <div id=Tensor_greaterEqual class="doc-entry">
-<h2 class="name">Tensor.greaterEqual <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L347-L352">source</a></h2>
+<h2 class="name">Tensor.greaterEqual <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L347-L352">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 <p class='docstr'>Returns a boolean tensor with the truth value of (this >= x)
-element-wise.<p></div>
+element-wise.</p></div>
 <div id=Tensor_id class="doc-entry">
-<h2 class="name">Tensor.id</h2>
+<h2 class="name">Tensor.id <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L45">source</a></h2>
 <div class="typestr">number</div>
 </div>
 <div id=Tensor_less class="doc-entry">
-<h2 class="name">Tensor.less <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L354-L359">source</a></h2>
+<h2 class="name">Tensor.less <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L354-L359">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 <p class='docstr'>Returns a boolean tensor with the truth value of (this < x)
-element-wise.<p></div>
+element-wise.</p></div>
 <div id=Tensor_lessEqual class="doc-entry">
-<h2 class="name">Tensor.lessEqual <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L361-L366">source</a></h2>
+<h2 class="name">Tensor.lessEqual <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L361-L366">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 <p class='docstr'>Returns a boolean tensor with the truth value of (this <= x)
-element-wise.<p></div>
+element-wise.</p></div>
 <div id=Tensor_log class="doc-entry">
-<h2 class="name">Tensor.log <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L192-L199">source</a></h2>
+<h2 class="name">Tensor.log <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L192-L199">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the natural logarithm to each element of the tensor.
 
 </p><script type=notebook>
 x = linspace(0.001, 5, 200);
 plot(x, x.log())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_logSoftmax class="doc-entry">
-<h2 class="name">Tensor.logSoftmax <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L432-L435">source</a></h2>
+<h2 class="name">Tensor.logSoftmax <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L434-L437">source</a></h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class='docstr'>Numerically stable log(softmax(x)). <p></div>
+<p class='docstr'>Numerically stable log(softmax(x)). </p></div>
 <div id=Tensor_matmul class="doc-entry">
-<h2 class="name">Tensor.matmul <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L160-L162">source</a></h2>
+<h2 class="name">Tensor.matmul <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L160-L162">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_mul class="doc-entry">
-<h2 class="name">Tensor.mul <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L152-L154">source</a></h2>
+<h2 class="name">Tensor.mul <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L152-L154">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_neg class="doc-entry">
-<h2 class="name">Tensor.neg <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L174-L181">source</a></h2>
+<h2 class="name">Tensor.neg <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L174-L181">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Negates each element of the tensor.
 
 </p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.neg())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_oneHot class="doc-entry">
-<h2 class="name">Tensor.oneHot <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L481-L491">source</a></h2>
+<h2 class="name">Tensor.oneHot <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L483-L493">source</a></h2>
 <div class="typestr">(depth: number, onValue?: number, offValue?: number): Tensor</div>
 <p class='docstr'>Build a one-hot tensor from labels.
 
 </p><script type=notebook>
 let labels = $([1, 3, 0], {dtype: "int32"});
 labels.oneHot(5);
-</script><p><p></div>
+</script></div>
 <div id=Tensor_onesLike class="doc-entry">
-<h2 class="name">Tensor.onesLike <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L164-L167">source</a></h2>
+<h2 class="name">Tensor.onesLike <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L164-L167">source</a></h2>
 <div class="typestr">(): Tensor</div>
 </div>
 <div id=Tensor_rank class="doc-entry">
-<h2 class="name">Tensor.rank</h2>
+<h2 class="name">Tensor.rank <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L97-L99">source</a></h2>
 <div class="typestr">number</div>
 </div>
 <div id=Tensor_reduceLogSumExp class="doc-entry">
-<h2 class="name">Tensor.reduceLogSumExp <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L330-L333">source</a></h2>
+<h2 class="name">Tensor.reduceLogSumExp <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L330-L333">source</a></h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
 </div>
 <div id=Tensor_reduceMax class="doc-entry">
-<h2 class="name">Tensor.reduceMax <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L322-L328">source</a></h2>
+<h2 class="name">Tensor.reduceMax <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L322-L328">source</a></h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class='docstr'>Take the maximum value over the given axes.<p></div>
+<p class='docstr'>Take the maximum value over the given axes.</p></div>
 <div id=Tensor_reduceMean class="doc-entry">
-<h2 class="name">Tensor.reduceMean <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L314-L320">source</a></h2>
+<h2 class="name">Tensor.reduceMean <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L314-L320">source</a></h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class='docstr'>Mean the tensor over the given axes.<p></div>
+<p class='docstr'>Mean the tensor over the given axes.</p></div>
 <div id=Tensor_reduceSum class="doc-entry">
-<h2 class="name">Tensor.reduceSum <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L306-L312">source</a></h2>
+<h2 class="name">Tensor.reduceSum <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L306-L312">source</a></h2>
 <div class="typestr">(axes?: number[], keepDims?: boolean): Tensor</div>
-<p class='docstr'>Sum the tensor over the given axes.<p></div>
+<p class='docstr'>Sum the tensor over the given axes.</p></div>
 <div id=Tensor_relu class="doc-entry">
-<h2 class="name">Tensor.relu <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L238-L246">source</a></h2>
+<h2 class="name">Tensor.relu <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L238-L246">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the rectified linear unit function component-wise.
 Where relu(x) is defined to be max(x, 0).
@@ -508,9 +508,9 @@ Where relu(x) is defined to be max(x, 0).
 </p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.relu())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_reshape class="doc-entry">
-<h2 class="name">Tensor.reshape <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L397-L408">source</a></h2>
+<h2 class="name">Tensor.reshape <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L399-L410">source</a></h2>
 <div class="typestr">(newShape: number[]): Tensor</div>
 <p class='docstr'>Reshapes the tensor without changing its data. O(1).
 
@@ -521,22 +521,22 @@ m = 2
 t = arange(m*n)
 console.log(t.reshape([n, m]))
 console.log(t.reshape([m, n]))
-</script><p><p></div>
+</script></div>
 <div id=Tensor_reverse class="doc-entry">
-<h2 class="name">Tensor.reverse <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L275-L288">source</a></h2>
+<h2 class="name">Tensor.reverse <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L275-L288">source</a></h2>
 <div class="typestr">(dims?: number[]): Tensor</div>
-<p class='docstr'>Reverses specific dimensions of a tensor. <p></div>
+<p class='docstr'>Reverses specific dimensions of a tensor. </p></div>
 <div id=Tensor_select class="doc-entry">
-<h2 class="name">Tensor.select <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L368-L375">source</a></h2>
+<h2 class="name">Tensor.select <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L368-L375">source</a></h2>
 <div class="typestr">(t: TensorLike, f: TensorLike): Tensor</div>
 <p class='docstr'>Selects elements from `t` or `f`, depending on the condition (this).
-this should be a boolean Tensor.<p></div>
+this should be a boolean Tensor.</p></div>
 <div id=Tensor_shape class="doc-entry">
-<h2 class="name">Tensor.shape</h2>
+<h2 class="name">Tensor.shape <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L109-L111">source</a></h2>
 <div class="typestr">number[]</div>
 </div>
 <div id=Tensor_sigmoid class="doc-entry">
-<h2 class="name">Tensor.sigmoid <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L248-L256">source</a></h2>
+<h2 class="name">Tensor.sigmoid <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L248-L256">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the sigmoid function component-wise to the tensor.
 The sigmoid function is defined as 1 / (1 + exp(-x)).
@@ -544,22 +544,23 @@ The sigmoid function is defined as 1 / (1 + exp(-x)).
 </p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.sigmoid())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_sign class="doc-entry">
-<h2 class="name">Tensor.sign <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L380">source</a></h2>
+<h2 class="name">Tensor.sign <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L377-L382">source</a></h2>
 <div class="typestr">(): Tensor</div>
-</div>
+<p class='docstr'>Returns an element-wise indication of the sign of a number.
+-1 for negative values and 1 for positive values.</p></div>
 <div id=Tensor_sinh class="doc-entry">
-<h2 class="name">Tensor.sinh <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L210-L217">source</a></h2>
+<h2 class="name">Tensor.sinh <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L210-L217">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the hyperbolic sine function component-wise.
 
 </p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.sinh())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_slice class="doc-entry">
-<h2 class="name">Tensor.slice <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L382-L395">source</a></h2>
+<h2 class="name">Tensor.slice <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L384-L397">source</a></h2>
 <div class="typestr">(begin: number[], size: number[]): Tensor</div>
 <p class='docstr'>Return a slice from 'input'.
 The output tensor is a tensor with dimensions described by 'size' whose
@@ -568,39 +569,39 @@ begin[i] specifies the offset into the ith dimension of 'input' to slice
 from.  size[i] specifies the number of elements of the ith dimension of
 'input' to slice. If size[i] is -1, all remaining elements in dimension
 are included in the slice -- this is equivalent to setting
-size[i] = input.shape[i] - begin[i]<p></div>
+size[i] = input.shape[i] - begin[i]</p></div>
 <div id=Tensor_softmax class="doc-entry">
-<h2 class="name">Tensor.softmax <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L427-L430">source</a></h2>
+<h2 class="name">Tensor.softmax <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L429-L432">source</a></h2>
 <div class="typestr">(axis?: number): Tensor</div>
-<p class='docstr'>Returns the softmax activations of a tensor. <p></div>
+<p class='docstr'>Returns the softmax activations of a tensor. </p></div>
 <div id=Tensor_softmaxCE class="doc-entry">
-<h2 class="name">Tensor.softmaxCE <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L493-L507">source</a></h2>
+<h2 class="name">Tensor.softmaxCE <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L495-L509">source</a></h2>
 <div class="typestr">(labels: TensorLike): Tensor</div>
 <p class='docstr'>Computes softmax cross entropy on logits.
-This is known as softmax_cross_entropy_with_logits in TF.<p></div>
+This is known as softmax_cross_entropy_with_logits in TF.</p></div>
 <div id=Tensor_square class="doc-entry">
-<h2 class="name">Tensor.square <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L201-L208">source</a></h2>
+<h2 class="name">Tensor.square <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L201-L208">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Squares each element of the tensor.
 
 </p><script type=notebook>
 x = linspace(-5, 5, 200);
 plot(x, x.square())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_squeeze class="doc-entry">
-<h2 class="name">Tensor.squeeze <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L418-L425">source</a></h2>
+<h2 class="name">Tensor.squeeze <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L420-L427">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Remove single-dimensional axes from the shape of a tensor.
 
 </p><script type=notebook>
 $([[[2, 3, 4]]]).squeeze()
-</script><p><p></div>
+</script></div>
 <div id=Tensor_sub class="doc-entry">
-<h2 class="name">Tensor.sub <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L148-L150">source</a></h2>
+<h2 class="name">Tensor.sub <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L148-L150">source</a></h2>
 <div class="typestr">(x: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_tanh class="doc-entry">
-<h2 class="name">Tensor.tanh <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L228-L236">source</a></h2>
+<h2 class="name">Tensor.tanh <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L228-L236">source</a></h2>
 <div class="typestr">(): Tensor</div>
 <p class='docstr'>Applies the hyperbolic tangent function component-wise.
 Where tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).
@@ -608,17 +609,17 @@ Where tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).
 </p><script type=notebook>
 x = linspace(-10, 10, 200);
 plot(x, x.tanh())
-</script><p><p></div>
+</script></div>
 <div id=Tensor_toString class="doc-entry">
-<h2 class="name">Tensor.toString <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L113-L115">source</a></h2>
+<h2 class="name">Tensor.toString <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L113-L115">source</a></h2>
 <div class="typestr">(): string</div>
 </div>
 <div id=Tensor_transpose class="doc-entry">
-<h2 class="name">Tensor.transpose <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L267-L273">source</a></h2>
+<h2 class="name">Tensor.transpose <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L267-L273">source</a></h2>
 <div class="typestr">(perm?: TensorLike): Tensor</div>
 </div>
 <div id=Tensor_zerosLike class="doc-entry">
-<h2 class="name">Tensor.zerosLike <a class="source-link" href="https://github.com/propelml/propel/blob/2ed97c23fbf978fe8dae81f5788cf553427ec9f1/tensor.ts#L169-L172">source</a></h2>
+<h2 class="name">Tensor.zerosLike <a class="source-link" href="https://github.com/propelml/propel/blob/be7dc4cab65af227479ac998df3fc0c7e5138ca1/tensor.ts#L169-L172">source</a></h2>
 <div class="typestr">(): Tensor</div>
 </div>
 </div>
