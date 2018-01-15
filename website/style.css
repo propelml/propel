@@ -170,10 +170,11 @@ header p {
   line-height: 28px;
   font-weight: 100;
   margin-top: -2px;
+  margin-bottom: 0;
 }
 
 header h1 {
-  margin: 40px 0 0 12px;
+  margin: 16px 0 0 12px;
 }
 
 .nav-buttons {
@@ -280,9 +281,18 @@ header h1 {
   padding: 0;
 }
 
-.docindex li:hover {
+.docindex a {
+  display: block;
+  width: 100%;
+  height: 28px;
+}
+
+.docindex a:hover,
+.docindex a:focus,
+.docindex a:active {
   color: rgb(31, 119, 180);
   text-decoration: underline;
+  background-color: #dddde3;
 }
 
 .doc-entry > .name {
@@ -315,6 +325,29 @@ header h1 {
 
 .nb-footer {
   text-align: center;
+  padding: 0 16px;
+}
+
+.global-header {
+  width: 100%;
+  background-color: #dddde3;
+}
+
+.global-header-inner {
+  display: flex;
+  max-width: 930px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 32px;
+  margin: 0 auto;
+}
+
+.home-link {
+  background: url('propelLogo.svg');
+  background-repeat: no-repeat;
+  width: 80px;
 }
 
 #newCell {
