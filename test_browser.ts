@@ -31,7 +31,8 @@ const TESTS = [
   // These web pages are simply loaded; the test passes if no unhandled
   // exceptions are thrown on the page.
   { href: "index.html" },
-  { href: "notebook.html" },
+  { href: "notebook/index.html" },
+  { href: "docs/index.html" },
   { href: "notebook_mnist.html" }
 ];
 

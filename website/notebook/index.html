@@ -4,22 +4,22 @@
   <meta charset="utf-8">
   <meta id="viewport" name="viewport" content="width=device-width,
     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <script src="propel_website/notebook.js"></script>
-  <link rel="stylesheet" href="normalize.css"/>
-  <link rel="stylesheet" href="skeleton.css"/>
-  <link rel="stylesheet" href="codemirror.css"/>
-  <link rel="stylesheet" href="syntax.css"/>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <script src="/propel_website/notebook.js"></script>
+  <link rel="stylesheet" href="/normalize.css"/>
+  <link rel="stylesheet" href="/skeleton.css"/>
+  <link rel="stylesheet" href="/codemirror.css"/>
+  <link rel="stylesheet" href="/syntax.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>Propel Notebook</title>
 </head>
 <body class="notebook">
   <div class="global-header">
     <div class="global-header-inner">
-      <a href="index.html">Propel</a>
-      <a href="#">Login</a>
+      <a class="button" href="/">← Propel</a>
+      <!-- <a class="button" href="#">Login</a> -->
     </div>
-    </div>
+  </div>
   <div class="container">
     <header class="row">
       <div class="column">
@@ -47,7 +47,7 @@ plot(x, f(x),
 </script>
 
 <script type="notebook">
-f = await fetch('mnist/README');
+f = await fetch('/mnist/README');
 t = await f.text();
 t;
 </script>
