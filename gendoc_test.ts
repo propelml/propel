@@ -28,6 +28,7 @@ test(async function gendoc_smoke() {
 test(async function gendoc_markupDocStr() {
   const docstr = [
     "hello",
+    "gamma <=> tau & phi",
     "",
     "  x = 1 + 2;",
     "",
@@ -36,6 +37,7 @@ test(async function gendoc_markupDocStr() {
   const actual = gendoc.markupDocStr(docstr);
   const expected = [
     "<p class='docstr'>hello",
+    "gamma &lt;=&gt; tau &amp; phi",
     "",
     "</p><script type=notebook>",
     "x = 1 + 2;",

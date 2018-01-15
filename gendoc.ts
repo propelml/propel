@@ -8,6 +8,7 @@
 // tslint:disable:object-literal-sort-keys
 import { spawnSync, execSync } from "child_process";
 import * as fs from "fs";
+import * as he from "he";
 import * as path from "path";
 import * as ts from "typescript";
 import { assert } from "../util";
@@ -39,6 +40,12 @@ function toTagName(s: string): string {
 
 function startsWithUpperCase(s: string): boolean {
   return s[0].toLowerCase() !== s[0];
+}
+
+// Encode characters with a special meaning as HTML entities.
+// For example, "<" will be mapped to "&lt;".
+function enc(s: string): string {
+  return he.encode(s, { useNamedReferences: true });
 }
 
 const fileGithubUrls = new Map<string, string>();
@@ -95,7 +102,9 @@ function toHTMLIndex(docs: DocEntry[]): string {
   for (const entry of docs) {
     const tag = toTagName(entry.name);
     const classes = "name " + entry.kind;
-    out += `<li><a href="#${tag}" class="${classes}">${entry.name}</a></li>\n`;
+    out += `<li><a href="#${tag}" class="${classes}">${enc(
+      entry.name
+    )}</a></li>\n`;
   }
   out += `</ol>\n`;
   return out;
@@ -127,18 +136,23 @@ export function markupDocStr(docstr: string): string {
       case "normal":
         if (isIndented(line)) {
           state = "code";
-          out("</p><script type=notebook>");
+          out(`</p><script type="notebook">`);
         }
-        out(line);
         break;
       case "code":
-        if (isIndented(line)) {
-          out(line);
-        } else {
+        if (!isIndented(line)) {
           state = "normal";
           out("</script><p>");
-          out(line);
         }
+        break;
+    }
+
+    switch (state) {
+      case "normal":
+        out(enc(line));
+        break;
+      case "code":
+        out(line);
         break;
     }
   }
@@ -189,14 +203,14 @@ function htmlBody(inner: string): string {
 }
 
 export function htmlEntry(entry: DocEntry): string {
-  let out = `<h2 class="name">${entry.name}`;
+  let out = `<h2 class="name">${enc(entry.name)}`;
   if (entry.sourceUrl) {
-    out += ` <a class="source-link" href="${entry.sourceUrl}">source</a>`;
+    out += ` <a class="source-link" href="${enc(entry.sourceUrl)}">source</a>`;
   }
   out += `</h2>\n`;
 
   if (entry.typestr) {
-    out += `<div class="typestr">${entry.typestr}</div>\n`;
+    out += `<div class="typestr">${enc(entry.typestr)}</div>\n`;
   }
 
   if (entry.docstr) {
@@ -207,10 +221,10 @@ export function htmlEntry(entry: DocEntry): string {
     out += `<p><span class='arg-title'>Arguments</span> <ol class="args">\n`;
     for (const arg of entry.args) {
       out += `<li>\n`;
-      out += `<span class="name">${arg.name}</span>\n`;
-      out += `<span class="typestr">${arg.typestr}</span>\n`;
+      out += `<span class="name">${enc(arg.name)}</span>\n`;
+      out += `<span class="typestr">${enc(arg.typestr)}</span>\n`;
       if (arg.docstr) {
-        out += `<span class="docstr">${arg.docstr}</span>\n`;
+        out += `<span class="docstr">${enc(arg.docstr)}</span>\n`;
       }
       out += `</li>\n`;
     }
@@ -218,7 +232,7 @@ export function htmlEntry(entry: DocEntry): string {
   }
   if (printArgs && entry.retType) {
     out += `<p><span class='arg-title'>Returns</span> `;
-    out += `<span class="retType">${entry.retType}</span>\n`;
+    out += `<span class="retType">${enc(entry.retType)}</span>\n`;
   }
   return out;
 }
