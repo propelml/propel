@@ -119,7 +119,7 @@ function unindent(s: string): string {
 }
 
 // Given some bit of documentation text, this function can detect indented
-// portions denoting examples and mark them up with <script type=notebook>.
+// portions denoting examples and mark them up with <script type="notebook">.
 export function markupDocStr(docstr: string): string {
   const input = docstr.split("\n");
   const output = [];
@@ -161,7 +161,7 @@ export function markupDocStr(docstr: string): string {
     out("</script><p>");
   }
 
-  const f = "<p class='docstr'>" + output.join("\n") + "</p>";
+  const f = `<p class="docstr">` + output.join("\n") + "</p>";
   return f.replace("<p></p>", "");
 }
 
@@ -181,7 +181,7 @@ function htmlBody(inner: string): string {
   <link rel="stylesheet" href="/style.css"/>
   <link rel="icon" type="image/png" href="/favicon.png">
   <script src="/propel_website/notebook.js"></script>
-  <script type=notebook>
+  <script type="notebook">
   // Common imports for the docs.
   import { $, grad, linspace, plot } from "propel";
   </script>
@@ -260,7 +260,7 @@ export function toHTML(docs: DocEntry[]): string {
   out += `<div class="doc-entries">\n`;
   for (const entry of docs) {
     const tag = toTagName(entry.name);
-    out += `<div id=${tag} class="doc-entry">\n`;
+    out += `<div id="${tag}" class="doc-entry">\n`;
     out += htmlEntry(entry);
     out += "</div>\n";
   }

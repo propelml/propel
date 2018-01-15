@@ -36,10 +36,10 @@ test(async function gendoc_markupDocStr() {
   ].join("\n");
   const actual = gendoc.markupDocStr(docstr);
   const expected = [
-    "<p class='docstr'>hello",
+    "<p class=\"docstr\">hello",
     "gamma &lt;=&gt; tau &amp; phi",
     "",
-    "</p><script type=notebook>",
+    "</p><script type=\"notebook\">",
     "x = 1 + 2;",
     "</script><p>",
     "",
@@ -60,9 +60,9 @@ test(async function gendoc_markupDocStr2() {
   ].join("\n");
   const actual = gendoc.markupDocStr(docstr);
   const expected = [
-    "<p class='docstr'>like this:",
+    "<p class=\"docstr\">like this:",
     "",
-    "</p><script type=notebook>",
+    "</p><script type=\"notebook\">",
     "params.forEach((tensor, name) => {",
     "  console.log(tensor);",
     "});",
