@@ -170,7 +170,7 @@ function htmlBody(inner: string): string {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8"/>
   <title>Propel Docs</title>
   <meta id="viewport" name="viewport" content="width=device-width,
     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -179,7 +179,7 @@ function htmlBody(inner: string): string {
   <link rel="stylesheet" href="/codemirror.css"/>
   <link rel="stylesheet" href="/syntax.css"/>
   <link rel="stylesheet" href="/style.css"/>
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" href="/favicon.png"/>
   <script src="/propel_website/notebook.js"></script>
   <script type="notebook">
   // Common imports for the docs.
