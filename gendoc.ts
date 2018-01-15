@@ -159,13 +159,13 @@ function htmlBody(inner: string): string {
   <title>Propel Docs</title>
   <meta id="viewport" name="viewport" content="width=device-width,
     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <link rel="stylesheet" href="normalize.css"/>
-  <link rel="stylesheet" href="skeleton.css"/>
-  <link rel="stylesheet" href="codemirror.css"/>
-  <link rel="stylesheet" href="syntax.css"/>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <script src="propel_website/notebook.js"></script>
+  <link rel="stylesheet" href="/normalize.css"/>
+  <link rel="stylesheet" href="/skeleton.css"/>
+  <link rel="stylesheet" href="/codemirror.css"/>
+  <link rel="stylesheet" href="/syntax.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script src="/propel_website/notebook.js"></script>
   <script type=notebook>
   // Common imports for the docs.
   import { $, grad, linspace, plot } from "propel";
@@ -506,7 +506,7 @@ export function genJSON(): DocEntry[] {
 function writeHTML() {
   const target = process.argv[2];
   if (!target) {
-    console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs.html");
+    console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs/index.html");
     process.exit(1)
   }
   const docs = genJSON();
