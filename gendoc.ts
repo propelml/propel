@@ -53,6 +53,7 @@ function getGithubUrlForFile(fileName: string) {
   // Sanity check: verify that the file in it's current form has been
   // committed.
   let stdout = execSync(`git status --porcelain -- "${fileName}"`, {
+    cwd: path.dirname(fileName),
     encoding: "utf8"
   });
   if (/\S/.test(stdout)) {
@@ -64,7 +65,7 @@ function getGithubUrlForFile(fileName: string) {
   // file doesn't change, the "source" links in the documentation won't change
   // either.
   stdout = execSync(`git log -n1 --pretty="%H" -- "${fileName}"`, {
-    cwd: `${__dirname}/..`,
+    cwd: path.dirname(fileName),
     encoding: "utf8"
   });
   const commitSha = stdout.match(/^\s*([0-9a-fA-F]{40})\s*$/)[1];
