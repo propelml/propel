@@ -24,7 +24,7 @@ const TESTS = [
   // page, the test fails.
   {
     doneMsg: /^DONE.*failed: 0/,
-    href: "test_isomorphic.html",
+    href: "test.html#script=propel_website/test_isomorphic.js",
     timeout: 30 * 1000
   },
 
