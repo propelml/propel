@@ -13,27 +13,40 @@
    limitations under the License.
  */
 
-import { IS_NODE } from "./util";
+import { inspect } from "util";
+import { assert, global, IS_NODE } from "./util";
 
-const filterExpr = IS_NODE ? process.argv[2]
-                           : new URL(location.href).hash.slice(1);
+type TestFunction = () => void | Promise<void>;
+
+interface TestDefinition {
+  fn: TestFunction;
+  name: string;
+}
+
+const filterExpr = IS_NODE
+  ? process.argv[2]
+  : new URL(location.href).hash.slice(1);
 const filterRegExp = filterExpr ? new RegExp(filterExpr, "i") : null;
-const tests = [];
 
-function filter(fn) {
-  if (filterRegExp) {
-    return filterRegExp.test(fn.name);
-  } else {
-    return true;
+const tests: TestDefinition[] = [];
+
+export function test(t: TestDefinition | TestFunction): void {
+  const fn: TestFunction = typeof t === "function" ? t : t.fn;
+  const name: string = t.name;
+
+  if (!name) {
+    throw new Error("Test function may not be anonymous");
+  }
+  if (filter(name)) {
+    tests.push({ fn, name });
   }
 }
 
-export function test(fn) {
-  if (!fn.name) {
-    throw new Error("Test function may not be anonymous");
-  }
-  if (filter(fn)) {
-    tests.push(fn);
+function filter(name: string): boolean {
+  if (filterRegExp) {
+    return filterRegExp.test(name);
+  } else {
+    return true;
   }
 }
 
@@ -42,14 +55,16 @@ async function runTests() {
   let failed = 0;
 
   for (let i = 0; i < tests.length; i++) {
-    const fn = tests[i];
+    const { fn, name } = tests[i];
 
-    console.warn("%d/%d +%d -%d: %s",
-                 i + 1,
-                 tests.length,
-                 passed,
-                 failed,
-                 fn.name);
+    console.warn(
+      "%d/%d +%d -%d: %s",
+      i + 1,
+      tests.length,
+      passed,
+      failed,
+      name
+    );
 
     try {
       const r = await fn();
