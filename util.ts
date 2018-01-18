@@ -27,7 +27,7 @@ if (IS_NODE) {
   // This is currently node.js specific.
   // TODO: move to api.js once it can be shared with the browser.
   const s = require("util").inspect.custom;
-  Tensor.prototype[s] = function(depth, opts) {
+  Tensor.prototype[s] = function(depth: number, opts: {}) {
     return this.toString();
   };
 
