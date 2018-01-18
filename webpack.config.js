@@ -12,7 +12,8 @@ const common = {
         options: {
           compilerOptions: {
             "declaration": false,
-            "target": "es5"
+            "target": "es5",
+            sourceMap: true
           }
         }
       }
@@ -20,7 +21,8 @@ const common = {
   },
   resolve: {
     extensions: [ '.ts', '.js' ]
-  }
+  },
+  devtool: "source-map"
 };
 
 function webConfig(name, libraryName) {
