@@ -18,8 +18,10 @@ import { BasicTensor, FlatVector, isTypedArray, RegularArray, Shape,
 
 const debug = false;
 const J = JSON.stringify;
+const globalEval = eval;
 export const IS_WEB = typeof window !== "undefined";
 export const IS_NODE = !IS_WEB;
+export const global = globalEval(IS_WEB ? "window" : "global");
 
 if (IS_NODE) {
   // This is currently node.js specific.
