@@ -55,7 +55,7 @@ async function runTests() {
       const r = await fn();
       passed++;
     } catch (e) {
-      console.error(e);
+      console.error((e && e.message) || e);
       failed++;
     }
   }
