@@ -23,11 +23,26 @@ interface TestDefinition {
   name: string;
 }
 
-const filterExpr = IS_NODE
-  ? process.argv[2]
-  : new URL(location.href).hash.slice(1);
-const filterRegExp = filterExpr ? new RegExp(filterExpr, "i") : null;
+/* A subset of the tests can be ran by providing a filter expression.
+ * In Node.js the filter is specified on the command line:
+ *
+ *   ts-node test_node log        # all tests with 'log' in the name
+ *   ts-node test_node ^util      # tests starting with 'util'
+ *
+ * In the browser, the filter is specified as part of the url:
+ *
+ *   http://localhost:9876/test.html#script=some/script.js&filter=log
+ *   http://localhost:9876/test.html#script=some/script.js&filter=^util
+ */
+let filterExpr: string = null;
+if (IS_NODE) {
+  if (process.argv.length >= 2) filterExpr = process.argv[2];
+} else {
+  const match = /(?:^#|&)filter=(.*?)(?:&|$)/.exec(window.location.hash);
+  if (match !== null) filterExpr = match[1];
+}
 
+const filterRegExp = filterExpr ? new RegExp(filterExpr, "i") : null;
 const tests: TestDefinition[] = [];
 
 export function test(t: TestDefinition | TestFunction): void {
