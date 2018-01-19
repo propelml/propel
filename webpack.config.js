@@ -67,6 +67,10 @@ const testsIso = webConfig("test_isomorphic", "yyy");
 testsIso.output.path = `${__dirname}/build/propel_website`;
 testsIso.entry = "./test_isomorphic.ts";
 
+const testsDl = webConfig("test_dl", "zzz");
+testsDl.output.path = `${__dirname}/build/propel_website`;
+testsDl.entry = "./test_dl.ts";
+
 const notebook = webConfig("notebook", "xxx");
 notebook.output.path = `${__dirname}/build/propel_website`;
 notebook.entry = "./notebook.ts";
@@ -84,5 +88,6 @@ module.exports = [
   propelNode,
   propelWeb,
   testsIso,
+  testsDl,
   notebook,
 ];

@@ -25,6 +25,11 @@ import "./util"; // To make unhandled rejections crash node.
 // Hit 'enter' in the terminal to stop the webserver and exit the browser.
 const debug = !!process.env.PP_TEST_DEBUG;
 
+// When the PP_TEST_DL environment variable is set, the DeepLearn test suite is
+// also executed. Since webgl isn't available in headless mode, this flag
+// causes Chromium to run in interactive mode.
+const testdl = !!process.env.PP_TEST_DL;
+
 const TESTS = [
   // This page loads and runs all the webpack'ed unit tests.
   // The test harness logs "DONE bla bla" to the console when done.
@@ -44,6 +49,14 @@ const TESTS = [
   { href: "notebook_mnist.html" }
 ];
 
+if (testdl) {
+  TESTS.unshift({
+    doneMsg: /^DONE.*failed: 0/,
+    href: "test.html#script=propel_website/test_dl.js",
+    timeout: 2 * 60 * 1000
+  });
+}
+
 (async() => {
   let passed = 0, failed = 0;
 
@@ -53,7 +66,7 @@ const TESTS = [
 
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    headless: !debug,
+    headless: !debug && !testdl
   });
 
   for (let i = 0; i < TESTS.length; i++) {
