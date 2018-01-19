@@ -1,19 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <meta id="viewport" name="viewport" content="width=device-width,
     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <script src="propel_website/notebook.js"></script>
-  <link rel="stylesheet" href="normalize.css">
-  <link rel="stylesheet" href="skeleton.css">
-  <link rel="stylesheet" href="codemirror.css"/>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <script src="/propel_website/notebook.js"></script>
+  <link rel="stylesheet" href="/normalize.css"/>
+  <link rel="stylesheet" href="/skeleton.css"/>
+  <link rel="stylesheet" href="/codemirror.css"/>
+  <link rel="stylesheet" href="/syntax.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>Propel Notebook</title>
 </head>
-<body>
-  <div class="container">
-    <div id=cells>
+<body class="notebook">
+<div class="container">
+<div id="cells"> <!-- #cells is magical. Don't remove. -->
 
 <script type="notebook">
 import { load, imshow } from "mnist";
@@ -115,10 +117,10 @@ async function train() {
 // train();
 </script>
 
-    </div> <!-- #cells -->
-    <div class="row">
-      <button id="newCell">New Cell</button>
-    </div>
-  </div> <!-- container -->
+</div> <!-- #cells -->
+<div class="container nb-footer">
+  <button id="newCell">New Cell</button>
+</div>
+</div> <!-- container -->
 </body>
 </html>
