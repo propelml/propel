@@ -15,10 +15,12 @@
 </head>
 <body class="notebook">
 <div class="container">
+
 <div id="cells"> <!-- #cells is magical. Don't remove. -->
 
 <script type="notebook">
-import { load, imshow } from "mnist";
+import { load } from "mnist";
+import { imshow } from "propel";
 
 datasetTrain = load("train", 256, false);
 datasetTrain.next().then(({images, labels}) => {
@@ -118,9 +120,11 @@ async function train() {
 </script>
 
 </div> <!-- #cells -->
+
 <div class="container nb-footer">
   <button id="newCell">New Cell</button>
 </div>
+
 </div> <!-- container -->
 </body>
 </html>
