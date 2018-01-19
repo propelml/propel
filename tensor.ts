@@ -173,6 +173,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Negates each element of the tensor.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-5, 5, 200);
    *    plot(x, x.neg())
    */
@@ -182,6 +183,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Exponentiates each element of the tensor.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-5, 5, 200);
    *    plot(x, x.exp())
    */
@@ -191,6 +193,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Applies the natural logarithm to each element of the tensor.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(0.001, 5, 200);
    *    plot(x, x.log())
    */
@@ -200,6 +203,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Squares each element of the tensor.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-5, 5, 200);
    *    plot(x, x.square())
    */
@@ -209,6 +213,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Applies the hyperbolic sine function component-wise.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-5, 5, 200);
    *    plot(x, x.sinh())
    */
@@ -218,6 +223,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Applies the hyperbolic cosine function component-wise.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-5, 5, 200);
    *    plot(x, x.cosh())
    */
@@ -228,6 +234,7 @@ export class Tensor implements types.BasicTensor {
   /** Applies the hyperbolic tangent function component-wise.
    * Where tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-10, 10, 200);
    *    plot(x, x.tanh())
    */
@@ -238,6 +245,7 @@ export class Tensor implements types.BasicTensor {
   /** Applies the rectified linear unit function component-wise.
    * Where relu(x) is defined to be max(x, 0).
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-10, 10, 200);
    *    plot(x, x.relu())
    */
@@ -248,6 +256,7 @@ export class Tensor implements types.BasicTensor {
   /** Applies the sigmoid function component-wise to the tensor.
    * The sigmoid function is defined as 1 / (1 + exp(-x)).
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-10, 10, 200);
    *    plot(x, x.sigmoid())
    */
@@ -257,6 +266,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Applies absolute value component-wise to the tensor.
    *
+   *    import { linspace, plot } from "propel";
    *    x = linspace(-10, 10, 200);
    *    plot(x, x.abs())
    */
