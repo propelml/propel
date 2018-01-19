@@ -17,6 +17,14 @@ import * as puppeteer from "puppeteer";
 import { format } from "util";
 import "./util"; // To make unhandled rejections crash node.
 
+// The PP_TEST_DEBUG environment variable can be used to run the tests in
+// debug mode. When debug mode is enabled...
+//   - the browser runs in interactive (not headless) mode.
+//   - tabs stay open after running the tests.
+//   - the built-in webserver remains online after running the tests.
+// Hit 'enter' in the terminal to stop the webserver and exit the browser.
+const debug = !!process.env.PP_TEST_DEBUG;
+
 const TESTS = [
   // This page loads and runs all the webpack'ed unit tests.
   // The test harness logs "DONE bla bla" to the console when done.
@@ -35,8 +43,6 @@ const TESTS = [
   { href: "docs/index.html" },
   { href: "notebook_mnist.html" }
 ];
-
-const debug = !!process.env.PP_DEBUG;
 
 (async() => {
   let passed = 0, failed = 0;
