@@ -12,27 +12,12 @@ import * as he from "he";
 import * as path from "path";
 import * as ts from "typescript";
 import { assert } from "../util";
+import { DocEntry, ArgEntry } from "../website";
 
 const repoBaseUrl = "https://github.com/propelml/propel";
 
 // Displays text for arguments and return value.
 const printArgs = false;
-
-export interface DocEntry {
-  kind: "class" | "method" | "property";
-  name: string;
-  typestr?: string;
-  docstr?: string;
-  args?: ArgEntry[];
-  retType?: string;
-  sourceUrl?: string;
-}
-
-export interface ArgEntry {
-  name: string;
-  typestr?: string;
-  docstr?: string;
-}
 
 function toTagName(s: string): string {
   return s.replace(/[.$]/g, "_");
@@ -90,7 +75,7 @@ function getGithubUrlForFile(fileName: string) {
       `File committed but not available on github: ${baseName}\n` +
       `You probably need to push your branch to github.\n` +
       stderr;
-    throw new Error(msg);
+    console.warn(msg);
   }
 
   fileGithubUrls.set(fileName, githubUrl);
@@ -521,15 +506,19 @@ export function genJSON(): DocEntry[] {
 function writeHTML() {
   const target = process.argv[2];
   if (!target) {
-    console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs/index.html");
+    console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs.json");
     process.exit(1)
   }
   const docs = genJSON();
-  console.log(JSON.stringify(docs, null, 2));
+  const j = JSON.stringify(docs, null, 2);
+  fs.writeFileSync(target, j);
+  console.log("wrote", target);
+  /*
   const html = toHTML(docs);
   const fn = target;
   fs.writeFileSync(fn, html);
   console.log("Wrote", fn);
+  */
 }
 
 if (require.main === module) {
