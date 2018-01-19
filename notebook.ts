@@ -196,14 +196,21 @@ class Cell {
   async execute() {
     lastExecutedCellId = this.id;
     const source = this.editor.getValue();
-    let rval;
+    let rval, error;
     try {
       rval = await evalCell(source, this.id);
     } catch (e) {
-      console.error(e.stack);
+      error = e instanceof Error ? e : new Error(e);
     }
-    if (rval !== undefined ) {
+    if (error ) {
+      console.error(error.stack);
+    } else if (rval !== undefined) {
       console.log(rval);
+    }
+    // When running tests, rethrow any errors. This ensures that errors
+    // occurring during notebook cell evaluation result in test failure.
+    if (error && window.navigator.webdriver) {
+      throw error;
     }
   }
 }
