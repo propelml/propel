@@ -6,13 +6,9 @@ import { test } from "./test";
 import { assert, global, IS_NODE } from "./util";
 
 class Suite {
-  name: string;
+  constructor(readonly name: string) {}
   before: HookFn[] = [];
   after: HookFn[] = [];
-
-  constructor(name: string) {
-    this.name = name;
-  }
 }
 
 let currentSuite: Suite = null;
@@ -106,21 +102,17 @@ const matchTesters: MatchTesters = {
   }
 };
 
-class MatchersBase {
-  actual: any;
-  constructor(actual: any) {
-    this.actual = actual;
-  }
-}
-
-class PositiveMatchers extends MatchersBase {
+class PositiveMatchers /* implements Matchers */ {
+  constructor(private actual: any) {}
   get not(): Matchers {
     const m = new NegativeMatchers(this.actual);
     return (m as any) as Matchers;
   }
 }
 
-class NegativeMatchers extends MatchersBase {}
+class NegativeMatchers /* implements Matchers */ {
+  constructor(private actual: any) {}
+}
 
 for (const name of Object.keys(matchTesters)) {
   const pos = PositiveMatchers.prototype as any;
