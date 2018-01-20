@@ -1,0 +1,26 @@
+version: "{branch}-build{build}"
+
+environment:
+  matrix:
+    - appveyor_build_worker_image: Visual Studio 2015
+      nodejs_version: 8
+
+clone_folder: c:\propel
+clone_depth: 1
+
+install:
+  - ps: Install-Product node $env:nodejs_version x64
+  - cmd: npm install -g node-gyp ts-node typescript
+
+before_build:
+  - cmd: git config core.symlinks true
+  - cmd: git reset --hard
+  - cmd: git submodule update --init --recursive --depth=1
+  - cmd: npm rebuild puppeteer
+  - cmd: dir node_modules
+  - cmd: dir node_modules\ts-node
+
+build_script:
+  - cmd: node tools\presubmit.js
+
+test: off
