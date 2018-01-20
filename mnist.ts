@@ -22,7 +22,7 @@ export interface Elements {
 
 export function makeHref(fn) {
   if (IS_WEB) {
-    return "./mnist/" + fn;
+    return "/static/mnist/" + fn;
   } else {
     // If compiled to JS, this might be in a different directory.
     const path = require("path");

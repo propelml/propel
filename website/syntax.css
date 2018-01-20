@@ -22,6 +22,13 @@
 
 /* Color scheme for code-mirror */
 
+/* Main background color */
+.cm-s-syntax,
+pre {
+  background-color: #1d2936;
+  color: #ddd;
+}
+
 .cm-s-syntax.cm-s-dark {
   color: #86b9f5;
   background-color: #283646;

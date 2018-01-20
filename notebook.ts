@@ -12,20 +12,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import * as CodeMirror from "codemirror";
-import "codemirror/mode/htmlmixed/htmlmixed.js";
-import "codemirror/mode/javascript/javascript.js";
-
+// tslint:disable:no-reference
+/// <reference path="node_modules/@types/codemirror/index.d.ts" />
+// React Notebook cells.
+// Note that these are rendered and executed server-side using JSDOM and may
+// are re-rendered client-side when users click "Run".
+// The Propel code in the cells are executed server-side so they don't have to
+// be run again on page load.
+import { Component, h } from "preact";
 import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { assert } from "./util";
+import { assert, IS_WEB } from "./util";
 
-const cellTable = new Map<number, Cell>(); // Maps id to Cell.
-const cellsElement = null;
-const _log = console.log;
-const _error = console.error;
+let cellTable = new Map<number, Cell>(); // Maps id to Cell.
+let nextCellId = 1;
+let lastExecutedCellId = null;
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
 // the local scope. This means, for instance, that function declarations create
@@ -33,13 +36,228 @@ const _error = console.error;
 // local variables within the scope where it's being called.
 const globalEval = eval;
 
-let lastExecutedCellId = null;
+// FIXME This is a hack. When rendering server-side the ids keep increasing
+// over all pages - that makes it not line up with how client-side ids will be
+// generated.
+export function resetIds() {
+  nextCellId = 1;
+  cellTable = new Map<number, Cell>();
+}
 
-export async function evalCell(source, cellId): Promise<any> {
+export function getNextId(): number {
+  return nextCellId++;
+}
+
+export function lookupCell(id: number) {
+  return cellTable.get(id);
+}
+
+// When rendering HTML server-side, all of the notebook cells are executed so
+// their output can be placed in the generated HTML. This queue tracks the
+// execution promises for each cell.
+export let serverSideExecuteQueue: Array<Promise<void>> = [];
+
+const codemirrorOptions = {
+  lineNumbers: false,
+  lineWrapping: true,
+  mode: "javascript",
+  scrollbarStyle: null,
+  theme: "syntax",
+  viewportMargin: Infinity,
+};
+
+interface Props {
+  code: string;
+  outputHTML: string;
+  id: number;
+}
+interface State { outputHTML: string; }
+
+export class Cell extends Component<Props, State> {
+  input: Element;
+  output: Element;
+  editor: CodeMirror.Editor;
+
+  constructor(props) {
+    super(props);
+    cellTable.set(this.id, this);
+  }
+
+  get id(): number {
+    return this.props.id;
+  }
+
+  _console: Console;
+  get console(): Console {
+    if (!this._console) {
+      this._console = new Console(this);
+    }
+    return this._console;
+  }
+
+  get code(): string {
+    return (this.editor ? this.editor.getValue() : this.props.code).trim();
+  }
+
+  shouldComponentUpdate() {
+    console.log(" shouldComponentUpdate() ", this.id);
+    return false;
+  }
+
+  async execute(): Promise<void> {
+    lastExecutedCellId = this.id;
+    let rval, error;
+    try {
+      rval = await evalCell(this.code, this.id);
+    } catch (e) {
+      error = e instanceof Error ? e : new Error(e);
+    }
+    if (error) {
+      this.console.error(error.stack);
+    } else if (rval !== undefined) {
+      this.console.log(rval);
+    }
+    // When running tests, rethrow any errors. This ensures that errors
+    // occurring during notebook cell evaluation result in test failure.
+    if (error && window.navigator.webdriver) {
+      throw error;
+    }
+  }
+
+  componentDidMount() {
+    const options = Object.assign({}, codemirrorOptions, {
+      mode: "javascript",
+      value: this.code,
+    });
+
+    // If we're in node, doing server-side rendering, we don't enable
+    // CodeMirror as its not clear if it can re-initialize its state after
+    // being serialized.
+    if (IS_WEB) {
+      // tslint:disable:variable-name
+      const CodeMirror = require("codemirror");
+      require("codemirror/mode/javascript/javascript.js");
+      this.input.innerHTML = "" ; // Delete the <pre>
+      this.editor = CodeMirror(this.input, options);
+      this.editor.setOption("extraKeys", {
+        "Ctrl-Enter": () =>  { this.update(); return true; },
+        "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
+      });
+    } else {
+      // Only on Node do we execute the cell automatically.
+      // TODO
+      serverSideExecuteQueue.push(this.execute());
+    }
+  }
+
+  async update() {
+    console.log("update cell");
+    this.output.innerHTML = ""; // Clear output.
+    // TODO Fix the update highlighting
+    // const classList = this.input.parentNode.classList;
+    // classList.add("notebook-cell-running");
+    try {
+      await this.execute();
+    } finally {
+      /*
+      classList.add("notebook-cell-updating");
+      setTimeout(() => {
+        classList.remove("notebook-cell-updating");
+        classList.remove("notebook-cell-running");
+      }, 100);
+      */
+    }
+  }
+
+  nextCell() {
+    // TODO
+  }
+
+  clickedRun() {
+    console.log("Run was clicked.");
+    this.execute();
+  }
+
+  render() {
+    return h("div", {
+        "class": "notebook-cell",
+        "id": `cell${this.id}`
+      },
+      h("div", {
+        "class": "input",
+        "ref": (ref => { this.input = ref; }),
+      },
+        // This pre is replaced by CodeMirror if users have JavaScript enabled.
+        h("pre", { }, this.code)
+      ),
+      h("button", {
+        "class": "run-button",
+        "onClick": this.clickedRun.bind(this),
+      }, "Run"),
+      h("div", {
+        "class": "output",
+        "dangerouslySetInnerHTML": { __html: this.props.outputHTML },
+        "id": "output" + this.id,
+        "ref": (ref => { this.output = ref; }),
+      }),
+    );
+  }
+}
+
+interface FixedProps {
+  code: string;
+}
+
+// FixedCell is for non-executing notebook-lookalikes. Usually will be used for
+// non-javascript code samples.
+// TODO share more code with Cell.
+export class FixedCell extends Component<FixedProps, State> {
+  render() {
+    // Render as a pre in case people don't have javascript turned on.
+    return h("div", { "class": "notebook-cell", },
+      h("div", { "class": "input" },
+        h("pre", { }, this.props.code.trim()),
+      )
+    );
+  }
+}
+
+export class Console {
+  constructor(private cell: Cell) { }
+
+  private common(...args) {
+    const output = this.cell.output;
+    // .toString() will fail if any of the arguments is null or undefined. Using
+    // ("" + a) instead.
+    let s = args.map((a) => "" + a).join(" ");
+    const last = output.lastChild;
+    if (last && last.nodeType !== Node.TEXT_NODE) {
+      s = "\n" + s;
+    }
+    const t = document.createTextNode(s + "\n");
+    output.appendChild(t);
+  }
+
+  log(...args) {
+    return this.common(...args);
+  }
+
+  warn(...args) {
+    return this.common(...args);
+  }
+
+  error(...args) {
+    return this.common(...args);
+  }
+}
+
+export async function evalCell(source: string, cellId: number): Promise<any> {
   source = transpile(source);
   source += `\n//# sourceURL=__cell${cellId}__.js`;
   const fn = globalEval(source);
-  return await fn(window, importModule);
+  const g = IS_WEB ? window : global;
+  const cell = lookupCell(cellId);
+  return await fn(g, importModule, cell.console);
 }
 
 // This is to handle asynchronous output situations.
@@ -55,20 +273,16 @@ export function guessCellId(): number {
   return lastExecutedCellId;
 }
 
-export function outputEl(): HTMLElement {
+export function outputEl(): Element {
   const id = guessCellId();
-  const cell = cellTable.get(id);
-  return cell.output;
+  const cell = lookupCell(id);
+  if (cell) return cell.output;
 }
 
-export function outputId(): string {
-  const id = guessCellId();
-  const cell = cellTable.get(id);
-  return cell.output.id;
-}
+matplotlib.register(outputEl);
 
 async function importModule(target) {
-  // _log("require", target);
+  // console.log("require", target);
   const m = {
     matplotlib,
     mnist,
@@ -78,209 +292,4 @@ async function importModule(target) {
     return m;
   }
   throw new Error("Unknown module: " + target);
-}
-
-// Override console.log so that it goes to the correct cell output.
-console.log = (...args) => {
-  const output = outputEl();
-  // messy
-
-  // .toString() will fail if any of the arguments is null or undefined. Using
-  // ("" + a) instead.
-  let s = args.map((a) => "" + a).join(" ");
-
-  const last = output.lastChild;
-  if (last && last.nodeType !== Node.TEXT_NODE) {
-    s = "\n" + s;
-  }
-  const t = document.createTextNode(s + "\n");
-  output.appendChild(t);
-  _log(...args);
-};
-
-// Override console.error so that it goes to the correct cell output.
-console.error = (...args) => {
-  const output = outputEl();
-  // messy
-
-  // .toString() will fail if any of the arguments is null or undefined. Using
-  // ("" + a) instead.
-  let s = args.map((a) => "" + a).join(" ");
-
-  const last = output.lastChild;
-  if (last && last.nodeType !== Node.TEXT_NODE) {
-    s = "\n" + s;
-  }
-  const t = document.createElement("b");
-  t.innerText = s + "\n";
-  output.appendChild(t);
-  _error(...args);
-};
-
-class Cell {
-  isLoad: boolean;
-  parentDiv: HTMLElement;
-  output: HTMLElement;
-  editor: CodeMirror.Editor;
-  runButton: HTMLElement;
-  id: number;
-  static nextId = 1;
-
-  constructor(source: string, parentDiv: HTMLElement) {
-    this.id = Cell.nextId++;
-    cellTable.set(this.id, this);
-    parentDiv.classList.add("notebook-cell");
-    (parentDiv as any).cell = this;
-    this.parentDiv = parentDiv;
-
-    this.editor = createCM(parentDiv, {
-      value: source ? source.trim() : "",
-    });
-    this.editor.setOption("extraKeys", {
-      "Ctrl-Enter": () =>  { this.update(); return true; },
-      "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
-    });
-
-    const runButton = document.createElement("button");
-    this.runButton = runButton;
-    runButton.innerText = "Run";
-    runButton.className = "run-button";
-    runButton.onclick = () => { this.update(); return false; };
-    parentDiv.appendChild(runButton);
-
-    this.output = document.createElement("div");
-    this.output.className = "output";
-    this.output.id = `output${this.id}`;
-    parentDiv.appendChild(this.output);
-  }
-
-  focus() {
-    this.editor.focus();
-  }
-
-  async update() {
-    _log("update");
-    this.output.innerText = ""; // Clear output.
-    const classList = this.parentDiv.classList;
-    classList.add("notebook-cell-running");
-    try {
-      await this.execute();
-    } finally {
-      classList.add("notebook-cell-updating");
-      setTimeout(() => {
-        classList.remove("notebook-cell-updating");
-        classList.remove("notebook-cell-running");
-      }, 100);
-    }
-  }
-
-  nextCell() {
-    for (let el = this.parentDiv.nextSibling; el; el = el.nextSibling) {
-      const cell = (el as any).cell;
-      if (cell instanceof Cell) {
-        cell.focus();
-        return;
-      }
-    }
-    createCell();
-  }
-
-  appendOutput(svg) {
-    this.output.appendChild(svg);
-  }
-
-  outputId(): string {
-    return this.output.id;
-  }
-
-  async execute() {
-    lastExecutedCellId = this.id;
-    const source = this.editor.getValue();
-    let rval, error;
-    try {
-      rval = await evalCell(source, this.id);
-    } catch (e) {
-      error = e instanceof Error ? e : new Error(e);
-    }
-    if (error ) {
-      console.error(error.stack);
-    } else if (rval !== undefined) {
-      console.log(rval);
-    }
-    // When running tests, rethrow any errors. This ensures that errors
-    // occurring during notebook cell evaluation result in test failure.
-    if (error && window.navigator.webdriver) {
-      throw error;
-    }
-  }
-}
-
-function createCell() {
-  const cellsDiv = document.getElementById("cells");
-  if (!cellsDiv) {
-    _log("Can't create cell - no element named 'cells' exists.");
-    return;
-  }
-  const parentDiv = document.createElement("div");
-  cellsDiv.appendChild(parentDiv);
-  const cell = new Cell("", parentDiv);
-  window.scrollBy(0, 500); // scroll down.
-  cell.focus();
-}
-
-function createCM(parentDiv, options) {
-  const defaults = {
-    lineNumbers: false,
-    lineWrapping: true,
-    mode: "javascript",
-    theme: "syntax",
-    viewportMargin: Infinity,
-  };
-  options = Object.assign(defaults, options);
-  return CodeMirror(parentDiv, options);
-}
-
-window.onload = async() => {
-  const newCell = document.getElementById("newCell");
-  if (newCell) newCell.onclick = createCell;
-
-  matplotlib.register(outputEl);
-
-  // Use CodeMirror to syntax highlight read-only <pre> elements.
-  for (const p of Array.from(document.getElementsByTagName("pre"))) {
-    _log("pre", p);
-    const code = p.innerText;
-    p.innerHTML = "";
-    createCM(p, {
-      mode: p.getAttribute("lang") || "javascript",
-      value: code,
-    });
-  }
-
-  // Pre-existing cells are stored as <script type=notebook> elements.
-  // These script tags are promptly removed from the DOM and
-  // replaced with CodeMirror-handled textareas containing
-  // the source code. We use <script type=notebook> in order to get
-  // proper syntax highlighting in editors.
-
-  const cells = [];
-  const scripts = Array.from(document.scripts).filter(
-    s => s.type === "notebook");
-  for (const s of scripts) {
-    const code = s.innerText;
-    const parentDiv = document.createElement("div");
-    replaceWith(s, parentDiv);
-    cells.push(new Cell(code, parentDiv));
-  }
-
-  for (const cell of cells) {
-    await cell.execute();
-  }
-};
-
-// Replaces oldElement with newElement at the same place
-// in the DOM tree.
-function replaceWith(oldElement: HTMLElement,
-                     newElement: HTMLElement): void {
-  oldElement.parentNode.replaceChild(newElement, oldElement);
 }

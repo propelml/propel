@@ -120,18 +120,6 @@ function buildAndTest() {
   return [propelPkgFn, tfPkgFn];
 }
 
-function symlink(a, b) {
-  console.log("symlink", a, b);
-  try {
-    fs.symlinkSync(a, b, "junction");
-  } catch (e) {
-    if (e.code === "EEXIST") {
-      console.log("EEXIST");
-    } else {
-      throw e;
-    }
-  }
-}
 
 if (true) {
   buildAndTest();
@@ -143,6 +131,6 @@ process.chdir(run.root + "/build");
 console.log("\n\nPackage tested and ready.");
 for (const name of ["propel", config.tfPkg]) {
   let vname = `${name}-${v}`;
-  symlink(name, vname);
+  run.symlink(name, vname);
   console.log("./tools/ar.js %s", "build/" + vname);
 }
