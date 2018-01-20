@@ -276,7 +276,7 @@ export function transpile(src: string): string {
   let body, edit, root;
 
   // Wrap code in async function.
-  src = `(async (${globalVar}, ${importFn}) => {\n${src}\n})`;
+  src = `(async (${globalVar}, ${importFn}, console) => {\n${src}\n})`;
 
   // Translate imports into async imports.
   edit = new SourceEditor(src);
