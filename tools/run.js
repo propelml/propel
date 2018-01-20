@@ -41,13 +41,27 @@ function rmrf(d) {
   }
 }
 
+function symlink(a, b) {
+  console.log("symlink", a, b);
+  try {
+    fs.symlinkSync(a, b, "junction");
+  } catch (e) {
+    if (e.code === "EEXIST") {
+      console.log("EEXIST");
+    } else {
+      throw e;
+    }
+  }
+}
+
 function version() {
   let pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
   return pkg.version;
 }
 
-exports.sh = sh;
 exports.mkdir = mkdir;
 exports.rmrf = rmrf;
 exports.root = root;
+exports.sh = sh;
+exports.symlink = symlink;
 exports.version = version;
