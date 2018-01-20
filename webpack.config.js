@@ -64,16 +64,16 @@ const propelNode = nodeConfig("propel_node");
 propelNode.entry = "./api.ts";
 
 const testsIso = webConfig("test_isomorphic", "yyy");
-testsIso.output.path = `${__dirname}/build/propel_website`;
+testsIso.output.path = `${__dirname}/build/website`;
 testsIso.entry = "./test_isomorphic.ts";
 
 const testsDl = webConfig("test_dl", "zzz");
-testsDl.output.path = `${__dirname}/build/propel_website`;
+testsDl.output.path = `${__dirname}/build/website`;
 testsDl.entry = "./test_dl.ts";
 
-const notebook = webConfig("notebook", "xxx");
-notebook.output.path = `${__dirname}/build/propel_website`;
-notebook.entry = "./notebook.ts";
+const website = webConfig("website", "vvv");
+website.output.path = `${__dirname}/build/website`;
+website.entry = "./website.ts";
 
 /*
 const testsNode = nodeConfig("tests_node");
@@ -89,5 +89,5 @@ module.exports = [
   propelWeb,
   testsIso,
   testsDl,
-  notebook,
+  website,
 ];
