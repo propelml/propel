@@ -34,7 +34,8 @@
 /Release/
 /RelWithDebInfo/
 /x64/
-/website/dist/
+/website/index.html
+/website/notebook/index.html
 /Win32/
 /gendoc
 

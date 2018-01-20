@@ -1,8 +1,10 @@
-const spawnSync = require("child_process").spawnSync;
+const { execSync, spawnSync } = require("child_process");
 const fs = require("fs");
-const root = require("path").dirname(__dirname);
+const { resolve } = require("path");
 const rimraf = require("rimraf");
+
 // Always chdir to propel's project root.
+const root = resolve(__dirname, "..");
 process.chdir(root);
 
 /** Runs a new subprocess synchronously.
@@ -41,13 +43,43 @@ function rmrf(d) {
   }
 }
 
+function symlink(a, b) {
+  let existing;
+  try {
+    existing = fs.readlinkSync(b);
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e;
+  }
+
+  if (existing) {
+    if (resolve(b, a) === resolve(b, existing)) {
+      console.log("symlink already exists", a, b);
+      return;
+    } else {
+      // Remove the existing symlink.
+      fs.unlinkSync(b);
+    }
+  }
+
+  console.log("symlink", a, b);
+
+  if (process.platform === "win32") {
+    // Until https://github.com/libuv/libuv/pull/1706 makes it into a node,
+    // can't create symlinks to directories on Windows.
+    execSync(`mklink /d "${b}" "${a}"`);
+  } else {
+    fs.symlinkSync(a, b, "dir");
+  }
+}
+
 function version() {
   let pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
   return pkg.version;
 }
 
-exports.sh = sh;
 exports.mkdir = mkdir;
 exports.rmrf = rmrf;
 exports.root = root;
+exports.sh = sh;
+exports.symlink = symlink;
 exports.version = version;

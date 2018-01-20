@@ -141,10 +141,9 @@ h1,
   margin-bottom: -8px;
 }
 
-header .button {
+.header-button {
   display: inline-block;
-  margin-right: 10px;
-  padding: 0;
+  margin: 0 10px 10px 0;
 }
 
 .button:hover {
@@ -253,7 +252,6 @@ header h1 {
     margin-right: 16px;
   }
 
-  .docstr,
   .arg-title,
   .args {
     padding-left: 16px;
@@ -359,22 +357,27 @@ header h1 {
   margin: 24px 0;
 }
 
-.output {
-  padding: 10px;
-  white-space: pre-wrap;
-  background-color: inherit;
-  margin: 0 auto;
+.notebook-cell .input {
+  white-space: pre;
 }
 
+.output {
+  background-color: inherit;
+}
+
+.CodeMirror,
+.notebook-cell .output,
+.notebook-cell .input > pre {
+  border: 0;
+  margin: 0;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+/* Auto-resizing cells. */
 .CodeMirror {
   height: auto;
-
-  /* Auto-resizing cells. */
-  padding: 10px;
-  background: #1d2936;
-  border: 0;
   transition: border-left-color 1s;
-  color: #ddd;
 }
 
 .CodeMirror-focused {
@@ -384,7 +387,7 @@ header h1 {
 }
 
 .CodeMirror,
-.output,
+.notebook-cell .output,
 svg {
   transition: border-left-color 0.5s;
   transition: background-color 0.5s ease;

@@ -37,7 +37,7 @@ const TESTS = [
   // page, the test fails.
   {
     doneMsg: /^DONE.*failed: 0/,
-    href: "test.html#script=propel_website/test_isomorphic.js",
+    href: "static/test.html#script=/test_isomorphic.js",
     timeout: 30 * 1000
   },
 
@@ -46,13 +46,12 @@ const TESTS = [
   { href: "index.html" },
   { href: "notebook/index.html" },
   { href: "docs/index.html" },
-  { href: "notebook_mnist.html" }
 ];
 
 if (testdl) {
   TESTS.unshift({
     doneMsg: /^DONE.*failed: 0/,
-    href: "test.html#script=propel_website/test_dl.js",
+    href: "static/test.html#script=/test_dl.js",
     timeout: 2 * 60 * 1000
   });
 }
@@ -60,7 +59,7 @@ if (testdl) {
 (async() => {
   let passed = 0, failed = 0;
 
-  const server = createServer({ root: "./website" });
+  const server = createServer({ root: "./build/website" });
   server.listen();
   const port = server.server.address().port;
 
