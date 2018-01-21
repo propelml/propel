@@ -2,6 +2,7 @@
 import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
+import { renderSync } from "sass";
 import * as website from "../website";
 // import * as nodeFetch from "node-fetch";
 import * as run from "./run";
@@ -62,12 +63,24 @@ async function writePages() {
   }
 }
 
+function scss(inFile, outFile) {
+  const options = {
+    file: inFile,
+    includePaths: ["./website"],
+  };
+  const result = renderSync(options).css.toString("utf8");
+  console.log("scss", inFile, outFile);
+  fs.writeFileSync(outFile, result);
+}
+
 run.mkdir("build");
 run.mkdir("build/website");
 run.mkdir("build/website/docs");
 run.mkdir("build/website/notebook");
 
 run.symlink(run.root + "/website/", "build/website/static");
+
+scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
 writePages().then(() => {
   console.log("Website built in", websiteRoot);

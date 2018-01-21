@@ -372,11 +372,7 @@ export function getHTML(title, markup) {
     <title>${title}</title>
     <meta id="viewport" name="viewport" content="width=device-width,
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <link rel="stylesheet" href="/static/normalize.css"/>
-    <link rel="stylesheet" href="/static/skeleton.css"/>
-    <link rel="stylesheet" href="/static/codemirror.css"/>
-    <link rel="stylesheet" href="/static/syntax.css"/>
-    <link rel="stylesheet" href="/static/style.css"/>
+    <link rel="stylesheet" href="/bundle.css"/>
     <script src="/website.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
