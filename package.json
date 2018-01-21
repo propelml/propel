@@ -28,6 +28,7 @@
     "preact": "^8.2.7",
     "puppeteer": "^0.13.0",
     "rimraf": "^2.6.2",
+    "sass": "^1.0.0-beta.4",
     "seedrandom": "^2.4.3",
     "stylelint": "^8.4.0",
     "stylelint-config-recommended": "^2.0.1",
