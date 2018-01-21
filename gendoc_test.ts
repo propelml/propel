@@ -21,54 +21,5 @@ test(async function gendoc_smoke() {
   console.log("length", docs.length);
   assert(docs.length > 5);
   assert(docs.map(e => e.name).indexOf("Tensor") >= 0);
-  const html = gendoc.toHTML(docs);
-  assert(html.length > 0);
 });
 
-test(async function gendoc_markupDocStr() {
-  const docstr = [
-    "hello",
-    "gamma <=> tau & phi",
-    "",
-    "  x = 1 + 2;",
-    "",
-    "world",
-  ].join("\n");
-  const actual = gendoc.markupDocStr(docstr);
-  const expected = [
-    "<p class=\"docstr\">hello",
-    "gamma &lt;=&gt; tau &amp; phi",
-    "",
-    "</p><script type=\"notebook\">",
-    "x = 1 + 2;",
-    "</script><p>",
-    "",
-    "world</p>",
-  ].join("\n");
-  // console.log("actual", JSON.stringify(actual));
-  // console.log("expected", JSON.stringify(expected));
-  assert(actual === expected);
-});
-
-test(async function gendoc_markupDocStr2() {
-  const docstr = [
-    "like this:",
-    "",
-    "  params.forEach((tensor, name) => {",
-    "    console.log(tensor);",
-    "  });",
-  ].join("\n");
-  const actual = gendoc.markupDocStr(docstr);
-  const expected = [
-    "<p class=\"docstr\">like this:",
-    "",
-    "</p><script type=\"notebook\">",
-    "params.forEach((tensor, name) => {",
-    "  console.log(tensor);",
-    "});",
-    "</script>",
-  ].join("\n");
-  // console.log("actual", JSON.stringify(actual));
-  // console.log("expected", JSON.stringify(expected));
-  assert(actual === expected);
-});

@@ -8,30 +8,12 @@
 // tslint:disable:object-literal-sort-keys
 import { spawnSync, execSync } from "child_process";
 import * as fs from "fs";
-import * as he from "he";
 import * as path from "path";
 import * as ts from "typescript";
 import { assert } from "../util";
 import { DocEntry, ArgEntry } from "../website";
 
 const repoBaseUrl = "https://github.com/propelml/propel";
-
-// Displays text for arguments and return value.
-const printArgs = false;
-
-function toTagName(s: string): string {
-  return s.replace(/[.$]/g, "_");
-}
-
-function startsWithUpperCase(s: string): boolean {
-  return s[0].toLowerCase() !== s[0];
-}
-
-// Encode characters with a special meaning as HTML entities.
-// For example, "<" will be mapped to "&lt;".
-function enc(s: string): string {
-  return he.encode(s, { useNamedReferences: true });
-}
 
 const fileGithubUrls = new Map<string, string>();
 
@@ -80,177 +62,6 @@ function getGithubUrlForFile(fileName: string) {
 
   fileGithubUrls.set(fileName, githubUrl);
   return githubUrl;
-}
-
-function toHTMLIndex(docs: DocEntry[]): string {
-  let out = `<ol class="docindex">\n`;
-  for (const entry of docs) {
-    const tag = toTagName(entry.name);
-    const classes = "name " + entry.kind;
-    out += `<li><a href="#${tag}" class="${classes}">${enc(
-      entry.name
-    )}</a></li>\n`;
-  }
-  out += `</ol>\n`;
-  return out;
-}
-
-function isIndented(s: string): boolean {
-  return s.match(/^  +[^\s]/) != null;
-}
-
-function unindent(s: string): string {
-  return s.replace(/^  /, "");
-}
-
-// Given some bit of documentation text, this function can detect indented
-// portions denoting examples and mark them up with <script type="notebook">.
-export function markupDocStr(docstr: string): string {
-  const input = docstr.split("\n");
-  const output = [];
-
-  let state: "normal" | "code" = "normal";
-
-  function out(s) {
-    output.push(state === "code" ? unindent(s) : s);
-  }
-
-  for (let i = 0; i < input.length; ++i) {
-    const line = input[i];
-    switch (state) {
-      case "normal":
-        if (isIndented(line)) {
-          state = "code";
-          out(`</p><script type="notebook">`);
-        }
-        break;
-      case "code":
-        if (!isIndented(line)) {
-          state = "normal";
-          out("</script><p>");
-        }
-        break;
-    }
-
-    switch (state) {
-      case "normal":
-        out(enc(line));
-        break;
-      case "code":
-        out(line);
-        break;
-    }
-  }
-
-  if (state === "code") {
-    out("</script><p>");
-  }
-
-  const f = `<p class="docstr">` + output.join("\n") + "</p>";
-  return f.replace("<p></p>", "");
-}
-
-function htmlBody(inner: string): string {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <title>Propel Docs</title>
-  <meta id="viewport" name="viewport" content="width=device-width,
-    minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <link rel="stylesheet" href="/normalize.css"/>
-  <link rel="stylesheet" href="/skeleton.css"/>
-  <link rel="stylesheet" href="/codemirror.css"/>
-  <link rel="stylesheet" href="/syntax.css"/>
-  <link rel="stylesheet" href="/style.css"/>
-  <link rel="icon" type="image/png" href="/favicon.png"/>
-  <script src="/propel_website/notebook.js"></script>
-  <script type="notebook">
-  // Common imports for the docs.
-  import { $, grad, linspace, plot } from "propel";
-  </script>
-</head>
-  <body>${inner}
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async
-  src="https://www.googletagmanager.com/gtag/js?id=UA-112187805-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'UA-112187805-1');
-</script>
-  </body>
-</html>
-  `;
-}
-
-export function htmlEntry(entry: DocEntry): string {
-  let out = `<h2 class="name">${enc(entry.name)}`;
-  if (entry.sourceUrl) {
-    out += ` <a class="source-link" href="${enc(entry.sourceUrl)}">source</a>`;
-  }
-  out += `</h2>\n`;
-
-  if (entry.typestr) {
-    out += `<div class="typestr">${enc(entry.typestr)}</div>\n`;
-  }
-
-  if (entry.docstr) {
-    out += markupDocStr(entry.docstr);
-  }
-
-  if (printArgs && entry.args && entry.args.length > 0) {
-    out += `<p><span class='arg-title'>Arguments</span> <ol class="args">\n`;
-    for (const arg of entry.args) {
-      out += `<li>\n`;
-      out += `<span class="name">${enc(arg.name)}</span>\n`;
-      out += `<span class="typestr">${enc(arg.typestr)}</span>\n`;
-      if (arg.docstr) {
-        out += `<span class="docstr">${enc(arg.docstr)}</span>\n`;
-      }
-      out += `</li>\n`;
-    }
-    out += `</ol>\n`;
-  }
-  if (printArgs && entry.retType) {
-    out += `<p><span class='arg-title'>Returns</span> `;
-    out += `<span class="retType">${enc(entry.retType)}</span>\n`;
-  }
-  return out;
-}
-
-export function toHTML(docs: DocEntry[]): string {
-  let out = "";
-
-  docs = docs.sort((a, b) => {
-    if (!startsWithUpperCase(a.name) && startsWithUpperCase(b.name)) {
-      return -1;
-    }
-    if (startsWithUpperCase(a.name) && !startsWithUpperCase(b.name)) {
-      return 1;
-    }
-    if (a.name < b.name) return -1;
-    if (a.name > b.name) return 1;
-    return 0;
-  });
-
-  out += `<div class="panel">\n`;
-  out += `<h1>Propel</h1>\n`;
-  out += toHTMLIndex(docs);
-  out += `</div>\n`;
-
-  out += `<div class="doc-entries">\n`;
-  for (const entry of docs) {
-    const tag = toTagName(entry.name);
-    out += `<div id="${tag}" class="doc-entry">\n`;
-    out += htmlEntry(entry);
-    out += "</div>\n";
-  }
-  out += `</div>\n`;
-  return htmlBody(out);
 }
 
 export function genJSON(): DocEntry[] {
@@ -513,12 +324,6 @@ function writeHTML() {
   const j = JSON.stringify(docs, null, 2);
   fs.writeFileSync(target, j);
   console.log("wrote", target);
-  /*
-  const html = toHTML(docs);
-  const fn = target;
-  fs.writeFileSync(fn, html);
-  console.log("Wrote", fn);
-  */
 }
 
 if (require.main === module) {
