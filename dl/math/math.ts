@@ -17,12 +17,10 @@
 
 import {BackendType, ENV} from '../environment';
 import * as util from '../util';
-import {NamedArrayMap} from '../util';
 import * as axis_util from './axis_util';
 import {MathBackend} from './backends/backend';
 import {BackendEngine} from './backends/backend_engine';
-import {TapeNodeInputGradientArrays} from './backends/tape_types';
-import {ScopeResult, ScopeResultImmediate} from './backends/tape_util';
+import {ScopeResult} from './backends/tape_util';
 import {MatrixOrientation} from './backends/types/matmul';
 import * as broadcast_util from './broadcast_util';
 import * as concat_util from './concat_util';
@@ -133,24 +131,7 @@ export class NDArrayMath implements NDArrayManager {
       scopeFn:
           (keep: <T1 extends NDArray>(ndarray: T1) => T1,
            track: <T2 extends NDArray>(ndarray: T2) => T2) => T): T {
-    const gradientsMode = false;
-    return this.backendEngine.scope('scope', scopeFn, gradientsMode);
-  }
-
-  /**
-   * Create a new gradients scope. Similar to scope, but forces all inner scopes
-   * to not clean up so that gradient operations can be used inside of this
-   * scope.
-   * @param scopeFn The function to execute with chained math operations.
-   */
-  gradientsScope<T extends ScopeResult>(
-      scopeFn:
-          (keep:
-               <D1 extends DataType, T1 extends NDArray<D1>>(ndarray: T1) => T1,
-           track: <D2 extends DataType, T2 extends NDArray<D2>>(ndarray: T2) =>
-               T2) => T): T {
-    const gradientsMode = true;
-    return this.backendEngine.scope('gradientsScope', scopeFn, gradientsMode);
+    return this.backendEngine.scope('scope', scopeFn);
   }
 
   /**
@@ -158,17 +139,15 @@ export class NDArrayMath implements NDArrayManager {
    * as scope() without the need for a function closure.
    */
   startScope() {
-    const gradientsMode = false;
-    this.backendEngine.startScope(gradientsMode);
+    this.backendEngine.startScope();
   }
 
   /**
    * End a scope. Use this with startScope() to achieve the same functionality
    * as scope() without the need for a function closure.
    */
-  endScope(result: ScopeResultImmediate) {
-    const gradientsMode = false;
-    this.backendEngine.endScope(result, gradientsMode);
+  endScope(result: {}) {
+    this.backendEngine.endScope(result);
   }
 
   /**
@@ -222,20 +201,7 @@ export class NDArrayMath implements NDArrayManager {
             ` and ${MatrixOrientation[bOrientation]} must match.`);
 
     return this.backendEngine.executeKernel(
-        'MatMul', {inputs: {a, b}, args: {aOrientation, bOrientation}},
-        (dy: Array2D, y: Array2D) => {
-          if (aOrientation === MatrixOrientation.TRANSPOSED ||
-              bOrientation === MatrixOrientation.TRANSPOSED) {
-            throw new Error(
-                `Backprop for transposed MatMul not yet implemented.`);
-          }
-          return {
-            a: () => this.matMul(
-                dy, b, MatrixOrientation.REGULAR, MatrixOrientation.TRANSPOSED),
-            b: () => this.matMul(
-                a, dy, MatrixOrientation.TRANSPOSED, MatrixOrientation.REGULAR)
-          };
-        });
+        'MatMul', {inputs: {a, b}, args: {aOrientation, bOrientation}});
   }
 
   private executeOp<T extends NDArray>(name: string, f: () => T): T {
@@ -339,11 +305,8 @@ export class NDArrayMath implements NDArrayManager {
         x.size === util.sizeFromShape(newShape),
         'new shape and old shape must have the same number of elements.');
 
-    const grad = (dy: NDArray, y: NDArray) => {
-      return {x: () => dy.reshape(x.shape)};
-    };
     return this.backendEngine.executeKernel(
-               'Reshape', {inputs: {x}, args: {newShape}}, grad) as T;
+               'Reshape', {inputs: {x}, args: {newShape}}) as T;
   }
 
   /**
@@ -352,11 +315,8 @@ export class NDArrayMath implements NDArrayManager {
    */
   cast<D extends DataType, R extends Rank>(
       x: NDArray<DataType, R>, newDType: D): RankMap<D>[R] {
-    const grad = (dy: NDArray, y: NDArray) => {
-      return {x: () => dy.reshape(dy.shape)};
-    };
     return this.backendEngine.executeKernel(
-               'Cast', {inputs: {x}, args: {newDType}}, grad) as RankMap<D>[R];
+               'Cast', {inputs: {x}, args: {newDType}}) as RankMap<D>[R];
   }
 
   /**
@@ -587,20 +547,7 @@ export class NDArrayMath implements NDArrayManager {
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
       }
       const res = this.backendEngine.executeKernel(
-          'Sum', {inputs: {x}, args: {axes}}, (dy: T, y: T) => {
-            return {
-              x: () => {
-                // TODO(nsthorat): Fix gradients for sum when using axis
-                // reduction.
-                if (axis != null) {
-                  throw new Error(
-                      `Gradients for sum with axis reduction not yet ` +
-                      `supported.`);
-                }
-                return this.multiply(dy, NDArray.ones(x.shape, dy.dtype));
-              }
-            };
-          });
+          'Sum', {inputs: {x}, args: {axes}});
       if (keepDims) {
         const newShape = axis_util.expandShapeToKeepDim(res.shape, origAxes);
         return res.reshape(newShape);
@@ -901,27 +848,14 @@ export class NDArrayMath implements NDArrayManager {
           `Logits was rank ${logits.rank} and dim was ${dim}`);
     }
 
-    const gradients = (dy: T, y: T) => {
-      return {
-        logits: () => {
-          const dyTimesY = this.multiply(dy, y);
-          const keepDims = true;
-          return this.subtract(
-              dyTimesY, this.multiply(this.sum(dyTimesY, [dim], keepDims), y));
-        }
-      };
-    };
-
     return this.executeOp('softmax', () => {
-      return this.customGradient(() => {
-        // Do it in log space for numerical stability.
-        // exp(X - logSumExp(X))
-        const keepDims = true;
-        const lse = this.logSumExp(logits, [dim], keepDims);
-        const logResult = this.subtract(logits, lse);
-        const value = this.exp(logResult) as T;
-        return {value, gradients};
-      }, {logits}, 'softmax');
+      // Do it in log space for numerical stability.
+      // exp(X - logSumExp(X))
+      const keepDims = true;
+      const lse = this.logSumExp(logits, [dim], keepDims);
+      const logResult = this.subtract(logits, lse);
+      const value = this.exp(logResult) as T;
+      return value;
     });
   }
 
@@ -965,28 +899,13 @@ export class NDArrayMath implements NDArrayManager {
     }
 
     return this.executeOp('softmaxCrossEntropyWithLogits', () => {
-      // Use a custom gradient for numerical stability.
-      return this.customGradient(() => {
-        const softmaxLogits = this.softmax(logits, dim);
-        const yPlusEps = this.add(Scalar.new(1e-5), softmaxLogits);
-        const logOutput = this.log(yPlusEps);
-        const tarLogOutput = this.multiply(labels, logOutput);
-        const costVector = this.neg(tarLogOutput);
-        const value = this.sum(costVector, [dim]) as O;
-
-        const gradients = (dy: O, y: O) => {
-          const dyShape = axis_util.expandShapeToKeepDim(dy.shape, [dim]);
-
-          return {
-            logits: () => this.multiply(
-                dy.reshape(dyShape), this.subtract(softmaxLogits, labels)),
-            labels: () => this.multiply(
-                dy.reshape(dyShape), this.subtract(labels, softmaxLogits))
-          };
-        };
-
-        return {value, gradients};
-      }, {labels, logits}, 'softmaxCrossEntropyWithLogits');
+      const softmaxLogits = this.softmax(logits, dim);
+      const yPlusEps = this.add(Scalar.new(1e-5), softmaxLogits);
+      const logOutput = this.log(yPlusEps);
+      const tarLogOutput = this.multiply(labels, logOutput);
+      const costVector = this.neg(tarLogOutput);
+      const value = this.sum(costVector, [dim]) as O;
+      return value;
     });
   }
 
@@ -1116,18 +1035,7 @@ export class NDArrayMath implements NDArrayManager {
     util.assertTypesMatch(a, b);
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
     return this.backendEngine.executeKernel(
-               'Sub', {inputs: {a, b}}, (dy: NDArray<D1>, y: NDArray<D1>) => {
-                 if (!util.arraysEqual(a.shape, b.shape)) {
-                   throw new Error(
-                       `Backprop through broadcasted subtract not ` +
-                       `yet supported.`);
-                 }
-                 return {
-                   a: () => this.multiply(dy, NDArray.onesLike(a)),
-                   b: () => this.scope(
-                       () => this.multiply(dy, this.neg(NDArray.onesLike(b))))
-                 };
-               }) as T;
+               'Sub', {inputs: {a, b}}) as T;
   }
 
   /**
@@ -1148,30 +1056,8 @@ export class NDArrayMath implements NDArrayManager {
         'only supports int32 data type for the exponent parameter.');
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
 
-    const gradient = (dy: NDArray<D>, y: NDArray<D>) => {
-      if (!util.arraysEqual(a.shape, b.shape)) {
-        throw new Error(
-            `Gradient of pow not yet supported for broadcasted shapes.`);
-      }
-      const derA = () => {
-        return this.scope(() => {
-          return this.multiply(
-              dy,
-              this.multiply(
-                  b.asType(a.dtype),
-                  this.pow(a, this.subtract(b, Scalar.new(1, 'int32')))));
-        });
-      };
-      const derB = () => {
-        throw new Error(
-            `Backprop through exponent of math.pow not ` +
-            `implemented yet.`);
-      };
-      return {a: derA, b: derB};
-    };
-
     return this.backendEngine.executeKernel(
-               'Pow', {inputs: {a, b}}, gradient) as T;
+               'Pow', {inputs: {a, b}}) as T;
   }
 
   /**
@@ -1216,18 +1102,7 @@ export class NDArrayMath implements NDArrayManager {
       a: NDArray<D1>, b: NDArray<D2>): T {
     util.assertTypesMatch(a, b);
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
-    return this.backendEngine.executeKernel(
-               'Mul', {inputs: {a, b}}, (dy: NDArray, y: NDArray) => {
-                 if (!util.arraysEqual(a.shape, b.shape)) {
-                   throw new Error(
-                       `Backprop through broadcasted multiply not ` +
-                       `supported yet.`);
-                 }
-                 return {
-                   a: () => this.multiply(dy, b),
-                   b: () => this.multiply(dy, a)
-                 };
-               }) as T;
+    return this.backendEngine.executeKernel('Mul', {inputs: {a, b}}) as T;
   }
 
   /**
@@ -1340,12 +1215,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param x The input array.
    */
   square<T extends NDArray>(x: T): T {
-    return this.backendEngine.executeKernel(
-               'Square', {inputs: {x}}, (dy: T, y: T) => {
-                 return {
-                   x: () => this.multiply(dy, this.multiply(x, Scalar.new(2)))
-                 };
-               }) as T;
+    return this.backendEngine.executeKernel( 'Square', {inputs: {x}}) as T;
   }
 
   /**
@@ -1377,9 +1247,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   relu<T extends NDArray>(x: T): T {
     return this.backendEngine.executeKernel(
-               'Relu', {inputs: {x}}, (dy: T, y: T) => {
-                 return {x: () => this.multiply(dy, this.step(x))};
-               }) as T;
+               'Relu', {inputs: {x}}) as T;
   }
 
   /**
@@ -2546,111 +2414,6 @@ export class NDArrayMath implements NDArrayManager {
     }
 
     throw new Error(`Error in norm: invalid axis: ${axis}`);
-  }
-
-  /**
-   * Warning: this is not fully implemented yet. Use with caution.
-   *
-   * Computes and returns the vector jacobian product of f(x) with respect to x.
-   * This method allows you to provide a non-scalar dy to backprop from.
-   *
-   * @param f The function to execute. f() should return an NDArray of the same
-   * shape and dtype as dy.
-   * @param x The input to compute dy/dx over. This can be a single value or
-   * an object mapping a string to an NDArray. If using the object mode, this
-   * method will return an object of the same shape.
-   */
-  vjp<T extends NDArray|NamedArrayMap, R extends NDArray>(
-      f: () => R, x: T, dy: R): T {
-    const keys = x instanceof NDArray ? null : Object.keys(x);
-    const xs = util.flattenNameArrayMap(x, keys);
-
-    const vjp = this.backendEngine.vjp(f, xs, dy) as NDArray[];
-
-    if (x instanceof NDArray) {
-      return vjp[0] as T;
-    } else {
-      return util.unflattenToNameArrayMap(keys, vjp) as T;
-    }
-  }
-
-  /**
-   * Warning: this is not fully implemented yet. Use with caution.
-   *
-   * Computes and returns the gradient of f(x) with respect to x.
-   *
-   * @param f The function to execute. f() should return a scalar.
-   *          TODO(nsthorat): Accept non-scalars.
-   * @param x The input to compute de/dx over. This can be a single value or
-   * an object mapping a string to an NDArray. If using the object mode, this
-   * method will return an object of the same shape.
-   */
-  gradients<T extends NDArray|NamedArrayMap, D extends DataType>(
-      f: () => Scalar<D>, x: T): T {
-    const keys = x instanceof NDArray ? null : Object.keys(x);
-    const xs = util.flattenNameArrayMap(x, keys);
-
-    const returnValue = false;
-    const gradients =
-        this.backendEngine.gradients(f, xs, returnValue) as NDArray[];
-
-    if (x instanceof NDArray) {
-      return gradients[0] as T;
-    } else {
-      return util.unflattenToNameArrayMap(keys, gradients) as T;
-    }
-  }
-
-  /**
-   * Warning: this is not fully implemented yet. Use with caution.
-   *
-   * Computes and returns the gradient of f(x) with respect to x. Returns both
-   * f(x) and f'(x).
-   *
-   * @param f The function to execute. f() should return a scalar.
-   *          TODO(nsthorat): Accept non-scalars.
-   * @param x The input to compute de/dx over. This can be a single value or
-   * an object mapping a string to an NDArray. If using the object mode, this
-   * method will return an object of the same shape.
-   */
-  valueAndGradients<T extends NDArray|NamedArrayMap, D extends DataType>(
-      f: () => Scalar<D>, x: T): {value: Scalar, gradients: T} {
-    const keys = x instanceof NDArray ? null : Object.keys(x);
-    const xs = util.flattenNameArrayMap(x, keys);
-
-    const returnValue = true;
-    const valueAndGradients =
-        this.backendEngine.gradients(f, xs, returnValue) as
-        {value: Scalar, gradients: NDArray[]};
-
-    let gradients: T;
-    if (x instanceof NDArray) {
-      gradients = valueAndGradients.gradients[0] as T;
-    } else {
-      gradients =
-          util.unflattenToNameArrayMap(keys, valueAndGradients.gradients) as T;
-    }
-    return {value: valueAndGradients.value, gradients};
-  }
-
-  /**
-   * Evaluates a function f() with a custom gradient function f'() to use during
-   * backpropagation.
-   * @param f The function to evaluate in forward mode. Returns a value NDArray
-   * and a gradient function closure.
-   * @param inputs The inputs to compute the gradient with respect to. These
-   * NDArrays should be used in f().
-   * @param name An optional name for the customGradient method. Used for
-   * debugging.
-   */
-  customGradient<D extends DataType, T extends NDArray<D>>(
-      f: () => {
-        value: T,
-        gradients: (dy: T, y: T) => TapeNodeInputGradientArrays
-      },
-      inputs: NamedArrayMap, name?: string): T {
-    return this.backendEngine.customGradient(
-        f, inputs, name == null ? '' : name);
   }
 
   disposeData(dataId: number): void {

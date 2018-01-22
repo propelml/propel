@@ -18,14 +18,13 @@
 import {NamedArrayMap} from '../../../util';
 import {Array1D, DataType, NDArray} from '../../ndarray';
 // tslint:disable-next-line:max-line-length
-import {KernelInputConfig, KernelNode, TapeNodeInputGradientArrays} from '../tape_types';
+import {KernelInputConfig, KernelNode} from '../tape_types';
 
 // Values
 export interface TopKValuesNode<D extends DataType, T extends NDArray<D>>
     extends KernelNode {
   inputAndArgs: TopKValuesInputConfig<T>;
   output: Array1D<D>;
-  gradient: (dy: Array1D<D>, y: Array1D<D>) => TopKValuesGradientInputArrays<T>;
 }
 
 export interface TopKValuesInputConfig<T extends NDArray> extends
@@ -39,18 +38,10 @@ export interface TopKValuesInputArrays<T extends NDArray> extends
   x: T;
 }
 
-export interface TopKValuesGradientInputArrays<T extends NDArray> extends
-    TapeNodeInputGradientArrays {
-  x: () => T;
-}
-
 // Indices
 export interface TopKIndicesNode extends KernelNode {
   inputAndArgs: TopKIndicesInputConfig;
   output: Array1D<'int32'>;
-  gradient:
-      (dy: Array1D<'int32'>,
-       y: Array1D<'int32'>) => TopKIndicesGradientInputArrays;
 }
 
 export interface TopKIndicesInputConfig extends KernelInputConfig {
@@ -59,8 +50,3 @@ export interface TopKIndicesInputConfig extends KernelInputConfig {
 }
 
 export interface TopKIndicesInputArrays extends NamedArrayMap { x: NDArray; }
-
-export interface TopKIndicesGradientInputArrays extends
-    TapeNodeInputGradientArrays {
-  x: () => NDArray;
-}

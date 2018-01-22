@@ -16,14 +16,11 @@
  */
 
 import * as util from '../../util';
-import {NamedArrayMap} from '../../util';
-import {DataType, NDArray, Scalar} from '../ndarray';
+import {DataType, NDArray} from '../ndarray';
 
 import {MathBackend} from './backend';
 import * as kernel_registry from './kernel_registry';
 import {KernelConfigRegistry} from './kernel_registry';
-// tslint:disable-next-line:max-line-length
-import {KernelNode, Tape, TapeNode, TapeNodeInputGradientArrays} from './tape_types';
 import * as tape_util from './tape_util';
 import {ScopeResult, ScopeResultImmediate} from './tape_util';
 
@@ -33,14 +30,6 @@ interface ScopeState {
 }
 
 export class BackendEngine {
-  private nextTapeNodeId = 0;
-
-  private activeTape: Tape;
-  private gradientScopeCount = 0;
-
-  private customGradientDepth = 0;
-
-  // Keep NDArrays that parallel the tapes.
   private activeScope: ScopeState;
   private scopeStack: ScopeState[];
 
@@ -58,7 +47,7 @@ export class BackendEngine {
 
   executeKernel<K extends keyof KernelConfigRegistry,
                           C extends KernelConfigRegistry[K]['inputAndArgs']>(
-      kernelName: K, config: C, grad?: KernelConfigRegistry[K]['gradient']):
+      kernelName: K, config: C):
       KernelConfigRegistry[K]['output'] {
     const kernelFn = () =>
         kernel_registry.executeKernel(this.backend, kernelName, config);
@@ -81,122 +70,7 @@ export class BackendEngine {
       util.checkForNaN(vals, result.dtype, name);
     }
 
-    if (this.activeTape != null && this.customGradientDepth === 0) {
-      config = tape_util.stripUndefinedInputsFromInputConfig(config) as C;
-
-      const evaluatedNode: KernelNode = {
-        id: this.nextTapeNodeId++,
-        type: 'kernel',
-        name: `kernel: ${kernelName}`,
-        kernel: kernelName,
-        inputAndArgs: config,
-        output: result,
-        gradient: grad
-      };
-      this.activeTape.push(evaluatedNode);
-    }
-
     return result;
-  }
-
-  customGradient<D extends DataType, T extends NDArray<D>>(
-      f: () => {
-        value: T,
-        gradients: (dy: T, y: T) => TapeNodeInputGradientArrays
-      },
-      inputs: NamedArrayMap, name: string): T {
-    this.customGradientDepth++;
-
-    let gradientsFunc: (dy: T, y: T) => TapeNodeInputGradientArrays;
-    const gradientsMode = true;
-    const result = this.scope('customGradient', () => {
-      const {value, gradients} = f();
-      gradientsFunc = gradients;
-      return value;
-    }, gradientsMode);
-
-    this.customGradientDepth--;
-
-    if (this.activeTape != null && this.customGradientDepth === 0) {
-      const evaluatedNode: TapeNode<T> = {
-        id: this.nextTapeNodeId++,
-        type: 'customGradient',
-        name,
-        inputAndArgs: {inputs},
-        output: result,
-        gradient: gradientsFunc
-      };
-
-      this.activeTape.push(evaluatedNode);
-    }
-
-    return result;
-  }
-
-  gradients(f: () => Scalar, xs: NDArray[], returnValue: boolean): NDArray[]|
-      {value: Scalar, gradients: NDArray[]} {
-    const gradientsMode = true;
-    const result = this.scope('gradients', () => {
-      const y = f();
-      if (y.rank !== 0) {
-        throw new Error(
-            `Cannot compute gradient of non-scalar y output. ` +
-            `Got y with rank ${y.rank}`);
-      }
-      const gradients = this.gradientWrt(y, xs);
-      if (returnValue) {
-        return [y, ...gradients];
-      } else {
-        return gradients;
-      }
-    }, gradientsMode);
-
-    if (returnValue) {
-      return {value: result[0] as Scalar, gradients: result.slice(1)};
-    } else {
-      return result;
-    }
-  }
-
-  vjp<T extends NDArray>(f: () => T, xs: NDArray[], dy: T): NDArray[] {
-    const gradientsMode = true;
-    return this.scope('vjp', () => {
-      const y = f();
-      if (!util.arraysEqual(y.shape, dy.shape)) {
-        throw new Error(
-            `Cannot compute vector jacobian product, ` +
-            `y shape (${y.shape}) does not match dy shape (${dy.shape}).`);
-      }
-      if (y.dtype !== dy.dtype) {
-        throw new Error(
-            `Cannot compute vector jacobian product, ` +
-            `y dtype (${y.dtype}) does not match dy dtype (${dy.dtype}).`);
-      }
-      return this.gradientWrt(y, xs, dy);
-    }, gradientsMode);
-  }
-
-  private gradientWrt<T extends NDArray>(y: T, xs: NDArray[], dy?: T):
-      NDArray[] {
-    // Filter out the nodes that don't connect x => y.
-    const filteredTape = tape_util.getFilteredNodesXToY(this.activeTape, xs, y);
-    if (filteredTape.length === 0) {
-      throw new Error(`Cannot compute gradient: y is not a function of xs.`);
-    }
-
-    const arrayAccumulatedGradientMap: {[ndarrayId: number]: NDArray} = {};
-    arrayAccumulatedGradientMap[y.id] = dy == null ? Scalar.new(1) : dy;
-
-    // Backprop gradients through the filtered nodes.
-    tape_util.backpropagateGradients(arrayAccumulatedGradientMap, filteredTape);
-
-    const gradients = xs.map(x => arrayAccumulatedGradientMap[x.id]);
-    gradients.forEach((grad, i) => {
-      if (grad == null) {
-        throw new Error(`Gradient error: y was not a function of xs[${i}]`);
-      }
-    });
-    return gradients;
   }
 
   /**
@@ -214,9 +88,9 @@ export class BackendEngine {
           (keep:
                <D1 extends DataType, T1 extends NDArray<D1>>(ndarray: T1) => T1,
            track: <D2 extends DataType, T2 extends NDArray<D2>>(ndarray: T2) =>
-               T2) => T,
-      gradientsMode: boolean): T {
-    this.startScope(gradientsMode);
+               T2) => T
+      ): T {
+    this.startScope();
 
     const keepFn = <T extends NDArray>(ndarray: T): T => this.keep(ndarray);
     // TODO(smilkov): trackFn is a no-op since we have global tracking.
@@ -225,10 +99,10 @@ export class BackendEngine {
     const result = scopeFn(keepFn, trackFn);
 
     if (result instanceof Promise) {
-      result.then(r => this.endScope(r, gradientsMode));
+      result.then(r => this.endScope(r));
       return result;
     } else {
-      this.endScope(result as ScopeResultImmediate, gradientsMode);
+      this.endScope(result as ScopeResultImmediate);
       return result;
     }
   }
@@ -237,14 +111,7 @@ export class BackendEngine {
    * Start a scope. Use this with endScope() to achieve the same functionality
    * as scope() without the need for a function closure.
    */
-  startScope(gradientsMode: boolean) {
-    if (gradientsMode && this.gradientScopeCount === 0) {
-      this.activeTape = [];
-    }
-    if (gradientsMode) {
-      this.gradientScopeCount++;
-    }
-
+  startScope() {
     const newScopeArrays: ScopeState = {keep: [], track: []};
     this.scopeStack.push(newScopeArrays);
     this.activeScope = newScopeArrays;
@@ -254,14 +121,7 @@ export class BackendEngine {
    * End a scope. Use this with startScope() to achieve the same functionality
    * as scope() without the need for a function closure.
    */
-  endScope(result: ScopeResultImmediate, gradientsMode: boolean) {
-    if (gradientsMode) {
-      this.gradientScopeCount--;
-      if (this.gradientScopeCount === 0) {
-        this.activeTape = null;
-      }
-    }
-
+  endScope(result: ScopeResultImmediate) {
     let arraysToKeep = this.activeScope.keep;
     const arraysToTrackInParent =
         tape_util.extractNDArraysFromScopeResult(result);
@@ -274,11 +134,7 @@ export class BackendEngine {
         continue;
       }
 
-      if (this.activeTape != null) {
-        arraysToTrackInParent.push(ndarray);
-      } else {
-        ndarray.dispose();
-      }
+      ndarray.dispose();
     }
 
     this.scopeStack.pop();
