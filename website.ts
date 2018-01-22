@@ -58,20 +58,20 @@ function link(href, ...children) {
   return h("a", {href}, ...children);
 }
 
-function notebook(code: string, fixed = false): JSX.Element {
-  if (fixed) {
-    return h(nb.FixedCell, { code });
-  } else {
-    let outputHTML = "";
-    const id = nb.getNextId();
-    // This is kinda a hack to get rehydration working. Potentially this can be
-    // done in a more elegant way.
-    const outputDiv = document.getElementById(`output${id}`);
-    if (outputDiv) {
-      outputHTML = outputDiv.innerHTML;
-    }
-    return h(nb.Cell, { id, code, outputHTML });
+function fixed(code: string): JSX.Element {
+  return h(nb.FixedCell, { code });
+}
+
+function notebook(code: string, id = null): JSX.Element {
+  let outputHTML = "";
+  if (id == null) id = nb.getNextId();
+  // This is kinda a hack to get rehydration working. Potentially this can be
+  // done in a more elegant way.
+  const outputDiv = document.getElementById(`output${id}`);
+  if (outputDiv) {
+    outputHTML = outputDiv.innerHTML;
   }
+  return h(nb.Cell, { id, code, outputHTML });
 }
 
 function toTagName(s: string): string {
@@ -221,22 +221,41 @@ export const PropelIndex = (props) => {
   );
 };
 
-export const NotebookIndex = (props) => {
-  return div("notebook",
-    h(GlobalHeader, null),
-    div("container",
-      h("header", { "class": "row" },
-        div("column",
-          h("h1", null, "Notebook")
-        )
+class NotebookIndex extends Component<any, any> {
+  constructor(props) {
+    super(props);
+    this.state = { cells };
+  }
+
+  newCellClick() {
+    const s = this.state;
+    s.cells.push(""); // empty;
+    this.setState(s);
+  }
+
+  render() {
+    const notebooks = this.state.cells.map((c, i) => {
+      return notebook(c, i);
+    });
+    return div("notebook",
+      h(GlobalHeader, null),
+      div("container",
+        h("header", { "class": "row" },
+          div("column",
+            h("h1", null, "Notebook")
+          )
+        ),
+        div("cells", ...notebooks),
+        div("container nb-footer",
+          h("button", {
+            id: "newCell",
+            onclick: this.newCellClick.bind(this),
+          }, "New Cell")
+        ),
       ),
-      div("cells", ...cells.map(c => notebook(c))),
-      div("container nb-footer",
-        h("button", { id: "newCell" }, "New Cell")
-      ),
-    ),
-  );
-};
+    );
+  }
+}
 
 const cells = [
 `
@@ -295,11 +314,9 @@ const Splash = (props) => {
             headerButton("http://github.com/propelml/propel", "Github")
           ),
           h("p", { "class": "snippet-title" }, "Use it in Node:"),
-          notebook("npm install propel\nimport { grad } from \"propel\";",
-                   true),
+          fixed("npm install propel\nimport { grad } from \"propel\";"),
           h("p", { "class": "snippet-title" }, "Use it in a browser:"),
-          notebook("<script src=\"https://unpkg.com/propel@3.0.0\"></script>",
-                   true)
+          fixed("<script src=\"https://unpkg.com/propel@3.0.0\"></script>"),
         )
       )
     )
@@ -337,12 +354,12 @@ const Exlainer = (props) => {
             p(`The basic propel npm package is javascript only,
               without TensorFlow bindings. To upgrade your speed dramatically
               install`),
-            notebook([
+            fixed([
               "npm install propel_mac",
               "npm install propel_windows",
               "npm install propel_linux",
               "npm install propel_linux_gpu",
-            ].join("\n"), true),
+            ].join("\n")),
           ),
           div("one-half column", notebook(tanhGrads))
         )
