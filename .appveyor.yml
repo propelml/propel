@@ -1,5 +1,8 @@
 version: "{branch}-build{build}"
-skip_branch_with_pr: true
+
+branches:
+  only:
+  - master
 
 environment:
   matrix:
