@@ -138,7 +138,9 @@ async function runTest(browser, url, { href, doneMsg = null, timeout = 1000 }) {
   }
 
   function onResponse(res) {
-    if (!res.ok) {
+    // Puppeteer sets res.ok if the HTTP status is in the 2xx range.
+    // Additionally we want to treat status 304 ("Not Modified") as a success.
+    if (!(res.ok || res.status === 304)) {
       fail(new Error(`HTTP ${res.status}: ${res.url}`));
     }
   }
