@@ -139,6 +139,8 @@ export class Cell extends Component<Props, State> {
       require("codemirror/mode/javascript/javascript.js");
       this.input.innerHTML = "" ; // Delete the <pre>
       this.editor = CodeMirror(this.input, options);
+      this.editor.on("focus", this.focus.bind(this));
+      this.editor.on("blur", this.blur.bind(this));
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  { this.update(); return true; },
         "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
@@ -175,7 +177,15 @@ export class Cell extends Component<Props, State> {
 
   clickedRun() {
     console.log("Run was clicked.");
-    this.execute();
+    this.update();
+  }
+
+  blur() {
+    this.input.classList.remove("focus");
+  }
+
+  focus() {
+    this.input.classList.add("focus");
   }
 
   render() {
@@ -190,10 +200,13 @@ export class Cell extends Component<Props, State> {
         // This pre is replaced by CodeMirror if users have JavaScript enabled.
         h("pre", { }, this.code)
       ),
-      h("button", {
-        "class": "run-button",
-        "onClick": this.clickedRun.bind(this),
-      }, "Run"),
+      h("div", { "class": "buttons" },
+        h("button", {
+          "class": "run-button",
+          "onClick": this.clickedRun.bind(this),
+        }, "Run"),
+        // h("button", { "class": "", "onClick": null, }, "Delete"),
+      ),
       h("div", {
         "class": "output",
         "dangerouslySetInnerHTML": { __html: this.props.outputHTML },

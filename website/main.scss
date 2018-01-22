@@ -406,20 +406,24 @@ svg {
   background-color: #cbcbd0;
 }
 
-button.run-button {
+.buttons {
   position: relative;
   float: right;
   bottom: 46px;
   right: 8px;
   opacity: 0;
   transition: opacity 0.25s;
-  background: #fff;
   z-index: 3;
 }
 
-button.run-button:hover,
-.CodeMirror-focused + button.run-button {
-  opacity: 0.7;
+.input.focus + .buttons {
+  opacity: 1.0;
+}
+
+.buttons button {
+  background: #fff;
+  z-index: 1;
+  margin: 5px;
 }
 
 .newCell {
