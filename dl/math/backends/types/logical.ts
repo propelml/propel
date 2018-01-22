@@ -18,13 +18,11 @@
 import {NamedArrayMap} from '../../../util';
 import {NDArray} from '../../ndarray';
 // tslint:disable-next-line:max-line-length
-import {KernelInputConfig, KernelNode, TapeNodeInputGradientArrays} from '../tape_types';
+import {KernelInputConfig, KernelNode} from '../tape_types';
 
 export interface EqualNode extends KernelNode {
   inputAndArgs: EqualInputConfig;
   output: NDArray<'bool'>;
-  gradient:
-      (dy: NDArray<'bool'>, y: NDArray<'bool'>) => EqualGradientInputArrays;
 }
 
 export interface EqualInputConfig extends KernelInputConfig {
@@ -34,11 +32,6 @@ export interface EqualInputConfig extends KernelInputConfig {
 export interface EqualInputArrays extends NamedArrayMap {
   a: NDArray;
   b: NDArray;
-}
-
-export interface EqualGradientInputArrays extends TapeNodeInputGradientArrays {
-  a: () => NDArray;
-  b: () => NDArray;
 }
 
 export interface SelectNode extends KernelNode {

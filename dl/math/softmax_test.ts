@@ -18,7 +18,7 @@
 import * as test_util from '../test_util';
 import {MathTests} from '../test_util';
 
-import {Array1D, Array2D, Scalar} from './ndarray';
+import {Array1D, Array2D} from './ndarray';
 
 // softmax
 {
@@ -77,42 +77,6 @@ import {Array1D, Array2D, Scalar} from './ndarray';
         math.softmax(Array2D.new([2, 3], [[2, 1, 3], [1, 3, 2]]), 0);
       };
       expect(f).toThrowError();
-    });
-
-    it('1D gradient', math => {
-      const x = Array1D.new([10, 0, -1]);
-      const y = math.softmax(x);
-      const dy = Array1D.new([1, 2, 3]);
-      const vjp = math.vjp(() => math.softmax(x), {x}, dy);
-
-      const totalSum = math.sum(math.multiply(dy, y));
-
-      expect(vjp.x.shape).toEqual(x.shape);
-      test_util.expectArraysClose(vjp.x, [
-        (dy.get(0) - totalSum.get()) * y.get(0),
-        (dy.get(1) - totalSum.get()) * y.get(1),
-        (dy.get(2) - totalSum.get()) * y.get(2)
-      ]);
-    });
-
-    it('2D gradient', math => {
-      const x = Array2D.new([2, 3], [10, 0, -1, 5, 4, 3]);
-      const y = math.softmax(x);
-      const dy = Array2D.new([2, 3], [3, 2, 1, 1, 2, 3]);
-      const vjp = math.vjp(() => math.softmax(x), {x}, dy);
-
-      const axis = -1;
-      const totalSum = math.sum(math.elementWiseMul(dy, y), axis);
-
-      expect(vjp.x.shape).toEqual(x.shape);
-      test_util.expectArraysClose(vjp.x, [
-        (dy.get(0, 0) - totalSum.get(0)) * y.get(0, 0),
-        (dy.get(0, 1) - totalSum.get(0)) * y.get(0, 1),
-        (dy.get(0, 2) - totalSum.get(0)) * y.get(0, 2),
-        (dy.get(1, 0) - totalSum.get(1)) * y.get(1, 0),
-        (dy.get(1, 1) - totalSum.get(1)) * y.get(1, 1),
-        (dy.get(1, 2) - totalSum.get(1)) * y.get(1, 2)
-      ]);
     });
   };
 
@@ -194,64 +158,6 @@ import {Array1D, Array2D, Scalar} from './ndarray';
 
       expect(y.shape).toEqual([]);
       test_util.expectArraysClose(y, [NaN]);
-    });
-
-    it('1D gradient', math => {
-      const logits = Array1D.new([1, 2, 3]);
-      const labels = Array1D.new([0.3, 0.6, 0.1]);
-      const softmaxLogits = math.softmax(logits);
-      const dy = Scalar.new(2);
-
-      const vjp = math.vjp(
-          () => math.softmaxCrossEntropyWithLogits(labels, logits),
-          {labels, logits}, dy);
-
-      expect(vjp.logits.shape).toEqual(logits.shape);
-      expect(vjp.labels.shape).toEqual(labels.shape);
-
-      test_util.expectArraysClose(vjp.logits, [
-        dy.get() * (softmaxLogits.get(0) - labels.get(0)),
-        dy.get() * (softmaxLogits.get(1) - labels.get(1)),
-        dy.get() * (softmaxLogits.get(2) - labels.get(2))
-      ]);
-
-      test_util.expectArraysClose(vjp.labels, [
-        dy.get() * (labels.get(0) - softmaxLogits.get(0)),
-        dy.get() * (labels.get(1) - softmaxLogits.get(1)),
-        dy.get() * (labels.get(2) - softmaxLogits.get(2))
-      ]);
-    });
-
-    it('2D gradient', math => {
-      const logits = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
-      const labels = Array2D.new([2, 3], [0.3, 0.6, 0.1, .2, .3, .5]);
-      const softmaxLogits = math.softmax(logits);
-      const dy = Array1D.new([2, 4]);
-
-      const vjp = math.vjp(
-          () => math.softmaxCrossEntropyWithLogits(labels, logits),
-          {labels, logits}, dy);
-
-      expect(vjp.logits.shape).toEqual(logits.shape);
-      expect(vjp.labels.shape).toEqual(labels.shape);
-
-      test_util.expectArraysClose(vjp.logits, [
-        dy.get(0) * (softmaxLogits.get(0, 0) - labels.get(0, 0)),
-        dy.get(0) * (softmaxLogits.get(0, 1) - labels.get(0, 1)),
-        dy.get(0) * (softmaxLogits.get(0, 2) - labels.get(0, 2)),
-        dy.get(1) * (softmaxLogits.get(1, 0) - labels.get(1, 0)),
-        dy.get(1) * (softmaxLogits.get(1, 1) - labels.get(1, 1)),
-        dy.get(1) * (softmaxLogits.get(1, 2) - labels.get(1, 2))
-      ]);
-
-      test_util.expectArraysClose(vjp.labels, [
-        dy.get(0) * (labels.get(0, 0) - softmaxLogits.get(0, 0)),
-        dy.get(0) * (labels.get(0, 1) - softmaxLogits.get(0, 1)),
-        dy.get(0) * (labels.get(0, 2) - softmaxLogits.get(0, 2)),
-        dy.get(1) * (labels.get(1, 0) - softmaxLogits.get(1, 0)),
-        dy.get(1) * (labels.get(1, 1) - softmaxLogits.get(1, 1)),
-        dy.get(1) * (labels.get(1, 2) - softmaxLogits.get(1, 2))
-      ]);
     });
   };
 

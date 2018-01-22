@@ -20,38 +20,14 @@ import {NDArray} from '../ndarray';
 
 import {KernelConfigRegistry} from './kernel_registry';
 
-export type Tape = Array<TapeNode<TapeNodeOutput>>;
-
-export type TapeNodeOutput = NDArray|NamedArrayMap;
-
-export type TapeNodeType = 'kernel'|'customGradient';
-
-export interface TapeNode<T extends TapeNodeOutput> {
-  id: number;
-  type: TapeNodeType;
-  name: string;
-  inputAndArgs: TapeNodeInputConfig;
-
-  output: T;
-  gradient: (dy: T, y: T) => TapeNodeInputGradientArrays;
-}
-
-export interface TapeNodeInputConfig {
-  inputs: NamedArrayMap;
-}
-
-export type TapeNodeInputGradientArrays = {
-  [inputName: string]: () => NDArray;
-};
-
 // Kernel nodes
-export interface KernelNode extends TapeNode<NDArray> {
+export interface KernelNode {
   kernel: keyof KernelConfigRegistry;
   inputAndArgs: KernelInputConfig;
   output: NDArray;
 }
 
-export interface KernelInputConfig extends TapeNodeInputConfig {
+export interface KernelInputConfig {
   inputs: NamedArrayMap;
   // tslint:disable-next-line:no-any
   args?: {[argName: string]: any};

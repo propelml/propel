@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -19,14 +18,11 @@
 import {NamedArrayMap} from '../../../util';
 import {Array2D} from '../../ndarray';
 // tslint:disable-next-line:max-line-length
-import {KernelInputConfig, KernelNode, TapeNodeInputGradientArrays} from '../tape_types';
+import {KernelInputConfig, KernelNode} from '../tape_types';
 
 export interface MultinomialNode extends KernelNode {
   inputAndArgs: MultinomialInputConfig;
   output: Array2D<'int32'>;
-  gradient:
-      (dy: Array2D<'int32'>,
-       y: Array2D<'int32'>) => MultinomialGradientInputArrays;
 }
 
 export interface MultinomialInputConfig extends KernelInputConfig {
@@ -36,9 +32,4 @@ export interface MultinomialInputConfig extends KernelInputConfig {
 
 export interface MultinomialInputArrays extends NamedArrayMap {
   probs: Array2D;
-}
-
-export interface MultinomialGradientInputArrays extends
-    TapeNodeInputGradientArrays {
-  probs: () => Array2D;
 }

@@ -225,45 +225,6 @@ const commonTests: MathTests = it => {
     expect(result.shape).toEqual([2, 2]);
     test_util.expectArraysClose(result, expected);
   });
-
-  // TODO(nsthorat): fix the precision for backprop.
-  it('gradients: A * B', math => {
-    const a = Array2D.new([2, 3], [1, 2, 3, 10, 20, 30]);
-    const b = Array2D.new([3, 2], [2, 3, 4, 1, 2, 3]);
-    const dy = Array2D.new([2, 2], [1, 10, 20, 30]);
-
-    const gradients = math.vjp(
-        () => math.matMul(
-            a, b, MatrixOrientation.REGULAR, MatrixOrientation.REGULAR),
-        {a, b}, dy);
-
-    // da = dy * bT
-    test_util.expectArraysClose(
-        gradients.a,
-        [
-          dy.get(0, 0) * b.get(0, 0) + dy.get(0, 1) * b.get(0, 1),
-          dy.get(0, 0) * b.get(1, 0) + dy.get(0, 1) * b.get(1, 1),
-          dy.get(0, 0) * b.get(2, 0) + dy.get(0, 1) * b.get(2, 1),
-          dy.get(1, 0) * b.get(0, 0) + dy.get(1, 1) * b.get(0, 1),
-          dy.get(1, 0) * b.get(1, 0) + dy.get(1, 1) * b.get(1, 1),
-          dy.get(1, 0) * b.get(2, 0) + dy.get(1, 1) * b.get(2, 1)
-        ],
-        1e-1);
-
-    // db = aT * dy
-    expect(gradients.b.shape).toEqual(b.shape);
-    test_util.expectArraysClose(
-        gradients.b,
-        [
-          a.get(0, 0) * dy.get(0, 0) + a.get(1, 0) * dy.get(1, 0),
-          a.get(0, 0) * dy.get(0, 1) + a.get(1, 0) * dy.get(1, 1),
-          a.get(0, 1) * dy.get(0, 0) + a.get(1, 1) * dy.get(1, 0),
-          a.get(0, 1) * dy.get(0, 1) + a.get(1, 1) * dy.get(1, 1),
-          a.get(0, 2) * dy.get(0, 0) + a.get(1, 2) * dy.get(1, 0),
-          a.get(0, 2) * dy.get(0, 1) + a.get(1, 2) * dy.get(1, 1)
-        ],
-        1e-1);
-  });
 };
 
 const gpuTests: MathTests = it => {
