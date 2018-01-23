@@ -510,7 +510,7 @@ export class Tensor implements types.BasicTensor {
    */
   softmaxCE(labels: types.TensorLike): Tensor {
     const logits = this;
-    const labelsT = this.colocate(labels);
+    const labelsT = this.colocate(labels).cast("float32");
     assert(labelsT.rank === 2);
     assert(logits.rank === 2);
     const logQ = logits.logSoftmax();

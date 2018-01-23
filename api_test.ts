@@ -918,7 +918,8 @@ test(async function api_cast() {
 
 test(async function api_oneHot() {
   for (const [device, $] of deviceTests()) {
-    const a = $([0, 1, 3, 4], {dtype: "uint8"});
+    // TODO dtype uint8
+    const a = $([0, 1, 3, 4], {dtype: "int32"});
     assertAllEqual(a.oneHot(6), [
       [1, 0, 0, 0, 0, 0],
       [0, 1, 0, 0, 0, 0],
