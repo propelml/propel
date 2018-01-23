@@ -14,7 +14,7 @@
  */
 import { test } from "./test";
 import * as tf from "./tf";
-import { assert, assertAllEqual, assertEqual } from "./util";
+import { assert, assertAllEqual } from "./util";
 
 assert(tf.loadBinding());
 const binding = tf.binding;
@@ -85,12 +85,12 @@ test(async function binding_mul() {
 test(async function binding_chaining() {
   // Do an Equal followed by ReduceAll.
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
-  const b = new binding.Handle(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
+  const b = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
 
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
   ];
-  const r = binding.execute(ctx, "Equal", opAttrs, [a, a])[0];
+  const r = binding.execute(ctx, "Equal", opAttrs, [a, b])[0];
   assert(binding.getDType(r) === binding.TF_BOOL);
   assertAllEqual(binding.getShape(r), [2]);
 

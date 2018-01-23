@@ -24,7 +24,7 @@ import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { assert, IS_WEB } from "./util";
+import { IS_WEB } from "./util";
 
 let cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -289,7 +289,11 @@ export function guessCellId(): number {
 export function outputEl(): Element {
   const id = guessCellId();
   const cell = lookupCell(id);
-  if (cell) return cell.output;
+  if (cell) {
+    return cell.output;
+  } else {
+    return null;
+  }
 }
 
 matplotlib.register(outputEl);
