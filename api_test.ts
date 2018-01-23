@@ -43,12 +43,13 @@ function gpuConvert(x: TensorLike, args?: types.TensorOpts): Tensor {
 }
 
 // Allows tests to run on CPU:0 and GPU:0 (if available).
-function deviceTests(): Array<[string, ConvertFn]> {
-  const out: Array<[string, ConvertFn]> = [ ["CPU:0", $] ];
+function testDevices(
+  fn: ($: ConvertFn, device: string) => Promise<void>
+): void {
+  test({ fn: () => fn($, "CPU:0"), name: `${fn.name} CPU:0` });
   if (gpuAvail()) {
-    out.push(["GPU:0", gpuConvert]);
+    test({ fn: () => fn(gpuConvert, "GPU:0"), name: `${fn.name} GPU:0` });
   }
-  return out;
 }
 
 // Basic Tests
@@ -398,111 +399,103 @@ test(async function api_matMul() {
   ]);
 });
 
-test(async function api_reduceSum() {
-  for (const [, $] of deviceTests()) {
-    const a = $([
-      [9, 8, 7],
-      [6, 5, 4],
-    ]);
-    assertAllEqual(a.reduceSum([0]), [9 + 6, 8 + 5, 7 + 4]);
-    assertAllEqual(a.reduceSum([1]), [9 + 8 + 7, 6 + 5 + 4]);
-    assertAllEqual(a.reduceSum(), 9 + 8 + 7 + 6 + 5 + 4);
+testDevices(async function api_reduceSum($, device) {
+  const a = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  assertAllEqual(a.reduceSum([0]), [9 + 6, 8 + 5, 7 + 4]);
+  assertAllEqual(a.reduceSum([1]), [9 + 8 + 7, 6 + 5 + 4]);
+  assertAllEqual(a.reduceSum(), 9 + 8 + 7 + 6 + 5 + 4);
 
-    assertAllEqual(a.reduceSum([0], true), [[9 + 6, 8 + 5, 7 + 4]]);
-    assertAllEqual(a.reduceSum([1], true), [[9 + 8 + 7], [6 + 5 + 4]]);
+  assertAllEqual(a.reduceSum([0], true), [[9 + 6, 8 + 5, 7 + 4]]);
+  assertAllEqual(a.reduceSum([1], true), [[9 + 8 + 7], [6 + 5 + 4]]);
 
-    const f = (x) => $(x).mul(2).reduceSum([0]);
-    const g = grad(f);
-    assertAllEqual(g(a), [[2, 2, 2], [2, 2, 2]]);
+  const f = (x) => $(x).mul(2).reduceSum([0]);
+  const g = grad(f);
+  assertAllEqual(g(a), [[2, 2, 2], [2, 2, 2]]);
 
-    const b = $([
-      [9, 8, 7],
-      [6, 5, 4],
-      [1, 2, 3],
-      [4, -4, -5],
-    ]);
-    const f2 = (x) => $(x).reduceSum([1]);
-    assertShapesEqual(f2(b).shape, [4]);
-    const g2 = grad(f2);
-    assertAllEqual(g2(b), [
-      [1, 1, 1],
-      [1, 1, 1],
-      [1, 1, 1],
-      [1, 1, 1],
-    ]);
-  }
+  const b = $([
+    [9, 8, 7],
+    [6, 5, 4],
+    [1, 2, 3],
+    [4, -4, -5],
+  ]);
+  const f2 = (x) => $(x).reduceSum([1]);
+  assertShapesEqual(f2(b).shape, [4]);
+  const g2 = grad(f2);
+  assertAllEqual(g2(b), [
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+  ]);
 });
 
-test(async function api_reduceMean() {
-  for (const [device, $] of deviceTests()) {
-    const a = $([
-      [9, 8, 7],
-      [6, 5, 4],
-    ]);
-    assert(a.device === device);
-    assertAllEqual(a.reduceMean([0]), [7.5, 6.5, 5.5]);
-    assertAllEqual(a.reduceMean([1]), [8, 5]);
-    assertAllEqual(a.reduceMean(), 6.5);
+testDevices(async function api_reduceMean($, device) {
+  const a = $([
+    [9, 8, 7],
+    [6, 5, 4],
+  ]);
+  assert(a.device === device);
+  assertAllEqual(a.reduceMean([0]), [7.5, 6.5, 5.5]);
+  assertAllEqual(a.reduceMean([1]), [8, 5]);
+  assertAllEqual(a.reduceMean(), 6.5);
 
-    assertAllEqual(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
-    assertAllEqual(a.reduceMean([1], true), [[8], [5]]);
+  assertAllEqual(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
+  assertAllEqual(a.reduceMean([1], true), [[8], [5]]);
 
-    const f = (x) => $(x).mul(2).reduceMean([0]);
-    const g = grad(f);
-    assertAllEqual(g(a), [[1, 1, 1], [1, 1, 1]]);
+  const f = (x) => $(x).mul(2).reduceMean([0]);
+  const g = grad(f);
+  assertAllEqual(g(a), [[1, 1, 1], [1, 1, 1]]);
 
-    const b = $([
-      [9, 8, 7],
-      [6, 5, 4],
-      [1, 2, 3],
-      [4, -4, -5],
-    ]);
-    const f2 = (x) => $(x).reduceMean([1]);
-    assertShapesEqual(f2(b).shape, [4]);
-    const g2 = grad(f2);
-    const t = 1 / 3;
-    assertAllClose(g2(b), [
-      [t, t, t],
-      [t, t, t],
-      [t, t, t],
-      [t, t, t],
-    ]);
-  }
+  const b = $([
+    [9, 8, 7],
+    [6, 5, 4],
+    [1, 2, 3],
+    [4, -4, -5],
+  ]);
+  const f2 = (x) => $(x).reduceMean([1]);
+  assertShapesEqual(f2(b).shape, [4]);
+  const g2 = grad(f2);
+  const t = 1 / 3;
+  assertAllClose(g2(b), [
+    [t, t, t],
+    [t, t, t],
+    [t, t, t],
+    [t, t, t],
+  ]);
 });
 
-test(async function api_reduceMax() {
-  for (const [, $] of deviceTests()) {
-    const a = $([
-      [9, 5, 7],
-      [6, 8, 4],
-    ]);
-    assertAllEqual(a.reduceMax([0]), [9, 8, 7]);
-    assertAllEqual(a.reduceMax([1]), [9, 8]);
-    assertAllEqual(a.reduceMax(), 9);
-    assertAllEqual(a.reduceMax([0], true), [[9, 8, 7]]);
-    assertAllEqual(a.reduceMax([1], true), [[9], [8]]);
+testDevices(async function api_reduceMax($, device) {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.reduceMax([0]), [9, 8, 7]);
+  assertAllEqual(a.reduceMax([1]), [9, 8]);
+  assertAllEqual(a.reduceMax(), 9);
+  assertAllEqual(a.reduceMax([0], true), [[9, 8, 7]]);
+  assertAllEqual(a.reduceMax([1], true), [[9], [8]]);
 
-    /* TODO
-    const f = (x) => $(x).reduceMax([0])
-    const g = grad(f);
-    assertAllEqual(g(a), [[1, 0, 1], [0, 1, 0]]);
-    */
-  }
+  /* TODO
+  const f = (x) => $(x).reduceMax([0])
+  const g = grad(f);
+  assertAllEqual(g(a), [[1, 0, 1], [0, 1, 0]]);
+  */
 });
 
-test(async function api_onesAndZerosLike() {
-  for (const [device, $] of deviceTests()) {
-    const a = $([
-      [9, 5, 7],
-      [6, 8, 4],
-    ]);
-    const ones = a.onesLike();
-    const zeros = a.zerosLike();
-    assert(ones.device === device);
-    assert(zeros.device === device);
-    assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
-    assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
-  }
+testDevices(async function api_onesAndZerosLike($, device) {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  const ones = a.onesLike();
+  const zeros = a.zerosLike();
+  assert(ones.device === device);
+  assert(zeros.device === device);
+  assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
+  assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
 });
 
 test(async function api_equal() {
@@ -652,26 +645,24 @@ test(async function api_sign() {
   assertAllEqual(g(x), [0, 0, 0, 0]);
 });
 
-test(async function api_reshape() {
-  for (const [device, $] of deviceTests()) {
-    const a = $([
-      [9, 5, 7],
-      [6, 8, 4],
-    ]);
-    assertAllEqual(a.reshape([3, 2]), [
-      [9, 5],
-      [7, 6],
-      [8, 4],
-    ]);
-    const f = (x) => $(x).reshape([3, 2]);
-    const g = grad(f);
-    const ga = g(a);
-    assert(ga.device === device);
-    assertAllEqual(ga, [
-      [1, 1, 1],
-      [1, 1, 1],
-    ]);
-  }
+testDevices(async function api_reshape($, device) {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.reshape([3, 2]), [
+    [9, 5],
+    [7, 6],
+    [8, 4],
+  ]);
+  const f = (x) => $(x).reshape([3, 2]);
+  const g = grad(f);
+  const ga = g(a);
+  assert(ga.device === device);
+  assertAllEqual(ga, [
+    [1, 1, 1],
+    [1, 1, 1],
+  ]);
 });
 
 test(async function api_flatten() {
@@ -713,28 +704,26 @@ test(async function api_logSoftmax() {
     [0.87176559, 0.65142273, 0.05246873, -1.57565704]);
 });
 
-test(async function api_argMaxAndMin() {
-  for (const [, $] of deviceTests()) {
-    const a = $([
-      [9, 5, 7],
-      [6, 8, 4],
-    ]);
-    assertAllEqual(a.argmax(1), [0, 1]);
-    assertAllEqual(a.argmin(1), [1, 2]);
-    assertAllEqual(a.argmax(0), [0, 1, 0]);
-    assertAllEqual(a.argmin(0), [1, 0, 1]);
-    // Not differentiable.
-    const g = grad((x) => $(x).argmax(0));
-    assertAllEqual(g(a), [
-      [0, 0, 0],
-      [0, 0, 0],
-    ]);
-    const h = grad((x) => $(x).argmin(0));
-    assertAllEqual(h(a), [
-      [0, 0, 0],
-      [0, 0, 0],
-    ]);
-  }
+testDevices(async function api_argMaxAndMin($, device) {
+  const a = $([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.argmax(1), [0, 1]);
+  assertAllEqual(a.argmin(1), [1, 2]);
+  assertAllEqual(a.argmax(0), [0, 1, 0]);
+  assertAllEqual(a.argmin(0), [1, 0, 1]);
+  // Not differentiable.
+  const g = grad((x) => $(x).argmax(0));
+  assertAllEqual(g(a), [
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
+  const h = grad((x) => $(x).argmin(0));
+  assertAllEqual(h(a), [
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
 });
 
 test(async function api_dot() {
@@ -882,31 +871,29 @@ test(async function api_bcastDiv() {
   assertAllClose(gab[1], [-0.00907029, -0.01081666]);
 });
 
-test(async function api_slice() {
-  for (const [, $] of deviceTests()) {
-    const a = $([[[1, 1, 1], [2, 2, 2]],
-                 [[3, 3, 3], [4, 4, 4]],
-                 [[5, 5, 5], [6, 6, 6]]]);
-    const s1 = a.slice([1, 0, 0], [1, 1, 3]);
-    // FIXME
-    // assert(s1.dtype === "uint8");
-    assertAllEqual(s1, [[[3, 3, 3]]]);
-    assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]),
-                   [[[3, 3, 3],
-                     [4, 4, 4]]]);
-    assertAllEqual(a.slice([1, 0, 0], [2, 1, 3]),
-                   [[[3, 3, 3]],
-                    [[5, 5, 5]]]);
-    assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
-                   [[[3, 3, 3], [4, 4, 4]]]);
+testDevices(async function api_slice($, device) {
+  const a = $([[[1, 1, 1], [2, 2, 2]],
+               [[3, 3, 3], [4, 4, 4]],
+               [[5, 5, 5], [6, 6, 6]]]);
+  const s1 = a.slice([1, 0, 0], [1, 1, 3]);
+  // FIXME
+  // assert(s1.dtype === "uint8");
+  assertAllEqual(s1, [[[3, 3, 3]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]),
+                 [[[3, 3, 3],
+                   [4, 4, 4]]]);
+  assertAllEqual(a.slice([1, 0, 0], [2, 1, 3]),
+                 [[[3, 3, 3]],
+                  [[5, 5, 5]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
+                 [[[3, 3, 3], [4, 4, 4]]]);
 
-    const s2 = $([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
-    assert(s2.dtype === "int32");
-    assertAllEqual(s2, [2]);
-    const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
-    grad(f);
-    // TODO figure out backwards pass.
-  }
+  const s2 = $([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
+  assert(s2.dtype === "int32");
+  assertAllEqual(s2, [2]);
+  const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
+  grad(f);
+  // TODO figure out backwards pass.
 });
 
 test(async function api_cast() {
@@ -916,24 +903,22 @@ test(async function api_cast() {
   assertAllClose(r, [1.0, 127 / 255, 0]);
 });
 
-test(async function api_oneHot() {
-  for (const [, $] of deviceTests()) {
-    const a = $([0, 1, 3, 4], {dtype: "uint8"});
-    assertAllEqual(a.oneHot(6), [
-      [1, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 0, 0],
-      [0, 0, 0, 0, 1, 0],
-    ]);
+testDevices(async function api_oneHot($, device) {
+  const a = $([0, 1, 3, 4], {dtype: "uint8"});
+  assertAllEqual(a.oneHot(6), [
+    [1, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0],
+  ]);
 
-    const b = $([0, 1, 3, 4], {dtype: "int32"});
-    assertAllEqual(b.oneHot(5, 0.5, -0.5), [
-      [ 0.5, -0.5, -0.5, -0.5, -0.5],
-      [-0.5,  0.5, -0.5, -0.5, -0.5],
-      [-0.5, -0.5, -0.5,  0.5, -0.5],
-      [-0.5, -0.5, -0.5, -0.5,  0.5],
-    ]);
-  }
+  const b = $([0, 1, 3, 4], {dtype: "int32"});
+  assertAllEqual(b.oneHot(5, 0.5, -0.5), [
+    [ 0.5, -0.5, -0.5, -0.5, -0.5],
+    [-0.5,  0.5, -0.5, -0.5, -0.5],
+    [-0.5, -0.5, -0.5,  0.5, -0.5],
+    [-0.5, -0.5, -0.5, -0.5,  0.5],
+  ]);
 });
 
 test(async function api_softmaxCE() {
@@ -989,53 +974,51 @@ test(async function api_devicePlacement() {
   assertAllEqual(rCpu, [3, 8]);
 });
 
-test(async function api_neuralNet() {
-  for (const [device, $] of deviceTests()) {
-    const inference = (params: Params, images: Tensor) => {
-      let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
-      let outputs;
-      const layerSizes = [ 28 * 28, 64, 10 ];
-      for (let i = 0; i < layerSizes.length - 1; ++i) {
-        const m = layerSizes[i];
-        const n = layerSizes[i + 1];
-        // Initialize or get weights and biases.
-        const w = params.randn(`w${i}`, [m, n], {device});
-        const b = params.zeros(`b${i}`, [n], "float32", device);
-        outputs = inputs.matmul(w).add(b);
-        inputs = outputs.relu();
-      }
-      return outputs;
-    };
-
-    // Define the training objective using softmax cross entropy loss.
-    const loss = (images, labels, params: Params): Tensor => {
-      const labels1H = labels.oneHot(10);
-      const logits = inference(params, images);
-      const softmaxLoss = logits.softmaxCE(labels1H).reduceMean();
-      return softmaxLoss;
-    };
-
-    // Just zero data.
-    const images = $(zeros([16, 28, 28], {dtype: "int32"}));
-    const labels = $(zeros([16], {dtype: "int32"}));
-    let params = new Params();
-    const gradFn = api.gradParams((params: Params): Tensor => {
-      return loss(images, labels, params);
-    });
-    const steps = 3;
-    const learningRate = 0.001;
-    for (let i = 0; i < steps; i++) {
-      const [grads] = gradFn(params);
-      const updated = new Params();
-      grads.forEach((g, name) => {
-        const p = params.get(name);
-        if (i > 0) {
-          assertShapesEqual(p.shape, g.shape);
-        }
-        updated.set(name, p.sub(g.mul(learningRate)));
-      });
-      params = updated;
+testDevices(async function api_neuralNet($, device) {
+  const inference = (params: Params, images: Tensor) => {
+    let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
+    let outputs;
+    const layerSizes = [ 28 * 28, 64, 10 ];
+    for (let i = 0; i < layerSizes.length - 1; ++i) {
+      const m = layerSizes[i];
+      const n = layerSizes[i + 1];
+      // Initialize or get weights and biases.
+      const w = params.randn(`w${i}`, [m, n], {device});
+      const b = params.zeros(`b${i}`, [n], "float32", device);
+      outputs = inputs.matmul(w).add(b);
+      inputs = outputs.relu();
     }
+    return outputs;
+  };
+
+  // Define the training objective using softmax cross entropy loss.
+  const loss = (images, labels, params: Params): Tensor => {
+    const labels1H = labels.oneHot(10);
+    const logits = inference(params, images);
+    const softmaxLoss = logits.softmaxCE(labels1H).reduceMean();
+    return softmaxLoss;
+  };
+
+  // Just zero data.
+  const images = $(zeros([16, 28, 28], {dtype: "int32"}));
+  const labels = $(zeros([16], {dtype: "int32"}));
+  let params = new Params();
+  const gradFn = api.gradParams((params: Params): Tensor => {
+    return loss(images, labels, params);
+  });
+  const steps = 3;
+  const learningRate = 0.001;
+  for (let i = 0; i < steps; i++) {
+    const [grads] = gradFn(params);
+    const updated = new Params();
+    grads.forEach((g, name) => {
+      const p = params.get(name);
+      if (i > 0) {
+        assertShapesEqual(p.shape, g.shape);
+      }
+      updated.set(name, p.sub(g.mul(learningRate)));
+    });
+    params = updated;
   }
 });
 
