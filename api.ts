@@ -13,7 +13,6 @@
    limitations under the License.
  */
 import { bo } from "./backend";
-import * as backprop from "./backprop";
 import { gradParams, ParamsFn } from "./backprop";
 import * as ops from "./ops";
 import { convert, gc, Tensor } from "./tensor";

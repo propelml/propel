@@ -13,9 +13,9 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import { BindingInterface, Handle } from "./binding";
+import { Handle } from "./binding";
 import * as types from "./types";
-import { assert, assertEqual, IS_WEB } from "./util";
+import { assert, assertEqual } from "./util";
 
 export let binding;
 export let ctx;

@@ -13,7 +13,7 @@
    limitations under the License.
  */
 import { $, Tensor } from "./api";
-import { assert, assertEqual, IS_WEB, log } from "./util";
+import { assert, assertEqual, IS_WEB } from "./util";
 
 export interface Elements {
   images: Tensor;
@@ -45,7 +45,7 @@ export function filenames(split: string): [string, string] {
       makeHref("t10k-images-idx3-ubyte"),
     ];
   } else {
-    assert(false, "Bad split: " + split);
+    throw new Error(`Bad split: ${split}`);
   }
 }
 
