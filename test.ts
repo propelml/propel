@@ -16,9 +16,9 @@
 import { inspect } from "util";
 import { assert, global, IS_NODE } from "./util";
 
-type TestFunction = () => void | Promise<void>;
+export type TestFunction = () => void | Promise<void>;
 
-interface TestDefinition {
+export interface TestDefinition {
   fn: TestFunction;
   name: string;
 }

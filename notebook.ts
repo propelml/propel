@@ -66,12 +66,12 @@ const codemirrorOptions = {
   viewportMargin: Infinity,
 };
 
-interface Props {
+export interface Props {
   code: string;
   outputHTML: string;
   id: number;
 }
-interface State { outputHTML: string; }
+export interface State { outputHTML: string; }
 
 export class Cell extends Component<Props, State> {
   input: Element;
@@ -217,7 +217,7 @@ export class Cell extends Component<Props, State> {
   }
 }
 
-interface FixedProps {
+export interface FixedProps {
   code: string;
 }
 
