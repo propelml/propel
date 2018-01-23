@@ -20,9 +20,8 @@ import {Tests} from '../../test_util';
 import {MathBackendWebGL} from './backend_webgl';
 
 const tests: Tests = () => {
-  it('delayed storage, reading', () => {
-    const delayedStorage = true;
-    const backend = new MathBackendWebGL(null, delayedStorage);
+  it('reading', () => {
+    const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     backend.register(0, [3], 'float32');
     backend.write(0, new Float32Array([1, 2, 3]));
@@ -38,9 +37,8 @@ const tests: Tests = () => {
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-  it('delayed storage, overwriting', () => {
-    const delayedStorage = true;
-    const backend = new MathBackendWebGL(null, delayedStorage);
+  it('overwriting', () => {
+    const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     backend.register(0, [3], 'float32');
     backend.write(0, new Float32Array([1, 2, 3]));
@@ -58,44 +56,15 @@ const tests: Tests = () => {
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-  it('immediate storage reading', () => {
-    const delayedStorage = false;
-    const backend = new MathBackendWebGL(null, delayedStorage);
+   it('disposal of backend disposes all textures', () => {
+    const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     backend.register(0, [3], 'float32');
     backend.write(0, new Float32Array([1, 2, 3]));
-    expect(texManager.getNumUsedTextures()).toBe(1);
-    test_util.expectArraysClose(
-        backend.readSync(0), new Float32Array([1, 2, 3]));
-    expect(texManager.getNumUsedTextures()).toBe(1);
-    backend.disposeData(0);
-    expect(texManager.getNumUsedTextures()).toBe(0);
-  });
-
-  it('immediate storage overwriting', () => {
-    const delayedStorage = false;
-    const backend = new MathBackendWebGL(null, delayedStorage);
-    const texManager = backend.getTextureManager();
-    backend.register(0, [3], 'float32');
-    backend.write(0, new Float32Array([1, 2, 3]));
-    expect(texManager.getNumUsedTextures()).toBe(1);
-    backend.write(0, new Float32Array([4, 5, 6]));
-    expect(texManager.getNumUsedTextures()).toBe(1);
-    test_util.expectArraysClose(
-        backend.readSync(0), new Float32Array([4, 5, 6]));
-    expect(texManager.getNumUsedTextures()).toBe(1);
-    backend.disposeData(0);
-    expect(texManager.getNumUsedTextures()).toBe(0);
-  });
-
-  it('disposal of backend disposes all textures', () => {
-    const delayedStorage = false;
-    const backend = new MathBackendWebGL(null, delayedStorage);
-    const texManager = backend.getTextureManager();
-    backend.register(0, [3], 'float32');
-    backend.write(0, new Float32Array([1, 2, 3]));
+    backend.getTexture(0); // Forces upload to GPU.
     backend.register(1, [3], 'float32');
     backend.write(1, new Float32Array([4, 5, 6]));
+    backend.getTexture(1); // Forces upload to GPU.
     expect(texManager.getNumUsedTextures()).toBe(2);
     backend.dispose();
     expect(texManager.getNumUsedTextures()).toBe(0);

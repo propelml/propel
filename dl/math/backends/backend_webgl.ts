@@ -120,17 +120,14 @@ export class MathBackendWebGL implements MathBackend {
 
     const {texture, texShape} = this.texData[dataId];
     if (texture != null) {
-      // Release the old texture.
+      // Release texture, because it is now out of sync. A new texture will be
+      // created when a GPU program needs it.
       this.textureManager.releaseTexture(texture, texShape);
       this.texData[dataId].texture = null;
       this.texData[dataId].texShape = null;
       this.texData[dataId].textureType = null;
     }
     this.texData[dataId].values = values;
-
-    if (!this.delayedStorage) {
-      this.uploadToGPU(dataId);
-    }
   }
 
   readSync<D extends DataType>(dataId: number): DataTypeMap[D] {
@@ -209,7 +206,7 @@ export class MathBackendWebGL implements MathBackend {
   private binaryCache: {[key: string]: GPGPUBinary} = {};
   private gpgpuCreatedLocally: boolean;
 
-  constructor(private gpgpu?: GPGPUContext, private delayedStorage = true) {
+  constructor(private gpgpu?: GPGPUContext) {
     if (ENV.get('WEBGL_VERSION') < 1) {
       throw new Error('WebGL is not supported on this device');
     }
@@ -892,12 +889,11 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   private cacheOnCPU(dataId: number, float32Values?: Float32Array) {
-    // In delayed storage mode, when the user reads data, we don't keep a copy
-    // on the gpu, to minimize likelihood of memory leak. We re-upload to gpu
-    // the next time a gpgpu program needs the texture.
-    const dontKeepCopyOnGPU = this.delayedStorage;
+    // When the user reads data, don't keep a copy on the gpu, to minimize
+    // likelihood of memory leak. We re-upload to gpu the next time a gpgpu
+    // program needs the texture.
     const {texture, texShape, dtype} = this.texData[dataId];
-    if (dontKeepCopyOnGPU && texture != null) {
+    if (texture != null) {
       this.textureManager.releaseTexture(texture, texShape);
       this.texData[dataId].texture = null;
       this.texData[dataId].texShape = null;
