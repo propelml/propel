@@ -5,6 +5,8 @@
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
+$githubGreen: #39aa56;
+
 /* NOTE html is set to 62.5% so that all the REM measurements
 throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
 html {
@@ -483,4 +485,15 @@ svg {
 
 .newCell {
   margin: 50px 10px;
+}
+
+.clone {
+  background: $githubGreen;
+  color: #fff;
+  border: none;
+}
+
+.clone:hover {
+  color: #fff;
+  background: darken($githubGreen, 10%);
 }

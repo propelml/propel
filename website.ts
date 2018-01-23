@@ -46,7 +46,7 @@ function i(...children) {
   return h("i", null, ...children);
 }
 
-function div(className, ...children) {
+export function div(className, ...children) {
   return h("div", { "class": className }, ...children);
 }
 
@@ -60,18 +60,6 @@ function link(href, ...children) {
 
 function fixed(code: string): JSX.Element {
   return h(nb.FixedCell, { code });
-}
-
-function notebook(code: string, id = null): JSX.Element {
-  let outputHTML = "";
-  if (id == null) id = nb.getNextId();
-  // This is kinda a hack to get rehydration working. Potentially this can be
-  // done in a more elegant way.
-  const outputDiv = document.getElementById(`output${id}`);
-  if (outputDiv) {
-    outputHTML = outputDiv.innerHTML;
-  }
-  return h(nb.Cell, { id, code, outputHTML });
 }
 
 function toTagName(s: string): string {
@@ -109,7 +97,7 @@ export function markupDocStr(docstr: string): JSX.Element {
         if (line == null || !isIndented(line)) {
           state = "normal";
           const src = buf.map(unindent).join("\n");
-          elements.push(notebook(src));
+          elements.push(nb.notebook(src));
           buf = [];
         }
         break;
@@ -188,14 +176,16 @@ const Docs = (props) => {
   );
 };
 
-const GlobalHeader = (props) => {
-  return div("global-header",
-    div("global-header-inner",
-      h("a", { "class": "button", href: "/" }, "← Propel"),
-      // h("a", { "class": "button", href: "#" }, "Login"),
-    ),
-  );
-};
+export class GlobalHeader extends Component<any, any> {
+  render() {
+    return div("global-header",
+      div("global-header-inner",
+        h("a", { "class": "button", href: "/" }, "← Propel"),
+        ...this.props.children,
+      ),
+    );
+  }
+}
 
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
@@ -218,73 +208,6 @@ export const PropelIndex = (props) => {
     h(ReferencesFooter, null),
   );
 };
-
-class NotebookIndex extends Component<any, any> {
-  constructor(props) {
-    super(props);
-    this.state = { cells };
-  }
-
-  newCellClick() {
-    const s = this.state;
-    s.cells.push(""); // empty;
-    this.setState(s);
-  }
-
-  render() {
-    const notebooks = this.state.cells.map((c, i) => {
-      return notebook(c, i);
-    });
-    return div("notebook",
-      h(GlobalHeader, null),
-      h("header", null,
-        h("h1", null, "Notebook")
-      ),
-      div("cells", ...notebooks),
-      div("nb-footer",
-        h("button", {
-          id: "newCell",
-          onclick: this.newCellClick.bind(this),
-        }, "New Cell")
-      ),
-    );
-  }
-}
-
-const cells = [
-`
-import { T } from "propel";
-t = T([[2, 3], [30, 20]])
-t.mul(5)
-`,
-`
-import { grad, linspace, plot } from "propel";
-
-f = (x) => T(x).mul(x);
-x = linspace(-4, 4, 200);
-plot(x, f(x),
-     x, grad(f)(x));
-`,
-/* TODO support fetch in tools/build_website.ts.
-`
-f = await fetch('/static/mnist/README');
-t = await f.text();
-t;
-`,
-*/
-`
-import { T } from "propel";
-function f(x) {
-  let y = x.sub(1);
-  let z = T(-1).sub(x);
-  return x.greater(0).select(y,z).relu();
-}
-x = linspace(-5, 5, 100)
-plot(x, f(x))
-plot(x, grad(f)(x))
-grad(f)([-3, -0.5, 0.5, 3])
-`
-];
 
 const ReferencesFooter = (props) => {
   return h("section", { "class": "footer" }, link("references.html",
@@ -346,7 +269,7 @@ const Explainer = (props) => {
           "npm install propel_linux_gpu",
         ].join("\n")),
       ),
-      div("explainer-notebook", notebook(tanhGrads))
+      div("explainer-notebook", nb.notebook(tanhGrads))
     )
   );
 };
@@ -365,6 +288,7 @@ plot(x, f(x),
 
 // Called by tools/build_website.ts
 export function getHTML(title, markup) {
+  const fbUrl = "https://www.gstatic.com/firebasejs/4.9.0";
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -373,6 +297,9 @@ export function getHTML(title, markup) {
     <meta id="viewport" name="viewport" content="width=device-width,
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="/bundle.css"/>
+    <script src="${fbUrl}/firebase.js"></script>
+    <script src="${fbUrl}/firebase-auth.js"></script>
+    <script src="${fbUrl}/firebase-firestore.js"></script>
     <script src="/website_main.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
@@ -409,7 +336,7 @@ export const pages: Page[] = [
   {
     title: "Propel Notebook",
     path: "website/notebook/index.html",
-    root: NotebookIndex,
+    root: nb.Notebook,
     route: /^\/notebook/,
   },
   {

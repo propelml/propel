@@ -84,4 +84,6 @@ scss("website/main.scss", join(websiteRoot, "bundle.css"));
 writePages().then(() => {
   run.parcel("website_main.ts", "build/website");
   console.log("Website built in", websiteRoot);
+  // Firebase keeps network connections open, so we have force exit the process.
+  process.exit(0);
 });
