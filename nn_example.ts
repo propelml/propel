@@ -20,7 +20,6 @@ import * as plt from "./matplotlib";
 import * as mnist from "./mnist";
 import { assert, IS_WEB } from "./util";
 
-const debug = true;
 let device;  // Set in train()
 
 // Hyperparameters

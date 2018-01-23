@@ -19,15 +19,13 @@
 
 import * as dl from "./dl";
 import * as tf from "./tf";
-import * as config from "./tools/config";
 import * as types from "./types";
-import { assert, deepCloneArray, flatten, inferShape, IS_WEB } from "./util";
+import { deepCloneArray, flatten, inferShape, IS_WEB } from "./util";
 
 // These globals will be set by onLoad
 let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
-const tfModule = null;
 
 let onLoadCalled = false;
 (function onLoad() {

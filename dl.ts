@@ -20,7 +20,7 @@ import "./dl/math/backends/backend_cpu";
 import "./dl/math/backends/backend_webgl";
 
 import { ENV } from "./dl/environment";
-import { MathBackendWebGL, NDArrayMathGPU }
+import { MathBackendWebGL }
  from "./dl/math/backends/backend_webgl";
 import { MatrixOrientation }
   from "./dl/math/backends/types/matmul";
@@ -121,6 +121,7 @@ export class OpsDL implements types.BackendOps {
     const nd = NDArray.make(orig.shape, {values: orig.dataSync()},
                             orig.dtype, math);
     return new TensorDL(nd, math);
+
   }
 
   getDevice(x: TensorDL): string {
