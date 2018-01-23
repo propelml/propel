@@ -12,19 +12,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
+// Propel Notebooks.
+// Note that this is rendered and executed server-side using JSDOM and then is
+// re-rendered client-side. The Propel code in the cells are executed
+// server-side so the results can be displayed even if javascript is disabled.
+
 // tslint:disable:no-reference
 /// <reference path="node_modules/@types/codemirror/index.d.ts" />
-// React Notebook cells.
-// Note that these are rendered and executed server-side using JSDOM and may
-// are re-rendered client-side when users click "Run".
-// The Propel code in the cells are executed server-side so they don't have to
-// be run again on page load.
+
 import { Component, h } from "preact";
 import * as propel from "./api";
+import * as db from "./db";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { delay, IS_WEB } from "./util";
+import { assert, delay, IS_WEB } from "./util";
+import { div, GlobalHeader } from "./website";
 
 let cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -52,6 +56,14 @@ export function lookupCell(id: number) {
   return cellTable.get(id);
 }
 
+// Convenience function to create Notebook JSX element.
+export function notebook(code: string, props: CellProps = {}): JSX.Element {
+  props.id = props.id || getNextId();
+  // console.log("create notebook", props.id);
+  props.code = code;
+  return h(Cell, props);
+}
+
 // When rendering HTML server-side, all of the notebook cells are executed so
 // their output can be placed in the generated HTML. This queue tracks the
 // execution promises for each cell.
@@ -66,14 +78,14 @@ const codemirrorOptions = {
   viewportMargin: Infinity,
 };
 
-export interface Props {
-  code: string;
-  outputHTML: string;
-  id: number;
+export interface CellProps {
+  code?: string;
+  id?: number;
+  onEdit?: (code: string) => void;
 }
-export interface State { outputHTML: string; }
+export interface CellState { }
 
-export class Cell extends Component<Props, State> {
+export class Cell extends Component<CellProps, CellState> {
   input: Element;
   output: Element;
   editor: CodeMirror.Editor;
@@ -99,8 +111,21 @@ export class Cell extends Component<Props, State> {
     return (this.editor ? this.editor.getValue() : this.props.code).trim();
   }
 
+  clearOutput() {
+    this.output.innerHTML = "";
+  }
+
+  componentWillReceiveProps(nextProps: CellProps) {
+    const nextCode = nextProps.code.trim();
+    if (nextCode !== this.code) {
+      this.editor.setValue(nextCode);
+      this.clearOutput();
+    }
+  }
+
+  // Never update the component, because CodeMirror has complex state.
+  // Code updates are done in componentWillReceiveProps.
   shouldComponentUpdate() {
-    console.log(" shouldComponentUpdate() ", this.id);
     return false;
   }
 
@@ -125,6 +150,10 @@ export class Cell extends Component<Props, State> {
   }
 
   componentDidMount() {
+    // Execute the cell automatically.
+    this.clearOutput();
+    notebookExecuteQueue.push(this.execute());
+
     const options = Object.assign({}, codemirrorOptions, {
       mode: "javascript",
       value: this.code,
@@ -146,12 +175,14 @@ export class Cell extends Component<Props, State> {
         "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
       });
     }
-    // Execute the cell automatically.
-    notebookExecuteQueue.push(this.update());
   }
 
   async update() {
-    this.output.innerHTML = ""; // Clear output.
+    if (this.props.onEdit) {
+      this.props.onEdit(this.code);
+    }
+
+    this.clearOutput();
     const classList = (this.input.parentNode as HTMLElement).classList;
     classList.add("notebook-cell-running");
     try {
@@ -202,7 +233,6 @@ export class Cell extends Component<Props, State> {
       ),
       h("div", {
         "class": "output",
-        "dangerouslySetInnerHTML": { __html: this.props.outputHTML },
         "id": "output" + this.id,
         "ref": (ref => { this.output = ref; }),
       }),
@@ -217,7 +247,7 @@ export interface FixedProps {
 // FixedCell is for non-executing notebook-lookalikes. Usually will be used for
 // non-javascript code samples.
 // TODO share more code with Cell.
-export class FixedCell extends Component<FixedProps, State> {
+export class FixedCell extends Component<FixedProps, CellState> {
   render() {
     // Render as a pre in case people don't have javascript turned on.
     return h("div", { "class": "notebook-cell", },
@@ -263,6 +293,7 @@ export async function evalCell(source: string, cellId: number): Promise<any> {
   const fn = globalEval(source);
   const g = IS_WEB ? window : global;
   const cell = lookupCell(cellId);
+  assert(cell != null);
   return await fn(g, importModule, cell.console);
 }
 
@@ -302,4 +333,208 @@ async function importModule(target) {
     return m;
   }
   throw new Error("Unknown module: " + target);
+}
+
+interface NotebookProps {
+  nbId?: string;
+}
+
+interface NotebookState {
+  loadingAuth: boolean;
+  userInfo?: db.UserInfo;
+  doc?: db.NotebookDoc;
+  nbId: string;
+  errorMsg?: string;
+}
+
+const exampleNbId = "2f0lhH2kP1ySYtY4sK9y";
+
+// This defines the Notebook page which loads Cells from Firebase.
+export class Notebook extends Component<NotebookProps, NotebookState> {
+  handle: db.Handle;
+
+  constructor(props) {
+    super(props);
+
+    // Extract the nbId from props or query string.
+    let nbId;
+    if (this.props.nbId) {
+      nbId = this.props.nbId;
+    } else {
+      const matches = document.location.search.match(/nbId=(\w+)/);
+      if (matches) {
+        nbId = matches[1];
+      } else {
+        nbId = exampleNbId;
+      }
+    }
+
+    this.state = {
+      loadingAuth: true,
+      userInfo: null,
+      doc: null,
+      nbId,
+    };
+  }
+
+  onError(errorMsg: string) {
+    this.setState({ errorMsg });
+  }
+
+  async onEdit(updatedCode, i) {
+    if (this.handle) {
+      const doc = this.state.doc;
+      doc.cells[i] = updatedCode;
+      this.setState({ doc });
+      this.handle.update(doc.cells);
+    }
+  }
+
+  loading() {
+    return this.state.loadingAuth || this.state.doc == null;
+  }
+
+  removeAuthListener: () => void;
+  componentDidMount() {
+    let hasSetStateFromDoc = false;
+    if (IS_WEB) {
+      this.handle = new db.Handle({
+        nbId: this.state.nbId,
+        onAuthStateChange: userInfo =>
+            this.setState({ loadingAuth: false, userInfo }),
+        onDocChange: doc => {
+          // We only take the very first change....
+          // Hacky.
+          if (!hasSetStateFromDoc) { this.setState({ doc }),
+          hasSetStateFromDoc = true;
+          }
+          console.log("Doc change from database.", doc);
+        },
+        onError: this.onError.bind(this),
+      });
+      this.handle.subscribe();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.handle) this.handle.dispose();
+  }
+
+  newCellClick() {
+    const doc = this.state.doc;
+    doc.cells.push("");
+    this.setState({ doc });
+  }
+
+  signIn() {
+    console.log("Click signIn");
+    if (this.handle && !this.state.userInfo && !this.state.loadingAuth) {
+      this.handle.signIn();
+      this.setState({ loadingAuth: true });
+    }
+  }
+
+  async clone() {
+    console.log("Click clone");
+    const clonedId = await this.handle.clone(this.state.doc);
+    // Redirect to new cloned notebook.
+    window.location.href = "/notebook?nbId=" + clonedId;
+  }
+
+  signOut() {
+    console.log("Click signOut");
+    this.handle.signOut();
+    this.setState({ loadingAuth: true });
+  }
+
+  stateToCells(): JSX.Element[] {
+    return this.state.doc.cells.map((code, i) => {
+      return notebook(code, {
+        // TODO(rld) i + 1 is because nextCellId starts at 1. So the statically
+        // generated version starts at 1. In order to consistantly update those
+        // cells, we use the same ids here. This brittle and should be fixed.
+        id: i + 1,
+        onEdit: (updatedCode) => {
+          this.onEdit(updatedCode, i);
+        }
+      });
+    });
+  }
+
+  render() {
+    let menuItems;
+    let body;
+
+    if (this.state.errorMsg) {
+      menuItems = [];
+      body = [
+        h("h1", null, "Error"),
+        h("b", null, this.state.errorMsg),
+      ];
+
+    } else if (this.loading()) {
+      menuItems = [];
+      body = [h("b", null, "loading")];
+
+    } else {
+      const nbCells = this.stateToCells();
+
+      if (this.state.userInfo) {
+        menuItems = [
+          h(Avatar, { userInfo: this.state.userInfo }),
+          h("button", {
+            "onclick": this.signOut.bind(this),
+          }, "Sign out")
+        ];
+
+        // If we don't own the doc, show a clone button.
+        menuItems.push(h("button", {
+          "class": "clone",
+          "onclick": this.clone.bind(this),
+        }, "Clone"));
+
+      } else {
+        menuItems = [
+          h("button", {
+            "class": "clone",
+            "onclick": this.signIn.bind(this),
+          }, "Sign in to Clone")
+        ];
+      }
+
+      body = [
+        h("header", null,
+          h(Avatar, { userInfo: this.state.doc.owner }),
+          h("b", null,
+            ` Notebook created
+              by ${this.state.doc.owner.displayName}
+              on ${fmtDate(this.state.doc.created)}.
+          `),
+        ),
+        div("cells", ...nbCells),
+        div("container nb-footer",
+          h("button", {
+            id: "newCell",
+            onclick: this.newCellClick.bind(this),
+          }, "New Cell")
+        ),
+      ];
+    }
+
+    return div("notebook",
+      h(GlobalHeader, null, ...menuItems),
+      ...body,
+    );
+  }
+}
+
+const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
+  const size = props.size || 50;
+  return h("img", {
+    src: props.userInfo.photoURL + "&size=" + size,
+  });
+};
+
+function fmtDate(d: Date): string {
+  return d.toISOString();
 }
