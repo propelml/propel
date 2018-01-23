@@ -47,7 +47,7 @@ interface OpInfo {
   bwFuncs: BWFunc[];
 }
 
-const ops = {}; // name -> OpInfo
+const ops: { [name: string]: OpInfo } = {};
 
 // Define a forward op.
 function defFW(name: string, fwFunc: FWFunc): OpFunc {

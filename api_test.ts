@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { $, arange, backend, DType, fill, grad, linspace, listDevices,
+import { $, arange, fill, grad, linspace, listDevices,
   multigrad, ones, Params, randn, Tensor, TensorLike, zeros } from "./api";
 import * as api from "./api";
 import { test } from "./test";
@@ -399,7 +399,7 @@ test(async function api_matMul() {
 });
 
 test(async function api_reduceSum() {
-  for (const [device, $] of deviceTests()) {
+  for (const [, $] of deviceTests()) {
     const a = $([
       [9, 8, 7],
       [6, 5, 4],
@@ -471,7 +471,7 @@ test(async function api_reduceMean() {
 });
 
 test(async function api_reduceMax() {
-  for (const [device, $] of deviceTests()) {
+  for (const [, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
       [6, 8, 4],
@@ -714,7 +714,7 @@ test(async function api_logSoftmax() {
 });
 
 test(async function api_argMaxAndMin() {
-  for (const [device, $] of deviceTests()) {
+  for (const [, $] of deviceTests()) {
     const a = $([
       [9, 5, 7],
       [6, 8, 4],
@@ -883,7 +883,7 @@ test(async function api_bcastDiv() {
 });
 
 test(async function api_slice() {
-  for (const [device, $] of deviceTests()) {
+  for (const [, $] of deviceTests()) {
     const a = $([[[1, 1, 1], [2, 2, 2]],
                  [[3, 3, 3], [4, 4, 4]],
                  [[5, 5, 5], [6, 6, 6]]]);
@@ -904,7 +904,7 @@ test(async function api_slice() {
     assert(s2.dtype === "int32");
     assertAllEqual(s2, [2]);
     const f = (x) => $(x).slice([1, 0, 0], [2, 1, 3]);
-    const g = grad(f);
+    grad(f);
     // TODO figure out backwards pass.
   }
 });
@@ -917,7 +917,7 @@ test(async function api_cast() {
 });
 
 test(async function api_oneHot() {
-  for (const [device, $] of deviceTests()) {
+  for (const [, $] of deviceTests()) {
     const a = $([0, 1, 3, 4], {dtype: "uint8"});
     assertAllEqual(a.oneHot(6), [
       [1, 0, 0, 0, 0, 0],
@@ -1025,7 +1025,7 @@ test(async function api_neuralNet() {
     const steps = 3;
     const learningRate = 0.001;
     for (let i = 0; i < steps; i++) {
-      const [grads, _] = gradFn(params);
+      const [grads] = gradFn(params);
       const updated = new Params();
       grads.forEach((g, name) => {
         const p = params.get(name);

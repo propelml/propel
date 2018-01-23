@@ -13,8 +13,7 @@
    limitations under the License.
  */
 
-import { inspect } from "util";
-import { assert, global, IS_NODE } from "./util";
+import { IS_NODE } from "./util";
 
 export type TestFunction = () => void | Promise<void>;
 
@@ -82,7 +81,7 @@ async function runTests() {
     );
 
     try {
-      const r = await fn();
+      await fn();
       passed++;
     } catch (e) {
       console.error((e && e.message) || e);

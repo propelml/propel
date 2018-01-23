@@ -56,11 +56,13 @@ function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
     return [inferShape(t), flatten(t) as number[]];
   } else if (typeof t === "number") {
     return [[], [t]];
+  } else {
+    throw new Error("Not TensorLike");
   }
 }
 
 function toNumber(t: TensorLike): number {
-  const [shape, values] = toShapeAndFlatVector(t);
+  const values = toShapeAndFlatVector(t)[1];
   if (values.length !== 1) {
     throw new Error("Not Scalar");
   }

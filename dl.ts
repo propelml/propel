@@ -20,7 +20,7 @@ import "./dl/math/backends/backend_cpu";
 import "./dl/math/backends/backend_webgl";
 
 import { ENV } from "./dl/environment";
-import { MathBackendWebGL, NDArrayMathGPU }
+import { MathBackendWebGL }
  from "./dl/math/backends/backend_webgl";
 import { MatrixOrientation }
   from "./dl/math/backends/types/matmul";
@@ -122,7 +122,7 @@ export class OpsDL implements types.BackendOps {
       // Is this correct?
       return new TensorDL(nd, cpuMath);
     }
-    assert(false, "unreachable");
+    throw new Error(`Invalid device: ${device}`);
   }
 
   getDevice(x: TensorDL): string {

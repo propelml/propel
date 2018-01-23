@@ -1,9 +1,9 @@
 // tslint:disable-next-line:no-reference
-/// <reference path='./jasmine_shim.d.ts' />
+/// <reference path='./jasmine_types.d.ts' />
 
 import { inspect } from "util";
 import { test } from "./test";
-import { assert, global, IS_NODE } from "./util";
+import { global } from "./util";
 
 class Suite {
   constructor(readonly name: string) {}
@@ -103,7 +103,7 @@ const matchTesters: MatchTesters = {
 };
 
 class PositiveMatchers /* implements Matchers */ {
-  constructor(private actual: any) {}
+  constructor(readonly actual: any) {}
   get not(): Matchers {
     const m = new NegativeMatchers(this.actual);
     return (m as any) as Matchers;
@@ -111,7 +111,7 @@ class PositiveMatchers /* implements Matchers */ {
 }
 
 class NegativeMatchers /* implements Matchers */ {
-  constructor(private actual: any) {}
+  constructor(readonly actual: any) {}
 }
 
 for (const name of Object.keys(matchTesters)) {
