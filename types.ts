@@ -114,6 +114,8 @@ export function getDType(data: TypedArray): DType {
     return "float32";
   } else if (data instanceof Uint8Array) {
     return "uint8";
+  } else {
+    throw new Error("Unsupported TypedArray flavor");
   }
 }
 

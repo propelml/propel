@@ -13,8 +13,8 @@
    limitations under the License.
  */
 import * as d3 from "d3";
-import { $, Tensor } from "./api";
-import { assert, assertEqual } from "./util";
+import { Tensor } from "./api";
+import { assertEqual } from "./util";
 
 export interface OutputHandler {
   (): Element;
@@ -38,7 +38,6 @@ export function outputEl(): null | Element {
   return h ? h() : null;
 }
 
-const currentPlot = null;
 // TODO colors should match those used by the syntax highlighting.
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
