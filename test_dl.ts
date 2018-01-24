@@ -42,5 +42,4 @@ import "./dl/math/softmax_test";
 import "./dl/math/tile_test";
 import "./dl/math/transpose_test";
 import "./dl/math/unaryop_test";
-import "./dl/math/variable_test";
 import "./dl/util_test";

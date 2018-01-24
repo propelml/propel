@@ -26,7 +26,7 @@ import * as broadcast_util from './broadcast_util';
 import * as concat_util from './concat_util';
 import * as conv_util from './conv_util';
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar, Variable} from './ndarray';
+import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar} from './ndarray';
 import * as slice_util from './slice_util';
 import {SumTypes} from './types';
 
@@ -37,7 +37,6 @@ export interface LSTMCell {
 export interface NDArrayManager {
   getNumArrays(): number;
   register(a: NDArray): void;
-  registerVariable(v: Variable): void;
 }
 
 export class NDArrayMath implements NDArrayManager {
@@ -45,9 +44,6 @@ export class NDArrayMath implements NDArrayManager {
   private registeredArrays = new Map<number, number>();
   private backend: MathBackend;
   private customBackend = false;
-
-  // Public since optimizers will use it.
-  registeredVariables = new Map<string, Variable>();
 
   time(query: () => NDArray): Promise<number> {
     return this.backend.time(query);
@@ -57,7 +53,7 @@ export class NDArrayMath implements NDArrayManager {
     return this.registeredArrays.size;
   }
 
-  register(a: NDArray|Variable): void {
+  register(a: NDArray): void {
     const refCount = this.registeredArrays.has(a.dataId) ?
         this.registeredArrays.get(a.dataId) :
         0;
@@ -65,16 +61,7 @@ export class NDArrayMath implements NDArrayManager {
       this.backend.register(a.dataId, a.shape, a.dtype);
     }
     this.registeredArrays.set(a.dataId, refCount + 1);
-    if (!(a instanceof Variable)) {
-      this.backendEngine.track(a);
-    }
-  }
-
-  registerVariable(v: Variable) {
-    if (this.registeredVariables.has(v.name)) {
-      throw new Error(`Variable with name ${v.name} was already registered`);
-    }
-    this.registeredVariables.set(v.name, v);
+    this.backendEngine.track(a);
   }
 
   writePixels(
