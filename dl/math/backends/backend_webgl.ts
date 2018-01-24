@@ -20,7 +20,6 @@ import * as util from '../../util';
 import {TypedArray} from '../../util';
 import * as axis_util from '../axis_util';
 import {Conv2DInfo} from '../conv_util';
-import {NDArrayMath} from '../math';
 // tslint:disable-next-line:max-line-length
 import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
 import * as reduce_util from '../reduce_util';
@@ -911,29 +910,6 @@ export class MathBackendWebGL implements MathBackend {
 }
 
 ENV.registerBackend('webgl', () => new MathBackendWebGL());
-
-// TODO(nsthorat): Deprecate this once we export non-abstract NDArrayMath.
-export class NDArrayMathGPU extends NDArrayMath {
-  constructor(gpgpu?: GPGPUContext, safeMode = false) {
-    console.warn(
-        'new NDArrayMathGPU() is deprecated. Please use the global ' +
-        'dl.ENV.math. In rare cases, to construct your own NDArrayMath ' +
-        'that runs on GPU, use math = new NDArrayMath(\'webgl\', safeMode); ' +
-        'and make sure to set it as global: dl.ENV.setMath(math);');
-    super(new MathBackendWebGL(gpgpu), safeMode);
-    ENV.setMath(this);
-  }
-
-  getGPGPUContext(): GPGPUContext {
-    return (this.backendEngine.getBackend() as MathBackendWebGL)
-        .getGPGPUContext();
-  }
-
-  getTextureManager(): TextureManager {
-    return (this.backendEngine.getBackend() as MathBackendWebGL)
-        .getTextureManager();
-  }
-}
 
 function float32ToTypedArray<D extends DataType>(
     a: Float32Array, dtype: D): DataTypeMap[D] {
