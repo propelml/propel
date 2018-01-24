@@ -23,7 +23,6 @@ import * as webgl_util from './math/backends/webgl/webgl_util';
 import * as conv_util from './math/conv_util';
 import * as test_util from './test_util';
 import * as util from './util';
-import {version} from './version';
 
 export {ENV, Environment, Features} from './environment';
 export {MathBackendCPU} from './math/backends/backend_cpu';
@@ -33,7 +32,6 @@ export {GPGPUContext} from './math/backends/webgl/gpgpu_context';
 export {LSTMCell, NDArrayMath} from './math/math';
 // tslint:disable-next-line:max-line-length
 export {Array1D, Array2D, Array3D, Array4D, NDArray, Scalar} from './math/ndarray';
-export {version};
 // Second level exports.
 export {
   conv_util,
