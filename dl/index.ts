@@ -26,13 +26,10 @@ import * as util from './util';
 import {version} from './version';
 
 export {ENV, Environment, Features} from './environment';
-// tslint:disable-next-line:max-line-length
-export {ConstantInitializer, Initializer, NDArrayInitializer, OnesInitializer, RandomNormalInitializer, RandomTruncatedNormalInitializer, RandomUniformInitializer, VarianceScalingInitializer, ZerosInitializer} from './initializers';
 export {MathBackendCPU} from './math/backends/backend_cpu';
 export {MathBackendWebGL} from './math/backends/backend_webgl';
 export {MatrixOrientation} from './math/backends/types/matmul';
 export {GPGPUContext} from './math/backends/webgl/gpgpu_context';
-// tslint:disable-next-line:max-line-length
 export {LSTMCell, NDArrayMath} from './math/math';
 // tslint:disable-next-line:max-line-length
 export {Array1D, Array2D, Array3D, Array4D, NDArray, Scalar} from './math/ndarray';
