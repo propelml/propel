@@ -84,7 +84,7 @@ async function runTests() {
       await fn();
       passed++;
     } catch (e) {
-      console.error((e && e.message) || e);
+      console.error((e && e.stack) || e);
       failed++;
     }
   }
