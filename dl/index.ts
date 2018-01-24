@@ -28,8 +28,8 @@ import {version} from './version';
 export {ENV, Environment, Features} from './environment';
 // tslint:disable-next-line:max-line-length
 export {ConstantInitializer, Initializer, NDArrayInitializer, OnesInitializer, RandomNormalInitializer, RandomTruncatedNormalInitializer, RandomUniformInitializer, VarianceScalingInitializer, ZerosInitializer} from './initializers';
-export {MathBackendCPU, NDArrayMathCPU} from './math/backends/backend_cpu';
-export {MathBackendWebGL, NDArrayMathGPU} from './math/backends/backend_webgl';
+export {MathBackendCPU} from './math/backends/backend_cpu';
+export {MathBackendWebGL} from './math/backends/backend_webgl';
 export {MatrixOrientation} from './math/backends/types/matmul';
 export {GPGPUContext} from './math/backends/webgl/gpgpu_context';
 // tslint:disable-next-line:max-line-length

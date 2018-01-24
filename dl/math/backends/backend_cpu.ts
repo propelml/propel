@@ -22,7 +22,6 @@ import * as util from '../../util';
 import * as broadcast_util from '../broadcast_util';
 import * as concat_util from '../concat_util';
 import {Conv2DInfo} from '../conv_util';
-import {NDArrayMath} from '../math';
 // tslint:disable-next-line:max-line-length
 import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank, Scalar} from '../ndarray';
 import * as types from '../types';
@@ -1517,16 +1516,3 @@ export class MathBackendCPU implements MathBackend {
 }
 
 ENV.registerBackend('cpu', () => new MathBackendCPU());
-
-// TODO(nsthorat): Deprecate this once we export non-abstract NDArrayMath.
-export class NDArrayMathCPU extends NDArrayMath {
-  constructor(safeMode = false) {
-    console.warn(
-        'new NDArrayMathCPU() is deprecated. Please use the global ' +
-        'dl.ENV.math. In rare cases, to construct your own NDArrayMath ' +
-        'that runs on CPU, use math = new NDArrayMath(\'cpu\', safeMode); ' +
-        'and make sure to set it as global: dl.ENV.setMath(math);');
-    super('cpu', safeMode);
-    ENV.setMath(this);
-  }
-}
