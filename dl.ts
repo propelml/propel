@@ -282,7 +282,7 @@ export class OpsDL implements types.BackendOps {
     return TensorDL.fromTypedArray(ta, [num]);
   }
 
-  arange(start: number, limit: number, delta: number): TensorDL {
+  range(start: number, limit: number, delta: number): TensorDL {
     const num = (limit - start) / delta;
     const ta = new Int32Array(num);
     for (let i = 0; i < num; ++i) {

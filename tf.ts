@@ -283,7 +283,7 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
-  arange(start: number, limit: number, delta: number): TensorTF {
+  range(start: number, limit: number, delta: number): TensorTF {
     const startT = int32Small(start);
     const limitT = int32Small(limit);
     const deltaT = int32Small(delta);

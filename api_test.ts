@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { $, arange, fill, grad, linspace, listDevices,
-  multigrad, ones, Params, randn, Tensor, TensorLike, zeros } from "./api";
+import { $, fill, grad, linspace, listDevices, multigrad,
+  ones, Params, randn, range, Tensor, TensorLike, zeros } from "./api";
 import * as api from "./api";
 import { test } from "./test";
 import * as types from "./types";
@@ -59,12 +59,12 @@ test(async function api_linspace() {
   assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
 });
 
-test(async function api_arange() {
-  const r1 = arange(-2, 2);
+test(async function api_range() {
+  const r1 = range(-2, 2);
   assertAllEqual(r1, [-2, -1, 0, 1]);
-  const r2 = arange(4);
+  const r2 = range(4);
   assertAllEqual(r2, [0, 1, 2, 3]);
-  const r3 = arange(4, 10, 2);
+  const r3 = range(4, 10, 2);
   assertAllEqual(r3, [4, 6, 8]);
 });
 

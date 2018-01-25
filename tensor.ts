@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { arange } from "./api";
+import { range } from "./api";
 import { bo, convertBasic } from "./backend";
 import * as format from "./format";
 import * as ops from "./ops";
@@ -276,7 +276,7 @@ export class Tensor implements types.BasicTensor {
 
   transpose(perm?: types.TensorLike): Tensor {
     if (perm === undefined) {
-      perm = arange(this.rank).reverse();
+      perm = range(this.rank).reverse();
     }
     perm = this.colocate(perm, "int32");
     return ops.transpose(this, perm);
@@ -408,10 +408,10 @@ export class Tensor implements types.BasicTensor {
 
   /** Reshapes the tensor without changing its data. O(1).
    *
-   *    import { arange } from "propel";
+   *    import { range } from "propel";
    *    n = 5
    *    m = 2
-   *    t = arange(m*n)
+   *    t = range(m*n)
    *    console.log(t.reshape([n, m]))
    *    console.log(t.reshape([m, n]))
    */
@@ -519,7 +519,7 @@ export class Tensor implements types.BasicTensor {
   }
 }
 
-/** Like arange() but outputs a javascript array of numbers. */
+/** Like range() but outputs a javascript array of numbers. */
 function rangeJS(limit: number): number[] {
   const r = new Array(limit);
   for (let i = 0; i < limit; i++) {
