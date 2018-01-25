@@ -65,7 +65,7 @@ export interface BackendOps {
   abs(x: BasicTensor): BasicTensor;
   randn(shape: Shape, seed?: number): BasicTensor;
   linspace(start: number, stop: number, num: number): BasicTensor;
-  arange(start: number, limit: number, delta: number): BasicTensor;
+  range(start: number, limit: number, delta: number): BasicTensor;
   transpose(x: BasicTensor, perm: BasicTensor): BasicTensor;
   reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
   matmul(x: BasicTensor, y: BasicTensor, transposeA: boolean,

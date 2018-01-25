@@ -67,11 +67,12 @@ export function linspace(start: number, stop: number, num = 50): Tensor {
 }
 
 /** Return evenly spaced numbers over a specified interval.
+ *  This as a similar interface as arange in numpy.
  *
- *    import { arange } from "propel"
- *    arange(10);
+ *    import { range } from "propel"
+ *    range(10);
  */
-export function arange(...args: number[]): Tensor {
+export function range(...args: number[]): Tensor {
   let start: number, limit: number, delta: number;
   switch (args.length) {
     case 1:
@@ -95,7 +96,7 @@ export function arange(...args: number[]): Tensor {
     default:
       throw new Error("Bad number of arguments.");
   }
-  const t = bo.arange(start, limit, delta);
+  const t = bo.range(start, limit, delta);
   return new Tensor(t);
 }
 
