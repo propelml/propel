@@ -137,7 +137,7 @@ export function genJSON(): DocEntry[] {
       // This is a top level class, get its symbol
       visitClass(node);
     } else if (ts.isTypeAliasDeclaration(node)) {
-      const symbol = checker.getSymbolAtLocation(node.name);
+      // const symbol = checker.getSymbolAtLocation(node.name);
       // checker.typeToString
       // checker.symbolToString
       // console.error("- type alias", checker.typeToString(node.type));
