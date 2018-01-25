@@ -407,17 +407,18 @@ svg {
 }
 
 .buttons {
-  position: relative;
-  float: right;
-  bottom: 46px;
-  right: 8px;
-  opacity: 0;
-  transition: opacity 0.25s;
-  z-index: 3;
+  text-align: right;
+  border: 0;
+  height: 0;
+  transition: height 0.2s ease-in-out;
+  overflow: hidden;
 }
 
+// When either the cell is in focus, or the button is in focus show the
+// buttons. Note the transition above.
+.buttons:focus,
 .input.focus + .buttons {
-  opacity: 1;
+  height: 50px;
 }
 
 .buttons button {
