@@ -149,8 +149,8 @@ export function multigradAndVal(f, argnums?: number[]) {
  * When evaluated at a point, it gives the slope in each dimension of
  * the function f. For example:
  *
- *    import { $, grad } from "propel";
- *    let f = (x) => $(x).square()
+ *    import { T, grad } from "propel";
+ *    let f = (x) => T(x).square()
  *    g = grad(f)  // g(x) = 2*x
  *    g(10) // is 2 * 10
  */

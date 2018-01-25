@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { $, Tensor } from "./api";
+import { T, Tensor } from "./api";
 import { assert, assertEqual, IS_WEB } from "./util";
 
 export interface Elements {
@@ -100,10 +100,10 @@ async function loadFile(href, split: string, isImages: boolean,
     // the entire dataset here upfront.
     // Ideally casts should be almost free, like they are in TF.
     const tensorData = new Float32Array(ui8.slice(4 * i));
-    t = $(tensorData, {dtype: "float32", device});
+    t = T(tensorData, {dtype: "float32", device});
   } else {
     const tensorData = new Int32Array(ui8.slice(4 * i));
-    t = $(tensorData, {dtype: "int32", device});
+    t = T(tensorData, {dtype: "int32", device});
   }
   const shape = isImages ? [numExamples, 28, 28] : [numExamples];
 

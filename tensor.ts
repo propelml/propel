@@ -421,7 +421,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Return a copy of the tensor collapsed into one dimension.
    *
-   *    $([[1, 2], [3, 4]]).flatten()
+   *    T([[1, 2], [3, 4]]).flatten()
    */
   flatten(): Tensor {
     return this.reshape([-1]);
@@ -429,7 +429,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Remove single-dimensional axes from the shape of a tensor.
    *
-   *    $([[[2, 3, 4]]]).squeeze()
+   *    T([[[2, 3, 4]]]).squeeze()
    */
   squeeze(): Tensor {
     const newShape = this.shape.filter((d) => d > 1);
@@ -492,7 +492,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Build a one-hot tensor from labels.
    *
-   *    let labels = $([1, 3, 0], {dtype: "int32"});
+   *    let labels = T([1, 3, 0], {dtype: "int32"});
    *    labels.oneHot(5);
    */
   oneHot(depth: number, onValue = 1.0, offValue = 0.0): Tensor {
