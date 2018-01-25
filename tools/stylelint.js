@@ -8,4 +8,9 @@ run.sh(`node ./node_modules/stylelint/bin/stylelint.js
   ${extra}
   --config stylelint.json
   website/main.scss
-  website/syntax.scss`);
+  website/normalize.scss
+  website/skeleton.scss
+  website/syntax.scss
+  website/syntax_dark.scss
+  website/syntax_light.scss
+`);

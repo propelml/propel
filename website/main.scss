@@ -1,6 +1,8 @@
 @import './normalize.scss';
 @import './skeleton.scss';
 @import './codemirror.scss';
+@import './syntax_dark.scss';
+// @import './syntax_light.scss';
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
@@ -21,7 +23,7 @@
 }
 
 body {
-  background-color: #e4e4ea;
+  background-color: $bodyBackground;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -35,18 +37,18 @@ body {
     'segoe ui',
     arial,
     sans-serif;
-  color: #1d2936;
+  color: $textColor;
 }
 
 body p {
   font-size: 16px;
   line-height: 32px;
-  color: #1d2936;
+  color: $textColor;
   margin: 16px 12px;
 }
 
 a {
-  color: #1163c2;
+  color: $linkColor;
   text-decoration: none;
 }
 
@@ -73,7 +75,7 @@ pre,
 
 .splash {
   padding-bottom: 32px;
-  background-color: #e4e4ea;
+  background-color: $bodyBackground;
 }
 
 .explainer-container {
@@ -121,8 +123,8 @@ h1,
   padding: 16px 0 16px 0;
   height: auto;
   padding-left: 0;
-  border-top: 1px solid #e4e4ea;
-  border-bottom: 1px solid #e4e4ea;
+  border-top: 1px solid $bodyBackground;
+  border-bottom: 1px solid $bodyBackground;
   margin-bottom: 16px;
   -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
@@ -134,7 +136,7 @@ h1,
   background-color: #fafaff;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
-  border-left: 2px solid #1163c2;
+  border-left: 2px solid $linkColor;
   -webkit-box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
   -moz-box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
   box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
@@ -156,12 +158,12 @@ h1,
 
 header {
   align-items: center;
-  background-color: #e4e4ea;
-  border-bottom: 1px solid #1d2936;
+  background-color: $bodyBackground;
+  border-bottom: 1px solid $textColor;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: #1d2936;
+  color: $textColor;
 }
 
 header * {
@@ -191,13 +193,13 @@ header h1 {
   top: 0;
   width: auto;
   padding: 8px 12px 32px 8px;
-  background-color: #e4e4ea;
+  background-color: $bodyBackground;
 }
 
 .panel h1 {
   font-size: 24px;
   line-height: 32px;
-  border-bottom: 1px solid #1d2936;
+  border-bottom: 1px solid $textColor;
   padding-bottom: 8px;
   margin-bottom: 16px;
   letter-spacing: 0.1px;
@@ -234,13 +236,13 @@ header h1 {
     top: 0;
     width: 240px;
     padding: 16px 12px 32px 8px;
-    background-color: #e4e4ea;
+    background-color: $bodyBackground;
   }
 
   .panel h1 {
     font-size: 24px;
     line-height: 32px;
-    border-bottom: 1px solid #1d2936;
+    border-bottom: 1px solid $cellBackground;
     padding-bottom: 8px;
     margin-bottom: 16px;
   }
@@ -294,12 +296,12 @@ header h1 {
 .docindex a:active {
   color: rgb(31, 119, 180);
   text-decoration: underline;
-  background-color: #dddde3;
+  background-color: $base1;
 }
 
 .doc-entry > .name {
   font-size: 20px;
-  color: #1163c2;
+  color: $linkColor;
   letter-spacing: 0.2px;
   font-weight: 300;
   margin: 0;
@@ -332,7 +334,7 @@ header h1 {
 
 .global-header {
   width: 100%;
-  background-color: #dddde3;
+  background-color: inherit;
 }
 
 .global-header-inner {
@@ -386,7 +388,7 @@ header h1 {
 
 .CodeMirror-focused {
   /* Color matches D3 lines. */
-  border-left-color: rgb(0, 0, 255);
+  border-left-color: $base03;
   transition: border-left-color 0s;
 }
 
