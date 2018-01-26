@@ -4,6 +4,22 @@ A Machine Learning Framework for JavaScript.
 
 [![Build Status](https://travis-ci.com/propelml/propel.svg?token=eWz4oGVxypBGsz78gdKp&branch=master)](https://travis-ci.com/propelml/propel)
 
+
+## Packages
+
+npm packages are built with `./tools/package.js`. Here are links
+to the various packages:
+
+    https://www.npmjs.com/package/propel
+    https://www.npmjs.com/package/propel_linux
+    https://www.npmjs.com/package/propel_linux_gpu
+    https://www.npmjs.com/package/propel_mac
+    https://www.npmjs.com/package/propel_windows
+
+If you're on Linux and would like to build a CUDA version of
+Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
+
+
 ## Contributing
 
 Check out Propel, including its git submodules.
@@ -41,16 +57,27 @@ of tests which currently must be run manually:
     Run this command:  `PP_TEST_DL=1 ts-node test_browser`
 
 
-## Packages
+### Adding An Op
 
-npm packages are built with `./tools/package.js`. Here are links
-to the various packages:
+Propel is under heavy development and is missing implementaions for many common
+ops. Here is a rough outline of how to add an op
 
-    https://www.npmjs.com/package/propel
-    https://www.npmjs.com/package/propel_linux
-    https://www.npmjs.com/package/propel_linux_gpu
-    https://www.npmjs.com/package/propel_mac
-    https://www.npmjs.com/package/propel_windows
+  1. Add the frontend implementation to `api.ts` or `tensor.ts` (depending on
+     if its a method of Tensor or a standalone function)
 
-If you're on Linux and would like to build a CUDA version of
-Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
+  2. Add the op's signature to the `BackendOps` interface in `types.ts`.
+
+  3. Add the forward and backwards passes to `ops.ts`.
+
+  4. Finally implement the op for DL and TF in `dl.ts` and `tf.ts`
+     respectively.
+ 
+  5. Add a test demonstrating the desired behavior in `api_test.ts`.
+     The tensorflow binding can be built using `./tools/build_binding.js`
+     and the test can be run by doing `ts-node api_test.ts MyTest`.
+     The DL test can be run by setting an environmental variable:
+     `PROPEL=dl ts-node api_test.ts MyTest`
+     
+     
+
+
