@@ -46,7 +46,7 @@ export interface BackendOps {
   neg(x: BasicTensor): BasicTensor;
   exp(x: BasicTensor): BasicTensor;
   log(x: BasicTensor): BasicTensor;
-  eye(size: number, dtype: DType): BasicTensor;
+  setDiag(input: BasicTensor, diag: BasicTensor): BasicTensor;
   onesLike(x: BasicTensor): BasicTensor;
   zerosLike(x: BasicTensor): BasicTensor;
   fill(value: BasicTensor, shape: Shape): BasicTensor;

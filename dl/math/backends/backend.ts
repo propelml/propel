@@ -171,5 +171,7 @@ export interface MathBackend extends NDArrayStorage {
   oneHot(indices: Array1D, depth: number, onValue: number, offValue: number):
       Array2D;
 
+  setDiag(input: Array2D, diag: Array1D): Array2D;
+
   dispose(): void;
 }

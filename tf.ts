@@ -209,8 +209,8 @@ export class OpsTF implements types.BackendOps {
     return execute1("Log", [x]);
   }
 
-  eye(size: number, dtype: types.DType = "float32"): types.BasicTensor {
-    throw new Error("Not Implemented");
+  setDiag(input: TensorTF, diag: TensorTF): TensorTF {
+    return execute1("MatrixSetDiag", [input, diag]);
   }
 
   onesLike(x: TensorTF): TensorTF {

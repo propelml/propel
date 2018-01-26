@@ -35,6 +35,7 @@ import {MatMulInputConfig, MatMulNode} from './types/matmul';
 import {MaximumInputConfig, MaximumNode, MaxInputConfig, MaxNode, MinimumInputConfig, MinimumNode, MinInputConfig, MinNode} from './types/minmax';
 import {MultinomialInputConfig, MultinomialNode} from './types/multinomial';
 import {OneHotInputConfig, OneHotNode} from './types/onehot';
+import {SetDiagInputConfig, SetDiagNode} from './types/set_diag';
 // tslint:disable-next-line:max-line-length
 import {PoolBackpropInputConfig, PoolBackpropNode, PoolInputConfig, PoolNode} from './types/pool';
 import {PowInputConfig, PowNode} from './types/pow';
@@ -326,6 +327,9 @@ const KERNEL_METHODS: {
     return backend.oneHot(
         config.inputs.indices, config.args.depth, config.args.onValue,
         config.args.offValue);
+  },
+  SetDiag: (backend: MathBackend, config: SetDiagInputConfig) => {
+    return backend.setDiag(config.inputs.input, config.inputs.diag);
   }
 };
 export function executeKernel<K extends keyof KernelConfigRegistry, R extends
@@ -413,4 +417,5 @@ export interface KernelConfigRegistry {
   BatchNorm2D: BatchNorm2DNode;
   Multinomial: MultinomialNode;
   OneHot: OneHotNode;
+  SetDiag: SetDiagNode;
 }

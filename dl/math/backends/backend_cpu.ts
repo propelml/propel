@@ -1461,6 +1461,17 @@ export class MathBackendCPU implements MathBackend {
     return Array2D.new([indices.size, depth], res);
   }
 
+  setDiag(input: Array2D, diag: Array1D): Array2D {
+    const out = this.clone(input);
+    const diagVals = diag.dataSync();
+    // const newValues = new Float32Array(values.length);
+    for (let i = 0; i < diagVals.length; ++i) {
+      const val = diagVals[i];
+      out.set(val, i, i);
+    }
+    return out;
+  }
+
   private broadcastedBinaryOp<D extends DataType>(
       a: NDArray, b: NDArray, dtype: D,
       op: (a: number, b: number) => number): NDArray<D> {
