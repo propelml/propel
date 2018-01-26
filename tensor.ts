@@ -517,6 +517,15 @@ export class Tensor implements types.BasicTensor {
     const pLogQ = labelsT.mul(logQ);
     return pLogQ.reduceSum([1]).neg();
   }
+
+  /** Sets the diagonal part of a matrix.
+   *
+   *    import { zeros } from "propel";
+   *    zeros([4, 3]).setDiag([1, 2, 3]);
+   */
+  setDiag(diag: types.TensorLike): Tensor {
+    return ops.setDiag(this, this.colocate(diag, this.dtype));
+  }
 }
 
 /** Like range() but outputs a javascript array of numbers. */

@@ -25,7 +25,7 @@ import { MathBackendWebGL }
 import { MatrixOrientation }
   from "./dl/math/backends/types/matmul";
 import { NDArrayMath } from "./dl/math/math";
-import { Array2D, Array3D, Array4D, NDArray, Scalar }
+import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./dl/math/ndarray";
 import * as types from "./types";
 import { assert } from "./util";
@@ -86,7 +86,6 @@ export class TensorDL implements types.BasicTensor {
   }
 
   constructor(ndarray: NDArray, math: NDArrayMath = cpuMath) {
-    assert((ndarray as any).math === math);
     this.dtype = ndarray.dtype;
     this.shape = ndarray.shape;
     this.math = math;
@@ -191,8 +190,14 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
-  eye(size: number, dtype: types.DType = "float32"): types.BasicTensor {
-    throw new Error("Not Implemented");
+  setDiag(x: TensorDL, diag: TensorDL): TensorDL {
+    if (x.shape.length !== 2 || diag.shape.length !== 1) {
+      throw new Error("Not implemented");
+    }
+    // DL doesn't support WebGL for this yet, so force CPU.
+    ENV.setMath(cpuMath);
+    const nd = cpuMath.setDiag(x.ndarray as Array2D, diag.ndarray as Array1D);
+    return new TensorDL(nd, x.math);
   }
 
   onesLike(x: TensorDL): TensorDL {

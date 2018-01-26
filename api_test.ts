@@ -1023,6 +1023,27 @@ testDevices(async function api_neuralNet(T, device) {
   }
 });
 
+testDevices(async function api_setDiag(T, device) {
+  const matrix = T(zeros([4, 3]));
+  const m = matrix.setDiag([1, 2, 3]);
+  assertAllEqual(m, [
+    [1, 0, 0],
+    [0, 2, 0],
+    [0, 0, 3],
+    [0, 0, 0]
+  ]);
+});
+
+testDevices(async function api_eye(T, device) {
+  const eye4 = T(api.eye(4));
+  assertAllEqual(eye4, [
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+  ]);
+});
+
 if (IS_NODE) {
   test(async function api_inspect() {
     const t = T([1, 2, 3]);

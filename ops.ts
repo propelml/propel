@@ -465,3 +465,16 @@ export const oneHot = defFW("oneHot",
     return bo.oneHot(x, depth, onValue, offValue);
   });
 defBW("oneHot", null);
+
+export const setDiag = defFW("setDiag", (input, diag) => {
+  return bo.setDiag(input, diag);
+});
+defBW("setDiag", (g) => {
+  // TODO
+  // return bo.setDiag(g, zeros);
+  throw new Error("Not Implemented.");
+}, (g) => {
+  // TODO
+  // return bo.getDiag(g);
+  throw new Error("Not Implemented.");
+});

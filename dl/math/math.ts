@@ -2344,6 +2344,10 @@ export class NDArrayMath implements NDArrayManager {
     });
   }
 
+  setDiag(input: Array2D, diag: Array1D): Array2D {
+    return this.backendEngine.executeKernel('SetDiag', {inputs: {input, diag}});
+  }
+
   /**
    * Calculate the norm for different NDAarray.
    */

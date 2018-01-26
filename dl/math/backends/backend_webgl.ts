@@ -807,6 +807,10 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun(program, [indices]);
   }
 
+  setDiag(input: Array2D, diag: Array1D): Array2D {
+    throw new Error('setDiag GPU not yet implemented!');
+  }
+
   private makeOutputArray<D extends DataType, T extends NDArray<D>>(
       shape: number[], dtype: D): T {
     return NDArray.make(shape, {}, dtype) as T;

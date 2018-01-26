@@ -49,10 +49,16 @@ export { Tensor } from "./tensor";
 export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
   from "./backprop";
 
-/** Returns the identity matrix of a given size. */
-export function eye(size: number, dtype: types.DType = "float32"): Tensor {
-  const t = bo.eye(size, dtype);
-  return new Tensor(t);
+/** Returns the identity matrix of a given size.
+ *
+ *    import { eye } from "propel";
+ *    eye(5);
+ */
+export function eye(size: number,
+                    opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  const matrix = zeros([size, size], opts);
+  const diag = ones([size], opts);
+  return matrix.setDiag(diag);
 }
 
 /** Returns num evenly spaced samples, calculated over the interval
