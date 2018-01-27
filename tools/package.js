@@ -47,25 +47,22 @@ function npmPack(name, cb) {
   return pkgFn;
 }
 
-function webpackIfDNE(configName, fn) {
-  if (clean || !fs.existsSync(fn)) {
-    console.log("Webpack %s", fn, configName);
-    run.sh("node ./tools/webpack.js --config-name=" + configName);
-  } else {
-    console.log("Skipping webpack %s", fn, configName);
-  }
-}
-
 function buildAndTest() {
   const propelPkgFn = npmPack("propel", distDir => {
-    webpackIfDNE("propel_node", distDir + "/propel_node.js");
-    webpackIfDNE("propel_web", distDir + "/propel_web.js");
-    // webpackIfDNE("tests_node", distDir + "/tests_node.js");
-    // webpackIfDNE("tests_web", distDir + "/tests_web.js");
+    run.parcel("api.ts", distDir);
+    const mainFn = distDir + "/propel.js";
+
+    let c = fs.readFileSync(mainFn, "utf8");
+    fs.writeFileSync(mainFn, c + `
+      if (typeof window !== "undefined") {
+        propel = require(1);
+      } else {
+        module.exports = require(1);
+      }
+    `);
     createPackageJson("package.json", distDir + "/package.json", {
       name: "propel",
-      main: "propel_node.js",
-      unpkg: "propel_web.js"
+      main: "propel.js",
     });
   });
 
@@ -92,7 +89,8 @@ function buildAndTest() {
   });
 
   // Now test the package
-  const testDir = "/tmp/propel_npm_test";
+  const tmpDir = process.env.TEMP || process.env.TMPDIR || "/tmp";
+  const testDir = path.join(tmpDir, "propel_npm_test");
   run.rmrf(testDir);
   run.mkdir(testDir);
 
@@ -108,8 +106,9 @@ function buildAndTest() {
   // Quick test that it works.
   fs.writeFileSync("test.js", `
     let propel = require('propel');
-    let $ = require('propel').$;
-    console.log($([1, 2, 3]).mul(42));
+    console.log("propel", propel);
+    let T = require('propel').T;
+    console.log(T([1, 2, 3]).mul(42));
     console.log("Using backend: %s", propel.backend);
     if (propel.backend !== "tf") throw Error("Bad backend");
   `);

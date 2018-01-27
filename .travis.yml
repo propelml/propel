@@ -1,3 +1,7 @@
+cache:
+  directories:
+   - .cache
+   - deps/node_modules/puppeteer/.local-chromium
 branches:
   only:
   - master

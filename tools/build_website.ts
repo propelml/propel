@@ -83,5 +83,6 @@ run.symlink(run.root + "/website/", "build/website/static");
 scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
 writePages().then(() => {
+  run.parcel("website.ts", "build/website");
   console.log("Website built in", websiteRoot);
 });
