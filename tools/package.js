@@ -120,8 +120,8 @@ function buildAndTest() {
   return [propelPkgFn, tfPkgFn];
 }
 
-
-if (true) {
+const skipBuild = (process.argv.indexOf("skip-build") >= 0);
+if (!skipBuild) {
   buildAndTest();
 }
 
