@@ -72,14 +72,32 @@ function symlink(a, b) {
   }
 }
 
+function tsnode(args) {
+  sh("node ./node_modules/ts-node/dist/bin.js " + args);
+}
+
+const parcelCli = "./node_modules/parcel-bundler/bin/cli.js";
+
+function parcel(inFile, outDir, debug = null) {
+  let opts = "";
+  const debugInArgv = (process.argv.indexOf("debug") >= 0);
+  if (debug === true || (debug === null && debugInArgv)) {
+    opts = "--no-minify";
+  }
+  sh(`node ${parcelCli} build ${inFile} -d ${outDir} ${opts}`);
+}
+
 function version() {
   let pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
   return pkg.version;
 }
 
 exports.mkdir = mkdir;
+exports.parcel = parcel;
+exports.parcelCli = parcelCli;
 exports.rmrf = rmrf;
 exports.root = root;
 exports.sh = sh;
 exports.symlink = symlink;
+exports.tsnode = tsnode;
 exports.version = version;

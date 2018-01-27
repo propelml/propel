@@ -15,6 +15,11 @@
 import { T, Tensor } from "./api";
 import { assert, assertEqual, IS_WEB } from "./util";
 
+// This is to confuse parcel.
+// TODO There may be a more elegant workaround in future versions.
+// https://github.com/parcel-bundler/parcel/pull/448
+const nodeRequire = IS_WEB ? null : require;
+
 export interface Elements {
   images: Tensor;
   labels: Tensor;
@@ -74,7 +79,7 @@ async function fetch2(href): Promise<ArrayBuffer> {
     const res = await fetch(href, { mode: "no-cors" });
     return res.arrayBuffer();
   } else {
-    const b = require("fs").readFileSync(href, null);
+    const b = nodeRequire("fs").readFileSync(href, null);
     return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
   }
 }
