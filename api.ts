@@ -100,7 +100,7 @@ export function range(...args: number[]): Tensor {
   return new Tensor(t);
 }
 
-/** Produces a new tensor with random values, drawn from the stanard normal
+/** Produces a new tensor with random values, drawn from the standard normal
  * distribution.
  *
  *    import { randn } from "propel"
