@@ -19,7 +19,7 @@ import { Trainer } from "./nn_example";
 const useGPU = (listDevices().length > 1);
 async function main() {
   const trainer = new Trainer(useGPU);
-  while (trainer.opt.steps < 10000) {
+  while (trainer.opt.steps < 30) {
     await trainer.step();
   }
 }

@@ -43,15 +43,15 @@ const TESTS = [
 
   // These web pages are simply loaded; the test passes if no unhandled
   // exceptions are thrown on the page.
-  { href: "index.html" },
-  { href: "notebook/index.html" },
-  { href: "docs/index.html" },
+  //{ href: "index.html" },
+  //{ href: "notebook/index.html" },
+  //{ href: "docs/index.html" },
 ];
 
 if (testdl) {
   TESTS.unshift({
     doneMsg: /^DONE.*failed: 0/,
-    href: "static/test.html#script=/test_dl.js",
+    href: "static/test.html#script=/test_dl.js&filter=basicLSTMCell",
     timeout: 2 * 60 * 1000
   });
 }
@@ -64,7 +64,10 @@ if (testdl) {
   const port = server.server.address().port;
 
   const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ],
     headless: !debug && !testdl
   });
 

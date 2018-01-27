@@ -138,7 +138,7 @@ export class Trainer {
       plt.plot(x, y);
     }
 
-    if (this.opt.steps % 100 === 0) {
+    if (this.opt.steps % 10 === 0) {
       const rate = this.durationCount / (this.durationSum / 1000);
       this.durationSum = this.durationCount = 0;
 

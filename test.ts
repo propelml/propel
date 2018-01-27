@@ -104,4 +104,5 @@ async function runTests() {
   }
 }
 
+Error.stackTraceLimit = Infinity;
 setTimeout(runTests, 0);
