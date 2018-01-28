@@ -240,3 +240,10 @@ export function inferShape(arr: number | boolean | RegularArray<number> |
   }
   return shape;
 }
+
+// Like setTimeout but with a promise.
+export function delay(t: number): Promise<void> {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, t);
+  });
+}

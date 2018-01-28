@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
 import * as nb from "./notebook";
 import { IS_WEB } from "./util";
-export { resetIds, serverSideExecuteQueue } from "./notebook";
+export { resetIds, notebookExecuteQueue } from "./notebook";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";
