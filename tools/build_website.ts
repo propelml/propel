@@ -40,8 +40,8 @@ async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
   const p = new Promise<string>((resolve, reject) => {
     window.addEventListener("load", async() => {
       try {
-        while (website.serverSideExecuteQueue.length > 0) {
-          await website.serverSideExecuteQueue.shift();
+        while (website.notebookExecuteQueue.length > 0) {
+          await website.notebookExecuteQueue.shift();
         }
         const bodyHtml = document.body.innerHTML;
         const html =  website.getHTML(page.title, bodyHtml);

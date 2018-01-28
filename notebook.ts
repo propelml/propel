@@ -24,7 +24,7 @@ import * as propel from "./api";
 import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { IS_WEB } from "./util";
+import { delay, IS_WEB } from "./util";
 
 let cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -55,7 +55,7 @@ export function lookupCell(id: number) {
 // When rendering HTML server-side, all of the notebook cells are executed so
 // their output can be placed in the generated HTML. This queue tracks the
 // execution promises for each cell.
-export let serverSideExecuteQueue: Array<Promise<void>> = [];
+export let notebookExecuteQueue: Array<Promise<void>> = [];
 
 const codemirrorOptions = {
   lineNumbers: false,
@@ -145,29 +145,22 @@ export class Cell extends Component<Props, State> {
         "Ctrl-Enter": () =>  { this.update(); return true; },
         "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
       });
-    } else {
-      // Only on Node do we execute the cell automatically.
-      // TODO
-      serverSideExecuteQueue.push(this.execute());
     }
+    // Execute the cell automatically.
+    notebookExecuteQueue.push(this.update());
   }
 
   async update() {
-    console.log("update cell");
     this.output.innerHTML = ""; // Clear output.
-    // TODO Fix the update highlighting
-    // const classList = this.input.parentNode.classList;
-    // classList.add("notebook-cell-running");
+    const classList = (this.input.parentNode as HTMLElement).classList;
+    classList.add("notebook-cell-running");
     try {
       await this.execute();
     } finally {
-      /*
       classList.add("notebook-cell-updating");
-      setTimeout(() => {
-        classList.remove("notebook-cell-updating");
-        classList.remove("notebook-cell-running");
-      }, 100);
-      */
+      await delay(100);
+      classList.remove("notebook-cell-updating");
+      classList.remove("notebook-cell-running");
     }
   }
 
