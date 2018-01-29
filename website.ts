@@ -311,7 +311,8 @@ const Splash = (props) => {
         div("column",
           p(
             headerButton("/docs", "API Ref"),
-            headerButton("/notebook", "Notebook"),
+            // Hide notebook link until more developed.
+            // headerButton("/notebook", "Notebook"),
             headerButton("http://github.com/propelml/propel", "Github")
           ),
           h("p", { "class": "snippet-title" }, "Use it in Node:"),
