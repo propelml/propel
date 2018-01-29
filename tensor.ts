@@ -421,7 +421,8 @@ export class Tensor implements types.BasicTensor {
 
   /** Return a copy of the tensor collapsed into one dimension.
    *
-   *    T([[1, 2], [3, 4]]).flatten()
+   *    import { T } from "propel";
+   *    T([[1, 2], [3, 4]]).flatten();
    */
   flatten(): Tensor {
     return this.reshape([-1]);
