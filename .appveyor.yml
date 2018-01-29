@@ -3,10 +3,13 @@ version: "{branch}-build{build}"
 branches:
   only:
   - master
+  - b/try
 
 cache:
+ - "%APPDATA%\\npm"
+ - "%USERPROFILE%\\.node-gyp"
  - .cache
- - deps\node_modules\puppeteer\.local-chromium
+ - .git\objects
 
 environment:
   matrix:
@@ -17,19 +20,28 @@ environment:
   #   nodejs_version: 9
 
 clone_folder: c:\propel
-clone_depth: 1
+
+init:
+  - cmd: set
+
+clone_script:
+  - ps: git clone -q --depth=1 --config core.symlinks=true --branch=$env:appveyor_repo_branch https://github.com/$env:appveyor_repo_name.git $env:appveyor_build_folder
+  - ps: cd $env:appveyor_build_folder
+  - ps: >-
+        if ($env:appveyor_pull_request_number) {
+          git fetch -q --depth=1 origin +refs/pull/$env:appveyor_pull_request_number/merge:
+          git checkout -q FETCH_HEAD
+        }
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - cmd: npm install -g node-gyp ts-node typescript
 
 before_build:
-  - cmd: git config core.symlinks true
-  - cmd: git reset --hard
-  - cmd: git submodule update --init --recursive --depth=1
+  - cmd: git submodule update --depth=1 --init
   - cmd: npm rebuild puppeteer
 
 build_script:
-  - cmd: node tools\presubmit.js
+  - cmd: echo node tools\presubmit.js
 
 test: off
