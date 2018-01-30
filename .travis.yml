@@ -12,6 +12,7 @@ git:
   submodules_depth: 1
 node_js:
 - '8.8'
+install: echo "Intentionally skipping npm install."
 script:
 - npm rebuild puppeteer
 - ./tools/presubmit.js
