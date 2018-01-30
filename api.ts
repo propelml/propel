@@ -109,8 +109,9 @@ export function range(...args: number[]): Tensor {
 /** Produces a new tensor with random values, drawn from the standard normal
  * distribution.
  *
- *    import { randn } from "propel"
- *    randn([3, 4])
+ *    import { range, randn } from "propel"
+ *    n = 1000
+ *    plot(range(n), randn([n]))
  */
 export function randn(shape: number[]): Tensor {
   const t = bo.randn(shape);
