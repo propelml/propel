@@ -183,8 +183,13 @@ export class BackendEngine {
             'math.scope(() => {math.method();...}) to avoid memory ' +
             'leaks.');
       }
+    } else {
+      // Only track NDArrays that are created in an explicit scope; when
+      // created in the global scope, tracking them makes no sense -- the
+      // global scope never gets cleaned up, and adding them to an array
+      // just prevents the NDArray from ever being garbage collected.
+      this.activeScope.track.push(result);
     }
-    this.activeScope.track.push(result);
     return result;
   }
 
