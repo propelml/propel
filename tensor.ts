@@ -430,7 +430,8 @@ export class Tensor implements types.BasicTensor {
 
   /** Remove single-dimensional axes from the shape of a tensor.
    *
-   *    T([[[2, 3, 4]]]).squeeze()
+   *    import { T } from "propel";
+   *    T([[[2, 3, 4]]]).squeeze();
    */
   squeeze(): Tensor {
     const newShape = this.shape.filter((d) => d > 1);
@@ -493,6 +494,7 @@ export class Tensor implements types.BasicTensor {
 
   /** Build a one-hot tensor from labels.
    *
+   *    import { T } from "propel";
    *    let labels = T([1, 3, 0], {dtype: "int32"});
    *    labels.oneHot(5);
    */
