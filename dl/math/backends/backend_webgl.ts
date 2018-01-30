@@ -925,8 +925,8 @@ export class MathBackendWebGL implements MathBackend {
 
   moveToCPU(td: TextureData): void {
     const x = td as any;
-    const ec = x.ec ? x.ec + 1 : x.ec = 1;
-    console.log("evicting ", ec);
+    const ec = x.ec ? ++x.ec : (x.ec = 1);
+    //console.log("evicting ", ec);
     this.readSync(td.id); // Causes download to CPU.
     const { values } = td;
     util.assert( values != null, "Data not copied to CPU");
@@ -935,8 +935,21 @@ export class MathBackendWebGL implements MathBackend {
 
   allocTexture(td: TextureData, texType: TextureType, texShape: [number, number]): WebGLTexture {
     assert(td.texture === null, "");
-    while (this.numberOfUsedTextured > 100) {
-      this.moveToCPU(this.lruTexData.prev);
+    //while (this.numberOfUsedTextured > 10000000) {
+    //  this.moveToCPU(this.lruTexData.prev);
+    //}
+    if (this.numberOfUsedTextured > 4000) {
+      let count = 0;
+      let bytes = 0;
+      console.log(`Moving textures to CPU`);
+      const start = Date.now();
+      while (this.numberOfUsedTextured > 10) {
+        bytes += (4 * this.lruTexData.texShape[0] * this.lruTexData.texShape[1]);
+        this.moveToCPU(this.lruTexData.prev);
+        count++;
+      }
+      const time = Date.now() - start;
+      console.log(`Moved ${count} textures (${bytes>>20} mb) in ${time} ms`);
     }
     this.numberOfUsedTextured++;
     const texture = this.textureManager.acquireTexture(texShape);
