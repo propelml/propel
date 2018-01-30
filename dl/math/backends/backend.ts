@@ -17,21 +17,21 @@
 
 import {Conv2DInfo} from '../conv_util';
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
 import {SumTypes} from '../types';
 import {MatrixOrientation} from './types/matmul';
 
 export interface NDArrayStorage {
-  read<D extends DataType>(dataId: number): Promise<DataTypeMap[D]>;
-  readSync<D extends DataType>(dataId: number): DataTypeMap[D];
-  disposeData(dataId: number): void;
-  write<D extends DataType>(dataId: number, values: DataTypeMap[D]): void;
+  read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;
+  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D];
+  disposeData(dataId: DataId): void;
+  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void;
   writePixels(
-      dataId: number,
+      dataId: DataId,
       pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
       numChannels: number): void;
   time(query: () => NDArray): Promise<number>;
-  register(dataId: number, shape: number[], dtype: DataType): void;
+  register(dataId: DataId, shape: number[], dtype: DataType): void;
 }
 
 /**

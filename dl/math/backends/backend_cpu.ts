@@ -23,7 +23,7 @@ import * as broadcast_util from '../broadcast_util';
 import * as concat_util from '../concat_util';
 import {Conv2DInfo} from '../conv_util';
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank, Scalar} from '../ndarray';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar} from '../ndarray';
 import * as types from '../types';
 import {SumTypes, SumTypesMap} from '../types';
 
@@ -32,7 +32,7 @@ import {MathBackend} from './backend';
 import {MatrixOrientation} from './types/matmul';
 
 export class MathBackendCPU implements MathBackend {
-  private data: {[dataId: number]: DataTypeMap[DataType]} = {};
+  private data = new WeakMap<DataId, DataTypeMap[DataType]>();
   private canvas: HTMLCanvasElement;
 
   constructor() {
@@ -41,18 +41,18 @@ export class MathBackendCPU implements MathBackend {
     }
   }
 
-  register(dataId: number, shape: number[], dtype: DataType): void {
-    this.data[dataId] = null;
+  register(dataId: DataId, shape: number[], dtype: DataType): void {
+    this.data.set(dataId, null);
   }
-  write<D extends DataType>(dataId: number, values: DataTypeMap[D]): void {
+  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void {
     if (values == null) {
       throw new Error('MathBackendCPU.write(): values can not be null');
     }
     this.throwIfNoData(dataId);
-    this.data[dataId] = values;
+    this.data.set(dataId, values);
   }
   writePixels(
-      dataId: number,
+      dataId: DataId,
       pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
@@ -97,26 +97,26 @@ export class MathBackendCPU implements MathBackend {
         }
       }
     }
-    this.data[dataId] = values;
+    this.data.set(dataId, values);
   }
-  async read<D extends DataType>(dataId: number): Promise<DataTypeMap[D]> {
+  async read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]> {
     this.throwIfNoData(dataId);
-    return this.data[dataId];
+    return this.data.get(dataId);
   }
-  readSync<D extends DataType>(dataId: number): DataTypeMap[D] {
+  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D] {
     this.throwIfNoData(dataId);
-    return this.data[dataId];
+    return this.data.get(dataId);
   }
-  disposeData(dataId: number): void {
-    delete this.data[dataId];
+  disposeData(dataId: DataId): void {
+    this.data.delete(dataId);
   }
   async time(query: () => NDArray): Promise<number> {
     const start = performance.now();
     query();
     return performance.now() - start;
   }
-  private throwIfNoData(dataId: number) {
-    if (!(dataId in this.data)) {
+  private throwIfNoData(dataId: DataId) {
+    if (!this.data.has(dataId)) {
       throw new Error(
           `No data found for NDArray with data id ${dataId}. ` +
           `Use dl.ENV.math instead of constructing your own NDArrayMath. ` +
