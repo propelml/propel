@@ -24,6 +24,7 @@ export enum TextureType {
 }
 
 export interface TextureData {
+  id: number;
   texture: WebGLTexture;
   shape: number[];
   /** [rows, columns] shape of the texture. */
@@ -32,6 +33,8 @@ export interface TextureData {
   dtype: DataType;
   numChannels?: number;
   values: DataTypeMap[DataType];
+  prev?: TextureData;
+  next?: TextureData;
 }
 
 export function getUnpackedMatrixTextureShapeWidthHeight(
