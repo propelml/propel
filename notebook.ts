@@ -164,8 +164,35 @@ export class Cell extends Component<Props, State> {
     }
   }
 
-  nextCell() {
-    // TODO
+  async nextCell() {
+    const currentId = "cell" + this.id;
+    const noteBooks = document.querySelectorAll(".notebook-cell");
+    let found = false, i;
+    for (i = 0; i < noteBooks.length; i++) {
+      if (noteBooks[i].id === currentId) {
+        found = true;
+        i++;
+        break;
+      }
+    }
+    if (!found) {
+      return;
+    }
+    let cell = noteBooks[i];
+    if (!cell) {
+      // create a new cell
+      const newBtn = document.querySelector("#newCell");
+      if (!newBtn) {
+        return;
+      }
+      newBtn.click();
+      await delay(100);
+      cell = document.querySelector(".notebook-cell:last-child");
+    }
+    // scroll & focus
+    // TODO: Scroll with a nice animation
+    cell.scrollIntoView();
+    document.querySelector("#" + cell.id + " textarea").focus();
   }
 
   clickedRun() {
