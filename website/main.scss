@@ -413,6 +413,7 @@ svg {
   border: 0;
   height: 0;
   transition: height 0.2s ease-in-out;
+  transition-delay: 0.1s;
   overflow: hidden;
 }
 
