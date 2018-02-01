@@ -75,8 +75,8 @@ function symlink(a, b) {
   }
 }
 
-function tsnode(args) {
-  sh("node ./node_modules/ts-node/dist/bin.js --type-check " + args);
+function tsnode(args, env = {}) {
+  sh("node ./node_modules/ts-node/dist/bin.js --type-check " + args, env);
 }
 
 const parcelCli = "./node_modules/parcel-bundler/bin/cli.js";
