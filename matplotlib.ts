@@ -12,9 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import * as Canvas from "canvas";
 import * as d3 from "d3";
 import { Tensor } from "./api";
-import { assertEqual } from "./util";
+import { assertEqual, IS_WEB } from "./util";
 
 export interface OutputHandler {
   (): Element;
@@ -187,16 +188,23 @@ export function plot(...args) {
   plotLines(data);
 }
 
-export function imshow(image: Tensor): void {
+export function imshow(image: Tensor): Element {
   const output = outputEl();
   if (!output) return;
-  const canvas = document.createElement("canvas");
+
+  const h = image.shape[0];
+  const w = image.shape[1];
+
+  const canvas = IS_WEB ? document.createElement("canvas") : new Canvas(w, h);
+  if (IS_WEB) {
+    canvas.height = h;
+    canvas.width = w;
+  }
+
   // Assuming image shape is [3, height, width] for RGB.
   // [height, width] for monochrome.
   assertEqual(image.shape.length, 2, "Assuming monochrome for now");
   const tensorData = image.getData();
-  const h = canvas.height = image.shape[0];
-  const w = canvas.width = image.shape[1];
   const ctx = canvas.getContext("2d");
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
@@ -212,5 +220,12 @@ export function imshow(image: Tensor): void {
     }
   }
   ctx.putImageData(imageData, 0, 0);
-  output.appendChild(canvas);
+  if (IS_WEB) {
+    output.appendChild(canvas);
+  } else {
+    const img = document.createElement("img");
+    img.src = canvas.toDataURL();
+    output.appendChild(img);
+  }
+  return canvas;
 }
