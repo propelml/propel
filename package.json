@@ -19,6 +19,7 @@
     "@types/node": "^8.5.5",
     "@types/seedrandom": "^2.4.27",
     "acorn": "^5.3.0",
+    "canvas": "^1.6.9",
     "codemirror": "^5.33.0",
     "d3": "^4.12.2",
     "http-server": "^0.10.0",
