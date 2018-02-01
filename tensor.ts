@@ -76,6 +76,27 @@ export class Tensor implements types.BasicTensor {
     t.basic = null;
   }
 
+  /** Returns an iterator over the values of the tensor.
+   *
+   *    import { range } from "propel";
+   *    for (let i in range(10)) {
+   *      console.log(i)
+   *    }
+   */
+  [Symbol.iterator]() {
+    const d = this.basic.getData();
+    let i = 0;
+    return {
+      next: () => {
+        if (i < d.length) {
+          return { value: d[i++], done: false };
+        } else {
+          return { value: null, done: true };
+        }
+      }
+    };
+  }
+
   // This is similar convert() - it turns TensorLike objects into Tensors - but
   // the function further ensures that the returned tensor is on the same
   // devices as this tensor.
