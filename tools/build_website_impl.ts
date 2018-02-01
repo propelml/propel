@@ -1,4 +1,3 @@
-#!/usr/bin/env ts-node
 import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
