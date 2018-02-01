@@ -4,7 +4,7 @@ const run = require("./run");
 // Build the project.
 run.sh("node ./tools/build_binding.js");
 run.sh("node ./tools/tsc.js");
-run.tsnode("./tools/build_website.ts");
+run.sh("node ./tools/build_website.js");
 run.parcel("test_dl.ts", "build/website", true);
 run.parcel("test_isomorphic.ts", "build/website", true);
 
