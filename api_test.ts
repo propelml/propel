@@ -1061,3 +1061,11 @@ test(async function api_plotSmoke() {
   const im = zeros([9, 9]);
   api.imshow(im);
 });
+
+test(async function api_rangeIterable() {
+  const items = [];
+  for (const i of range(3)) {
+    items.push(i);
+  }
+  assertAllEqual(items, [0, 1, 2]);
+});
