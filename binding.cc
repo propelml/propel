@@ -882,7 +882,8 @@ static napi_value ListDevices(napi_env env, napi_callback_info info) {
     check(nstatus == napi_ok);
 
     napi_value memory_js;
-    nstatus = napi_create_int32(env, memory_bytes, &memory_js);
+    nstatus =
+        napi_create_double(env, static_cast<double>(memory_bytes), &memory_js);
     check(nstatus == napi_ok);
     nstatus =
         napi_set_named_property(env, device_obj, "memoryBytes", memory_js);
