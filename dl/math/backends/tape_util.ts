@@ -17,11 +17,10 @@
 
 import {NDArray} from '../ndarray';
 
-export type ScopeResultImmediate =
+export type ScopeResult =
     void|NDArray|NDArray[]|{[key: string]: NDArray};
-export type ScopeResult = ScopeResultImmediate|Promise<ScopeResultImmediate>;
 
-export function extractNDArraysFromScopeResult(result: ScopeResultImmediate):
+export function extractNDArraysFromScopeResult(result: ScopeResult):
     NDArray[] {
   if (result == null) {
     return [];

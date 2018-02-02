@@ -25,12 +25,12 @@ import {Array1D, Array3D, Scalar} from './ndarray';
 {
   const gpuTests: MathTests = it => {
     it('scope returns NDArray', async math => {
-      await math.scope(async () => {
+      math.scope(() => {
         const a = Array1D.new([1, 2, 3]);
         let b = Array1D.new([0, 0, 0]);
 
         expect(math.getNumArrays()).toBe(2);
-        await math.scope(async () => {
+        math.scope(() => {
           const result = math.scope(() => {
             b = math.addStrict(a, b);
             b = math.addStrict(a, b);
@@ -67,7 +67,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       const b = Array1D.new([0, -1, 1]);
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           math.add(a, b);
           return [math.add(a, b), math.subtract(a, b)];
@@ -110,7 +110,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
 
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           let c = math.add(a, b);
           c = math.add(a, c);
@@ -136,7 +136,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
 
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           b = math.addStrict(a, b);
           b = math.scope(() => {
