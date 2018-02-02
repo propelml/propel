@@ -96,12 +96,12 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   }
 
   return {
-    program,
-    source,
     webGLProgram,
+    program,
     uniformLocations,
     attributeLocations,
     gpgpu,
+    source,
     inShapeInfos,
     outShapeInfo
   };
