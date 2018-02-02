@@ -18,8 +18,29 @@
 import * as util from '../../util';
 import {DataType, NDArray} from '../ndarray';
 
-import * as tape_util from './tape_util';
-import {ScopeResult} from './tape_util';
+export type ScopeResult =
+    void|NDArray|NDArray[]|{[key: string]: NDArray};
+
+export function extractNDArraysFromScopeResult(result: ScopeResult):
+    NDArray[] {
+  if (result == null) {
+    return [];
+  }
+  if (result instanceof NDArray) {
+    return [result];
+  }
+
+  const list: NDArray[] = [];
+  const resultObj = result as {[key: string]: NDArray};
+  // Iteration over keys works also for arrays.
+  for (const k in resultObj) {
+    const val = resultObj[k];
+    if (val instanceof NDArray) {
+      list.push(val);
+    }
+  }
+  return list;
+}
 
 export class BackendEngine {
   private activeScope: NDArray[];
@@ -62,8 +83,7 @@ export class BackendEngine {
    * as scope() without the need for a function closure.
    */
   endScope(result: ScopeResult) {
-    const arraysToTrackInParent =
-      tape_util.extractNDArraysFromScopeResult(result);
+    const arraysToTrackInParent = extractNDArraysFromScopeResult(result);
 
     // Dispose the arrays tracked in this scope.
     for (let i = 0; i < this.activeScope.length; i++) {
