@@ -28,16 +28,10 @@ export class BackendEngine {
   private activeScope: NDArray[];
   private scopeStack: NDArray[][];
 
-  private debugMode = false;
-
   constructor(private backend: MathBackend, private safeMode: boolean) {
     // Create a default outer scope.
     this.activeScope = [];
     this.scopeStack = [this.activeScope];
-  }
-
-  enableDebugMode() {
-    this.debugMode = true;
   }
 
   executeKernel<K extends keyof KernelConfigRegistry,
@@ -46,26 +40,7 @@ export class BackendEngine {
       KernelConfigRegistry[K]['output'] {
     const kernelFn = () =>
         kernel_registry.executeKernel(this.backend, kernelName, config);
-
-    let start: number;
-    if (this.debugMode) {
-      start = performance.now();
-    }
-    const result = kernelFn();
-    if (this.debugMode) {
-      const vals = result.dataSync();
-      const time = util.rightPad(`${performance.now() - start}ms`, 9);
-      const paddedName = util.rightPad(kernelName, 25);
-      const rank = result.rank;
-      const size = result.size;
-      const shape = util.rightPad(result.shape.toString(), 14);
-      console.log(
-          `%c${paddedName}\t%c${time}\t%c${rank}D ${shape}\t%c${size}`,
-          'font-weight:bold', 'color:red', 'color:blue', 'color: orange');
-      util.checkForNaN(vals, result.dtype, name);
-    }
-
-    return result;
+    return kernelFn();
   }
 
   /**

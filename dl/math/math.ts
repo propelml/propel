@@ -97,18 +97,6 @@ export class NDArrayMath implements NDArrayManager {
   }
 
   /**
-   * In debug mode, the output of every math call will be downloaded to the CPU
-   * and checked for NaNs. This significantly impacts performance.
-   */
-  enableDebugMode() {
-    this.backendEngine.enableDebugMode();
-    console.warn(
-        'Debugging mode is ON. The output of every math call will ' +
-        'be downloaded to CPU and checked for NaNs. ' +
-        'This significantly impacts performance.');
-  }
-
-  /**
    * Create a new math scope. Put chained math operations inside a scope
    * function closure so that the library automatically cleans up NDArrays
    * from intermediate math operations. You must create a scope in safe mode
