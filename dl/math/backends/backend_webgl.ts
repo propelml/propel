@@ -851,6 +851,7 @@ export class MathBackendWebGL implements MathBackend {
 
   dispose() {
     for (const key in this.binaryCache) {
+      if (!this.binaryCache.hasOwnProperty(key)) continue;
       this.gpgpu.deleteProgram(this.binaryCache[key].webGLProgram);
     }
     this.textureManager.dispose();

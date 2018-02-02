@@ -34,6 +34,7 @@ export function extractNDArraysFromScopeResult(result: ScopeResult):
   const resultObj = result as {[key: string]: NDArray};
   // Iteration over keys works also for arrays.
   for (const k in resultObj) {
+    if (!resultObj.hasOwnProperty(k)) continue;
     const val = resultObj[k];
     if (val instanceof NDArray) {
       list.push(val);
