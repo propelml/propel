@@ -16,7 +16,7 @@
  */
 
 import * as test_util from '../../../test_util';
-import {MatrixOrientation} from '../types/matmul';
+import {MatrixOrientation} from '../../types';
 
 import {GPGPUContext} from './gpgpu_context';
 import * as mulmat_packed_gpu from './mulmat_packed_gpu';

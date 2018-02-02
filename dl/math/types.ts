@@ -17,6 +17,11 @@ import {DataType} from './ndarray';
  * =============================================================================
  */
 
+export enum MatrixOrientation {
+  REGULAR,
+  TRANSPOSED
+}
+
 export interface SumTypes {
   float32: 'float32';
   int32: 'int32';
