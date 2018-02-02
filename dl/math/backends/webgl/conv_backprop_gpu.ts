@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../../conv_util';
-import {GPGPUProgram} from './gpgpu_math';
+import {Conv2DInfo} from "../../conv_util";
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class Conv2DDerFilterProgram implements GPGPUProgram {
-  variableNames = ['x', 'dy'];
+  variableNames = ["x", "dy"];
   outputShape: number[];
   userCode: string;
 
@@ -71,7 +71,7 @@ export class Conv2DDerFilterProgram implements GPGPUProgram {
 }
 
 export class Conv2DDerInputProgram implements GPGPUProgram {
-  variableNames = ['dy', 'W'];
+  variableNames = ["dy", "W"];
   outputShape: number[];
   userCode: string;
 
@@ -136,7 +136,7 @@ export class Conv2DDerInputProgram implements GPGPUProgram {
 }
 
 export class Conv2DDerBiasProgram implements GPGPUProgram {
-  variableNames = ['dy'];
+  variableNames = ["dy"];
   outputShape: number[];
   userCode: string;
 

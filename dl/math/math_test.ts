@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array1D, Array3D, Scalar} from './ndarray';
+import {Array1D, Array3D, Scalar} from "./ndarray";
 
 // math.scope
 {
   const gpuTests: MathTests = it => {
-    it('scope returns NDArray', async math => {
+    it("scope returns NDArray", async math => {
       math.scope(() => {
         const a = Array1D.new([1, 2, 3]);
         let b = Array1D.new([0, 0, 0]);
@@ -49,7 +49,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('multiple disposes does not affect num arrays', math => {
+    it("multiple disposes does not affect num arrays", math => {
       expect(math.getNumArrays()).toBe(0);
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([1, 2, 3]);
@@ -61,7 +61,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('scope returns NDArray[]', async math => {
+    it("scope returns NDArray[]", async math => {
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([0, -1, 1]);
       expect(math.getNumArrays()).toBe(2);
@@ -86,7 +86,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('basic scope usage without return', math => {
+    it("basic scope usage without return", math => {
       const a = Array1D.new([1, 2, 3]);
       let b = Array1D.new([0, 0, 0]);
 
@@ -103,7 +103,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(2);
     });
 
-    it('scope returns Promise<NDArray>', async math => {
+    it("scope returns Promise<NDArray>", async math => {
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([0, 0, 0]);
 
@@ -129,7 +129,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('nested scope usage', async math => {
+    it("nested scope usage", async math => {
       const a = Array1D.new([1, 2, 3]);
       let b = Array1D.new([0, 0, 0]);
 
@@ -165,17 +165,17 @@ import {Array1D, Array3D, Scalar} from './ndarray';
     });
   };
 
-  test_util.describeMathGPU('scope', [gpuTests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathGPU("scope", [gpuTests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // fromPixels & math
 {
   const tests: MathTests = it => {
-    it('debug mode does not error when no nans', math => {
+    it("debug mode does not error when no nans", math => {
       const pixels = new ImageData(2, 2);
       for (let i = 0; i < 8; i++) {
         pixels.data[i] = 100;
@@ -185,7 +185,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       }
 
       const a = Array3D.fromPixels(pixels, 4);
-      const b = Scalar.new(20, 'int32');
+      const b = Scalar.new(20, "int32");
 
       const res = math.add(a, b);
 
@@ -196,9 +196,9 @@ import {Array1D, Array3D, Scalar} from './ndarray';
     });
   };
 
-  test_util.describeMathGPU('fromPixels + math', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathGPU("fromPixels + math", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

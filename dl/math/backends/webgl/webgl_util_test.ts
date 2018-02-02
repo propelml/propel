@@ -15,27 +15,27 @@
  * =============================================================================
  */
 
-import * as gpgpu_util from './gpgpu_util';
-import * as webgl_util from './webgl_util';
+import * as gpgpu_util from "./gpgpu_util";
+import * as webgl_util from "./webgl_util";
 
-describe('webgl_util getTextureShapeFromLogicalShape', () => {
+describe("webgl_util getTextureShapeFromLogicalShape", () => {
   let gl: WebGLRenderingContext;
 
   beforeEach(() => {
     gl = gpgpu_util.createWebGLContext();
   });
 
-  it('scalar', () => {
+  it("scalar", () => {
     const textureShape = webgl_util.getTextureShapeFromLogicalShape(gl, []);
     expect(textureShape).toEqual([1, 1]);
   });
 
-  it('1d', () => {
+  it("1d", () => {
     const textureShape = webgl_util.getTextureShapeFromLogicalShape(gl, [4]);
     expect(textureShape).toEqual([4, 1]);
   });
 
-  it('2d stays same', () => {
+  it("2d stays same", () => {
     let textureShape = webgl_util.getTextureShapeFromLogicalShape(gl, [5, 2]);
     expect(textureShape).toEqual([5, 2]);
 
@@ -46,31 +46,31 @@ describe('webgl_util getTextureShapeFromLogicalShape', () => {
     expect(textureShape).toEqual([1, 5]);
   });
 
-  it('3d 2x3x4', () => {
+  it("3d 2x3x4", () => {
     const textureShape =
         webgl_util.getTextureShapeFromLogicalShape(gl, [2, 3, 4]);
     expect(textureShape).toEqual([2, 12]);
   });
 
-  it('3d 2x1x4 got squeezed', () => {
+  it("3d 2x1x4 got squeezed", () => {
     const textureShape =
         webgl_util.getTextureShapeFromLogicalShape(gl, [2, 1, 4]);
     expect(textureShape).toEqual([2, 4]);
   });
 
-  it('3d 1x8x2 got squeezed', () => {
+  it("3d 1x8x2 got squeezed", () => {
     const textureShape =
         webgl_util.getTextureShapeFromLogicalShape(gl, [1, 8, 2]);
     expect(textureShape).toEqual([8, 2]);
   });
 
-  it('4d 1x8x1x3 got squeezed', () => {
+  it("4d 1x8x1x3 got squeezed", () => {
     const textureShape =
         webgl_util.getTextureShapeFromLogicalShape(gl, [1, 8, 1, 3]);
     expect(textureShape).toEqual([8, 3]);
   });
 
-  it('4d 1x3x1x8 got squeezed', () => {
+  it("4d 1x3x1x8 got squeezed", () => {
     const textureShape =
         webgl_util.getTextureShapeFromLogicalShape(gl, [1, 3, 1, 8]);
     expect(textureShape).toEqual([3, 8]);

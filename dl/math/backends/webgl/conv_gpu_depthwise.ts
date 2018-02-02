@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../../conv_util';
-import {GPGPUProgram} from './gpgpu_math';
+import {Conv2DInfo} from "../../conv_util";
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class DepthwiseConv2DProgram implements GPGPUProgram {
-  variableNames = ['x', 'W'];
+  variableNames = ["x", "W"];
   outputShape: number[];
   userCode: string;
 

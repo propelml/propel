@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import {ENV} from '../../../environment';
+import {ENV} from "../../../environment";
 
-import * as tex_util from './tex_util';
-import * as webgl_util from './webgl_util';
+import * as tex_util from "./tex_util";
+import * as webgl_util from "./webgl_util";
 
 export function getWebGLContextAttributes(): WebGLContextAttributes {
   return {
@@ -81,11 +81,11 @@ export function createIndexBuffer(gl: WebGLRenderingContext): WebGLBuffer {
 
 function getTextureInternalFormat(
     gl: WebGLRenderingContext, numChannels: number): number {
-  if (!ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED')) {
+  if (!ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     return gl.RGBA;
   }
 
-  if (ENV.get('WEBGL_VERSION') === 2) {
+  if (ENV.get("WEBGL_VERSION") === 2) {
     if (numChannels === 4) {
       // tslint:disable-next-line:no-any
       return (gl as any).RGBA32F;
@@ -98,11 +98,11 @@ function getTextureInternalFormat(
 
 function getTextureFormat(
     gl: WebGLRenderingContext, numChannels: number): number {
-  if (!ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED')) {
+  if (!ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     return gl.RGBA;
   }
 
-  if (ENV.get('WEBGL_VERSION') === 2) {
+  if (ENV.get("WEBGL_VERSION") === 2) {
     if (numChannels === 4) {
       // tslint:disable-next-line:no-any
       return (gl as any).RGBA;
@@ -114,7 +114,7 @@ function getTextureFormat(
 }
 
 function getTextureType(gl: WebGLRenderingContext) {
-  if (!ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED')) {
+  if (!ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     return gl.UNSIGNED_BYTE;
   }
   return gl.FLOAT;
@@ -180,10 +180,10 @@ export function bindVertexProgramAttributeStreams(
   webgl_util.callAndCheck(
       gl, () => gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer));
   webgl_util.bindVertexBufferToProgramAttribute(
-      gl, program, 'clipSpacePos', vertexBuffer, 3, stride, posOffset,
+      gl, program, "clipSpacePos", vertexBuffer, 3, stride, posOffset,
       attribLocations);
   webgl_util.bindVertexBufferToProgramAttribute(
-      gl, program, 'uv', vertexBuffer, 2, stride, uvOffset, attribLocations);
+      gl, program, "uv", vertexBuffer, 2, stride, uvOffset, attribLocations);
 }
 
 export function uploadPixelDataToTexture(
@@ -220,7 +220,7 @@ export function uploadMatrixToTexture(
 
   let unpackedArray: Float32Array|Uint8Array;
 
-  if (ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED')) {
+  if (ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     const channelsPerTexture =
         numChannels === 1 ? webgl_util.getChannelsPerTexture() : numChannels;
     if (channelsPerTexture === 1) {
@@ -253,7 +253,7 @@ export function uploadMatrixToPackedTexture(
 function getDownloadTargetArrayBuffer(
     rows: number, columns: number, channelsPerTexture: number): Float32Array|
     Uint8Array {
-  const isFloatTexture = ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED');
+  const isFloatTexture = ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
 
   let downloadTarget: Float32Array|Uint8Array;
   if (isFloatTexture) {
@@ -269,7 +269,7 @@ function getDownloadTargetArrayBuffer(
 function decodeDownloadTargetArrayBuffer(
     downloadTarget: Float32Array|Uint8Array, rows: number, columns: number,
     channelsPerPixel: number): Float32Array {
-  const isFloatTexture = ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED');
+  const isFloatTexture = ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
   if (isFloatTexture) {
     const matrix = new Float32Array(rows * columns);
     tex_util.decodeMatrixFromUnpackedArray(

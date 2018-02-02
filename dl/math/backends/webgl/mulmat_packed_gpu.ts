@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import {MatrixOrientation} from '../../types';
+import {MatrixOrientation} from "../../types";
 
-import {GPGPUContext} from './gpgpu_context';
-import * as webgl_util from './webgl_util';
+import {GPGPUContext} from "./gpgpu_context";
+import * as webgl_util from "./webgl_util";
 
 export function getFragmentShaderSource(
     sharedDimension: number, aOrientation: MatrixOrientation,
@@ -38,17 +38,17 @@ export function getFragmentShaderSource(
    */
   const sharedDimensionPacked = Math.ceil(sharedDimension / 2);
   const aSample = (aOrientation === MatrixOrientation.REGULAR) ?
-      'center, resultUV.t' :
-      'resultUV.t, center';
+      "center, resultUV.t" :
+      "resultUV.t, center";
   const bSample = (bOrientation === MatrixOrientation.REGULAR) ?
-      'resultUV.s, center' :
-      'center, resultUV.s';
+      "resultUV.s, center" :
+      "center, resultUV.s";
   const aSwizzle: [string, string] =
-      (aOrientation === MatrixOrientation.REGULAR) ? ['a.xxzz', 'a.yyww'] :
-                                                     ['a.xxyy', 'a.zzww'];
+      (aOrientation === MatrixOrientation.REGULAR) ? ["a.xxzz", "a.yyww"] :
+                                                     ["a.xxyy", "a.zzww"];
   const bSwizzle: [string, string] =
-      (bOrientation === MatrixOrientation.REGULAR) ? ['b.xyxy', 'b.zwzw'] :
-                                                     ['b.xzxz', 'b.ywyw'];
+      (bOrientation === MatrixOrientation.REGULAR) ? ["b.xyxy", "b.zwzw"] :
+                                                     ["b.xzxz", "b.ywyw"];
   return `
     precision highp float;
     uniform sampler2D matrixA;
@@ -83,9 +83,9 @@ export function multiplyMatrixPacked(
       result, resultShapeRowCol[0], resultShapeRowCol[1]);
   gpgpu.setProgram(multiplyProgram);
   const matrixASamplerLocation = webgl_util.getProgramUniformLocationOrThrow(
-      gpgpu.gl, multiplyProgram, 'matrixA');
+      gpgpu.gl, multiplyProgram, "matrixA");
   const matrixBSamplerLocation = webgl_util.getProgramUniformLocationOrThrow(
-      gpgpu.gl, multiplyProgram, 'matrixB');
+      gpgpu.gl, multiplyProgram, "matrixB");
   gpgpu.setInputMatrixTexture(a, matrixASamplerLocation, 0);
   gpgpu.setInputMatrixTexture(b, matrixBSamplerLocation, 1);
   gpgpu.executeProgram();

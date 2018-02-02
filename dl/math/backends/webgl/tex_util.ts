@@ -1,4 +1,4 @@
-import {DataType, DataTypeMap} from '../../ndarray';
+import {DataType, DataTypeMap} from "../../ndarray";
 
 /**
  * @license

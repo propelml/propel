@@ -15,14 +15,14 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import {Array2D, Array3D, Array4D} from './ndarray';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
+import {Array2D, Array3D, Array4D} from "./ndarray";
 
 // math.maxPool
 {
   const tests: MathTests = it => {
-    it('1x1x1 in, 1x1 filter, 1 stride: [0] => [0]', math => {
+    it("1x1x1 in, 1x1 filter, 1 stride: [0] => [0]", math => {
       const a = Array3D.new([1, 1, 1], [0]);
 
       const result = math.maxPool(a, 1, 1, 0);
@@ -30,7 +30,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [0]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8]);
 
@@ -40,7 +40,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [5, 6, 9, 9]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride, batch=2', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride, batch=2", math => {
       // Feed forward.
       const a = Array4D.new(
           [2, 3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
@@ -51,7 +51,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [5, 6, 9, 9, 5, 6, 8, 9]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride, propagates NaNs', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride, propagates NaNs", math => {
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, NaN, 9]);
 
       const result = math.maxPool(a, 2, 1, 0);
@@ -60,7 +60,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [5, 6, NaN, NaN]);
     });
 
-    it('3x3x2 in, 2x2 filter, 1 stride', math => {
+    it("3x3x2 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [3, 3, 2],
@@ -72,7 +72,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [5, 99, 6, 88, 9, 66, 9, 55]);
     });
 
-    it('4x4x1 in, 2x2 filter, 2 stride', math => {
+    it("4x4x1 in, 2x2 filter, 2 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [4, 4, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -83,7 +83,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [5, 7, 13, 15]);
     });
 
-    it('2x2x1 in, 2x2 filter, 2 stride, pad=1', math => {
+    it("2x2x1 in, 2x2 filter, 2 stride, pad=1", math => {
       // Feed forward.
       const a = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
 
@@ -93,7 +93,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 2, 3, 4]);
     });
 
-    it('throws when x is not rank 3', math => {
+    it("throws when x is not rank 3", math => {
       // tslint:disable-next-line:no-any
       const a: any = Array2D.new([3, 3], [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
@@ -101,24 +101,24 @@ import {Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('maxPool', [tests]);
-  test_util.describeMathGPU('maxPool', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("maxPool", [tests]);
+  test_util.describeMathGPU("maxPool", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // math.minPool
 {
   const tests: MathTests = it => {
-    it('1x1x1 in, 1x1 filter, 1 stride: [0] => [0]', math => {
+    it("1x1x1 in, 1x1 filter, 1 stride: [0] => [0]", math => {
       const a = Array3D.new([1, 1, 1], [0]);
       const result = math.minPool(a, 1, 1, 0);
       test_util.expectArraysClose(result, [0]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8]);
       const result = math.minPool(a, 2, 1, 0);
@@ -127,7 +127,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 2, 4, 5]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride, batch=2', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride, batch=2", math => {
       // Feed forward.
       const a = Array4D.new(
           [2, 3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8, 1, 2, 3, 5, 4, 6, 7, 9, 8]);
@@ -137,7 +137,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 2, 4, 5, 1, 2, 4, 4]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride, propagates NaNs', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride, propagates NaNs", math => {
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, NaN, 8]);
       const result = math.minPool(a, 2, 1, 0);
 
@@ -145,7 +145,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 2, NaN, NaN]);
     });
 
-    it('3x3x2 in, 2x2 filter, 1 stride', math => {
+    it("3x3x2 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [3, 3, 2],
@@ -156,7 +156,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 55, 2, 44, 4, 22, 5, 11]);
     });
 
-    it('4x4x1 in, 2x2 filter, 2 stride', math => {
+    it("4x4x1 in, 2x2 filter, 2 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [4, 4, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -166,7 +166,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [0, 2, 8, 10]);
     });
 
-    it('2x2x1 in, 2x2 filter, 2 stride, pad=1', math => {
+    it("2x2x1 in, 2x2 filter, 2 stride, pad=1", math => {
       // Feed forward.
       const a = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const result = math.minPool(a, 2, 2, 1);
@@ -176,24 +176,24 @@ import {Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('minPool', [tests]);
-  test_util.describeMathGPU('minPool', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("minPool", [tests]);
+  test_util.describeMathGPU("minPool", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // math.avgPool
 {
   const tests: MathTests = it => {
-    it('1x1x1 in, 1x1 filter, 1 stride: [0] => [0]', math => {
+    it("1x1x1 in, 1x1 filter, 1 stride: [0] => [0]", math => {
       const a = Array3D.new([1, 1, 1], [0]);
       const result = math.avgPool(a, 1, 1, 0);
       test_util.expectArraysClose(result, [0]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8]);
       const result = math.avgPool(a, 2, 1, 0);
@@ -202,7 +202,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [3, 4, 6.25, 7]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array4D.new(
           [2, 3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 9, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
@@ -212,7 +212,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [3, 4, 6.25, 7, 3, 4, 6, 7]);
     });
 
-    it('3x3x1 in, 2x2 filter, 1 stride, propagates NaNs', math => {
+    it("3x3x1 in, 2x2 filter, 1 stride, propagates NaNs", math => {
       // Feed forward.
       const a = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, NaN, 8]);
       const result = math.avgPool(a, 2, 1, 0);
@@ -221,7 +221,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [3, 4, NaN, NaN]);
     });
 
-    it('3x3x2 in, 2x2 filter, 1 stride', math => {
+    it("3x3x2 in, 2x2 filter, 1 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [3, 3, 2],
@@ -232,7 +232,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [3, 77, 4, 66, 6.25, 44, 7, 33]);
     });
 
-    it('4x4x1 in, 2x2 filter, 2 stride', math => {
+    it("4x4x1 in, 2x2 filter, 2 stride", math => {
       // Feed forward.
       const a = Array3D.new(
           [4, 4, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -242,7 +242,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [2.5, 4.5, 10.5, 12.5]);
     });
 
-    it('2x2x1 in, 2x2 filter, 2 stride, pad=1', math => {
+    it("2x2x1 in, 2x2 filter, 2 stride, pad=1", math => {
       // Feed forward.
       const a = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const result = math.avgPool(a, 2, 2, 1);
@@ -252,10 +252,10 @@ import {Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('avgPool', [tests]);
-  test_util.describeMathGPU('avgPool', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("avgPool", [tests]);
+  test_util.describeMathGPU("avgPool", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

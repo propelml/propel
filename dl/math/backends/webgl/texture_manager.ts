@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
+import {GPGPUContext} from "./gpgpu_context";
 
 export class TextureManager {
   private numUsedTextures = 0;
@@ -67,7 +67,7 @@ export class TextureManager {
     }
     const total = this.numFreeTextures + this.numUsedTextures;
     console.log(
-        'Free/Used', `${this.numFreeTextures} / ${this.numUsedTextures}`,
+        "Free/Used", `${this.numFreeTextures} / ${this.numUsedTextures}`,
         `(${total})`);
   }
 

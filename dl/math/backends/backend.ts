@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../conv_util';
+import {Conv2DInfo} from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
-import {MatrixOrientation, SumTypes} from '../types';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from "../ndarray";
+import {MatrixOrientation, SumTypes} from "../types";
 
 export interface NDArrayStorage {
   read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;
@@ -65,24 +65,24 @@ export interface MathBackend extends NDArrayStorage {
   add<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
   subtract<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
   multiply<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
-  divide<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<'float32'>;
+  divide<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<"float32">;
 
   sum<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<SumTypes[D]>;
 
-  argMin(x: NDArray, axes: number[]): NDArray<'int32'>;
-  argMax(x: NDArray, axes: number[]): NDArray<'int32'>;
+  argMin(x: NDArray, axes: number[]): NDArray<"int32">;
+  argMax(x: NDArray, axes: number[]): NDArray<"int32">;
 
-  equal(a: NDArray, b: NDArray): NDArray<'bool'>;
-  notEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  greater(a: NDArray, b: NDArray): NDArray<'bool'>;
-  greaterEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  less(a: NDArray, b: NDArray): NDArray<'bool'>;
-  lessEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  select(cond: NDArray<'bool'>, a: NDArray, b: NDArray): NDArray;
+  equal(a: NDArray, b: NDArray): NDArray<"bool">;
+  notEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  greater(a: NDArray, b: NDArray): NDArray<"bool">;
+  greaterEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  less(a: NDArray, b: NDArray): NDArray<"bool">;
+  lessEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray;
 
   topKValues<D extends DataType, T extends NDArray<D>>(x: T, k: number):
       Array1D<D>;
-  topKIndices(x: NDArray, k: number): Array1D<'int32'>;
+  topKIndices(x: NDArray, k: number): Array1D<"int32">;
 
   min<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D>;
   minimum<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
@@ -93,7 +93,7 @@ export interface MathBackend extends NDArrayStorage {
   ceil<T extends NDArray>(x: T): T;
   floor<T extends NDArray>(x: T): T;
 
-  pow<T extends NDArray>(a: T, b: NDArray<'int32'>): T;
+  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T;
   exp<T extends NDArray>(x: T): T;
   log<T extends NDArray>(x: T): T;
   sqrt<T extends NDArray>(x: T): T;
@@ -107,7 +107,7 @@ export interface MathBackend extends NDArrayStorage {
   leakyRelu<T extends NDArray>(x: T, alpha: number): T;
   prelu<T extends NDArray>(x: T, alpha: T): T;
   preluDer<T extends NDArray>(x: T, alpha: T): T;
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<'int32', R>;
+  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R>;
 
   clip<T extends NDArray>(x: T, min: number, max: number): T;
 
@@ -165,7 +165,7 @@ export interface MathBackend extends NDArrayStorage {
       offset?: Array4D|Array1D): Array4D;
 
   multinomial(probabilities: Array2D, numSamples: number, seed: number):
-      Array2D<'int32'>;
+      Array2D<"int32">;
 
   oneHot(indices: Array1D, depth: number, onValue: number, offValue: number):
       Array2D;

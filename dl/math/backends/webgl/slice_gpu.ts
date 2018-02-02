@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
-import {GPGPUProgram} from './gpgpu_math';
-import {getCoordsDataType} from './shader_compiler';
+import {GPGPUContext} from "./gpgpu_context";
+import {GPGPUProgram} from "./gpgpu_math";
+import {getCoordsDataType} from "./shader_compiler";
 
 export class SliceProgram implements GPGPUProgram {
-  variableNames = ['source'];
+  variableNames = ["source"];
   outputShape: number[];
   userCode: string;
   rank: number;
@@ -53,7 +53,7 @@ export class SliceProgram implements GPGPUProgram {
     }
     return (gpgpu: GPGPUContext, webGLProgram: WebGLProgram) => {
       if (this.startLoc == null) {
-        this.startLoc = gpgpu.getUniformLocationNoThrow(webGLProgram, 'start');
+        this.startLoc = gpgpu.getUniformLocationNoThrow(webGLProgram, "start");
         if (this.startLoc == null) {
           // This means the compiler has optimized and realized it doesn't need
           // the uniform.
@@ -78,13 +78,13 @@ export class SliceProgram implements GPGPUProgram {
 
 function getCoords(rank: number): string {
   if (rank === 1) {
-    return 'sourceLoc';
+    return "sourceLoc";
   } else if (rank === 2) {
-    return 'sourceLoc.x, sourceLoc.y';
+    return "sourceLoc.x, sourceLoc.y";
   } else if (rank === 3) {
-    return 'sourceLoc.x, sourceLoc.y, sourceLoc.z';
+    return "sourceLoc.x, sourceLoc.y, sourceLoc.z";
   } else if (rank === 4) {
-    return 'sourceLoc.x, sourceLoc.y, sourceLoc.z, sourceLoc.w';
+    return "sourceLoc.x, sourceLoc.y, sourceLoc.z, sourceLoc.w";
   } else {
     throw Error(`Slicing for rank ${rank} is not yet supported`);
   }

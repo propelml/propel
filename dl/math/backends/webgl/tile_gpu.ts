@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {GPGPUProgram} from './gpgpu_math';
-import {getCoordsDataType} from './shader_compiler';
+import {GPGPUProgram} from "./gpgpu_math";
+import {getCoordsDataType} from "./shader_compiler";
 
 export class TileProgram implements GPGPUProgram {
-  variableNames = ['A'];
+  variableNames = ["A"];
   outputShape: number[];
   userCode: string;
   rank: number;
@@ -52,7 +52,7 @@ function getSourceCoords(aShape: number[]): string {
     return `imod(resRC, ${aShape[0]})`;
   }
 
-  const currentCoords = ['resRC.x', 'resRC.y', 'resRC.z', 'resRC.w'];
+  const currentCoords = ["resRC.x", "resRC.y", "resRC.z", "resRC.w"];
 
   const sourceCoords = [];
   for (let i = 0; i < aShape.length; i++) {

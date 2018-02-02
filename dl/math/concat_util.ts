@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as util from '../util';
+import * as util from "../util";
 
 export function assertParams(aShape: number[], bShape: number[], axis: number) {
   const aRank = aShape.length;
@@ -42,7 +42,7 @@ export function computeOutShape(
     x1Shape: number[], x2Shape: number[], axis: number): number[] {
   util.assert(
       x1Shape.length === x2Shape.length,
-      'x1 and x2 should have the same rank.');
+      "x1 and x2 should have the same rank.");
   const outputShape = x1Shape.slice();
   outputShape[axis] += x2Shape[axis];
   return outputShape;

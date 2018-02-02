@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-import {NDArrayMath} from './math';
-import {NDArray, Scalar} from './ndarray';
+import {NDArrayMath} from "./math";
+import {NDArray, Scalar} from "./ndarray";
 
 /**
  * An error function and its derivative.

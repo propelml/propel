@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {MatrixOrientation} from '../../types';
+import {MatrixOrientation} from "../../types";
 
-import {GPGPUProgram} from './gpgpu_math';
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class MatMulProgram implements GPGPUProgram {
-  variableNames = ['matrixA', 'matrixB'];
+  variableNames = ["matrixA", "matrixB"];
   outputShape: number[];
   userCode: string;
 
@@ -52,16 +52,16 @@ export class MatMulProgram implements GPGPUProgram {
       float result = 0.0;
       for (int i = 0; i < ${sharedDimNearestVec4}; i += 4) {
         vec4 a = vec4(
-          getMatrixA(${aSnippetFromOffset(0, 'i')}),
-          getMatrixA(${aSnippetFromOffset(1, 'i')}),
-          getMatrixA(${aSnippetFromOffset(2, 'i')}),
-          getMatrixA(${aSnippetFromOffset(3, 'i')})
+          getMatrixA(${aSnippetFromOffset(0, "i")}),
+          getMatrixA(${aSnippetFromOffset(1, "i")}),
+          getMatrixA(${aSnippetFromOffset(2, "i")}),
+          getMatrixA(${aSnippetFromOffset(3, "i")})
         );
         vec4 b = vec4(
-          getMatrixB(${bSnippetFromOffset(0, 'i')}),
-          getMatrixB(${bSnippetFromOffset(1, 'i')}),
-          getMatrixB(${bSnippetFromOffset(2, 'i')}),
-          getMatrixB(${bSnippetFromOffset(3, 'i')})
+          getMatrixB(${bSnippetFromOffset(0, "i")}),
+          getMatrixB(${bSnippetFromOffset(1, "i")}),
+          getMatrixB(${bSnippetFromOffset(2, "i")}),
+          getMatrixB(${bSnippetFromOffset(3, "i")})
         );
 
         result += dot(a, b);

@@ -15,16 +15,16 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import {Array3D, Array4D} from './ndarray';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
+import {Array3D, Array4D} from "./ndarray";
 
 // math.depthwiseConv2D
 {
   const tests: MathTests = it => {
-    it('input=1x3x3x1,f=2,s=1,p=valid,chMul=1', math => {
+    it("input=1x3x3x1,f=2,s=1,p=valid,chMul=1", math => {
       const fSize = 2;
-      const pad = 'valid';
+      const pad = "valid";
       const stride = 1;
       const chMul = 1;
       const inDepth = 1;
@@ -43,9 +43,9 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('input=1x3x3x2,f=2,s=1,p=same,chMul=1', math => {
+    it("input=1x3x3x2,f=2,s=1,p=same,chMul=1", math => {
       const fSize = 2;
-      const pad = 'same';
+      const pad = "same";
       const stride = 1;
       const chMul = 1;
       const inDepth = 2;
@@ -70,9 +70,9 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('input=1x3x3x2,f=2,s=1,p=same,chMul=2', math => {
+    it("input=1x3x3x2,f=2,s=1,p=same,chMul=2", math => {
       const fSize = 2;
-      const pad = 'same';
+      const pad = "same";
       const stride = 1;
       const chMul = 2;
       const inDepth = 2;
@@ -101,9 +101,9 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('input=2x3x3x2,f=2,s=1,p=same,chMul=2', math => {
+    it("input=2x3x3x2,f=2,s=1,p=same,chMul=2", math => {
       const fSize = 2;
-      const pad = 'same';
+      const pad = "same";
       const stride = 1;
       const chMul = 2;
       const inDepth = 2;
@@ -140,9 +140,9 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('Array3D is allowed', math => {
+    it("Array3D is allowed", math => {
       const fSize = 2;
-      const pad = 'same';
+      const pad = "same";
       const stride = 1;
       const chMul = 3;
       const inDepth = 2;
@@ -154,10 +154,10 @@ import {Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('depthwiseConv2D', [tests]);
-  test_util.describeMathGPU('depthwiseConv2D', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("depthwiseConv2D", [tests]);
+  test_util.describeMathGPU("depthwiseConv2D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

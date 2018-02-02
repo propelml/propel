@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import {Array1D, Array2D, Array3D} from './ndarray';
-import {MatrixOrientation} from './types';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
+import {Array1D, Array2D, Array3D} from "./ndarray";
+import {MatrixOrientation} from "./types";
 
 const commonTests: MathTests = it => {
-  it('A x B', math => {
+  it("A x B", math => {
     const a = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([3, 2], [0, 1, -3, 2, 2, 1]);
 
@@ -31,7 +31,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(c, [0, 8, -3, 20]);
   });
 
-  it('A x B^t', math => {
+  it("A x B^t", math => {
     const a = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([2, 3], [1, 0, 2, 4, 3, 0]);
 
@@ -42,7 +42,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(c, expected);
   });
 
-  it('A^t x B', math => {
+  it("A^t x B", math => {
     const a = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([2, 3], [1, 0, 2, 4, 3, 0]);
 
@@ -53,7 +53,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(c, expected);
   });
 
-  it('A^t x B^t', math => {
+  it("A^t x B^t", math => {
     const a = Array2D.new([3, 2], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([2, 3], [1, 0, 2, 4, 3, 0]);
 
@@ -64,7 +64,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(c, expected);
   });
 
-  it('A x B^t shapes do not match', math => {
+  it("A x B^t shapes do not match", math => {
     const a = Array2D.zeros([2, 3]);
     const b = Array2D.zeros([3, 2]);
 
@@ -75,7 +75,7 @@ const commonTests: MathTests = it => {
     expect(f).toThrowError();
   });
 
-  it('A^t x B shapes do not match', math => {
+  it("A^t x B shapes do not match", math => {
     const a = Array2D.zeros([2, 3]);
     const b = Array2D.zeros([3, 2]);
 
@@ -86,7 +86,7 @@ const commonTests: MathTests = it => {
     expect(f).toThrowError();
   });
 
-  it('A^t x B^t shapes do not match', math => {
+  it("A^t x B^t shapes do not match", math => {
     const a = Array2D.zeros([3, 2]);
     const b = Array2D.zeros([3, 2]);
 
@@ -97,14 +97,14 @@ const commonTests: MathTests = it => {
     expect(f).toThrowError();
   });
 
-  it('matmul throws when inner dimensions dont match', math => {
+  it("matmul throws when inner dimensions dont match", math => {
     const a = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([4, 2], [0, 1, -3, 2, 2, 1, 2, 2]);
 
     expect(() => math.matMul(a, b)).toThrowError();
   });
 
-  it('matmul throws when passed non matrices', math => {
+  it("matmul throws when passed non matrices", math => {
     // tslint:disable-next-line:no-any
     const a: any =
         Array3D.new([2, 3, 2], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
@@ -114,7 +114,7 @@ const commonTests: MathTests = it => {
     expect(() => math.matMul(b, a)).toThrowError();
   });
 
-  it('Vector times matrix', math => {
+  it("Vector times matrix", math => {
     const v = Array1D.new([2, 3]);
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
     const result = math.vectorTimesMatrix(v, matrix);
@@ -123,7 +123,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('Vector times matrix with implicit reshape', math => {
+  it("Vector times matrix with implicit reshape", math => {
     const v = Array1D.new([2, 3]);
 
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
@@ -133,7 +133,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('Vector times matrix throws when not passed a vector', math => {
+  it("Vector times matrix throws when not passed a vector", math => {
     // tslint:disable-next-line:no-any
     const v: any = Array2D.new([2, 2], [1, 2, 3, 4]);
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
@@ -141,7 +141,7 @@ const commonTests: MathTests = it => {
     expect(() => math.vectorTimesMatrix(v, matrix)).toThrowError();
   });
 
-  it('Vector times matrix throws when not passed a matrix', math => {
+  it("Vector times matrix throws when not passed a matrix", math => {
     const v = Array1D.new([2, 3]);
     // tslint:disable-next-line:no-any
     const matrix: any = Array3D.new([2, 2, 2], [1, 2, 3, 4, 5, 6, 7, 8]);
@@ -149,7 +149,7 @@ const commonTests: MathTests = it => {
     expect(() => math.vectorTimesMatrix(v, matrix)).toThrowError();
   });
 
-  it('Matrix times vector', math => {
+  it("Matrix times vector", math => {
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
     const v = Array1D.new([2, 3]);
     const result = math.matrixTimesVector(matrix, v);
@@ -158,7 +158,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('Matrix * vector propagates NaNs', math => {
+  it("Matrix * vector propagates NaNs", math => {
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
     const v = Array1D.new([2, NaN]);
     const result = math.matrixTimesVector(matrix, v);
@@ -167,7 +167,7 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('matrix times vector throws when not passed a vector', math => {
+  it("matrix times vector throws when not passed a vector", math => {
     // tslint:disable-next-line:no-any
     const v: any = Array2D.new([2, 2], [1, 2, 3, 4]);
     const matrix = Array2D.new([2, 2], [1, 2, 3, 4]);
@@ -175,7 +175,7 @@ const commonTests: MathTests = it => {
     expect(() => math.matrixTimesVector(matrix, v)).toThrowError();
   });
 
-  it('matrix times vector throws when not passed a matrix', math => {
+  it("matrix times vector throws when not passed a matrix", math => {
     const v = Array1D.new([2, 3]);
 
     // tslint:disable-next-line:no-any
@@ -184,7 +184,7 @@ const commonTests: MathTests = it => {
     expect(() => math.matrixTimesVector(matrix, v)).toThrowError();
   });
 
-  it('Dot product', math => {
+  it("Dot product", math => {
     const v1 = Array1D.new([2, 3]);
     const v2 = Array1D.new([2, 1]);
     const result = math.dotProduct(v1, v2);
@@ -192,14 +192,14 @@ const commonTests: MathTests = it => {
     test_util.expectNumbersClose(result.get(), 7);
   });
 
-  it('Dot product propagates NaNs', math => {
+  it("Dot product propagates NaNs", math => {
     const v1 = Array1D.new([2, NaN]);
     const v2 = Array1D.new([2, 1]);
     const result = math.dotProduct(v1, v2);
     expect(result.get()).toEqual(NaN);
   });
 
-  it('Dot product throws when vectors are different size', math => {
+  it("Dot product throws when vectors are different size", math => {
     const v1 = Array1D.new([2, 3, 3]);
     const v2 = Array1D.new([2, 1]);
 
@@ -207,7 +207,7 @@ const commonTests: MathTests = it => {
     expect(() => math.dotProduct(v2, v1)).toThrowError();
   });
 
-  it('Dot product throws when passed non vectors', math => {
+  it("Dot product throws when passed non vectors", math => {
     // tslint:disable-next-line:no-any
     const v1: any = Array2D.new([2, 2], [1, 2, 3, 3]);
     const v2 = Array1D.new([2, 1]);
@@ -216,7 +216,7 @@ const commonTests: MathTests = it => {
     expect(() => math.dotProduct(v2, v1)).toThrowError();
   });
 
-  it('Outer product', math => {
+  it("Outer product", math => {
     const v1 = Array1D.new([2, 3]);
     const v2 = Array1D.new([2, 1]);
     const result = math.outerProduct(v1, v2);
@@ -228,7 +228,7 @@ const commonTests: MathTests = it => {
 };
 
 const gpuTests: MathTests = it => {
-  it('Matrix times vector, large matrix', math => {
+  it("Matrix times vector, large matrix", math => {
     const maxTexSize = 16000;
     const sharedDim = maxTexSize + 4;
     const matrix = Array2D.zeros([2, sharedDim]);
@@ -245,9 +245,9 @@ const gpuTests: MathTests = it => {
   });
 };
 
-test_util.describeMathCPU('matMul', [commonTests]);
-test_util.describeMathGPU('matMul', [commonTests, gpuTests], [
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+test_util.describeMathCPU("matMul", [commonTests]);
+test_util.describeMathGPU("matMul", [commonTests, gpuTests], [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

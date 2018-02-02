@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import {ENV} from '../../../environment';
-import * as util from '../../../util';
-import {NDArray} from '../../ndarray';
-import {GPGPUContext} from './gpgpu_context';
-import * as shader_compiler from './shader_compiler';
-import {ShapeInfo} from './shader_compiler';
-import {TextureData} from './tex_util';
+import {ENV} from "../../../environment";
+import * as util from "../../../util";
+import {NDArray} from "../../ndarray";
+import {GPGPUContext} from "./gpgpu_context";
+import * as shader_compiler from "./shader_compiler";
+import {ShapeInfo} from "./shader_compiler";
+import {TextureData} from "./tex_util";
 
-const ATTRIBUTE_NAMES = ['uv', 'clipSpacePos'];
+const ATTRIBUTE_NAMES = ["uv", "clipSpacePos"];
 
 export interface GPGPUProgram {
   variableNames: string[];
@@ -43,10 +43,10 @@ export interface GPGPUBinary {
   outShapeInfo: ShapeInfo;
 }
 
-const NAN_UNIFORM_NAME = 'NaN';
+const NAN_UNIFORM_NAME = "NaN";
 
 function shouldUploadNaNUniform(): boolean {
-  return !ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED');
+  return !ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
 }
 
 export interface ArrayData<T extends NDArray> {
@@ -166,7 +166,7 @@ export function runProgram<T extends NDArray, K extends NDArray>(
 export function makeShaderKey(
     program: GPGPUProgram, inputs: Array<ArrayData<NDArray>>,
     output: ArrayData<NDArray>): string {
-  let keyInputs = '';
+  let keyInputs = "";
   inputs.concat(output).forEach(x => {
     keyInputs +=
         `${x.array.shape}_${x.texData.textureShape}_${x.texData.textureType}`;
@@ -175,6 +175,6 @@ export function makeShaderKey(
   const keyBroadcast = (program.supportsBroadcasting === true).toString();
   let key = program.constructor.name;
   // Fast string concat. See https://jsperf.com/string-concatenation/14.
-  key += '_' + keyBroadcast + '_' + keyInputs + '_' + keyUserCode;
+  key += "_" + keyBroadcast + "_" + keyInputs + "_" + keyUserCode;
   return key;
 }

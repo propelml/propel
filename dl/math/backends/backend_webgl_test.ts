@@ -15,17 +15,17 @@
  * =============================================================================
  */
 
-import * as test_util from '../../test_util';
-import {Tests} from '../../test_util';
-import {DataId} from '../ndarray';
-import {MathBackendWebGL} from './backend_webgl';
+import * as test_util from "../../test_util";
+import {Tests} from "../../test_util";
+import {DataId} from "../ndarray";
+import {MathBackendWebGL} from "./backend_webgl";
 
 const tests: Tests = () => {
-  it('reading', () => {
+  it("reading", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     const id = new DataId();
-    backend.register(id, [3], 'float32');
+    backend.register(id, [3], "float32");
     backend.write(id, new Float32Array([1, 2, 3]));
     expect(texManager.getNumUsedTextures()).toBe(0);
     backend.getTexture(id);
@@ -39,11 +39,11 @@ const tests: Tests = () => {
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-  it('overwriting', () => {
+  it("overwriting", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     const id = new DataId();
-    backend.register(id, [3], 'float32');
+    backend.register(id, [3], "float32");
     backend.write(id, new Float32Array([1, 2, 3]));
     backend.getTexture(id);
     expect(texManager.getNumUsedTextures()).toBe(1);
@@ -59,15 +59,15 @@ const tests: Tests = () => {
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-   it('disposal of backend disposes all textures', () => {
+   it("disposal of backend disposes all textures", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     const id1 = new DataId();
     const id2 = new DataId();
-    backend.register(id1, [3], 'float32');
+    backend.register(id1, [3], "float32");
     backend.write(id1, new Float32Array([1, 2, 3]));
     backend.getTexture(id1); // Forces upload to GPU.
-    backend.register(id2, [3], 'float32');
+    backend.register(id2, [3], "float32");
     backend.write(id2, new Float32Array([4, 5, 6]));
     backend.getTexture(id2); // Forces upload to GPU.
     expect(texManager.getNumUsedTextures()).toBe(2);
@@ -76,8 +76,8 @@ const tests: Tests = () => {
   });
 };
 
-test_util.describeCustom('backend_webgl', tests, [
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+test_util.describeCustom("backend_webgl", tests, [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

@@ -15,66 +15,66 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import {Array1D, Array2D, NDArray} from './ndarray';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
+import {Array1D, Array2D, NDArray} from "./ndarray";
 
 const tests: MathTests = it => {
   const NUM_SAMPLES = 10000;
   // Allowed Variance in probability (in %).
   const EPSILON = 0.05;
 
-  it('Flip a fair coin and check bounds', math => {
+  it("Flip a fair coin and check bounds", math => {
     const probs = Array1D.new([0.5, 0.5]);
     const result = math.multinomial(probs, NUM_SAMPLES);
-    expect(result.dtype).toBe('int32');
+    expect(result.dtype).toBe("int32");
     expect(result.shape).toEqual([NUM_SAMPLES]);
     const outcomeProbs = computeProbs(result.dataSync(), 2);
     test_util.expectArraysClose(outcomeProbs, [0.5, 0.5], EPSILON);
   });
 
-  it('Flip a two-sided coin with 100% of heads', math => {
+  it("Flip a two-sided coin with 100% of heads", math => {
     const probs = Array1D.new([1, 0]);
     const result = math.multinomial(probs, NUM_SAMPLES);
-    expect(result.dtype).toBe('int32');
+    expect(result.dtype).toBe("int32");
     expect(result.shape).toEqual([NUM_SAMPLES]);
     const outcomeProbs = computeProbs(result.dataSync(), 2);
     test_util.expectArraysClose(outcomeProbs, [1, 0], EPSILON);
   });
 
-  it('Flip a two-sided coin with 100% of tails', math => {
+  it("Flip a two-sided coin with 100% of tails", math => {
     const probs = Array1D.new([0, 1]);
     const result = math.multinomial(probs, NUM_SAMPLES);
-    expect(result.dtype).toBe('int32');
+    expect(result.dtype).toBe("int32");
     expect(result.shape).toEqual([NUM_SAMPLES]);
     const outcomeProbs = computeProbs(result.dataSync(), 2);
     test_util.expectArraysClose(outcomeProbs, [0, 1], EPSILON);
   });
 
-  it('Flip a single-sided coin throws error', math => {
+  it("Flip a single-sided coin throws error", math => {
     const probs = Array1D.new([1]);
     expect(() => math.multinomial(probs, NUM_SAMPLES)).toThrowError();
   });
 
-  it('Flip a ten-sided coin and check bounds', math => {
+  it("Flip a ten-sided coin and check bounds", math => {
     const numOutcomes = 10;
     const probs = Array1D.zeros([numOutcomes]);
     for (let i = 0; i < numOutcomes; ++i) {
       probs.set(1 / numOutcomes, i);
     }
     const result = math.multinomial(probs, NUM_SAMPLES);
-    expect(result.dtype).toBe('int32');
+    expect(result.dtype).toBe("int32");
     expect(result.shape).toEqual([NUM_SAMPLES]);
     const outcomeProbs = computeProbs(result.dataSync(), numOutcomes);
     expect(outcomeProbs.length).toBeLessThanOrEqual(numOutcomes);
   });
 
-  it('Flip 3 three-sided coins, each coin is 100% biases', math => {
+  it("Flip 3 three-sided coins, each coin is 100% biases", math => {
     const numOutcomes = 3;
     const probs =
         Array2D.new([3, numOutcomes], [[0, 0, 1], [0, 1, 0], [1, 0, 0]]);
     const result = math.multinomial(probs, NUM_SAMPLES);
-    expect(result.dtype).toBe('int32');
+    expect(result.dtype).toBe("int32");
     expect(result.shape).toEqual([3, NUM_SAMPLES]);
 
     // First coin always gets last event.
@@ -94,7 +94,7 @@ const tests: MathTests = it => {
 
   });
 
-  it('passing Array3D throws error', math => {
+  it("passing Array3D throws error", math => {
     const probs = NDArray.zeros([3, 2, 2]) as Array1D;
     expect(() => math.multinomial(probs, 3)).toThrowError();
   });
@@ -117,9 +117,9 @@ const tests: MathTests = it => {
   }
 };
 
-test_util.describeMathCPU('multinomial', [tests]);
-test_util.describeMathGPU('multinomial', [tests], [
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+test_util.describeMathCPU("multinomial", [tests]);
+test_util.describeMathGPU("multinomial", [tests], [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

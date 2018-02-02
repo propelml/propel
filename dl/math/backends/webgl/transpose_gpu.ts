@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {GPGPUProgram} from './gpgpu_math';
-import {getCoordsDataType} from './shader_compiler';
+import {GPGPUProgram} from "./gpgpu_math";
+import {getCoordsDataType} from "./shader_compiler";
 
 export class TransposeProgram implements GPGPUProgram {
-  variableNames = ['A'];
+  variableNames = ["A"];
   outputShape: number[];
   userCode: string;
   rank: number;
@@ -48,7 +48,7 @@ function getSwitchedCoords(newDim: number[]): string {
   if (rank > 4) {
     throw Error(`Transpose for rank ${rank} is not yet supported`);
   }
-  const originalOrder = ['resRC.x', 'resRC.y', 'resRC.z', 'resRC.w'];
+  const originalOrder = ["resRC.x", "resRC.y", "resRC.z", "resRC.w"];
   const switchedCoords = new Array(rank);
   for (let i = 0; i < newDim.length; i++) {
     switchedCoords[newDim[i]] = originalOrder[i];

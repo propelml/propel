@@ -15,47 +15,47 @@
  * =============================================================================
  */
 
-import {ENV} from '../../environment';
-import * as util from '../../util';
-import {TypedArray} from '../../util';
-import * as axis_util from '../axis_util';
-import {Conv2DInfo} from '../conv_util';
+import {ENV} from "../../environment";
+import * as util from "../../util";
+import {TypedArray} from "../../util";
+import * as axis_util from "../axis_util";
+import {Conv2DInfo} from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
-import * as reduce_util from '../reduce_util';
-import * as types from '../types';
-import {SumTypes, SumTypesMap} from '../types';
-import {MathBackend} from './backend';
-import {ArgMinMaxProgram} from './webgl/argminmax_gpu';
-import {BatchNormProgram} from './webgl/batchnorm_gpu';
-import * as binaryop_gpu from './webgl/binaryop_gpu';
-import {BinaryOpProgram} from './webgl/binaryop_gpu';
-import {ClipProgram} from './webgl/clip_gpu';
-import {ConcatProgram} from './webgl/concat_gpu';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from "../ndarray";
+import * as reduce_util from "../reduce_util";
+import * as types from "../types";
+import {SumTypes, SumTypesMap} from "../types";
+import {MathBackend} from "./backend";
+import {ArgMinMaxProgram} from "./webgl/argminmax_gpu";
+import {BatchNormProgram} from "./webgl/batchnorm_gpu";
+import * as binaryop_gpu from "./webgl/binaryop_gpu";
+import {BinaryOpProgram} from "./webgl/binaryop_gpu";
+import {ClipProgram} from "./webgl/clip_gpu";
+import {ConcatProgram} from "./webgl/concat_gpu";
 // tslint:disable-next-line:max-line-length
-import {Conv2DDerBiasProgram, Conv2DDerFilterProgram, Conv2DDerInputProgram} from './webgl/conv_backprop_gpu';
-import {Conv2DProgram} from './webgl/conv_gpu';
-import {DepthwiseConv2DProgram} from './webgl/conv_gpu_depthwise';
-import {Copy2DProgram} from './webgl/copy_gpu';
-import {GPGPUContext} from './webgl/gpgpu_context';
-import * as gpgpu_math from './webgl/gpgpu_math';
-import {ArrayData, GPGPUBinary, GPGPUProgram} from './webgl/gpgpu_math';
-import * as gpgpu_util from './webgl/gpgpu_util';
-import {MaxPool2DBackpropProgram} from './webgl/max_pool_backprop_gpu';
-import {MatMulProgram} from './webgl/mulmat_gpu';
-import {MultinomialProgram} from './webgl/multinomial_gpu';
-import {OneHotProgram} from './webgl/onehot_gpu';
-import {Pool2DProgram} from './webgl/pool_gpu';
-import {ReduceProgram} from './webgl/reduce_gpu';
-import {ResizeBilinear3DProgram} from './webgl/resize_bilinear_gpu';
-import {SliceProgram} from './webgl/slice_gpu';
-import {TextureData, TextureType} from './webgl/tex_util';
-import {TextureManager} from './webgl/texture_manager';
-import {TileProgram} from './webgl/tile_gpu';
-import {TransposeProgram} from './webgl/transpose_gpu';
-import * as unary_op from './webgl/unaryop_gpu';
-import {UnaryOpProgram} from './webgl/unaryop_gpu';
-import * as webgl_util from './webgl/webgl_util';
+import {Conv2DDerBiasProgram, Conv2DDerFilterProgram, Conv2DDerInputProgram} from "./webgl/conv_backprop_gpu";
+import {Conv2DProgram} from "./webgl/conv_gpu";
+import {DepthwiseConv2DProgram} from "./webgl/conv_gpu_depthwise";
+import {Copy2DProgram} from "./webgl/copy_gpu";
+import {GPGPUContext} from "./webgl/gpgpu_context";
+import * as gpgpu_math from "./webgl/gpgpu_math";
+import {ArrayData, GPGPUBinary, GPGPUProgram} from "./webgl/gpgpu_math";
+import * as gpgpu_util from "./webgl/gpgpu_util";
+import {MaxPool2DBackpropProgram} from "./webgl/max_pool_backprop_gpu";
+import {MatMulProgram} from "./webgl/mulmat_gpu";
+import {MultinomialProgram} from "./webgl/multinomial_gpu";
+import {OneHotProgram} from "./webgl/onehot_gpu";
+import {Pool2DProgram} from "./webgl/pool_gpu";
+import {ReduceProgram} from "./webgl/reduce_gpu";
+import {ResizeBilinear3DProgram} from "./webgl/resize_bilinear_gpu";
+import {SliceProgram} from "./webgl/slice_gpu";
+import {TextureData, TextureType} from "./webgl/tex_util";
+import {TextureManager} from "./webgl/texture_manager";
+import {TileProgram} from "./webgl/tile_gpu";
+import {TransposeProgram} from "./webgl/transpose_gpu";
+import * as unary_op from "./webgl/unaryop_gpu";
+import {UnaryOpProgram} from "./webgl/unaryop_gpu";
+import * as webgl_util from "./webgl/webgl_util";
 
 export class MathBackendWebGL implements MathBackend {
   private texData = new WeakMap<DataId, TextureData>();
@@ -79,7 +79,7 @@ export class MathBackendWebGL implements MathBackend {
       pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
-      throw new Error('MathBackendWebGL.writePixels(): pixels can not be null');
+      throw new Error("MathBackendWebGL.writePixels(): pixels can not be null");
     }
     this.throwIfNoData(dataId);
     const textureShape: [number, number] = [pixels.height, pixels.width];
@@ -89,7 +89,7 @@ export class MathBackendWebGL implements MathBackend {
 
     this.texData.set(dataId, {
       shape,
-      dtype: 'int32',
+      dtype: "int32",
       values: null,
       texture,
       textureShape,
@@ -99,12 +99,12 @@ export class MathBackendWebGL implements MathBackend {
     if (pixels instanceof HTMLVideoElement) {
       if (this.canvas == null) {
         throw new Error(
-            'Can\'t read pixels from HTMLImageElement outside ' +
-            'the browser.');
+            "Can't read pixels from HTMLImageElement outside " +
+            "the browser.");
       }
       this.canvas.width = pixels.width;
       this.canvas.height = pixels.height;
-      this.canvas.getContext('2d').drawImage(
+      this.canvas.getContext("2d").drawImage(
           pixels, 0, 0, pixels.width, pixels.height);
       pixels = this.canvas;
     }
@@ -113,7 +113,7 @@ export class MathBackendWebGL implements MathBackend {
   }
   write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void {
     if (values == null) {
-      throw new Error('MathBackendWebGL.write(): values can not be null');
+      throw new Error("MathBackendWebGL.write(): values can not be null");
     }
     this.throwIfNoData(dataId);
 
@@ -158,7 +158,7 @@ export class MathBackendWebGL implements MathBackend {
       this.cacheOnCPU(dataId);
       return values;
     }
-    if (ENV.get('WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED') &&
+    if (ENV.get("WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED") &&
         textureType === TextureType.DEFAULT) {
       const float32Values = await this.gpgpu.downloadMatrixFromTextureAsync(
           texture, textureShape[0], textureShape[1]);
@@ -166,7 +166,7 @@ export class MathBackendWebGL implements MathBackend {
       return this.texData.get(dataId).values;
     }
 
-    if (!ENV.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED')) {
+    if (!ENV.get("WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED")) {
       return this.readSync(dataId);
     }
 
@@ -176,7 +176,7 @@ export class MathBackendWebGL implements MathBackend {
     return this.readSync(dataId);
   }
   async time(query: () => NDArray): Promise<number> {
-    if (!ENV.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED')) {
+    if (!ENV.get("WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED")) {
       const start = performance.now();
       const a = query();
       await a.data();
@@ -209,8 +209,8 @@ export class MathBackendWebGL implements MathBackend {
   private gpgpuCreatedLocally: boolean;
 
   constructor(private gpgpu?: GPGPUContext) {
-    if (ENV.get('WEBGL_VERSION') < 1) {
-      throw new Error('WebGL is not supported on this device');
+    if (ENV.get("WEBGL_VERSION") < 1) {
+      throw new Error("WebGL is not supported on this device");
     }
     if (gpgpu == null) {
       const gl = gpgpu_util.createWebGLContext();
@@ -219,8 +219,8 @@ export class MathBackendWebGL implements MathBackend {
     } else {
       this.gpgpuCreatedLocally = false;
     }
-    if (typeof document !== 'undefined') {
-      this.canvas = document.createElement('canvas');
+    if (typeof document !== "undefined") {
+      this.canvas = document.createElement("canvas");
     }
     this.textureManager = new TextureManager(this.gpgpu);
   }
@@ -406,7 +406,7 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   private reduce<D extends DataType>(
-      x: Array2D, reduceType: 'max'|'min'|'sum', dtype: D): Array2D<D> {
+      x: Array2D, reduceType: "max"|"min"|"sum", dtype: D): Array2D<D> {
     const batchSize = x.shape[0];
     const inSize = x.shape[1];
     const windowSize = reduce_util.computeOptimalWindowSize(inSize);
@@ -424,8 +424,8 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   private argReduce(
-      x: Array2D, reduceType: 'max'|'min',
-      bestIndicesA: Array2D = null): Array2D<'int32'> {
+      x: Array2D, reduceType: "max"|"min",
+      bestIndicesA: Array2D = null): Array2D<"int32"> {
     let batchSize = x.shape[0];
     let inSize = x.shape[1];
     if (bestIndicesA != null) {
@@ -438,7 +438,7 @@ export class MathBackendWebGL implements MathBackend {
         new ArgMinMaxProgram(reduceInfo, reduceType, bestIndicesA == null);
     const [rows, cols] = program.outputShape;
     const output =
-        this.makeOutputArray(program.outputShape, 'int32').as2D(rows, cols);
+        this.makeOutputArray(program.outputShape, "int32").as2D(rows, cols);
     const inputs = [x];
     if (bestIndicesA != null) {
       inputs.push(bestIndicesA);
@@ -452,92 +452,92 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   sum<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<SumTypes[D]> {
-    axis_util.assertAxesAreInnerMostDims('sum', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("sum", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const inSize = util.sizeFromShape(reduceShape);
     const a2D = x.as2D(-1, inSize);
     const outputDType = SumTypesMap[x.dtype];
-    return this.reduce(a2D, 'sum', outputDType).reshape(outShape);
+    return this.reduce(a2D, "sum", outputDType).reshape(outShape);
   }
 
-  argMin(x: NDArray, axes: number[]): NDArray<'int32'> {
-    axis_util.assertAxesAreInnerMostDims('argMin', axes, x.rank);
+  argMin(x: NDArray, axes: number[]): NDArray<"int32"> {
+    axis_util.assertAxesAreInnerMostDims("argMin", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const inSize = util.sizeFromShape(reduceShape);
     const a2D = x.as2D(-1, inSize);
-    return this.argReduce(a2D, 'min').reshape(outShape);
+    return this.argReduce(a2D, "min").reshape(outShape);
   }
 
-  argMax(x: NDArray, axes: number[]): NDArray<'int32'> {
-    axis_util.assertAxesAreInnerMostDims('argMax', axes, x.rank);
+  argMax(x: NDArray, axes: number[]): NDArray<"int32"> {
+    axis_util.assertAxesAreInnerMostDims("argMax", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const inSize = util.sizeFromShape(reduceShape);
     const a2D = x.as2D(-1, inSize);
-    return this.argReduce(a2D, 'max').reshape(outShape);
+    return this.argReduce(a2D, "max").reshape(outShape);
   }
 
-  equal(a: NDArray, b: NDArray): NDArray<'bool'> {
+  equal(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program = new BinaryOpProgram(binaryop_gpu.EQUAL, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  notEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
+  notEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program =
         new BinaryOpProgram(binaryop_gpu.NOT_EQUAL, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  greater(a: NDArray, b: NDArray): NDArray<'bool'> {
+  greater(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program = new BinaryOpProgram(binaryop_gpu.GREATER, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  greaterEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
+  greaterEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program =
         new BinaryOpProgram(binaryop_gpu.GREATER_EQUAL, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  less(a: NDArray, b: NDArray): NDArray<'bool'> {
+  less(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program = new BinaryOpProgram(binaryop_gpu.LESS, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  lessEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
+  lessEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
     const program =
         new BinaryOpProgram(binaryop_gpu.LESS_EQUAL, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'bool');
+    const output = this.makeOutputArray(program.outputShape, "bool");
     return this.compileAndRun(program, [a, b], output);
   }
 
-  select(cond: NDArray<'bool'>, a: NDArray, b: NDArray): NDArray {
-    throw new Error('select GPU not yet implemented!');
+  select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray {
+    throw new Error("select GPU not yet implemented!");
   }
 
   topKValues<D extends DataType, T extends NDArray<D>>(x: T, k: number):
       Array1D<D> {
-    throw new Error('topKValues GPU not yet implemented!');
+    throw new Error("topKValues GPU not yet implemented!");
   }
 
-  topKIndices(x: NDArray, k: number): Array1D<'int32'> {
-    throw new Error('topKIndices GPU not yet implemented!');
+  topKIndices(x: NDArray, k: number): Array1D<"int32"> {
+    throw new Error("topKIndices GPU not yet implemented!");
   }
 
   min<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D> {
-    axis_util.assertAxesAreInnerMostDims('min', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("min", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const inSize = util.sizeFromShape(reduceShape);
     const a2D = x.as2D(-1, inSize);
-    return this.reduce(a2D, 'min', a2D.dtype).reshape(outShape);
+    return this.reduce(a2D, "min", a2D.dtype).reshape(outShape);
   }
 
   minimum<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D> {
@@ -546,12 +546,12 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   max<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D> {
-    axis_util.assertAxesAreInnerMostDims('max', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("max", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const inSize = util.sizeFromShape(reduceShape);
     const a2D = x.as2D(-1, inSize);
-    return this.reduce(a2D, 'max', a2D.dtype).reshape(outShape);
+    return this.reduce(a2D, "max", a2D.dtype).reshape(outShape);
   }
 
   maximum<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D> {
@@ -559,10 +559,10 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun(program, [a, b]);
   }
 
-  divide(a: NDArray, b: NDArray): NDArray<'float32'> {
+  divide(a: NDArray, b: NDArray): NDArray<"float32"> {
     const program = new BinaryOpProgram(binaryop_gpu.DIV, a.shape, b.shape);
-    const output = this.makeOutputArray(program.outputShape, 'float32');
-    return this.compileAndRun<NDArray, NDArray<'float32'>>(
+    const output = this.makeOutputArray(program.outputShape, "float32");
+    return this.compileAndRun<NDArray, NDArray<"float32">>(
         program, [a, b], output);
   }
 
@@ -582,7 +582,7 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun<NDArray, NDArray<D>>(program, [a, b], output);
   }
 
-  pow<T extends NDArray>(a: T, b: NDArray<'int32'>): T {
+  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T {
     const program = new BinaryOpProgram(binaryop_gpu.POW, a.shape, b.shape);
     const output =
         this.makeOutputArray(
@@ -656,10 +656,10 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun(program, [a, b]) as T;
   }
 
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<'int32', R> {
+  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R> {
     const program = new UnaryOpProgram(x.shape, unary_op.TO_INT);
-    const output = this.makeOutputArray(program.outputShape, 'int32');
-    return this.compileAndRun(program, [x], output) as NDArray<'int32', R>;
+    const output = this.makeOutputArray(program.outputShape, "int32");
+    return this.compileAndRun(program, [x], output) as NDArray<"int32", R>;
   }
 
   clip<T extends NDArray>(x: T, min: number, max: number): T {
@@ -755,24 +755,24 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   maxPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    const program = new Pool2DProgram(convInfo, 'max', false);
+    const program = new Pool2DProgram(convInfo, "max", false);
     return this.compileAndRun(program, [x]);
   }
 
   minPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    const program = new Pool2DProgram(convInfo, 'min', false);
+    const program = new Pool2DProgram(convInfo, "min", false);
     return this.compileAndRun(program, [x]);
   }
 
   avgPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    const program = new Pool2DProgram(convInfo, 'avg', false);
+    const program = new Pool2DProgram(convInfo, "avg", false);
     return this.compileAndRun(program, [x]);
   }
 
   maxPoolBackprop(dy: Array4D, x: Array4D, convInfo: Conv2DInfo): Array4D {
     const getPositions = true;
     const maxPoolPositionsProgram =
-        new Pool2DProgram(convInfo, 'max', getPositions);
+        new Pool2DProgram(convInfo, "max", getPositions);
     const maxPoolPositions: Array4D =
         this.compileAndRun(maxPoolPositionsProgram, [x]);
 
@@ -793,12 +793,12 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   multinomial(probs: Array2D, numSamples: number, seed: number):
-      Array2D<'int32'> {
+      Array2D<"int32"> {
     const batchSize = probs.shape[0];
     const numOutcomes = probs.shape[1];
     const program = new MultinomialProgram(batchSize, numOutcomes, numSamples);
     const output =
-        this.makeOutputArray(program.outputShape, 'int32') as Array2D<'int32'>;
+        this.makeOutputArray(program.outputShape, "int32") as Array2D<"int32">;
     const customSetup = program.getCustomSetupFunc(seed);
     return this.compileAndRun(program, [probs], output, customSetup);
   }
@@ -810,7 +810,7 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   setDiag(input: Array2D, diag: Array1D): Array2D {
-    throw new Error('setDiag GPU not yet implemented!');
+    throw new Error("setDiag GPU not yet implemented!");
   }
 
   private makeOutputArray<D extends DataType, T extends NDArray<D>>(
@@ -916,14 +916,14 @@ export class MathBackendWebGL implements MathBackend {
   }
 }
 
-ENV.registerBackend('webgl', () => new MathBackendWebGL());
+ENV.registerBackend("webgl", () => new MathBackendWebGL());
 
 function float32ToTypedArray<D extends DataType>(
     a: Float32Array, dtype: D): DataTypeMap[D] {
-  if (dtype === 'float32') {
+  if (dtype === "float32") {
     return a;
-  } else if (dtype === 'int32' || dtype === 'bool') {
-    const result = (dtype === 'int32') ? new Int32Array(a.length) :
+  } else if (dtype === "int32" || dtype === "bool") {
+    const result = (dtype === "int32") ? new Int32Array(a.length) :
                                          new Uint8Array(a.length);
     for (let i = 0; i < result.length; ++i) {
       let val = a[i];

@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-import * as util from '../../util';
-import {DataType, NDArray} from '../ndarray';
+import * as util from "../../util";
+import {DataType, NDArray} from "../ndarray";
 
 export type ScopeResult =
     void|NDArray|NDArray[]|{[key: string]: NDArray};

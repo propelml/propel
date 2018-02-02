@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {ENV} from '../../../environment';
-import * as util from '../../../util';
-import * as broadcast_util from '../../broadcast_util';
-import * as tex_util from './tex_util';
-import {TextureType} from './tex_util';
+import {ENV} from "../../../environment";
+import * as util from "../../../util";
+import * as broadcast_util from "../../broadcast_util";
+import * as tex_util from "./tex_util";
+import {TextureType} from "./tex_util";
 
 export type ShapeInfo = {
   logicalShape: number[],
@@ -38,28 +38,28 @@ export function makeShader(
   const sampleSnippet = getSampleSnippet();
   const setOutputSnippet = getSetOutputSnippet();
   const inputPrefixSnippet =
-      inputsInfo.map(x => `uniform sampler2D ${x.name};`).join('\n');
+      inputsInfo.map(x => `uniform sampler2D ${x.name};`).join("\n");
   const inputSamplingSnippet =
       inputsInfo.map(x => getInputSamplingSnippet(x, outputShape, broadcast))
-          .join('\n');
+          .join("\n");
   const outTexShape = outputShape.textureShape;
   const outputSamplingSnippet =
       getOutputSamplingSnippet(outputShape.logicalShape, outTexShape);
   const source = [
     SHADER_PREFIX, sampleSnippet, setOutputSnippet, inputPrefixSnippet,
     outputSamplingSnippet, inputSamplingSnippet, userCode
-  ].join('\n');
+  ].join("\n");
   return source;
 }
 
 function getSampleSnippet() {
-  return ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED') ?
+  return ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED") ?
       FLOAT_TEXTURE_SAMPLE_SNIPPET :
       UNSIGNED_BYTE_TEXTURE_SAMPLE_SNIPPET;
 }
 
 function getSetOutputSnippet() {
-  return ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED') ?
+  return ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED") ?
       FLOAT_TEXTURE_SETOUTPUT_SNIPPET :
       UNSIGNED_BYTE_TEXTURE_SETOUTPUT_SNIPPET;
 }
@@ -411,7 +411,7 @@ function getOutput2DCoords(
 
 function getSamplerScalar(inputInfo: InputInfo): string {
   const texName = inputInfo.name;
-  const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
+  const funcName = "get" + texName.charAt(0).toUpperCase() + texName.slice(1);
   return `
     float ${funcName}() {
       return sample(${texName}, halfCR);
@@ -421,7 +421,7 @@ function getSamplerScalar(inputInfo: InputInfo): string {
 
 function getSampler1D(inputInfo: InputInfo): string {
   const texName = inputInfo.name;
-  const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
+  const funcName = "get" + texName.charAt(0).toUpperCase() + texName.slice(1);
   return `
     float ${funcName}(int index) {
       return ${funcName}Flat(index);
@@ -433,7 +433,7 @@ function getSampler2D(inputInfo: InputInfo): string {
   const shape = inputInfo.shapeInfo.logicalShape;
   const textureShape = inputInfo.shapeInfo.textureShape;
   const texName = inputInfo.name;
-  const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
+  const funcName = "get" + texName.charAt(0).toUpperCase() + texName.slice(1);
   const texNumR = textureShape[0];
   const texNumC = textureShape[1];
   if (util.arraysEqual(shape, textureShape)) {
@@ -448,7 +448,7 @@ function getSampler2D(inputInfo: InputInfo): string {
   const squeezedShape = newShape;
   if (squeezedShape.length < shape.length) {
     const newInputInfo = squeezeInputInfo(inputInfo, squeezedShape);
-    const params = ['row', 'col'];
+    const params = ["row", "col"];
     return `
       ${getSamplerFromInInfo(newInputInfo)}
       float ${funcName}(int row, int col) {
@@ -486,7 +486,7 @@ function getSampler3D(inputInfo: InputInfo): string {
   const textureShape = inputInfo.shapeInfo.textureShape;
   const shape = inputInfo.shapeInfo.logicalShape;
   const texName = inputInfo.name;
-  const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
+  const funcName = "get" + texName.charAt(0).toUpperCase() + texName.slice(1);
   const texNumR = textureShape[0];
   const texNumC = textureShape[1];
   const stride0 = shape[1] * shape[2];
@@ -498,7 +498,7 @@ function getSampler3D(inputInfo: InputInfo): string {
     const squeezedShape = newShape;
     if (squeezedShape.length < shape.length) {
       const newInputInfo = squeezeInputInfo(inputInfo, squeezedShape);
-      const params = ['row', 'col', 'depth'];
+      const params = ["row", "col", "depth"];
       return `
         ${getSamplerFromInInfo(newInputInfo)}
         float ${funcName}(int row, int col, int depth) {
@@ -567,7 +567,7 @@ function getSampler4D(inputInfo: InputInfo): string {
   const shape = inputInfo.shapeInfo.logicalShape;
   const textureShape = inputInfo.shapeInfo.textureShape;
   const texName = inputInfo.name;
-  const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
+  const funcName = "get" + texName.charAt(0).toUpperCase() + texName.slice(1);
   const texNumR = textureShape[0];
   const texNumC = textureShape[1];
   const stride2 = shape[3];
@@ -576,7 +576,7 @@ function getSampler4D(inputInfo: InputInfo): string {
   const {newShape, keptDims} = util.squeezeShape(shape);
   if (newShape.length < shape.length) {
     const newInputInfo = squeezeInputInfo(inputInfo, newShape);
-    const params = ['row', 'col', 'depth', 'depth2'];
+    const params = ["row", "col", "depth", "depth2"];
     return `
       ${getSamplerFromInInfo(newInputInfo)}
       float ${funcName}(int row, int col, int depth, int depth2) {
@@ -619,7 +619,7 @@ function getSamplerFlat(inputInfo: InputInfo): string {
   const texName = inputInfo.name;
   const textureShape = inputInfo.shapeInfo.textureShape;
   const funcName =
-      'get' + texName.charAt(0).toUpperCase() + texName.slice(1) + 'Flat';
+      "get" + texName.charAt(0).toUpperCase() + texName.slice(1) + "Flat";
   const tNumR = textureShape[0];
   const tNumC = textureShape[1];
   if (tNumC === 1 && tNumR === 1) {
@@ -659,33 +659,33 @@ function getBroadcastOutputCoordsSampler(
   const inRank = inputInfo.shapeInfo.logicalShape.length;
   const outRank = outShapeInfo.logicalShape.length;
 
-  let type = 'int';
+  let type = "int";
   if (outRank === 2) {
-    type = 'ivec2';
+    type = "ivec2";
   } else if (outRank === 3) {
-    type = 'ivec3';
+    type = "ivec3";
   } else if (outRank === 4) {
-    type = 'ivec4';
+    type = "ivec4";
   }
   const broadcastDims = broadcast_util.getBroadcastDims(
       inputInfo.shapeInfo.logicalShape, outShapeInfo.logicalShape);
   const rankDiff = outRank - inRank;
   let coordsSnippet: string;
   if (inRank === 0) {
-    coordsSnippet = '';
+    coordsSnippet = "";
   } else if (outRank < 2 && broadcastDims.length >= 1) {
-    coordsSnippet = 'coords = 0;';
+    coordsSnippet = "coords = 0;";
   } else {
     coordsSnippet =
-        broadcastDims.map(d => `coords[${d + rankDiff}] = 0;`).join('\n');
+        broadcastDims.map(d => `coords[${d + rankDiff}] = 0;`).join("\n");
   }
-  let unpackedCoordsSnippet = '';
+  let unpackedCoordsSnippet = "";
   if (outRank < 2 && inRank > 0) {
-    unpackedCoordsSnippet = 'coords';
+    unpackedCoordsSnippet = "coords";
   } else {
     unpackedCoordsSnippet = inputInfo.shapeInfo.logicalShape
                                 .map((s, i) => `coords[${i + rankDiff}]`)
-                                .join(', ');
+                                .join(", ");
   }
   return `
     float ${funcName}() {
@@ -705,7 +705,7 @@ function getSamplerAtOutputCoords(
       inputInfo.shapeInfo.textureType === TextureType.RGBA_COLOR;
 
   const texFuncSnippet = texName.charAt(0).toUpperCase() + texName.slice(1);
-  const funcName = 'get' + texFuncSnippet + 'AtOutCoords';
+  const funcName = "get" + texFuncSnippet + "AtOutCoords";
 
   const broadcastDims = broadcast_util.getBroadcastDims(
       inputInfo.shapeInfo.logicalShape, outShapeInfo.logicalShape);
@@ -737,7 +737,7 @@ function getSamplerAtOutputCoords(
 
   let sampleSnippet = `return sample(${texName}, uv);`;
 
-  let rgbaColorSnippet = '';
+  let rgbaColorSnippet = "";
   if (isRGBAColorTexture) {
     rgbaColorSnippet = `
       int col = texC / ${inputInfo.shapeInfo.logicalShape[2]};
@@ -749,7 +749,7 @@ function getSamplerAtOutputCoords(
   }
 
   const inSize = util.sizeFromShape(inTexExpandedShape);
-  let broadcastSnippet = '';
+  let broadcastSnippet = "";
   if (doBroadcast && broadcastOverOuter) {
     broadcastSnippet = `
         int mainPart = index / ${inSize};
@@ -777,13 +777,13 @@ function getSamplerAtOutputCoords(
 
 export function getCoordsDataType(rank: number): string {
   if (rank === 1) {
-    return 'int';
+    return "int";
   } else if (rank === 2) {
-    return 'ivec2';
+    return "ivec2";
   } else if (rank === 3) {
-    return 'ivec3';
+    return "ivec3";
   } else if (rank === 4) {
-    return 'ivec4';
+    return "ivec4";
   } else {
     throw Error(`GPU for rank ${rank} is not yet supported`);
   }
@@ -799,5 +799,5 @@ function squeezeInputInfo(
 }
 
 function getSqueezedParams(params: string[], keptDims: number[]): string {
-  return keptDims.map(d => params[d]).join(', ');
+  return keptDims.map(d => params[d]).join(", ");
 }

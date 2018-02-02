@@ -15,28 +15,28 @@
  * =============================================================================
  */
 
-import * as seedrandom from 'seedrandom';
+import * as seedrandom from "seedrandom";
 
-import {ENV} from '../../environment';
-import * as util from '../../util';
-import * as broadcast_util from '../broadcast_util';
-import * as concat_util from '../concat_util';
-import {Conv2DInfo} from '../conv_util';
+import {ENV} from "../../environment";
+import * as util from "../../util";
+import * as broadcast_util from "../broadcast_util";
+import * as concat_util from "../concat_util";
+import {Conv2DInfo} from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar} from '../ndarray';
-import * as types from '../types';
-import {MatrixOrientation, SumTypes, SumTypesMap} from '../types';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar} from "../ndarray";
+import * as types from "../types";
+import {MatrixOrientation, SumTypes, SumTypesMap} from "../types";
 
-import * as axis_util from './../axis_util';
-import {MathBackend} from './backend';
+import * as axis_util from "./../axis_util";
+import {MathBackend} from "./backend";
 
 export class MathBackendCPU implements MathBackend {
   private data = new WeakMap<DataId, DataTypeMap[DataType]>();
   private canvas: HTMLCanvasElement;
 
   constructor() {
-    if (typeof document !== 'undefined') {
-      this.canvas = document.createElement('canvas');
+    if (typeof document !== "undefined") {
+      this.canvas = document.createElement("canvas");
     }
   }
 
@@ -45,7 +45,7 @@ export class MathBackendCPU implements MathBackend {
   }
   write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void {
     if (values == null) {
-      throw new Error('MathBackendCPU.write(): values can not be null');
+      throw new Error("MathBackendCPU.write(): values can not be null");
     }
     this.throwIfNoData(dataId);
     this.data.set(dataId, values);
@@ -55,14 +55,14 @@ export class MathBackendCPU implements MathBackend {
       pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
-      throw new Error('MathBackendCPU.writePixels(): pixels can not be null');
+      throw new Error("MathBackendCPU.writePixels(): pixels can not be null");
     }
     this.throwIfNoData(dataId);
     let vals: Uint8ClampedArray;
     if (pixels instanceof ImageData) {
       vals = pixels.data;
     } else if (pixels instanceof HTMLCanvasElement) {
-      vals = pixels.getContext('2d')
+      vals = pixels.getContext("2d")
                  .getImageData(0, 0, pixels.width, pixels.height)
                  .data;
     } else if (
@@ -70,14 +70,14 @@ export class MathBackendCPU implements MathBackend {
         pixels instanceof HTMLVideoElement) {
       if (this.canvas == null) {
         throw new Error(
-            'Can\'t read pixels from HTMLImageElement outside ' +
-            'the browser.');
+            "Can't read pixels from HTMLImageElement outside " +
+            "the browser.");
       }
       this.canvas.width = pixels.width;
       this.canvas.height = pixels.height;
-      this.canvas.getContext('2d').drawImage(
+      this.canvas.getContext("2d").drawImage(
           pixels, 0, 0, pixels.width, pixels.height);
-      vals = this.canvas.getContext('2d')
+      vals = this.canvas.getContext("2d")
                  .getImageData(0, 0, pixels.width, pixels.height)
                  .data;
     } else {
@@ -319,7 +319,7 @@ export class MathBackendCPU implements MathBackend {
                (aValue, bValue) => aValue - bValue) as NDArray<D>;
   }
 
-  pow<T extends NDArray>(a: T, b: NDArray<'int32'>): T {
+  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T {
     return this.broadcastedBinaryOp(
                a, b, a.dtype, (aValue, bValue) => Math.pow(aValue, bValue)) as
         T;
@@ -368,14 +368,14 @@ export class MathBackendCPU implements MathBackend {
                (aValue, bValue) => aValue * bValue) as NDArray<D>;
   }
 
-  divide(a: NDArray, b: NDArray): NDArray<'float32'> {
+  divide(a: NDArray, b: NDArray): NDArray<"float32"> {
     return this.broadcastedBinaryOp(
-               a, b, 'float32', (aValue, bValue) => aValue / bValue) as
-        NDArray<'float32'>;
+               a, b, "float32", (aValue, bValue) => aValue / bValue) as
+        NDArray<"float32">;
   }
 
   sum<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<SumTypes[D]> {
-    axis_util.assertAxesAreInnerMostDims('sum', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("sum", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const resultDtype = SumTypesMap[x.dtype] as keyof SumTypes;
@@ -395,11 +395,11 @@ export class MathBackendCPU implements MathBackend {
     return result as NDArray<SumTypes[D]>;
   }
 
-  argMin(x: NDArray, axes: number[]): NDArray<'int32'> {
-    axis_util.assertAxesAreInnerMostDims('argMin', axes, x.rank);
+  argMin(x: NDArray, axes: number[]): NDArray<"int32"> {
+    axis_util.assertAxesAreInnerMostDims("argMin", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
-    const result = NDArray.zeros(outShape, 'int32');
+    const result = NDArray.zeros(outShape, "int32");
     const reduceSize = util.sizeFromShape(reduceShape);
     const vals = result.dataSync();
 
@@ -424,11 +424,11 @@ export class MathBackendCPU implements MathBackend {
     return result;
   }
 
-  argMax(x: NDArray, axes: number[]): NDArray<'int32'> {
-    axis_util.assertAxesAreInnerMostDims('argMax', axes, x.rank);
+  argMax(x: NDArray, axes: number[]): NDArray<"int32"> {
+    axis_util.assertAxesAreInnerMostDims("argMax", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
-    const result = NDArray.zeros(outShape, 'int32');
+    const result = NDArray.zeros(outShape, "int32");
     const reduceSize = util.sizeFromShape(reduceShape);
     const vals = result.dataSync();
 
@@ -453,67 +453,67 @@ export class MathBackendCPU implements MathBackend {
     return result;
   }
 
-  equal(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  equal(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal === bVal) ? 1 : 0;
       }
     });
   }
 
-  notEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  notEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal !== bVal) ? 1 : 0;
       }
     });
   }
 
-  greater(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  greater(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal > bVal) ? 1 : 0;
       }
     });
   }
 
-  greaterEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  greaterEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal >= bVal) ? 1 : 0;
       }
     });
   }
 
-  less(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  less(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal < bVal) ? 1 : 0;
       }
     });
   }
 
-  lessEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
-    return this.broadcastedBinaryOp(a, b, 'bool', (aVal, bVal) => {
+  lessEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
+    return this.broadcastedBinaryOp(a, b, "bool", (aVal, bVal) => {
       if (util.isValNaN(aVal, a.dtype) || util.isValNaN(bVal, b.dtype)) {
-        return util.getNaN('bool');
+        return util.getNaN("bool");
       } else {
         return (aVal <= bVal) ? 1 : 0;
       }
     });
   }
 
-  select(cond: NDArray<'bool'>, a: NDArray, b: NDArray): NDArray {
+  select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray {
     return this.ternaryOp(cond, a, b, a.dtype, (condVal, aVal, bVal) => {
       return condVal ? aVal : bVal;
     });
@@ -524,12 +524,12 @@ export class MathBackendCPU implements MathBackend {
     return this.topK(x, k).values as Array1D<D>;
   }
 
-  topKIndices(x: NDArray, k: number): Array1D<'int32'> {
+  topKIndices(x: NDArray, k: number): Array1D<"int32"> {
     return this.topK(x, k).indices;
   }
 
   private topK<D extends DataType, T extends NDArray<D>>(x: T, k: number):
-      {values: Array1D<D>, indices: Array1D<'int32'>} {
+      {values: Array1D<D>, indices: Array1D<"int32">} {
     const values = x.dataSync();
     const valuesAndIndices: Array<{value: number, index: number}> = [];
     for (let i = 0; i < values.length; i++) {
@@ -547,12 +547,12 @@ export class MathBackendCPU implements MathBackend {
     }
     return {
       values: Array1D.new<D>(topkValues),
-      indices: Array1D.new<'int32'>(topkIndices)
+      indices: Array1D.new<"int32">(topkIndices)
     };
   }
 
   min<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D> {
-    axis_util.assertAxesAreInnerMostDims('min', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("min", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const result = NDArray.zeros(outShape, x.dtype);
@@ -584,7 +584,7 @@ export class MathBackendCPU implements MathBackend {
   }
 
   max<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D> {
-    axis_util.assertAxesAreInnerMostDims('max', axes, x.rank);
+    axis_util.assertAxesAreInnerMostDims("max", axes, x.rank);
     const [outShape, reduceShape] =
         axis_util.computeOutAndReduceShapes(x.shape, axes);
     const result = NDArray.zeros(outShape, x.dtype);
@@ -798,14 +798,14 @@ export class MathBackendCPU implements MathBackend {
     return NDArray.make(x.shape, {values: resultValues}) as T;
   }
 
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<'int32', R> {
+  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R> {
     const resultValues = new Int32Array(x.size);
     const values = x.dataSync();
     for (let i = 0; i < values.length; ++i) {
       resultValues[i] = values[i];
     }
-    return NDArray.make(x.shape, {values: resultValues}, 'int32') as
-        NDArray<'int32', R>;
+    return NDArray.make(x.shape, {values: resultValues}, "int32") as
+        NDArray<"int32", R>;
   }
 
   sigmoid<T extends NDArray>(x: T): T {
@@ -1098,11 +1098,11 @@ export class MathBackendCPU implements MathBackend {
       newShape[i] = x.shape[i] * reps[i];
     }
     let dtype;
-    if (x.dtype === 'float32') {
+    if (x.dtype === "float32") {
       dtype = Float32Array;
-    } else if (x.dtype === 'int32') {
+    } else if (x.dtype === "int32") {
       dtype = Int32Array;
-    } else if (x.dtype === 'bool') {
+    } else if (x.dtype === "bool") {
       dtype = Uint8Array;
     } else {
       throw new Error(`Dtype ${x.dtype} not supported for tile`);
@@ -1148,7 +1148,7 @@ export class MathBackendCPU implements MathBackend {
     return result;
   }
 
-  private pool(x: Array4D, convInfo: Conv2DInfo, poolType: 'max'|'min'|'avg') {
+  private pool(x: Array4D, convInfo: Conv2DInfo, poolType: "max"|"min"|"avg") {
     const strideHeight = convInfo.strideHeight;
     const strideWidth = convInfo.strideWidth;
     const filterHeight = convInfo.filterHeight;
@@ -1168,7 +1168,7 @@ export class MathBackendCPU implements MathBackend {
             const xCMax = Math.min(convInfo.inWidth, filterWidth + xCCorner);
 
             let minMaxValue =
-                (poolType === 'max' ? Number.NEGATIVE_INFINITY :
+                (poolType === "max" ? Number.NEGATIVE_INFINITY :
                                       Number.POSITIVE_INFINITY);
             let avgValue = 0;
             for (let xR = xRMin; xR < xRMax; ++xR) {
@@ -1179,10 +1179,10 @@ export class MathBackendCPU implements MathBackend {
                   avgValue = NaN;
                   break;
                 }
-                if ((poolType === 'max' && pixel > minMaxValue) ||
-                    (poolType === 'min' && pixel < minMaxValue)) {
+                if ((poolType === "max" && pixel > minMaxValue) ||
+                    (poolType === "min" && pixel < minMaxValue)) {
                   minMaxValue = pixel;
-                } else if (poolType === 'avg') {
+                } else if (poolType === "avg") {
                   avgValue += pixel / (filterHeight * filterWidth);
                 }
               }
@@ -1190,7 +1190,7 @@ export class MathBackendCPU implements MathBackend {
                 break;
               }
             }
-            y.set(poolType === 'avg' ? avgValue : minMaxValue, b, yR, yC, d);
+            y.set(poolType === "avg" ? avgValue : minMaxValue, b, yR, yC, d);
           }
         }
       }
@@ -1199,7 +1199,7 @@ export class MathBackendCPU implements MathBackend {
   }
 
   maxPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    return this.pool(x, convInfo, 'max');
+    return this.pool(x, convInfo, "max");
   }
 
   maxPoolPositions(x: Array4D, convInfo: Conv2DInfo) {
@@ -1294,11 +1294,11 @@ export class MathBackendCPU implements MathBackend {
   }
 
   minPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    return this.pool(x, convInfo, 'min');
+    return this.pool(x, convInfo, "min");
   }
 
   avgPool(x: Array4D, convInfo: Conv2DInfo): Array4D {
-    return this.pool(x, convInfo, 'avg');
+    return this.pool(x, convInfo, "avg");
   }
 
   resizeBilinear3D(
@@ -1413,10 +1413,10 @@ export class MathBackendCPU implements MathBackend {
   }
 
   multinomial(probabilities: Array2D, numSamples: number, seed: number):
-      Array2D<'int32'> {
+      Array2D<"int32"> {
     const batchSize = probabilities.shape[0];
     const numEvents = probabilities.shape[1];
-    const res = Array2D.zeros([batchSize, numSamples], 'int32');
+    const res = Array2D.zeros([batchSize, numSamples], "int32");
     const resVals = res.dataSync();
     const probVals = probabilities.dataSync();
 
@@ -1525,4 +1525,4 @@ export class MathBackendCPU implements MathBackend {
   dispose() {}
 }
 
-ENV.registerBackend('cpu', () => new MathBackendCPU());
+ENV.registerBackend("cpu", () => new MathBackendCPU());

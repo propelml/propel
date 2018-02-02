@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array2D} from './ndarray';
+import {Array2D} from "./ndarray";
 
 const commonTests: MathTests = it => {
-  it('returns a ndarray with the same shape and value', math => {
+  it("returns a ndarray with the same shape and value", math => {
     const a = Array2D.new([3, 3], [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     const aPrime = math.clone(a);
     expect(aPrime.shape).toEqual(a.shape);
@@ -29,9 +29,9 @@ const commonTests: MathTests = it => {
   });
 };
 
-test_util.describeMathCPU('clone', [commonTests]);
-test_util.describeMathGPU('clone', [commonTests], [
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-  {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+test_util.describeMathCPU("clone", [commonTests]);
+test_util.describeMathGPU("clone", [commonTests], [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

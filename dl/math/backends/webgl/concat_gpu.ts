@@ -15,17 +15,17 @@
  * =============================================================================
  */
 
-import * as concat_util from '../../concat_util';
-import {GPGPUProgram} from './gpgpu_math';
-import {getCoordsDataType} from './shader_compiler';
+import * as concat_util from "../../concat_util";
+import {GPGPUProgram} from "./gpgpu_math";
+import {getCoordsDataType} from "./shader_compiler";
 
 export class ConcatProgram implements GPGPUProgram {
-  variableNames = ['A', 'B'];
+  variableNames = ["A", "B"];
   outputShape: number[] = [];
   userCode: string;
 
   constructor(aShape: number[], bShape: number[], axis: number) {
-    const yAxes = ['yR', 'yC', 'yD', 'yW'];
+    const yAxes = ["yR", "yC", "yD", "yW"];
     const concatAxis = yAxes[axis];
     this.outputShape = concat_util.computeOutShape(aShape, bShape, axis);
 
@@ -54,28 +54,28 @@ export class ConcatProgram implements GPGPUProgram {
 
 function getSampleCoords(rank: number): string {
   if (rank === 1) {
-    return 'yR';
+    return "yR";
   } else if (rank === 2) {
-    return 'yR, yC';
+    return "yR, yC";
   } else if (rank === 3) {
-    return 'yR, yC, yD';
+    return "yR, yC, yD";
   } else if (rank === 4) {
-    return 'yR, yC, yD, yW';
+    return "yR, yC, yD, yW";
   } else {
     throw Error(`Concat for rank ${rank} is not yet supported`);
   }
 }
 
 function getUnpack(rank: number): string {
-  let res = rank === 1 ? 'int yR = coords;' : 'int yR = coords.x;';
+  let res = rank === 1 ? "int yR = coords;" : "int yR = coords.x;";
   if (rank > 1) {
-    res += '\nint yC = coords.y;';
+    res += "\nint yC = coords.y;";
   }
   if (rank > 2) {
-    res += '\nint yD = coords.z;';
+    res += "\nint yD = coords.z;";
   }
   if (rank > 3) {
-    res += '\nint yW = coords.w;';
+    res += "\nint yW = coords.w;";
   }
   if (rank > 4) {
     throw Error(`Concat for rank ${rank} is not yet supported`);
