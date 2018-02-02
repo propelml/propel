@@ -15,14 +15,14 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array1D} from './ndarray';
+import {Array1D} from "./ndarray";
 
 {
   const tests: MathTests = it => {
-    it('basic', math => {
+    it("basic", math => {
       const a = Array1D.new([3, -1, 0, 100, -7, 2]);
       const min = -1;
       const max = 50;
@@ -32,7 +32,7 @@ import {Array1D} from './ndarray';
       test_util.expectArraysClose(result, [3, -1, 0, 50, -1, 2]);
     });
 
-    it('propagates NaNs', math => {
+    it("propagates NaNs", math => {
       const a = Array1D.new([3, -1, 0, 100, -7, 2, NaN]);
       const min = -1;
       const max = 50;
@@ -42,7 +42,7 @@ import {Array1D} from './ndarray';
       test_util.expectArraysClose(result, [3, -1, 0, 50, -1, 2, NaN]);
     });
 
-    it('min greater than max', math => {
+    it("min greater than max", math => {
       const a = Array1D.new([3, -1, 0, 100, -7, 2]);
       const min = 1;
       const max = -1;
@@ -54,10 +54,10 @@ import {Array1D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('clip', [tests]);
-  test_util.describeMathGPU('clip', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("clip", [tests]);
+  test_util.describeMathGPU("clip", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

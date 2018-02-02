@@ -15,19 +15,19 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../../conv_util';
-import {GPGPUProgram} from './gpgpu_math';
+import {Conv2DInfo} from "../../conv_util";
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class Pool2DProgram implements GPGPUProgram {
-  variableNames = ['x'];
+  variableNames = ["x"];
   outputShape: number[];
   userCode: string;
 
   constructor(
-      convInfo: Conv2DInfo, poolType: 'max'|'min'|'avg',
+      convInfo: Conv2DInfo, poolType: "max"|"min"|"avg",
       computePositions: boolean) {
-    if (poolType === 'avg' && computePositions) {
-      throw new Error('Cannot compute positions for average pool.');
+    if (poolType === "avg" && computePositions) {
+      throw new Error("Cannot compute positions for average pool.");
     }
 
     const filterHeight = convInfo.filterHeight;
@@ -38,19 +38,19 @@ export class Pool2DProgram implements GPGPUProgram {
     const padLeft = convInfo.padInfo.left;
     this.outputShape = convInfo.outShape;
 
-    const isAvgPool = poolType === 'avg';
+    const isAvgPool = poolType === "avg";
 
-    let initializationValue = '0.0';
+    let initializationValue = "0.0";
     if (!isAvgPool) {
-      if (poolType === 'min') {
-        initializationValue = '1.0 / 0.0';
+      if (poolType === "min") {
+        initializationValue = "1.0 / 0.0";
       } else {
-        initializationValue = '-1.0 / 0.0';
+        initializationValue = "-1.0 / 0.0";
       }
     }
 
     if (computePositions) {
-      const compareOp = poolType === 'min' ? '<=' : '>=';
+      const compareOp = poolType === "min" ? "<=" : ">=";
 
       this.userCode = `
         const ivec2 strides = ivec2(${strideHeight}, ${strideWidth});
@@ -110,11 +110,11 @@ export class Pool2DProgram implements GPGPUProgram {
       return;
     }
 
-    const compareOp = poolType === 'min' ? 'min' : 'max';
+    const compareOp = poolType === "min" ? "min" : "max";
 
     let returnValue = `${poolType}(${poolType}(${poolType}(` +
-        'minMaxValue[0], minMaxValue[1]), minMaxValue[2]), minMaxValue[3])';
-    if (poolType === 'avg') {
+        "minMaxValue[0], minMaxValue[1]), minMaxValue[2]), minMaxValue[3])";
+    if (poolType === "avg") {
       returnValue = `avgValue / ${filterHeight * filterWidth}.0`;
     }
 

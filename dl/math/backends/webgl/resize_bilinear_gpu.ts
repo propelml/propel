@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import {GPGPUProgram} from './gpgpu_math';
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class ResizeBilinear3DProgram implements GPGPUProgram {
-  variableNames = ['A'];
+  variableNames = ["A"];
   outputShape: number[] = [];
   userCode: string;
 

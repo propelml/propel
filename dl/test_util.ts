@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import {ENV, Features} from './environment';
-import {MathBackendCPU} from './math/backends/backend_cpu';
-import {MathBackendWebGL} from './math/backends/backend_webgl';
-import {NDArrayMath} from './math/math';
-import {DataType, NDArray} from './math/ndarray';
-import * as util from './util';
-import {TypedArray} from './util';
+import {ENV, Features} from "./environment";
+import {MathBackendCPU} from "./math/backends/backend_cpu";
+import {MathBackendWebGL} from "./math/backends/backend_webgl";
+import {NDArrayMath} from "./math/math";
+import {DataType, NDArray} from "./math/ndarray";
+import * as util from "./util";
+import {TypedArray} from "./util";
 
 /** Accuracy for tests. */
 // TODO(nsthorat || smilkov): Fix this low precision for byte-backed textures.
@@ -157,7 +157,7 @@ export function expectArraysClose(
     if (!areClose(a, Number(e), epsilon)) {
       const actualStr = `actual[${i}] === ${a}`;
       const expectedStr = `expected[${i}] === ${e}`;
-      throw new Error('Arrays differ: ' + actualStr + ', ' + expectedStr);
+      throw new Error("Arrays differ: " + actualStr + ", " + expectedStr);
     }
   }
 }
@@ -239,7 +239,7 @@ export function cpuMultiplyMatrix(
 
 export function cpuDotProduct(a: Float32Array, b: Float32Array): number {
   if (a.length !== b.length) {
-    throw new Error('cpuDotProduct: incompatible vectors.');
+    throw new Error("cpuDotProduct: incompatible vectors.");
   }
   let d = 0;
   for (let i = 0; i < a.length; ++i) {
@@ -254,7 +254,7 @@ export type Tests = (it: (name: string, testFn: () => void) => void) => void;
 
 export function describeMathCPU(
     name: string, tests: MathTests[], featuresList?: Features[]) {
-  const testNameBase = 'CPU: math.' + name;
+  const testNameBase = "CPU: math." + name;
   describeWithFeaturesAndExecutor(
       testNameBase, tests as Tests[],
       (testName, tests, features) => executeMathTests(testName, tests, () => {
@@ -264,7 +264,7 @@ export function describeMathCPU(
 
 export function describeMathGPU(
     name: string, tests: MathTests[], featuresList?: Features[]) {
-  const testNameBase = 'WebGL: math.' + name;
+  const testNameBase = "WebGL: math." + name;
   describeWithFeaturesAndExecutor(
       testNameBase, tests as Tests[],
       (testName, tests, features) => executeMathTests(testName, tests, () => {
@@ -289,7 +289,7 @@ function describeWithFeaturesAndExecutor(
     featuresList?: Features[]) {
   if (featuresList != null) {
     featuresList.forEach(features => {
-      const testName = testNameBase + ' ' + JSON.stringify(features);
+      const testName = testNameBase + " " + JSON.stringify(features);
       executor(testName, tests, features);
     });
   } else {
@@ -346,8 +346,8 @@ export function executeTests(
     beforeEach(() => {
       if (features != null) {
         ENV.setFeatures(features);
-        ENV.registerBackend('webgl', () => new MathBackendWebGL());
-        ENV.registerBackend('cpu', () => new MathBackendCPU());
+        ENV.registerBackend("webgl", () => new MathBackendWebGL());
+        ENV.registerBackend("cpu", () => new MathBackendCPU());
       }
 
       if (customBeforeEach != null) {

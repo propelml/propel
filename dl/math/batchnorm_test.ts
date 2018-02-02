@@ -15,17 +15,17 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
+import {Array1D, Array2D, Array3D, Array4D} from "./ndarray";
 
 // math.batchNormalization4D
 {
   // TODO(nsthorat): Fix the precision for byte-packed batchnorm.
   const epsilon = 1e-1;
   const tests: MathTests = it => {
-    it('simple batchnorm4D, no offset or scale, 2x1x1x2', math => {
+    it("simple batchnorm4D, no offset or scale, 2x1x1x2", math => {
       const x = Array4D.new([2, 1, 1, 2], new Float32Array([2, 100, 4, 400]));
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -49,7 +49,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm4D, no offset, 2x1x1x2', math => {
+    it("simple batchnorm4D, no offset, 2x1x1x2", math => {
       const x = Array4D.new([2, 1, 1, 2], new Float32Array([2, 100, 4, 400]));
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -74,7 +74,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm4D, no scale, 2x1x1x2', math => {
+    it("simple batchnorm4D, no scale, 2x1x1x2", math => {
       const x = Array4D.new([2, 1, 1, 2], new Float32Array([2, 100, 4, 400]));
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -104,7 +104,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm4D, 2x1x1x2', math => {
+    it("simple batchnorm4D, 2x1x1x2", math => {
       const x = Array4D.new([2, 1, 1, 2], new Float32Array([2, 100, 4, 400]));
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -136,11 +136,11 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('batchNormalization4D', [tests]);
-  test_util.describeMathGPU('batchNormalization4D', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("batchNormalization4D", [tests]);
+  test_util.describeMathGPU("batchNormalization4D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
@@ -149,7 +149,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
   // TODO(nsthorat): Fix the precision for byte-packed batchnorm.
   const epsilon = 1e-1;
   const tests: MathTests = it => {
-    it('simple batchnorm3D, no offset or scale, 2x1x2', math => {
+    it("simple batchnorm3D, no offset or scale, 2x1x2", math => {
       const x = Array3D.new([2, 1, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -172,7 +172,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm3D, no offset, 2x1x2', math => {
+    it("simple batchnorm3D, no offset, 2x1x2", math => {
       const x = Array3D.new([2, 1, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -196,7 +196,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm3D, no scale, 2x1x2', math => {
+    it("simple batchnorm3D, no scale, 2x1x2", math => {
       const x = Array3D.new([2, 1, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -225,7 +225,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm3D, 2x1x2', math => {
+    it("simple batchnorm3D, 2x1x2", math => {
       const x = Array3D.new([2, 1, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -255,7 +255,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('batchnorm matches tensorflow, 2x3x3', math => {
+    it("batchnorm matches tensorflow, 2x3x3", math => {
       const x = Array3D.new(
           [2, 3, 3], [
             0.49955603, 0.04158615, -1.09440524, 2.03854165, -0.61578344,
@@ -282,11 +282,11 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('batchNormalization3D', [tests]);
-  test_util.describeMathGPU('batchNormalization3D', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("batchNormalization3D", [tests]);
+  test_util.describeMathGPU("batchNormalization3D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
@@ -295,7 +295,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
   // TODO(nsthorat): Fix the precision for byte-packed batchnorm.
   const epsilon = 1e-1;
   const tests: MathTests = it => {
-    it('simple batchnorm2D, no offset or scale, 2x2', math => {
+    it("simple batchnorm2D, no offset or scale, 2x2", math => {
       const x = Array2D.new([2, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -317,7 +317,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           ],
           epsilon);
     });
-    it('simple batchnorm2D, no offset, 2x2', math => {
+    it("simple batchnorm2D, no offset, 2x2", math => {
       const x = Array2D.new([2, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -341,7 +341,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm2D, no scale, 2x2', math => {
+    it("simple batchnorm2D, no scale, 2x2", math => {
       const x = Array2D.new([2, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -370,7 +370,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('simple batchnorm2D, 2x2', math => {
+    it("simple batchnorm2D, 2x2", math => {
       const x = Array2D.new([2, 2], [2, 100, 4, 400]);
       const mean = Array1D.new([1, 2]);
       const variance = Array1D.new([2, 3]);
@@ -400,7 +400,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           epsilon);
     });
 
-    it('batchnorm2D matches tensorflow, 3x3', math => {
+    it("batchnorm2D matches tensorflow, 3x3", math => {
       const x =
           Array2D.new([3, 3], [
                         0.3136892, 0.92389025, 0.594782, 0.05021042, 0.67545404,
@@ -422,10 +422,10 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
           ]);
     });
   };
-  test_util.describeMathCPU('batchNormalization2D', [tests]);
-  test_util.describeMathGPU('batchNormalization2D', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("batchNormalization2D", [tests]);
+  test_util.describeMathGPU("batchNormalization2D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

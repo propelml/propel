@@ -15,29 +15,29 @@
  * =============================================================================
  */
 
-import * as test_util from '../../test_util';
-import {MathTests} from '../../test_util';
-import {Scalar} from '../ndarray';
+import * as test_util from "../../test_util";
+import {MathTests} from "../../test_util";
+import {Scalar} from "../ndarray";
 
-import {extractNDArraysFromScopeResult} from './backend_engine';
+import {extractNDArraysFromScopeResult} from "./backend_engine";
 
 // extractNDArraysFromScopeResult
 {
   const tests: MathTests = it => {
-    it('null input returns empty array', math => {
+    it("null input returns empty array", math => {
       const results = extractNDArraysFromScopeResult(null);
 
       expect(results).toEqual([]);
     });
 
-    it('ndarray input returns one element array', math => {
+    it("ndarray input returns one element array", math => {
       const x = Scalar.new(1);
       const results = extractNDArraysFromScopeResult(x);
 
       expect(results).toEqual([x]);
     });
 
-    it('name array map returns flattened array', math => {
+    it("name array map returns flattened array", math => {
       const x1 = Scalar.new(1);
       const x2 = Scalar.new(3);
       const x3 = Scalar.new(4);
@@ -48,5 +48,5 @@ import {extractNDArraysFromScopeResult} from './backend_engine';
   };
 
   test_util.describeMathCPU(
-      'tape_util.extractNDArraysFromScopeResult', [tests]);
+      "tape_util.extractNDArraysFromScopeResult", [tests]);
 }

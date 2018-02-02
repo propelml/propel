@@ -15,9 +15,9 @@
  * =============================================================================
  */
 
-import {MathBackend} from './math/backends/backend';
-import {NDArrayMath} from './math/math';
-import * as util from './util';
+import {MathBackend} from "./math/backends/backend";
+import {NDArrayMath} from "./math/math";
+import * as util from "./util";
 
 export enum Type {
   NUMBER,
@@ -26,21 +26,21 @@ export enum Type {
 
 export interface Features {
   // Whether the disjoint_query_timer extension is an available extension.
-  'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED'?: boolean;
+  "WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED"?: boolean;
   // 0: No WebGL, 1: WebGL 1.0, 2: WebGL 2.0.
-  'WEBGL_VERSION'?: number;
+  "WEBGL_VERSION"?: number;
   // Whether writing & reading floating point textures is enabled. When
   // false, fall back to using unsigned byte textures.
-  'WEBGL_FLOAT_TEXTURE_ENABLED'?: boolean;
+  "WEBGL_FLOAT_TEXTURE_ENABLED"?: boolean;
   // Whether WEBGL_get_buffer_sub_data_async is enabled.
-  'WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED'?: boolean;
+  "WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED"?: boolean;
 }
 
 export const URL_PROPERTIES: URLProperty[] = [
-  {name: 'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED', type: Type.BOOLEAN},
-  {name: 'WEBGL_VERSION', type: Type.NUMBER},
-  {name: 'WEBGL_FLOAT_TEXTURE_ENABLED', type: Type.BOOLEAN}, {
-    name: 'WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED',
+  {name: "WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED", type: Type.BOOLEAN},
+  {name: "WEBGL_VERSION", type: Type.NUMBER},
+  {name: "WEBGL_FLOAT_TEXTURE_ENABLED", type: Type.BOOLEAN}, {
+    name: "WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED",
     type: Type.BOOLEAN
   }
 ];
@@ -52,25 +52,25 @@ export interface URLProperty {
 
 function getWebGLRenderingContext(webGLVersion: number): WebGLRenderingContext {
   if (webGLVersion === 0) {
-    throw new Error('Cannot get WebGL rendering context, WebGL is disabled.');
+    throw new Error("Cannot get WebGL rendering context, WebGL is disabled.");
   }
 
-  const tempCanvas = document.createElement('canvas');
+  const tempCanvas = document.createElement("canvas");
 
   if (webGLVersion === 1) {
-    return (tempCanvas.getContext('webgl') ||
-            tempCanvas.getContext('experimental-webgl')) as
+    return (tempCanvas.getContext("webgl") ||
+            tempCanvas.getContext("experimental-webgl")) as
         WebGLRenderingContext;
   }
-  return tempCanvas.getContext('webgl2') as WebGLRenderingContext;
+  return tempCanvas.getContext("webgl2") as WebGLRenderingContext;
 }
 
 function loseContext(gl: WebGLRenderingContext) {
   if (gl != null) {
-    const loseContextExtension = gl.getExtension('WEBGL_lose_context');
+    const loseContextExtension = gl.getExtension("WEBGL_lose_context");
     if (loseContextExtension == null) {
       throw new Error(
-          'Extension WEBGL_lose_context not supported on this browser.');
+          "Extension WEBGL_lose_context not supported on this browser.");
     }
     loseContextExtension.loseContext();
   }
@@ -88,8 +88,8 @@ function isWebGLVersionEnabled(webGLVersion: 1|2) {
 function isWebGLDisjointQueryTimerEnabled(webGLVersion: number) {
   const gl = getWebGLRenderingContext(webGLVersion);
 
-  const extensionName = webGLVersion === 1 ? 'EXT_disjoint_timer_query' :
-                                             'EXT_disjoint_timer_query_webgl2';
+  const extensionName = webGLVersion === 1 ? "EXT_disjoint_timer_query" :
+                                             "EXT_disjoint_timer_query_webgl2";
   const ext = gl.getExtension(extensionName);
   const isExtEnabled = ext != null;
   if (gl != null) {
@@ -106,11 +106,11 @@ function isFloatTextureReadPixelsEnabled(webGLVersion: number): boolean {
   const gl = getWebGLRenderingContext(webGLVersion);
 
   if (webGLVersion === 1) {
-    if (gl.getExtension('OES_texture_float') == null) {
+    if (gl.getExtension("OES_texture_float") == null) {
       return false;
     }
   } else {
-    if (gl.getExtension('EXT_color_buffer_float') == null) {
+    if (gl.getExtension("EXT_color_buffer_float") == null) {
       return false;
     }
   }
@@ -146,13 +146,13 @@ function isWebGLGetBufferSubDataAsyncExtensionEnabled(webGLVersion: number) {
     return false;
   }
   const gl = getWebGLRenderingContext(webGLVersion);
-  const ext = gl.getExtension('WEBGL_get_buffer_sub_data_async');
+  const ext = gl.getExtension("WEBGL_get_buffer_sub_data_async");
   const isEnabled = ext != null;
   loseContext(gl);
   return isEnabled;
 }
 
-export type BackendType = 'webgl'|'cpu';
+export type BackendType = "webgl"|"cpu";
 
 export class Environment {
   private features: Features = {};
@@ -179,38 +179,38 @@ export class Environment {
   }
 
   getBestBackend(): MathBackend {
-    const orderedBackends: BackendType[] = ['webgl', 'cpu'];
+    const orderedBackends: BackendType[] = ["webgl", "cpu"];
     for (let i = 0; i < orderedBackends.length; ++i) {
       const backendId = orderedBackends[i];
       if (backendId in this.backendRegistry) {
         return this.backendRegistry[backendId];
       }
     }
-    throw new Error('No backend found in registry.');
+    throw new Error("No backend found in registry.");
   }
 
   private evaluateFeature<K extends keyof Features>(feature: K): Features[K] {
-    if (feature === 'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED') {
-      const webGLVersion = this.get('WEBGL_VERSION');
+    if (feature === "WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED") {
+      const webGLVersion = this.get("WEBGL_VERSION");
 
       if (webGLVersion === 0) {
         return false;
       }
 
       return isWebGLDisjointQueryTimerEnabled(webGLVersion);
-    } else if (feature === 'WEBGL_VERSION') {
+    } else if (feature === "WEBGL_VERSION") {
       if (isWebGLVersionEnabled(2)) {
         return 2;
       } else if (isWebGLVersionEnabled(1)) {
         return 1;
       }
       return 0;
-    } else if (feature === 'WEBGL_FLOAT_TEXTURE_ENABLED') {
-      return isFloatTextureReadPixelsEnabled(this.get('WEBGL_VERSION'));
+    } else if (feature === "WEBGL_FLOAT_TEXTURE_ENABLED") {
+      return isFloatTextureReadPixelsEnabled(this.get("WEBGL_VERSION"));
     } else if (
-        feature === 'WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED') {
+        feature === "WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED") {
       return isWebGLGetBufferSubDataAsyncExtensionEnabled(
-          this.get('WEBGL_VERSION'));
+          this.get("WEBGL_VERSION"));
     }
     throw new Error(`Unknown feature ${feature}.`);
   }
@@ -272,11 +272,11 @@ export class Environment {
 }
 
 // Expects flags from URL in the format ?dljsflags=FLAG1:1,FLAG2:true.
-const DEEPLEARNJS_FLAGS_PREFIX = 'dljsflags';
+const DEEPLEARNJS_FLAGS_PREFIX = "dljsflags";
 function getFeaturesFromURL(): Features {
   const features: Features = {};
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return features;
   }
 
@@ -284,9 +284,9 @@ function getFeaturesFromURL(): Features {
   if (DEEPLEARNJS_FLAGS_PREFIX in urlParams) {
     const urlFlags: {[key: string]: string} = {};
 
-    const keyValues = urlParams[DEEPLEARNJS_FLAGS_PREFIX].split(',');
+    const keyValues = urlParams[DEEPLEARNJS_FLAGS_PREFIX].split(",");
     keyValues.forEach(keyValue => {
-      const [key, value] = keyValue.split(':') as [string, string];
+      const [key, value] = keyValue.split(":") as [string, string];
       urlFlags[key] = value;
     });
 
@@ -298,7 +298,7 @@ function getFeaturesFromURL(): Features {
         if (urlProperty.type === Type.NUMBER) {
           features[urlProperty.name] = +urlFlags[urlProperty.name];
         } else if (urlProperty.type === Type.BOOLEAN) {
-          features[urlProperty.name] = urlFlags[urlProperty.name] === 'true';
+          features[urlProperty.name] = urlFlags[urlProperty.name] === "true";
         } else {
           console.warn(`Unknown URL param: ${urlProperty.name}.`);
         }
@@ -312,12 +312,12 @@ function getFeaturesFromURL(): Features {
 function getGlobalNamespace(): {ENV: Environment} {
   // tslint:disable-next-line:no-any
   let ns: any;
-  if (typeof (window) !== 'undefined') {
+  if (typeof (window) !== "undefined") {
     ns = window;
-  } else if (typeof (global) !== 'undefined') {
+  } else if (typeof (global) !== "undefined") {
     ns = global;
   } else {
-    throw new Error('Could not find a global object');
+    throw new Error("Could not find a global object");
   }
   return ns;
 }

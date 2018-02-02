@@ -15,27 +15,27 @@
  * =============================================================================
  */
 
-import {ReduceInfo} from '../../reduce_util';
-import {GPGPUProgram} from './gpgpu_math';
+import {ReduceInfo} from "../../reduce_util";
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class ArgMinMaxProgram implements GPGPUProgram {
-  variableNames = ['A'];
+  variableNames = ["A"];
   outputShape: number[];
   userCode: string;
 
-  constructor(reduceInfo: ReduceInfo, op: 'max'|'min', firstPass: boolean) {
+  constructor(reduceInfo: ReduceInfo, op: "max"|"min", firstPass: boolean) {
     const windowSize = reduceInfo.windowSize;
     const batchSize = reduceInfo.batchSize;
     const inSize = reduceInfo.inSize;
     const outSize = Math.ceil(inSize / windowSize);
     if (!firstPass) {
-      this.variableNames.push('bestIndicesA');
+      this.variableNames.push("bestIndicesA");
     }
     this.outputShape = [batchSize, outSize];
-    const compOp = (op === 'max') ? '>' : '<';
+    const compOp = (op === "max") ? ">" : "<";
     const indexSnippet = firstPass ?
-        'inOffset + i;' :
-        'round(getBestIndicesA(batch, inOffset + i));';
+        "inOffset + i;" :
+        "round(getBestIndicesA(batch, inOffset + i));";
 
     this.userCode = `
       void main() {

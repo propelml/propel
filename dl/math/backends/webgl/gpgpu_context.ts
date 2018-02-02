@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {ENV} from '../../../environment';
-import * as util from '../../../util';
-import * as gpgpu_util from './gpgpu_util';
-import * as tex_util from './tex_util';
-import * as webgl_util from './webgl_util';
-import {WebGLLoseContextExtension} from './webgl_util';
+import {ENV} from "../../../environment";
+import * as util from "../../../util";
+import * as gpgpu_util from "./gpgpu_util";
+import * as tex_util from "./tex_util";
+import * as webgl_util from "./webgl_util";
+import {WebGLLoseContextExtension} from "./webgl_util";
 
 export class GPGPUContext {
   gl: WebGLRenderingContext;
@@ -43,23 +43,23 @@ export class GPGPUContext {
       this.gl = gpgpu_util.createWebGLContext();
     }
     // WebGL 2.0 enables texture floats without an extension.
-    if (ENV.get('WEBGL_VERSION') === 1) {
+    if (ENV.get("WEBGL_VERSION") === 1) {
       this.textureFloatExtension =
-          webgl_util.getExtensionOrThrow(this.gl, 'OES_texture_float');
+          webgl_util.getExtensionOrThrow(this.gl, "OES_texture_float");
       this.colorBufferFloatExtension =
-          this.gl.getExtension('WEBGL_color_buffer_float');
+          this.gl.getExtension("WEBGL_color_buffer_float");
     } else {
       this.colorBufferFloatExtension =
-          webgl_util.getExtensionOrThrow(this.gl, 'EXT_color_buffer_float');
+          webgl_util.getExtensionOrThrow(this.gl, "EXT_color_buffer_float");
     }
 
     this.loseContextExtension =
-        webgl_util.getExtensionOrThrow(this.gl, 'WEBGL_lose_context') as
+        webgl_util.getExtensionOrThrow(this.gl, "WEBGL_lose_context") as
         WebGLLoseContextExtension;
 
-    if (ENV.get('WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED')) {
+    if (ENV.get("WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED")) {
       this.getBufferSubDataAsyncExtension =
-          this.gl.getExtension('WEBGL_get_buffer_sub_data_async');
+          this.gl.getExtension("WEBGL_get_buffer_sub_data_async");
     }
 
     this.vertexBuffer = gpgpu_util.createVertexBuffer(this.gl);
@@ -71,16 +71,16 @@ export class GPGPUContext {
     this.throwIfDisposed();
     if (this.program != null) {
       console.warn(
-          'Disposing a GPGPUContext that still has a bound WebGLProgram.' +
-          ' This is probably a resource leak, delete the program with ' +
-          'GPGPUContext.deleteProgram before disposing.');
+          "Disposing a GPGPUContext that still has a bound WebGLProgram." +
+          " This is probably a resource leak, delete the program with " +
+          "GPGPUContext.deleteProgram before disposing.");
     }
     if (this.outputTexture != null) {
       console.warn(
-          'Disposing a GPGPUContext that still has a bound output matrix ' +
-          'texture.  This is probably a resource leak, delete the output ' +
-          'matrix texture with GPGPUContext.deleteMatrixTexture before ' +
-          'disposing.');
+          "Disposing a GPGPUContext that still has a bound output matrix " +
+          "texture.  This is probably a resource leak, delete the output " +
+          "matrix texture with GPGPUContext.deleteMatrixTexture before " +
+          "disposing.");
     }
     const gl = this.gl;
     webgl_util.callAndCheck(gl, () => gl.finish());
@@ -273,7 +273,7 @@ export class GPGPUContext {
   setOutputPackedMatrixWriteRegion(
       startRow: number, numRows: number, startColumn: number,
       numColumns: number) {
-    throw new Error('setOutputPackedMatrixWriteRegion not implemented.');
+    throw new Error("setOutputPackedMatrixWriteRegion not implemented.");
   }
 
   debugValidate() {
@@ -308,7 +308,7 @@ export class GPGPUContext {
    * @return a promise that resolves with the ellapsed time in milliseconds.
    */
   runQuery(queryFn: () => void): Promise<number> {
-    if (ENV.get('WEBGL_VERSION') === 2) {
+    if (ENV.get("WEBGL_VERSION") === 2) {
       return this.runQueryWebGL2(queryFn);
     }
     return this.runQueryWebGL1(queryFn);
@@ -316,7 +316,7 @@ export class GPGPUContext {
 
   private runQueryWebGL2(benchmark: () => void): Promise<number> {
     const ext = webgl_util.getExtensionOrThrow(
-        this.gl, 'EXT_disjoint_timer_query_webgl2');
+        this.gl, "EXT_disjoint_timer_query_webgl2");
     // tslint:disable-next-line:no-any
     const query = (this.gl as any).createQuery();
 
@@ -354,7 +354,7 @@ export class GPGPUContext {
       };
 
       const resolveWithWarning = () => {
-        console.warn('Disjoint query timer never available.');
+        console.warn("Disjoint query timer never available.");
         resolve(-1);
       };
 
@@ -365,7 +365,7 @@ export class GPGPUContext {
   private runQueryWebGL1(benchmark: () => void): Promise<number> {
     const ext = webgl_util.getExtensionOrThrow(
                     // tslint:disable-next-line:no-any
-                    this.gl, 'EXT_disjoint_timer_query') as any;
+                    this.gl, "EXT_disjoint_timer_query") as any;
     const query = ext.createQueryEXT();
 
     ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, query);
@@ -392,7 +392,7 @@ export class GPGPUContext {
       };
 
       const resolveWithWarning = () => {
-        console.warn('Disjoint query timer never available.');
+        console.warn("Disjoint query timer never available.");
         resolve(-1);
       };
 
@@ -465,13 +465,13 @@ export class GPGPUContext {
 
   private throwIfDisposed() {
     if (this.disposed) {
-      throw new Error('Attempted to use disposed GPGPUContext.');
+      throw new Error("Attempted to use disposed GPGPUContext.");
     }
   }
 
   private throwIfNoProgram() {
     if (this.program == null) {
-      throw new Error('No GPU program is currently set.');
+      throw new Error("No GPU program is currently set.");
     }
   }
 }

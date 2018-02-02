@@ -68,7 +68,7 @@ export function parseAxisParam(
   // Normalize input.
   if (axis == null) {
     axis = shape.map((s, i) => i);
-  } else if (typeof (axis) === 'number') {
+  } else if (typeof (axis) === "number") {
     axis = [axis];
   }
 

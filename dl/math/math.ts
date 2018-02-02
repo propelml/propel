@@ -15,18 +15,18 @@
  * =============================================================================
  */
 
-import {BackendType, ENV} from '../environment';
-import * as util from '../util';
-import * as axis_util from './axis_util';
-import {MathBackend} from './backends/backend';
-import {BackendEngine, ScopeResult} from './backends/backend_engine';
-import * as broadcast_util from './broadcast_util';
-import * as concat_util from './concat_util';
-import * as conv_util from './conv_util';
+import {BackendType, ENV} from "../environment";
+import * as util from "../util";
+import * as axis_util from "./axis_util";
+import {MathBackend} from "./backends/backend";
+import {BackendEngine, ScopeResult} from "./backends/backend_engine";
+import * as broadcast_util from "./broadcast_util";
+import * as concat_util from "./concat_util";
+import * as conv_util from "./conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar} from './ndarray';
-import * as slice_util from './slice_util';
-import {MatrixOrientation, SumTypes} from './types';
+import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar} from "./ndarray";
+import * as slice_util from "./slice_util";
+import {MatrixOrientation, SumTypes} from "./types";
 
 export interface LSTMCell {
   (data: Array2D, c: Array2D, h: Array2D): [Array2D, Array2D];
@@ -85,7 +85,7 @@ export class NDArrayMath implements NDArrayManager {
    *     a math.scope() which will automatically clean up intermediate NDArrays.
    */
   constructor(backend: BackendType|MathBackend) {
-    if (typeof backend === 'string') {
+    if (typeof backend === "string") {
       this.backend = ENV.getBackend(backend);
     } else {
       this.customBackend = true;
@@ -103,7 +103,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param scopeFn The function to execute with chained math operations.
    */
   scope<T extends ScopeResult>(scopeFn: () => T): T {
-    return this.backendEngine.scope('scope', scopeFn);
+    return this.backendEngine.scope("scope", scopeFn);
   }
 
   /**
@@ -261,7 +261,7 @@ export class NDArrayMath implements NDArrayManager {
     newShape = util.inferFromImplicitShape(newShape, x.size);
     util.assert(
         x.size === util.sizeFromShape(newShape),
-        'new shape and old shape must have the same number of elements.');
+        "new shape and old shape must have the same number of elements.");
 
     return NDArray.make(newShape, {dataId: x.dataId}, x.dtype) as T;
   }
@@ -276,9 +276,9 @@ export class NDArrayMath implements NDArrayManager {
       // We don't change the underlying data, since we cast to higher precision.
       return NDArray.make(x.shape, {dataId: x.dataId}, newDType);
     }
-    if (newDType === 'int32') {
+    if (newDType === "int32") {
       return this.backend.int(x) as NDArray as RankMap<D>[R];
-    } else if (newDType === 'bool') {
+    } else if (newDType === "bool") {
       return this.backend.notEqual(x, Scalar.new(0, x.dtype)) as RankMap<D>[R];
     } else {
       throw new Error(`Error in Cast: unknown dtype argument (${newDType})`);
@@ -465,7 +465,7 @@ export class NDArrayMath implements NDArrayManager {
   logSumExp<T extends NDArray>(
       input: NDArray, axis: number|number[] = null, keepDims = false): T {
     const axes = axis_util.parseAxisParam(axis, input.shape);
-    return this.executeOp('logSumExp', () => {
+    return this.executeOp("logSumExp", () => {
       const xMax = this.max(input, axes, true /* keepDims */);
       const a = this.subtract(input, xMax);
       const b = this.exp(a);
@@ -500,7 +500,7 @@ export class NDArrayMath implements NDArrayManager {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
-    return this.executeOp('sum', () => {
+    return this.executeOp("sum", () => {
       if (permutedAxes != null) {
         x = this.transpose(x, permutedAxes);
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
@@ -529,12 +529,12 @@ export class NDArrayMath implements NDArrayManager {
    * @param keepDims Optional. If true, retains reduced dimensions with size 1.
    */
   mean(x: NDArray, axis: number|number[] = null, keepDims = false):
-      NDArray<'float32'> {
+      NDArray<"float32"> {
     const axes = axis_util.parseAxisParam(axis, x.shape);
     const shapes = axis_util.computeOutAndReduceShapes(x.shape, axes);
     const reduceShape = shapes[1];
     const reduceSize = util.sizeFromShape(reduceShape);
-    return this.executeOp('mean', () => {
+    return this.executeOp("mean", () => {
       return this.scope(() => {
         const res = this.divide(x, Scalar.new(reduceSize));
         return this.sum(res, axis, keepDims);
@@ -551,10 +551,10 @@ export class NDArrayMath implements NDArrayManager {
    * across all axes and returns the flat index.
    *
    */
-  argMin<T extends NDArray<'int32'>>(x: NDArray, axis: number = null): T {
+  argMin<T extends NDArray<"int32">>(x: NDArray, axis: number = null): T {
     let axes = axis_util.parseAxisParam(axis, x.shape);
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
-    return this.executeOp('argMin', () => {
+    return this.executeOp("argMin", () => {
       if (permutedAxes != null) {
         x = this.transpose(x, permutedAxes);
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
@@ -571,10 +571,10 @@ export class NDArrayMath implements NDArrayManager {
    * @param axis Optional. The dimension to reduce. By default it reduces
    *     across all axes and returns the flat index
    */
-  argMax<T extends NDArray<'int32'>>(x: NDArray, axis: number = null): T {
+  argMax<T extends NDArray<"int32">>(x: NDArray, axis: number = null): T {
     let axes = axis_util.parseAxisParam(axis, x.shape);
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
-    return this.executeOp('argMax', () => {
+    return this.executeOp("argMax", () => {
       if (permutedAxes != null) {
         x = this.transpose(x, permutedAxes);
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
@@ -588,9 +588,9 @@ export class NDArrayMath implements NDArrayManager {
    * @param x1 The first input NDArray.
    * @param x2 The second input NDArray.
    */
-  argMaxEquals(x1: NDArray, x2: NDArray): Scalar<'bool'> {
-    util.assertShapesMatch(x1.shape, x2.shape, 'Error in argMaxEquals: ');
-    return this.executeOp('argMaxEquals', () => this.scope(() => {
+  argMaxEquals(x1: NDArray, x2: NDArray): Scalar<"bool"> {
+    util.assertShapesMatch(x1.shape, x2.shape, "Error in argMaxEquals: ");
+    return this.executeOp("argMaxEquals", () => this.scope(() => {
       return this.equal(this.argMax(x1), this.argMax(x2));
     }));
   }
@@ -602,15 +602,15 @@ export class NDArrayMath implements NDArrayManager {
    * @param a The first input `NDArray`.
    * @param b The second input `NDArray`. Must have the same dtype as `a`.
    */
-  equal<D1 extends DataType, D2 extends D1, T extends NDArray<'bool'>>(
+  equal<D1 extends DataType, D2 extends D1, T extends NDArray<"bool">>(
       a: NDArray<D1>, b: NDArray<D2>): T {
     util.assertTypesMatch(a, b);
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
     return this.backend.equal(a, b) as T;
   }
 
-  equalStrict<T extends NDArray>(a: T, b: T): NDArray<'bool'> {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in equalStrict: ');
+  equalStrict<T extends NDArray>(a: T, b: T): NDArray<"bool"> {
+    util.assertShapesMatch(a.shape, b.shape, "Error in equalStrict: ");
     return this.equal(a, b);
   }
 
@@ -621,7 +621,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param a The first input `NDArray`.
    * @param b The second input `NDArray`. Must have the same dtype as `a`.
    */
-  notEqual<D1 extends DataType, D2 extends D1, T extends NDArray<'bool'>>(
+  notEqual<D1 extends DataType, D2 extends D1, T extends NDArray<"bool">>(
       a: NDArray<D1>, b: NDArray<D2>): T {
     util.assertTypesMatch(a, b);
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
@@ -629,43 +629,43 @@ export class NDArrayMath implements NDArrayManager {
   }
 
   notEqualStrict<R extends Rank, D1 extends DataType, D2 extends D1>(
-      a: NDArray<D1, R>, b: NDArray<D2, R>): RankMap<'bool'>[R] {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in notEqualStrict: ');
+      a: NDArray<D1, R>, b: NDArray<D2, R>): RankMap<"bool">[R] {
+    util.assertShapesMatch(a.shape, b.shape, "Error in notEqualStrict: ");
     return this.notEqual(a, b);
   }
 
   /**
    * Returns the truth value of (a > b) element-wise. Supports broadcasting.
    */
-  greater(a: NDArray, b: NDArray): NDArray<'bool'> {
+  greater(a: NDArray, b: NDArray): NDArray<"bool"> {
     return this.backend.greater(a, b);
   }
 
   /**
    * Returns the truth value of (a >= b) element-wise. Supports broadcasting.
    */
-  greaterEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
+  greaterEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
     return this.backend.greaterEqual(a, b);
   }
 
   /**
    * Returns the truth value of (a < b) element-wise. Supports broadcasting.
    */
-  less(a: NDArray, b: NDArray): NDArray<'bool'> {
+  less(a: NDArray, b: NDArray): NDArray<"bool"> {
     return this.backend.less(a, b);
   }
 
   /**
    * Returns the truth value of (a <= b) element-wise. Supports broadcasting.
    */
-  lessEqual(a: NDArray, b: NDArray): NDArray<'bool'> {
+  lessEqual(a: NDArray, b: NDArray): NDArray<"bool"> {
     return this.backend.lessEqual(a, b);
   }
 
   /**
    * Selects elements from `a` or `b`, depending on `cond`.
    */
-  select(cond: NDArray<'bool'>, a: NDArray, b: NDArray): NDArray {
+  select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray {
     return this.backend.select(cond, a, b);
   }
 
@@ -674,14 +674,14 @@ export class NDArrayMath implements NDArrayManager {
    * @param x The input NDArray.
    * @param k How many top values to compute.
    */
-  topK(x: NDArray, k: number): {values: Array1D, indices: Array1D<'int32'>} {
+  topK(x: NDArray, k: number): {values: Array1D, indices: Array1D<"int32">} {
     util.assert(
         k <= x.size,
         `Error in topK: k value (${k}) must be less than size of input ` +
             `ndarray, got shape ${x.shape}.`);
     let values: Array1D;
-    let indices: Array1D<'int32'>;
-    this.executeOp('topK', () => {
+    let indices: Array1D<"int32">;
+    this.executeOp("topK", () => {
       values = this.backend.topKValues(x, k);
       indices = this.backend.topKIndices(x, k);
       return values;
@@ -709,7 +709,7 @@ export class NDArrayMath implements NDArrayManager {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
-    return this.executeOp('min', () => {
+    return this.executeOp("min", () => {
       if (permutedAxes != null) {
         x = this.transpose(x, permutedAxes);
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
@@ -756,7 +756,7 @@ export class NDArrayMath implements NDArrayManager {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
-    return this.executeOp('max', () => {
+    return this.executeOp("max", () => {
       if (permutedAxes != null) {
         x = this.transpose(x, permutedAxes);
         axes = axis_util.getInnerMostAxes(axes.length, x.rank);
@@ -796,11 +796,11 @@ export class NDArrayMath implements NDArrayManager {
     }
     if (dim !== logits.rank - 1) {
       throw Error(
-          'Softmax along a non-last dimension is not yet supported. ' +
+          "Softmax along a non-last dimension is not yet supported. " +
           `Logits was rank ${logits.rank} and dim was ${dim}`);
     }
 
-    return this.executeOp('softmax', () => {
+    return this.executeOp("softmax", () => {
       // Do it in log space for numerical stability.
       // exp(X - logSumExp(X))
       const keepDims = true;
@@ -835,11 +835,11 @@ export class NDArrayMath implements NDArrayManager {
    * @param dim The dimension softmax would be performed on. Defaults to -1
    *     which indicates the last dimension.
    */
-  softmaxCrossEntropyWithLogits<I extends NDArray<'float32'>,
-                                          O extends NDArray<'float32'>>(
+  softmaxCrossEntropyWithLogits<I extends NDArray<"float32">,
+                                          O extends NDArray<"float32">>(
       labels: I, logits: I, dim = -1): O {
     util.assertShapesMatch(
-        labels.shape, logits.shape, 'Error in softmaxCrossEntropyWithLogits: ');
+        labels.shape, logits.shape, "Error in softmaxCrossEntropyWithLogits: ");
     if (dim === -1) {
       dim = logits.rank - 1;
     }
@@ -850,7 +850,7 @@ export class NDArrayMath implements NDArrayManager {
           `and dim was ${dim}`);
     }
 
-    return this.executeOp('softmaxCrossEntropyWithLogits', () => {
+    return this.executeOp("softmaxCrossEntropyWithLogits", () => {
       const softmaxLogits = this.softmax(logits, dim);
       const yPlusEps = this.add(Scalar.new(1e-5), softmaxLogits);
       const logOutput = this.log(yPlusEps);
@@ -969,7 +969,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The second NDArray to multiply element-wise.
    */
   addStrict<T extends NDArray>(a: T, b: T): T {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in addStrict: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in addStrict: ");
     return this.add(a, b) as T;
   }
 
@@ -999,10 +999,10 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The exponent NDArray to pow element-wise.
    */
   pow<D extends DataType, T extends NDArray<D>>(
-      a: NDArray<D>, b: NDArray<'int32'>): T {
+      a: NDArray<D>, b: NDArray<"int32">): T {
     util.assert(
-        b.dtype === 'int32',
-        'only supports int32 data type for the exponent parameter.');
+        b.dtype === "int32",
+        "only supports int32 data type for the exponent parameter.");
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
 
     return this.backend.pow(a, b) as T;
@@ -1015,9 +1015,9 @@ export class NDArrayMath implements NDArrayManager {
    * @param a The base NDArray to pow element-wise.
    * @param b The exponent NDArray to pow element-wise.
    */
-  powStrict<D extends DataType>(a: NDArray<D>, b: NDArray<'int32'>):
+  powStrict<D extends DataType>(a: NDArray<D>, b: NDArray<"int32">):
       NDArray<D> {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in powStrict: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in powStrict: ");
     return this.pow(a, b);
   }
 
@@ -1035,7 +1035,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The second NDArray to multiply element-wise.
    */
   subStrict<T extends NDArray>(a: T, b: T): T {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in subStrict: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in subStrict: ");
     return this.subtract(a, b);
   }
 
@@ -1068,7 +1068,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The second NDArray to multiply element-wise.
    */
   multiplyStrict<T extends NDArray>(a: T, b: T): T {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in multiplyStrict: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in multiplyStrict: ");
     return this.multiply(a, b) as T;
   }
 
@@ -1079,7 +1079,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param a The first NDArray to divide element-wise.
    * @param b The second NDArray to divide element-wise.
    */
-  divide<T extends NDArray<'float32'>>(a: NDArray, b: NDArray): T {
+  divide<T extends NDArray<"float32">>(a: NDArray, b: NDArray): T {
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
     return this.backend.divide(a, b) as T;
   }
@@ -1092,7 +1092,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The second NDArray to multiply element-wise.
    */
   divideStrict<T extends NDArray>(a: T, b: T): T {
-    util.assertShapesMatch(a.shape, b.shape, 'Error in divideStrict: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in divideStrict: ");
     return this.divide(a, b) as T;
   }
 
@@ -1358,9 +1358,9 @@ export class NDArrayMath implements NDArrayManager {
         c2.size === 1,
         `Error in scaledArrayAdd: third argument must be rank 0, but got ` +
             `NDArray of rank ${c2.rank}.`);
-    util.assertShapesMatch(a.shape, b.shape, 'Error in scaledArrayAdd: ');
+    util.assertShapesMatch(a.shape, b.shape, "Error in scaledArrayAdd: ");
 
-    return this.executeOp('scaledArrayAdd', () => {
+    return this.executeOp("scaledArrayAdd", () => {
       return this.scope(() => {
         // TODO(nsthorat): Add an SGEMM kernel and then update this.
         return this.add(this.multiply(c1, a), this.multiply(c2, b)) as T;
@@ -1415,7 +1415,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   conv1d<T extends NDArray>(
       input: T, filter: Array3D, bias: Array1D|null, stride: number,
-      pad: 'valid'|'same'|number): T {
+      pad: "valid"|"same"|number): T {
     let input3D = input as NDArray as Array3D;
     let reshapedTo3D = false;
     if (input.rank === 2) {
@@ -1448,7 +1448,7 @@ export class NDArrayMath implements NDArrayManager {
         input3D.as4D(input3D.shape[0], 1, input3D.shape[1], input3D.shape[2]);
     const strides: [number, number] = [1, stride];
 
-    return this.executeOp('Conv1D', () => {
+    return this.executeOp("Conv1D", () => {
       const res = this.conv2d(input4D, filter4D, bias, strides, pad);
       if (reshapedTo3D) {
         return res.as2D(res.shape[2], res.shape[3]) as NDArray as T;
@@ -1478,7 +1478,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   conv2d<T extends NDArray>(
       input: T, filter: Array4D, bias: Array1D|null,
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1506,7 +1506,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computeConv2DInfo(input4D.shape, filter.shape, strides, pad);
-    return this.executeOp('Conv2D', () => {
+    return this.executeOp("Conv2D", () => {
       const res = this.backend.conv2d(input4D, filter, bias, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1534,7 +1534,7 @@ export class NDArrayMath implements NDArrayManager {
   conv2dDerInput<T extends NDArray>(
       inShape: [number, number, number, number]|[number, number, number], dy: T,
       filter: Array4D, strides: [number, number]|number,
-      pad: 'valid'|'same'|number): T {
+      pad: "valid"|"same"|number): T {
     util.assert(
         inShape.length === dy.rank,
         `Length of inShape ` +
@@ -1574,7 +1574,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computeConv2DInfo(inShape4D, filter.shape, strides, pad);
-    return this.executeOp('conv2dDerInput', () => {
+    return this.executeOp("conv2dDerInput", () => {
       const res = this.backend.conv2dDerInput(dy4D, filter, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1615,7 +1615,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   conv2dDerFilter<T extends NDArray>(
       input: T, dy: T, filterShape: [number, number, number, number],
-      strides: [number, number]|number, pad: 'valid'|'same'|number): Array4D {
+      strides: [number, number]|number, pad: "valid"|"same"|number): Array4D {
     let input4D = input as NDArray as Array4D;
     if (input.rank === 3) {
       input4D = input.as4D(1, input.shape[0], input.shape[1], input.shape[2]);
@@ -1669,7 +1669,7 @@ export class NDArrayMath implements NDArrayManager {
   conv2dTranspose<T extends NDArray>(
       x: T, filter: Array4D,
       outputShape: [number, number, number, number]|[number, number, number],
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     return this.conv2dDerInput(outputShape, x, filter, strides, pad);
   }
 
@@ -1709,7 +1709,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   depthwiseConv2D<T extends NDArray>(
       input: T, filter: Array4D, strides: [number, number]|number,
-      pad: 'valid'|'same'|number, rates: [number, number]|number = [1, 1]): T {
+      pad: "valid"|"same"|number, rates: [number, number]|number = [1, 1]): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1733,12 +1733,12 @@ export class NDArrayMath implements NDArrayManager {
     const [rateHeight, rateWidth] = parseTupleParam(rates);
     util.assert(
         rateHeight === 1 && rateWidth === 1,
-        'Error in depthwiseConv2D: rates greater than 1 are not yet ' +
+        "Error in depthwiseConv2D: rates greater than 1 are not yet " +
             `supported. Got rates '${rates}'`);
 
     const convInfo = conv_util.computeConv2DInfo(
         input4D.shape, filter.shape, strides, pad, true /* depthwise */);
-    return this.executeOp('depthwiseConv2D', () => {
+    return this.executeOp("depthwiseConv2D", () => {
       const res = this.backend.depthwiseConv2D(input4D, filter, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1765,7 +1765,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   maxPool<T extends NDArray>(
       input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1778,7 +1778,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computePool2DInfo(input4D.shape, filterSize, strides, pad);
-    return this.executeOp('maxPool', () => {
+    return this.executeOp("maxPool", () => {
       const res = this.backend.maxPool(input4D, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1804,7 +1804,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   maxPoolBackprop<T extends NDArray>(
       dy: T, input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     util.assert(
         input.rank === dy.rank,
         `Rank of input (${input.rank}) does not match rank of dy (${dy.rank})`);
@@ -1829,7 +1829,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computePool2DInfo(input4D.shape, filterSize, strides, pad);
-    return this.executeOp('maxPoolBackprop', () => {
+    return this.executeOp("maxPoolBackprop", () => {
       const res = this.backend.maxPoolBackprop(dy4D, input4D, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1856,7 +1856,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   minPool<T extends NDArray>(
       input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1869,7 +1869,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computePool2DInfo(input4D.shape, filterSize, strides, pad);
-    return this.executeOp('minPool', () => {
+    return this.executeOp("minPool", () => {
       const res = this.backend.minPool(input4D, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -1896,7 +1896,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   avgPool<T extends NDArray>(
       input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: 'valid'|'same'|number): T {
+      strides: [number, number]|number, pad: "valid"|"same"|number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1909,7 +1909,7 @@ export class NDArrayMath implements NDArrayManager {
 
     const convInfo =
         conv_util.computePool2DInfo(input4D.shape, filterSize, strides, pad);
-    return this.executeOp('avgPool', () => {
+    return this.executeOp("avgPool", () => {
       const res = this.backend.avgPool(input4D, convInfo);
       if (reshapedTo4D) {
         return res.as3D(res.shape[1], res.shape[2], res.shape[3]) as NDArray as
@@ -2167,7 +2167,7 @@ export class NDArrayMath implements NDArrayManager {
    */
   multinomial(
       probabilities: Array1D|Array2D, numSamples: number,
-      seed?: number): Array1D<'int32'>|Array2D<'int32'> {
+      seed?: number): Array1D<"int32">|Array2D<"int32"> {
     const numOutcomes = probabilities.size;
     if (numOutcomes < 2) {
       throw new Error(
@@ -2184,7 +2184,7 @@ export class NDArrayMath implements NDArrayManager {
     if (probabilities.rank === 1) {
       probabilities = probabilities.as2D(1, -1);
     }
-    return this.executeOp('multinomial', () => {
+    return this.executeOp("multinomial", () => {
       const res =
         this.backend.multinomial(probabilities as Array2D, numSamples, seed);
       if (origRank === 1) {
@@ -2226,7 +2226,7 @@ export class NDArrayMath implements NDArrayManager {
    * @return An object with two keys: `mean` and `variance`.
    */
   moments(x: NDArray, axis: number|number[] = null, keepDims = false):
-      {mean: NDArray<'float32'>, variance: NDArray<'float32'>} {
+      {mean: NDArray<"float32">, variance: NDArray<"float32">} {
     const axes = axis_util.parseAxisParam(axis, x.shape);
     const result = this.scope(() => {
       const mean = this.mean(x, axes, keepDims);
@@ -2235,7 +2235,7 @@ export class NDArrayMath implements NDArrayManager {
         keepDimsShape = axis_util.expandShapeToKeepDim(mean.shape, axes);
       }
       const devSquared = this.square(
-          this.subtract(x.asType('float32'), mean.reshape(keepDimsShape)));
+          this.subtract(x.asType("float32"), mean.reshape(keepDimsShape)));
       const variance = this.mean(devSquared, axes, keepDims);
       return {mean, variance};
     });
@@ -2271,7 +2271,7 @@ export class NDArrayMath implements NDArrayManager {
    * as the input.
    */
   norm<D extends DataType>(
-      x: NDArray<D>, ord: number|'euclidean'|'fro' = 'euclidean',
+      x: NDArray<D>, ord: number|"euclidean"|"fro" = "euclidean",
       axis: number|number[] = null, keepDims = false): NDArray<D|SumTypes[D]> {
     return this.scope(() => {
       const norm = this.normInternal(x, ord, axis);
@@ -2305,7 +2305,7 @@ export class NDArrayMath implements NDArrayManager {
     }
 
     // vector
-    if (x.rank === 1 || typeof axis === 'number' ||
+    if (x.rank === 1 || typeof axis === "number" ||
         axis instanceof Array && axis.length === 1) {
       if (p === 1) {
         return this.sum(this.abs(x), axis);
@@ -2316,10 +2316,10 @@ export class NDArrayMath implements NDArrayManager {
       if (p === -Infinity) {
         return this.min(this.abs(x), axis);
       }
-      if (p === 'euclidean' || p === 2) {
+      if (p === "euclidean" || p === 2) {
         // norm(x, 2) = sum(abs(xi) ^ 2) ^ 1/2
         return this.sqrt(
-            this.sum(this.pow(this.abs(x), Scalar.new(2, 'int32')), axis));
+            this.sum(this.pow(this.abs(x), Scalar.new(2, "int32")), axis));
       }
 
       throw new Error(`Error in norm: invalid ord value: ${p}`);
@@ -2336,9 +2336,9 @@ export class NDArrayMath implements NDArrayManager {
       if (p === -Infinity) {
         return this.min(this.sum(this.abs(x), axis[1]), axis[0]);
       }
-      if (p === 'fro' || p === 'euclidean') {
+      if (p === "fro" || p === "euclidean") {
         // norm(x) = sqrt(sum(pow(x, 2)))
-        return this.sqrt(this.sum(this.pow(x, Scalar.new(2, 'int32')), axis));
+        return this.sqrt(this.sum(this.pow(x, Scalar.new(2, "int32")), axis));
       }
 
       throw new Error(`Error in norm: invalid ord value: ${p}`);
@@ -2366,5 +2366,5 @@ export class NDArrayMath implements NDArrayManager {
 }
 
 function parseTupleParam(param: number|[number, number]): [number, number] {
-  return typeof param === 'number' ? [param, param] : param;
+  return typeof param === "number" ? [param, param] : param;
 }

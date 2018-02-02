@@ -1,4 +1,4 @@
-import {DataType} from './ndarray';
+import {DataType} from "./ndarray";
 
 /**
  * @license
@@ -23,33 +23,33 @@ export enum MatrixOrientation {
 }
 
 export interface SumTypes {
-  float32: 'float32';
-  int32: 'int32';
-  bool: 'int32';
+  float32: "float32";
+  int32: "int32";
+  bool: "int32";
 }
 
 export enum SumTypesMap {
-  float32 = 'float32',
-  int32 = 'int32',
-  bool = 'int32'
+  float32 = "float32",
+  int32 = "int32",
+  bool = "int32"
 }
 
 export enum UpcastBoolAndMap {
-  bool = 'bool',
-  float32 = 'float32',
-  int32 = 'int32'
+  bool = "bool",
+  float32 = "float32",
+  int32 = "int32"
 }
 
 export enum UpcastFloat32AndMap {
-  bool = 'float32',
-  float32 = 'float32',
-  int32 = 'float32'
+  bool = "float32",
+  float32 = "float32",
+  int32 = "float32"
 }
 
 export enum UpcastInt32AndMap {
-  bool = 'int32',
-  float32 = 'float32',
-  int32 = 'int32'
+  bool = "int32",
+  float32 = "float32",
+  int32 = "int32"
 }
 
 const upcastTypeMap = {

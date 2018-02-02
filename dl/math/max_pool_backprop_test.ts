@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array3D, Array4D} from './ndarray';
+import {Array3D, Array4D} from "./ndarray";
 
 // math.maxPoolBackprop
 {
   const tests: MathTests = it => {
-    it('x=3x3x1, f=2, s=1, no duplicate max value, test #1', math => {
+    it("x=3x3x1, f=2, s=1, no duplicate max value, test #1", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
@@ -33,7 +33,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=3x3x1, f=2, s=1, no duplicate max value, test #2', math => {
+    it("x=3x3x1, f=2, s=1, no duplicate max value, test #2", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([3, 3, 1], [9, 5, 6, 6, 8, 4, 9, 5, 10]);
 
@@ -43,7 +43,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=3x3x1, f=2, s=1 duplicate max value, test 1', math => {
+    it("x=3x3x1, f=2, s=1 duplicate max value, test 1", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([3, 3, 1], [0, 0, 0, 0, 5, 0, 0, 0, 0]);
 
@@ -53,7 +53,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=3x3x1, f=2, s=1 duplicate max value, test 2', math => {
+    it("x=3x3x1, f=2, s=1 duplicate max value, test 2", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([3, 3, 1], [1, 3, 2, 1, 2, 1, 1, 1, 5]);
 
@@ -63,7 +63,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=3x3x1, f=2, s=1, batch=2, duplicate max value in 2nd input', math => {
+    it("x=3x3x1, f=2, s=1, batch=2, duplicate max value in 2nd input", math => {
       const dy = Array4D.new([2, 2, 2, 1], [1, 2, 3, 4, 5, 6, 7, 8]);
       const x = Array4D.new(
           [2, 3, 3, 1], [1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 9, 8]);
@@ -75,7 +75,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=4x4x1, f=2, s=2, test #1', math => {
+    it("x=4x4x1, f=2, s=2, test #1", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new(
           [4, 4, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -86,7 +86,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=4x4x1, f=2, s=2, test #2', math => {
+    it("x=4x4x1, f=2, s=2, test #2", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new(
           [4, 4, 1], [1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1]);
@@ -95,7 +95,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=5x5x1, f=3, s=2 no duplicate max value', math => {
+    it("x=5x5x1, f=3, s=2 no duplicate max value", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([5, 5, 1], [
         0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
@@ -111,7 +111,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=5x5x1, f=3, s=2 duplicate max value', math => {
+    it("x=5x5x1, f=3, s=2 duplicate max value", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([5, 5, 1], [
         0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 24,
@@ -128,7 +128,7 @@ import {Array3D, Array4D} from './ndarray';
     });
 
     // Max pool backprop depth > 1.
-    it('x=3x3x2, f=2, s=1, no duplicate max value', math => {
+    it("x=3x3x2, f=2, s=1, no duplicate max value", math => {
       // This test combines the first two 3x3x1 tests with no duplicates to
       // make depth=2,
       // dy is slightly modified to show the difference.
@@ -144,7 +144,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=3x3x2, f=2, s=1, duplicate max value', math => {
+    it("x=3x3x2, f=2, s=1, duplicate max value", math => {
       // This test combines the first two 3x3x1 tests with duplicates to
       // make depth=2,
       // dy is slightly modified to show the difference.
@@ -159,7 +159,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=4x4x2, f=2, s=1', math => {
+    it("x=4x4x2, f=2, s=1", math => {
       // This test combines the first two 4x4x1 tests with duplicates to make
       // depth=2,
       // dy is slightly modified to show the difference.
@@ -178,7 +178,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(dx, expected);
     });
 
-    it('x=5x5x2, f=3, s=2 no duplicate max value', math => {
+    it("x=5x5x2, f=3, s=2 no duplicate max value", math => {
       // This test combines the first two 5x5x1 tests with duplicates to make
       // depth=2,
       // dy is slightly modified to show the difference.
@@ -200,10 +200,10 @@ import {Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('maxPoolBackprop', [tests]);
-  test_util.describeMathGPU('maxPoolBackprop', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("maxPoolBackprop", [tests]);
+  test_util.describeMathGPU("maxPoolBackprop", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

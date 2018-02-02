@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-import {NDArrayMath} from './math';
-import {NDArray, Scalar} from './ndarray';
+import {NDArrayMath} from "./math";
+import {NDArray, Scalar} from "./ndarray";
 
 /** A node's activation function and its derivative. */
 export interface ActivationFunction {

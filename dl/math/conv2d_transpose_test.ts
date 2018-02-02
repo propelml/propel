@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import {MathTests} from "../test_util";
 
-import {Array2D, Array3D, Array4D} from './ndarray';
+import {Array2D, Array3D, Array4D} from "./ndarray";
 
 // math.conv2dTranspose
 {
   const tests: MathTests = it => {
-    it('input=2x2x1,d2=1,f=2,s=1,p=0', math => {
+    it("input=2x2x1,d2=1,f=2,s=1,p=0", math => {
       const origInputDepth = 1;
       const origOutputDepth = 1;
       const inputShape: [number, number, number] = [1, 1, origOutputDepth];
@@ -42,7 +42,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('input=2x2x1,d2=1,f=2,s=1,p=0, batch=2', math => {
+    it("input=2x2x1,d2=1,f=2,s=1,p=0, batch=2", math => {
       const origInputDepth = 1;
       const origOutputDepth = 1;
       const inputShape: [number, number, number, number] =
@@ -63,7 +63,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('throws when x is not rank 3', math => {
+    it("throws when x is not rank 3", math => {
       const origInputDepth = 1;
       const origOutputDepth = 1;
       const fSize = 2;
@@ -79,7 +79,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
           .toThrowError();
     });
 
-    it('throws when weights is not rank 4', math => {
+    it("throws when weights is not rank 4", math => {
       const origInputDepth = 1;
       const origOutputDepth = 1;
       const inputShape: [number, number, number] = [1, 1, origOutputDepth];
@@ -95,7 +95,7 @@ import {Array2D, Array3D, Array4D} from './ndarray';
           .toThrowError();
     });
 
-    it('throws when x depth does not match weights original output depth',
+    it("throws when x depth does not match weights original output depth",
        math => {
          const origInputDepth = 1;
          const origOutputDepth = 2;
@@ -115,10 +115,10 @@ import {Array2D, Array3D, Array4D} from './ndarray';
        });
   };
 
-  test_util.describeMathCPU('conv2dTranspose', [tests]);
-  test_util.describeMathGPU('conv2dTranspose', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathCPU("conv2dTranspose", [tests]);
+  test_util.describeMathGPU("conv2dTranspose", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

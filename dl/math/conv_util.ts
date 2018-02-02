@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as util from '../util';
+import * as util from "../util";
 
 export type PadInfo = {
   top: number,
@@ -37,7 +37,7 @@ export type Conv2DInfo = {
   outHeight: number,
   outWidth: number,
   outChannels: number,
-  dataFormat: 'channelsFirst'|'channelsLast',
+  dataFormat: "channelsFirst"|"channelsLast",
   strideHeight: number,
   strideWidth: number,
   filterHeight: number,
@@ -51,14 +51,14 @@ export type Conv2DInfo = {
 export function computePool2DInfo(
     inShape: [number, number, number, number],
     filterSize: [number, number]|number, strides: number|[number, number],
-    pad: 'same'|'valid'|number,
-    dataFormat: 'channelsFirst'|'channelsLast' = 'channelsLast'): Conv2DInfo {
+    pad: "same"|"valid"|number,
+    dataFormat: "channelsFirst"|"channelsLast" = "channelsLast"): Conv2DInfo {
   const [filterHeight, filterWidth] = parseTupleParam(filterSize);
 
   let filterShape: [number, number, number, number];
-  if (dataFormat === 'channelsLast') {
+  if (dataFormat === "channelsLast") {
     filterShape = [filterHeight, filterWidth, inShape[3], inShape[3]];
-  } else if (dataFormat === 'channelsFirst') {
+  } else if (dataFormat === "channelsFirst") {
     filterShape = [filterHeight, filterWidth, inShape[1], inShape[1]];
   } else {
     throw new Error(`Unknown dataFormat ${dataFormat}`);
@@ -74,13 +74,13 @@ export function computePool2DInfo(
 export function computeConv2DInfo(
     inShape: [number, number, number, number],
     filterShape: [number, number, number, number],
-    strides: number|[number, number], pad: 'same'|'valid'|number,
+    strides: number|[number, number], pad: "same"|"valid"|number,
     depthwise = false,
-    dataFormat: 'channelsFirst' | 'channelsLast' = 'channelsLast'): Conv2DInfo {
+    dataFormat: "channelsFirst" | "channelsLast" = "channelsLast"): Conv2DInfo {
   let [batchSize, inHeight, inWidth, inChannels] = [-1, -1, -1, -1];
-  if (dataFormat === 'channelsLast') {
+  if (dataFormat === "channelsLast") {
     [batchSize, inHeight, inWidth, inChannels] = inShape;
-  } else if (dataFormat === 'channelsFirst') {
+  } else if (dataFormat === "channelsFirst") {
     [batchSize, inChannels, inHeight, inWidth] = inShape;
   } else {
     throw new Error(`Unknown dataFormat ${dataFormat}`);
@@ -94,9 +94,9 @@ export function computeConv2DInfo(
   const outChannels = depthwise ? filterChannels * inChannels : filterChannels;
 
   let outShape: [number, number, number, number];
-  if (dataFormat === 'channelsFirst') {
+  if (dataFormat === "channelsFirst") {
     outShape = [batchSize, outChannels, outHeight, outWidth];
-  } else if (dataFormat === 'channelsLast') {
+  } else if (dataFormat === "channelsLast") {
     outShape = [batchSize, outHeight, outWidth, outChannels];
   }
 
@@ -168,11 +168,11 @@ export function computeDilatedRC(
 }
 
 function parseTupleParam(param: number|[number, number]): [number, number] {
-  return typeof param === 'number' ? [param, param] : param;
+  return typeof param === "number" ? [param, param] : param;
 }
 
 function getPadAndOutInfo(
-    pad: 'same'|'valid'|number, inHeight: number, inWidth: number,
+    pad: "same"|"valid"|number, inHeight: number, inWidth: number,
     strideHeight: number, strideWidth: number, filterHeight: number,
     filterWidth: number):
     {padInfo: PadInfo, outHeight: number, outWidth: number} {
@@ -180,13 +180,13 @@ function getPadAndOutInfo(
   let outHeight: number;
   let outWidth: number;
 
-  if (typeof pad === 'number') {
+  if (typeof pad === "number") {
     padInfo = {top: pad, bottom: pad, left: pad, right: pad};
     const outShape = computeOutputShape3D(
         [inHeight, inWidth, 1], filterHeight, 1, strideHeight, pad);
     outHeight = outShape[0];
     outWidth = outShape[1];
-  } else if (pad === 'same') {
+  } else if (pad === "same") {
     outHeight = Math.ceil(inHeight / strideHeight);
     outWidth = Math.ceil(inWidth / strideWidth);
     const padAlongHeight =
@@ -197,7 +197,7 @@ function getPadAndOutInfo(
     const left = Math.floor(padAlongWidth / 2);
     const right = padAlongWidth - left;
     padInfo = {top, bottom, left, right};
-  } else if (pad === 'valid') {
+  } else if (pad === "valid") {
     padInfo = {top: 0, bottom: 0, left: 0, right: 0};
     outHeight = Math.ceil((inHeight - filterHeight + 1) / strideHeight);
     outWidth = Math.ceil((inWidth - filterWidth + 1) / strideWidth);

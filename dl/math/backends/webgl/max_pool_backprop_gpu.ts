@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../../conv_util';
+import {Conv2DInfo} from "../../conv_util";
 
-import {GPGPUProgram} from './gpgpu_math';
+import {GPGPUProgram} from "./gpgpu_math";
 
 export class MaxPool2DBackpropProgram implements GPGPUProgram {
-  variableNames = ['dy', 'maxPos'];
+  variableNames = ["dy", "maxPos"];
   outputShape: number[];
   userCode: string;
 
