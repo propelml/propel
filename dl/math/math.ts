@@ -92,7 +92,7 @@ export class NDArrayMath implements NDArrayManager {
       this.customBackend = true;
       this.backend = backend;
     }
-    this.backendEngine = new BackendEngine(this.backend);
+    this.backendEngine = new BackendEngine();
   }
 
   /**

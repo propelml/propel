@@ -18,7 +18,6 @@
 import * as util from '../../util';
 import {DataType, NDArray} from '../ndarray';
 
-import {MathBackend} from './backend';
 import * as tape_util from './tape_util';
 import {ScopeResult} from './tape_util';
 
@@ -26,7 +25,7 @@ export class BackendEngine {
   private activeScope: NDArray[];
   private scopeStack: NDArray[][];
 
-  constructor(private backend: MathBackend) {
+  constructor() {
     // Create a default outer scope.
     this.activeScope = [];
     this.scopeStack = [this.activeScope];
@@ -102,9 +101,5 @@ export class BackendEngine {
       this.activeScope.push(result);
     }
     return result;
-  }
-
-  getBackend(): MathBackend {
-    return this.backend;
   }
 }
