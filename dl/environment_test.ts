@@ -14,7 +14,6 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as device_util from './device_util';
 import {ENV, Environment, Features} from './environment';
 import {MathBackend} from './math/backends/backend';
 import {MathBackendCPU} from './math/backends/backend_cpu';
@@ -79,43 +78,6 @@ describe('disjoint query timer enabled', () => {
 
     ENV.setFeatures(features);
     expect(ENV.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED')).toBe(true);
-  });
-});
-
-describe('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE', () => {
-  afterEach(() => {
-    ENV.reset();
-  });
-
-  it('disjoint query timer disabled', () => {
-    const features:
-        Features = {'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED': false};
-
-    const env = new Environment(features);
-
-    expect(env.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE'))
-        .toBe(false);
-  });
-
-  it('disjoint query timer enabled, mobile', () => {
-    const features:
-        Features = {'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED': true};
-    spyOn(device_util, 'isMobile').and.returnValue(true);
-
-    const env = new Environment(features);
-
-    expect(env.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE'))
-        .toBe(false);
-  });
-
-  it('disjoint query timer enabled, not mobile', () => {
-    const features:
-        Features = {'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED': true};
-    spyOn(device_util, 'isMobile').and.returnValue(false);
-
-    const env = new Environment(features);
-
-    expect(env.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE')).toBe(true);
   });
 });
 
