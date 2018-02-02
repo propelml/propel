@@ -23,7 +23,7 @@ import {TextureType} from './tex_util';
 
 export type ShapeInfo = {
   logicalShape: number[],
-  texShape: [number, number],
+  textureShape: [number, number],
   textureType: TextureType
 };
 
@@ -42,7 +42,7 @@ export function makeShader(
   const inputSamplingSnippet =
       inputsInfo.map(x => getInputSamplingSnippet(x, outputShape, broadcast))
           .join('\n');
-  const outTexShape = outputShape.texShape;
+  const outTexShape = outputShape.textureShape;
   const outputSamplingSnippet =
       getOutputSamplingSnippet(outputShape.logicalShape, outTexShape);
   const source = [
@@ -299,39 +299,39 @@ function getOutputScalarCoords() {
 }
 
 function getOutput1DCoords(
-    shape: [number], texShape: [number, number]): string {
-  if (texShape[0] === 1) {
+    shape: [number], textureShape: [number, number]): string {
+  if (textureShape[0] === 1) {
     return `
       int getOutputCoords() {
-        return int(resultUV.x * ${texShape[1]}.0);
+        return int(resultUV.x * ${textureShape[1]}.0);
       }
     `;
   }
-  if (texShape[1] === 1) {
+  if (textureShape[1] === 1) {
     return `
       int getOutputCoords() {
-        return int(resultUV.y * ${texShape[0]}.0);
+        return int(resultUV.y * ${textureShape[0]}.0);
       }
     `;
   }
   return `
     int getOutputCoords() {
       ivec2 resTexRC = ivec2(resultUV.yx *
-                             vec2(${texShape[0]}, ${texShape[1]}));
-      return resTexRC.x * ${texShape[1]} + resTexRC.y;
+                             vec2(${textureShape[0]}, ${textureShape[1]}));
+      return resTexRC.x * ${textureShape[1]} + resTexRC.y;
     }
   `;
 }
 
 function getOutput3DCoords(
-    shape: [number, number, number], texShape: [number, number]): string {
+    shape: [number, number, number], textureShape: [number, number]): string {
   const stride0 = shape[1] * shape[2];
   const stride1 = shape[2];
   return `
     ivec3 getOutputCoords() {
       ivec2 resTexRC = ivec2(resultUV.yx *
-                             vec2(${texShape[0]}, ${texShape[1]}));
-      int index = resTexRC.x * ${texShape[1]} + resTexRC.y;
+                             vec2(${textureShape[0]}, ${textureShape[1]}));
+      int index = resTexRC.x * ${textureShape[1]} + resTexRC.y;
       int r = index / ${stride0};
       index -= r * ${stride0};
       int c = index / ${stride1};
@@ -343,15 +343,15 @@ function getOutput3DCoords(
 
 function getOutput4DCoords(
     shape: [number, number, number, number],
-    texShape: [number, number]): string {
+    textureShape: [number, number]): string {
   const stride2 = shape[3];
   const stride1 = shape[2] * stride2;
   const stride0 = shape[1] * stride1;
   return `
     ivec4 getOutputCoords() {
       ivec2 resTexRC = ivec2(resultUV.yx *
-        vec2(${texShape[0]}, ${texShape[1]}));
-      int index = resTexRC.x * ${texShape[1]} + resTexRC.y;
+        vec2(${textureShape[0]}, ${textureShape[1]}));
+      int index = resTexRC.x * ${textureShape[1]} + resTexRC.y;
 
       int r = index / ${stride0};
       index -= r * ${stride0};
@@ -368,11 +368,12 @@ function getOutput4DCoords(
 }
 
 function getOutput2DCoords(
-    shape: [number, number], texShape: [number, number]): string {
-  if (util.arraysEqual(shape, texShape)) {
+    shape: [number, number], textureShape: [number, number]): string {
+  if (util.arraysEqual(shape, textureShape)) {
     return `
       ivec2 getOutputCoords() {
-        return ivec2(resultUV.yx * vec2(${texShape[0]}, ${texShape[1]}));
+        return ivec2(resultUV.yx *
+                     vec2(${textureShape[0]}, ${textureShape[1]}));
       }
     `;
   }
@@ -380,8 +381,8 @@ function getOutput2DCoords(
     return `
       ivec2 getOutputCoords() {
         ivec2 resTexRC = ivec2(resultUV.yx *
-                               vec2(${texShape[0]}, ${texShape[1]}));
-        int index = resTexRC.x * ${texShape[1]} + resTexRC.y;
+                               vec2(${textureShape[0]}, ${textureShape[1]}));
+        int index = resTexRC.x * ${textureShape[1]} + resTexRC.y;
         return ivec2(index, 0);
       }
     `;
@@ -390,8 +391,8 @@ function getOutput2DCoords(
     return `
       ivec2 getOutputCoords() {
         ivec2 resTexRC = ivec2(resultUV.yx *
-                               vec2(${texShape[0]}, ${texShape[1]}));
-        int index = resTexRC.x * ${texShape[1]} + resTexRC.y;
+                               vec2(${textureShape[0]}, ${textureShape[1]}));
+        int index = resTexRC.x * ${textureShape[1]} + resTexRC.y;
         return ivec2(0, index);
       }
     `;
@@ -399,8 +400,8 @@ function getOutput2DCoords(
   return `
     ivec2 getOutputCoords() {
       ivec2 resTexRC = ivec2(resultUV.yx *
-                             vec2(${texShape[0]}, ${texShape[1]}));
-      int index = resTexRC.x * ${texShape[1]} + resTexRC.y;
+                             vec2(${textureShape[0]}, ${textureShape[1]}));
+      int index = resTexRC.x * ${textureShape[1]} + resTexRC.y;
       int r = index / ${shape[1]};
       int c = index - r * ${shape[1]};
       return ivec2(r, c);
@@ -430,12 +431,12 @@ function getSampler1D(inputInfo: InputInfo): string {
 
 function getSampler2D(inputInfo: InputInfo): string {
   const shape = inputInfo.shapeInfo.logicalShape;
-  const texShape = inputInfo.shapeInfo.texShape;
+  const textureShape = inputInfo.shapeInfo.textureShape;
   const texName = inputInfo.name;
   const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
-  const texNumR = texShape[0];
-  const texNumC = texShape[1];
-  if (util.arraysEqual(shape, texShape)) {
+  const texNumR = textureShape[0];
+  const texNumC = textureShape[1];
+  if (util.arraysEqual(shape, textureShape)) {
     return `
     float ${funcName}(int row, int col) {
       vec2 uv = (vec2(col, row) + halfCR) / vec2(${texNumC}.0, ${texNumR}.0);
@@ -482,17 +483,17 @@ function getSampler2D(inputInfo: InputInfo): string {
 }
 
 function getSampler3D(inputInfo: InputInfo): string {
-  const texShape = inputInfo.shapeInfo.texShape;
+  const textureShape = inputInfo.shapeInfo.textureShape;
   const shape = inputInfo.shapeInfo.logicalShape;
   const texName = inputInfo.name;
   const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
-  const texNumR = texShape[0];
-  const texNumC = texShape[1];
+  const texNumR = textureShape[0];
+  const texNumC = textureShape[1];
   const stride0 = shape[1] * shape[2];
   const stride1 = shape[2];
-  const texType = inputInfo.shapeInfo.textureType;
+  const textureType = inputInfo.shapeInfo.textureType;
 
-  if (texType === TextureType.DEFAULT) {
+  if (textureType === TextureType.DEFAULT) {
     const {newShape, keptDims} = util.squeezeShape(shape);
     const squeezedShape = newShape;
     if (squeezedShape.length < shape.length) {
@@ -508,7 +509,7 @@ function getSampler3D(inputInfo: InputInfo): string {
   }
 
   if (texNumC === stride0) {
-    if (texType === TextureType.DEFAULT) {
+    if (textureType === TextureType.DEFAULT) {
       return `
         float ${funcName}(int row, int col, int depth) {
           int texR = row;
@@ -518,7 +519,7 @@ function getSampler3D(inputInfo: InputInfo): string {
           return sample(${texName}, uv);
         }
       `;
-    } else if (texType === TextureType.RGBA_COLOR) {
+    } else if (textureType === TextureType.RGBA_COLOR) {
       return `
         float ${funcName}(int row, int col, int depth) {
           vec2 uv = (vec2(col, row) + halfCR) /
@@ -527,11 +528,11 @@ function getSampler3D(inputInfo: InputInfo): string {
         }
       `;
     } else {
-      throw new Error(`Unknown TextureType ${texType}.`);
+      throw new Error(`Unknown TextureType ${textureType}.`);
     }
   }
 
-  if (texNumC === stride1 && texType === TextureType.DEFAULT) {
+  if (texNumC === stride1 && textureType === TextureType.DEFAULT) {
     return `
     float ${funcName}(int row, int col, int depth) {
       int texR = row * ${shape[1]} + col;
@@ -542,7 +543,7 @@ function getSampler3D(inputInfo: InputInfo): string {
   `;
   }
 
-  if (texType === TextureType.DEFAULT) {
+  if (textureType === TextureType.DEFAULT) {
     return `
       float ${funcName}(int row, int col, int depth) {
         vec2 uv = UVfrom3D(
@@ -550,7 +551,7 @@ function getSampler3D(inputInfo: InputInfo): string {
         return sample(${texName}, uv);
       }
   `;
-  } else if (texType === TextureType.RGBA_COLOR) {
+  } else if (textureType === TextureType.RGBA_COLOR) {
     return `
       float ${funcName}(int row, int col, int depth) {
         vec2 uv = UVfrom2D(${texNumR}, ${texNumC}, ${shape[1]}, row, col);
@@ -558,17 +559,17 @@ function getSampler3D(inputInfo: InputInfo): string {
       }
     `;
   } else {
-    throw new Error(`Unknown TextureType ${texType}.`);
+    throw new Error(`Unknown TextureType ${textureType}.`);
   }
 }
 
 function getSampler4D(inputInfo: InputInfo): string {
   const shape = inputInfo.shapeInfo.logicalShape;
-  const texShape = inputInfo.shapeInfo.texShape;
+  const textureShape = inputInfo.shapeInfo.textureShape;
   const texName = inputInfo.name;
   const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
-  const texNumR = texShape[0];
-  const texNumC = texShape[1];
+  const texNumR = textureShape[0];
+  const texNumC = textureShape[1];
   const stride2 = shape[3];
   const stride1 = shape[2] * stride2;
   const stride0 = shape[1] * stride1;
@@ -616,11 +617,11 @@ function getSampler4D(inputInfo: InputInfo): string {
 
 function getSamplerFlat(inputInfo: InputInfo): string {
   const texName = inputInfo.name;
-  const texShape = inputInfo.shapeInfo.texShape;
+  const textureShape = inputInfo.shapeInfo.textureShape;
   const funcName =
       'get' + texName.charAt(0).toUpperCase() + texName.slice(1) + 'Flat';
-  const tNumR = texShape[0];
-  const tNumC = texShape[1];
+  const tNumR = textureShape[0];
+  const tNumC = textureShape[1];
   if (tNumC === 1 && tNumR === 1) {
     return `
       float ${funcName}(int index) {
@@ -698,7 +699,7 @@ function getBroadcastOutputCoordsSampler(
 function getSamplerAtOutputCoords(
     inputInfo: InputInfo, outShapeInfo: ShapeInfo,
     supportsBroadcasting: boolean) {
-  const inTexShape = inputInfo.shapeInfo.texShape;
+  const inTexShape = inputInfo.shapeInfo.textureShape;
   const texName = inputInfo.name;
   const isRGBAColorTexture =
       inputInfo.shapeInfo.textureType === TextureType.RGBA_COLOR;
@@ -719,7 +720,7 @@ function getSamplerAtOutputCoords(
         inputInfo, outShapeInfo, texFuncSnippet, funcName);
   }
 
-  const outTexShape = outShapeInfo.texShape;
+  const outTexShape = outShapeInfo.textureShape;
   if (util.arraysEqual(inTexShape, outTexShape) && !isRGBAColorTexture) {
     return `
       float ${funcName}() {
