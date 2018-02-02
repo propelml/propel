@@ -19,9 +19,9 @@ import * as util from '../util';
 
 export type PadInfo = {
   top: number,
+  bottom: number,
   left: number,
-  right: number,
-  bottom: number
+  right: number
 };
 
 /**
@@ -102,18 +102,18 @@ export function computeConv2DInfo(
 
   return {
     batchSize,
-    dataFormat,
     inHeight,
     inWidth,
     inChannels,
     outHeight,
     outWidth,
     outChannels,
-    padInfo,
+    dataFormat,
     strideHeight,
     strideWidth,
     filterHeight,
     filterWidth,
+    padInfo,
     inShape,
     outShape,
     filterShape

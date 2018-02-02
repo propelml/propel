@@ -22,13 +22,13 @@ import * as webgl_util from './webgl_util';
 
 export function getWebGLContextAttributes(): WebGLContextAttributes {
   return {
+    failIfMajorPerformanceCaveat: true,
     alpha: false,
     antialias: false,
+    depth: false,
     premultipliedAlpha: false,
     preserveDrawingBuffer: false,
-    depth: false,
-    stencil: false,
-    failIfMajorPerformanceCaveat: true
+    stencil: false
   };
 }
 
