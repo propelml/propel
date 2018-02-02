@@ -44,7 +44,7 @@
     "no-unused-expression": true,
     "no-var-keyword": true,
     "object-literal-shorthand": true,
-    "object-literal-sort-keys": true,
+    "object-literal-sort-keys": [true, "match-declaration-order"],
     "one-line": [true, "check-catch", "check-finally", "check-else"],
     //"only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
     "ordered-imports": true,

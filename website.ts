@@ -420,28 +420,28 @@ function route(pathname: string): Page {
 
 export const pages: Page[] = [
   {
+    title: "Propel ML",
     path: "website/index.html",
     root: PropelIndex,
     route: /^\/(index.html)?$/,
-    title: "Propel ML",
   },
   {
+    title: "Propel Notebook",
     path: "website/notebook/index.html",
     root: NotebookIndex,
     route: /^\/notebook/,
-    title: "Propel Notebook",
   },
   {
+    title: "Propel References",
     path: "website/references.html",
     root: References,
     route: /^\/references/,
-    title: "Propel References",
   },
   {
+    title: "Propel Docs",
     path: "website/docs/index.html",
     root: Docs,
     route: /^\/docs/,
-    title: "Propel Docs",
   },
 ];
 
