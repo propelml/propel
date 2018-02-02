@@ -302,7 +302,20 @@ export function genJSON(): DocEntry[] {
   }
 
   function classElementName(m: ts.ClassElement): string {
-    return m.name && ts.isIdentifier(m.name) ? m.name.text : "<unknown>";
+    if (m.name) {
+      if (ts.isIdentifier(m.name)) {
+        return ts.idText(m.name);
+      }
+      if (ts.isComputedPropertyName(m.name)) {
+        const e = m.name.expression;
+        if (ts.isPropertyAccessExpression(e)) {
+          // This is for [Symbol.iterator]() { }
+          assert(ts.isIdentifier(e.name));
+          return `[Symbol.${e.name.text}]`;
+        }
+      }
+    }
+    return "<unknown>";
   }
 
   // TODO use tsconfig.json instead of supplying config.
@@ -314,7 +327,7 @@ export function genJSON(): DocEntry[] {
   return output;
 }
 
-function writeHTML() {
+function writeJSON() {
   const target = process.argv[2];
   if (!target) {
     console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs.json");
@@ -327,5 +340,5 @@ function writeHTML() {
 }
 
 if (require.main === module) {
-  writeHTML();
+  writeJSON();
 }
