@@ -61,7 +61,7 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   const inputInfos = inputs.map((input, i) => {
     const shapeInfo = {
       logicalShape: input.array.shape,
-      texShape: input.texData.texShape,
+      textureShape: input.texData.textureShape,
       textureType: input.texData.textureType
     };
     return {name: program.variableNames[i], shapeInfo};
@@ -69,7 +69,7 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   const inShapeInfos = inputInfos.map(x => x.shapeInfo);
   const outShapeInfo = {
     logicalShape: output.array.shape,
-    texShape: output.texData.texShape,
+    textureShape: output.texData.textureShape,
     textureType: output.texData.textureType
   };
   const source = shader_compiler.makeShader(
@@ -117,9 +117,9 @@ function validateBinaryAndProgram(
 
   shapeInfos.forEach((s, i) => {
     const shapeA = s.logicalShape;
-    const texShapeA = s.texShape;
+    const texShapeA = s.textureShape;
     const shapeB = inputs[i].array.shape;
-    const texShapeB = inputs[i].texData.texShape;
+    const texShapeB = inputs[i].texData.textureShape;
 
     if (!util.arraysEqual(shapeA, shapeB)) {
       throw Error(
@@ -142,7 +142,7 @@ export function runProgram<T extends NDArray, K extends NDArray>(
   validateBinaryAndProgram([binary.outShapeInfo], [output]);
 
   const outTex = output.texData.texture;
-  const outTexShape = output.texData.texShape;
+  const outTexShape = output.texData.textureShape;
   const gpgpu = binary.gpgpu;
   gpgpu.setOutputMatrixTexture(outTex, outTexShape[0], outTexShape[1]);
   gpgpu.setProgram(binary.webGLProgram);
@@ -169,7 +169,7 @@ export function makeShaderKey(
   let keyInputs = '';
   inputs.concat(output).forEach(x => {
     keyInputs +=
-        `${x.array.shape}_${x.texData.texShape}_${x.texData.textureType}`;
+        `${x.array.shape}_${x.texData.textureShape}_${x.texData.textureType}`;
   });
   const keyUserCode = program.userCode;
   const keyBroadcast = (program.supportsBroadcasting === true).toString();
