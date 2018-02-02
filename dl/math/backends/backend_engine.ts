@@ -19,8 +19,6 @@ import * as util from '../../util';
 import {DataType, NDArray} from '../ndarray';
 
 import {MathBackend} from './backend';
-import * as kernel_registry from './kernel_registry';
-import {KernelConfigRegistry} from './kernel_registry';
 import * as tape_util from './tape_util';
 import {ScopeResult} from './tape_util';
 
@@ -32,15 +30,6 @@ export class BackendEngine {
     // Create a default outer scope.
     this.activeScope = [];
     this.scopeStack = [this.activeScope];
-  }
-
-  executeKernel<K extends keyof KernelConfigRegistry,
-                          C extends KernelConfigRegistry[K]['inputAndArgs']>(
-      kernelName: K, config: C):
-      KernelConfigRegistry[K]['output'] {
-    const kernelFn = () =>
-        kernel_registry.executeKernel(this.backend, kernelName, config);
-    return kernelFn();
   }
 
   /**
