@@ -36,14 +36,14 @@ function lookupMath(device: string): NDArrayMath {
   return deviceRegistry.get(device);
 }
 
-const cpuMath = new NDArrayMath("cpu", false);
+const cpuMath = new NDArrayMath("cpu");
 ENV.setMath(cpuMath);
 deviceRegistry.set("CPU:0", cpuMath);
 
 let gpuMath;
 const webglBackend = ENV.getBackend("webgl") as MathBackendWebGL;
 if (webglBackend) {
-  gpuMath = new NDArrayMath("webgl", false);
+  gpuMath = new NDArrayMath("webgl");
   deviceRegistry.set("GPU:0", gpuMath);
 }
 

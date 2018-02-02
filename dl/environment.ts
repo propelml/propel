@@ -265,8 +265,7 @@ export class Environment {
   get math(): NDArrayMath {
     if (this.globalMath == null) {
       const bestBackend = this.getBestBackend();
-      const safeMode = false;
-      this.globalMath = new NDArrayMath(bestBackend, safeMode);
+      this.globalMath = new NDArrayMath(bestBackend);
     }
     return this.globalMath;
   }

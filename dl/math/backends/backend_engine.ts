@@ -28,7 +28,7 @@ export class BackendEngine {
   private activeScope: NDArray[];
   private scopeStack: NDArray[][];
 
-  constructor(private backend: MathBackend, private safeMode: boolean) {
+  constructor(private backend: MathBackend) {
     // Create a default outer scope.
     this.activeScope = [];
     this.scopeStack = [this.activeScope];
@@ -105,15 +105,7 @@ export class BackendEngine {
    * @param result The NDArray to track in the current scope.
    */
   track<D extends DataType, T extends NDArray<D>>(result: T): T {
-    if (this.scopeStack.length === 1) {
-      if (this.safeMode) {
-        throw new Error(
-            'You are using math in safe mode. Enclose all ' +
-            'math.method() calls inside a scope: ' +
-            'math.scope(() => {math.method();...}) to avoid memory ' +
-            'leaks.');
-      }
-    } else {
+    if (this.scopeStack.length > 1) {
       // Only track NDArrays that are created in an explicit scope; when
       // created in the global scope, tracking them makes no sense -- the
       // global scope never gets cleaned up, and adding them to an array
