@@ -827,7 +827,8 @@ export class MathBackendWebGL implements MathBackend {
       return {array: input, texData: this.texData.get(input.dataId)};
     });
     this.uploadToGPU(output.dataId);
-    const outputData = {array: output, texData: this.texData.get(output.dataId)};
+    const outputData =
+        {array: output, texData: this.texData.get(output.dataId)};
     const key = gpgpu_math.makeShaderKey(program, inputsData, outputData);
     const binary = this.getAndSaveBinary(key, () => {
       return gpgpu_math.compileProgram(
@@ -906,7 +907,8 @@ export class MathBackendWebGL implements MathBackend {
       });
     }
     if (float32Values != null) {
-      this.texData.get(dataId).values = float32ToTypedArray(float32Values, dtype);
+      this.texData.get(dataId).values =
+          float32ToTypedArray(float32Values, dtype);
     }
   }
 }

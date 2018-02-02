@@ -2027,7 +2027,8 @@ export class NDArrayMath implements NDArrayManager {
               `but got rank ${offset.rank}.`);
     }
 
-    return this.backend.batchNormalization3D(x, mean, variance, varianceEpsilon, scale, offset);
+    return this.backend.batchNormalization3D(
+        x, mean, variance, varianceEpsilon, scale, offset);
   }
 
   /**
