@@ -26,7 +26,6 @@ import * as reduce_util from '../reduce_util';
 import * as types from '../types';
 import {SumTypes, SumTypesMap} from '../types';
 import {MathBackend} from './backend';
-import {MatrixOrientation} from './types/matmul';
 import {ArgMinMaxProgram} from './webgl/argminmax_gpu';
 import {BatchNormProgram} from './webgl/batchnorm_gpu';
 import * as binaryop_gpu from './webgl/binaryop_gpu';
@@ -306,8 +305,8 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   matMul(
-      a: Array2D, b: Array2D, aOrientation: MatrixOrientation,
-      bOrientation: MatrixOrientation): Array2D {
+      a: Array2D, b: Array2D, aOrientation: types.MatrixOrientation,
+      bOrientation: types.MatrixOrientation): Array2D {
     const program =
         new MatMulProgram(a.shape, b.shape, aOrientation, bOrientation);
     return this.compileAndRun<Array2D, Array2D>(program, [a, b]);

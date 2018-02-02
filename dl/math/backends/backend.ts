@@ -18,8 +18,7 @@
 import {Conv2DInfo} from '../conv_util';
 // tslint:disable-next-line:max-line-length
 import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
-import {SumTypes} from '../types';
-import {MatrixOrientation} from './types/matmul';
+import {MatrixOrientation, SumTypes} from '../types';
 
 export interface NDArrayStorage {
   read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;

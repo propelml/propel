@@ -27,11 +27,11 @@ import * as util from './util';
 export {ENV, Environment, Features} from './environment';
 export {MathBackendCPU} from './math/backends/backend_cpu';
 export {MathBackendWebGL} from './math/backends/backend_webgl';
-export {MatrixOrientation} from './math/backends/types/matmul';
 export {GPGPUContext} from './math/backends/webgl/gpgpu_context';
 export {LSTMCell, NDArrayMath} from './math/math';
 // tslint:disable-next-line:max-line-length
 export {Array1D, Array2D, Array3D, Array4D, NDArray, Scalar} from './math/ndarray';
+export {MatrixOrientation} from './math/types';
 // Second level exports.
 export {
   conv_util,

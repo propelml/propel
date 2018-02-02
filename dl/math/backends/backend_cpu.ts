@@ -25,11 +25,10 @@ import {Conv2DInfo} from '../conv_util';
 // tslint:disable-next-line:max-line-length
 import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar} from '../ndarray';
 import * as types from '../types';
-import {SumTypes, SumTypesMap} from '../types';
+import {MatrixOrientation, SumTypes, SumTypesMap} from '../types';
 
 import * as axis_util from './../axis_util';
 import {MathBackend} from './backend';
-import {MatrixOrientation} from './types/matmul';
 
 export class MathBackendCPU implements MathBackend {
   private data = new WeakMap<DataId, DataTypeMap[DataType]>();

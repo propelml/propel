@@ -22,11 +22,10 @@ import "./dl/math/backends/backend_webgl";
 import { ENV } from "./dl/environment";
 import { MathBackendWebGL }
  from "./dl/math/backends/backend_webgl";
-import { MatrixOrientation }
-  from "./dl/math/backends/types/matmul";
 import { NDArrayMath } from "./dl/math/math";
 import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./dl/math/ndarray";
+import { MatrixOrientation } from "./dl/math/types";
 import * as types from "./types";
 import { assert } from "./util";
 
