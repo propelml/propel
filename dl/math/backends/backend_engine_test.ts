@@ -16,10 +16,10 @@
  */
 
 import * as test_util from "../../test_util";
-import {MathTests} from "../../test_util";
-import {Scalar} from "../ndarray";
+import { MathTests } from "../../test_util";
+import { Scalar } from "../ndarray";
 
-import {extractNDArraysFromScopeResult} from "./backend_engine";
+import { extractNDArraysFromScopeResult } from "./backend_engine";
 
 // extractNDArraysFromScopeResult
 {

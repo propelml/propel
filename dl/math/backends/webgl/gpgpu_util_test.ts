@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from "./gpgpu_context";
+import { GPGPUContext } from "./gpgpu_context";
 import * as gpgpu_util from "./gpgpu_util";
 
 describe("gpgpu_util createWebGLContext", () => {

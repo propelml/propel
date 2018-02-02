@@ -16,10 +16,10 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
+import { MathTests } from "../test_util";
 import * as util from "../util";
 
-import {Array1D, Array2D, Array3D} from "./ndarray";
+import { Array1D, Array2D, Array3D } from "./ndarray";
 
 // math.tile
 {

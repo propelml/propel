@@ -16,8 +16,8 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
-import {Array1D} from "./ndarray";
+import { MathTests } from "../test_util";
+import { Array1D } from "./ndarray";
 
 const tests: MathTests = it => {
   it("Depth 1 throws error", math => {

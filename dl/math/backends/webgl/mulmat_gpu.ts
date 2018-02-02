@@ -15,9 +15,9 @@
  * =============================================================================
  */
 
-import {MatrixOrientation} from "../../types";
+import { MatrixOrientation } from "../../types";
 
-import {GPGPUProgram} from "./gpgpu_math";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class MatMulProgram implements GPGPUProgram {
   variableNames = ["matrixA", "matrixB"];
@@ -36,14 +36,16 @@ export class MatMulProgram implements GPGPUProgram {
 
     const sharedDim =
         (aOrient === MatrixOrientation.REGULAR ? aShape[1] : aShape[0]);
-    const aSnippetFromOffset = (vec4Offset: number, indexVar: string|number) =>
-        (aOrient === MatrixOrientation.REGULAR) ?
-        `aRow, ${indexVar} + ${vec4Offset}` :
-        `${indexVar} + ${vec4Offset}, aRow`;
-    const bSnippetFromOffset = (vec4Offset: number, indexVar: string|number) =>
-        (bOrient === MatrixOrientation.REGULAR) ?
-        `${indexVar} + ${vec4Offset}, bCol` :
-        `bCol, ${indexVar} + ${vec4Offset}`;
+    const aSnippetFromOffset =
+        (vec4Offset: number, indexVar: string | number) =>
+          aOrient === MatrixOrientation.REGULAR
+            ? `aRow, ${indexVar} + ${vec4Offset}`
+            : `${indexVar} + ${vec4Offset}, aRow`;
+    const bSnippetFromOffset =
+        (vec4Offset: number, indexVar: string | number) =>
+          bOrient === MatrixOrientation.REGULAR
+            ? `${indexVar} + ${vec4Offset}, bCol`
+            : `bCol, ${indexVar} + ${vec4Offset}`;
 
     const sharedDimNearestVec4 = Math.floor(sharedDim / 4) * 4;
     const sharedDimVec4Remainder = sharedDim % 4;

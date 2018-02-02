@@ -1,4 +1,4 @@
-import {DataType, DataTypeMap} from "../../ndarray";
+import { DataType, DataTypeMap } from "../../ndarray";
 
 /**
  * @license
@@ -59,7 +59,7 @@ export function getMatrixSizeFromUnpackedArraySize(
   return unpackedSize / channelsPerTexture;
 }
 
-export type TypedArray = Float32Array|Uint8Array;
+export type TypedArray = Float32Array | Uint8Array;
 
 export function encodeMatrixToUnpackedArray(
     matrix: TypedArray, unpackedArray: TypedArray, channelsPerTexture: number) {

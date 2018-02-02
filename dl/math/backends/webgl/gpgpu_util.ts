@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {ENV} from "../../../environment";
+import { ENV } from "../../../environment";
 
 import * as tex_util from "./tex_util";
 import * as webgl_util from "./webgl_util";
@@ -187,8 +187,8 @@ export function bindVertexProgramAttributeStreams(
 }
 
 export function uploadPixelDataToTexture(
-    gl: WebGLRenderingContext, texture: WebGLTexture,
-    pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement) {
+    gl: WebGLRenderingContext, texture: WebGLTexture, pixels:
+    ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement) {
   webgl_util.callAndCheck(gl, () => gl.bindTexture(gl.TEXTURE_2D, texture));
   webgl_util.callAndCheck(
       gl,
@@ -199,7 +199,7 @@ export function uploadPixelDataToTexture(
 
 function uploadDataToTexture(
     gl: WebGLRenderingContext, texture: WebGLTexture, width: number,
-    height: number, data: Float32Array|Uint8Array, numChannels: number) {
+    height: number, data: Float32Array | Uint8Array, numChannels: number) {
   const textureFormat = getTextureFormat(gl, numChannels);
 
   webgl_util.validateTextureSize(gl, width, height);
@@ -218,7 +218,7 @@ export function uploadMatrixToTexture(
   const [w, h] =
       tex_util.getUnpackedMatrixTextureShapeWidthHeight(rows, columns);
 
-  let unpackedArray: Float32Array|Uint8Array;
+  let unpackedArray: Float32Array | Uint8Array;
 
   if (ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     const channelsPerTexture =
@@ -251,11 +251,11 @@ export function uploadMatrixToPackedTexture(
 }
 
 function getDownloadTargetArrayBuffer(
-    rows: number, columns: number, channelsPerTexture: number): Float32Array|
+    rows: number, columns: number, channelsPerTexture: number): Float32Array |
     Uint8Array {
   const isFloatTexture = ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
 
-  let downloadTarget: Float32Array|Uint8Array;
+  let downloadTarget: Float32Array | Uint8Array;
   if (isFloatTexture) {
     downloadTarget =
         new Float32Array(tex_util.getUnpackedArraySizeFromMatrixSize(
@@ -267,7 +267,7 @@ function getDownloadTargetArrayBuffer(
 }
 
 function decodeDownloadTargetArrayBuffer(
-    downloadTarget: Float32Array|Uint8Array, rows: number, columns: number,
+    downloadTarget: Float32Array | Uint8Array, rows: number, columns: number,
     channelsPerPixel: number): Float32Array {
   const isFloatTexture = ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
   if (isFloatTexture) {

@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {GPGPUProgram} from "./gpgpu_math";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class ClipProgram implements GPGPUProgram {
   variableNames = ["A"];

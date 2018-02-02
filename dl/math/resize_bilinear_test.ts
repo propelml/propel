@@ -16,9 +16,9 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array3D} from "./ndarray";
+import { Array3D } from "./ndarray";
 
 // math.resizeBilinear3D
 {

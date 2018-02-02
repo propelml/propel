@@ -16,9 +16,9 @@
  */
 
 import * as test_util from "../../test_util";
-import {Tests} from "../../test_util";
-import {DataId} from "../ndarray";
-import {MathBackendWebGL} from "./backend_webgl";
+import { Tests } from "../../test_util";
+import { DataId } from "../ndarray";
+import { MathBackendWebGL } from "./backend_webgl";
 
 const tests: Tests = () => {
   it("reading", () => {

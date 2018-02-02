@@ -17,18 +17,18 @@
 
 import * as seedrandom from "seedrandom";
 
-import {ENV} from "../../environment";
+import { ENV } from "../../environment";
 import * as util from "../../util";
 import * as broadcast_util from "../broadcast_util";
 import * as concat_util from "../concat_util";
-import {Conv2DInfo} from "../conv_util";
+import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar} from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar } from "../ndarray";
 import * as types from "../types";
-import {MatrixOrientation, SumTypes, SumTypesMap} from "../types";
+import { MatrixOrientation, SumTypes, SumTypesMap } from "../types";
 
 import * as axis_util from "./../axis_util";
-import {MathBackend} from "./backend";
+import { MathBackend } from "./backend";
 
 export class MathBackendCPU implements MathBackend {
   private data = new WeakMap<DataId, DataTypeMap[DataType]>();
@@ -52,7 +52,8 @@ export class MathBackendCPU implements MathBackend {
   }
   writePixels(
       dataId: DataId,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
       throw new Error("MathBackendCPU.writePixels(): pixels can not be null");
@@ -912,8 +913,8 @@ export class MathBackendCPU implements MathBackend {
     return NDArray.make(x.shape, {values: resultValues}) as T;
   }
 
-  conv2d(x: Array4D, filter: Array4D, bias: Array1D|null, convInfo: Conv2DInfo):
-      Array4D {
+  conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
+      convInfo: Conv2DInfo): Array4D {
     const filterHeight = convInfo.filterHeight;
     const filterWidth = convInfo.filterWidth;
     const padLeft = convInfo.padInfo.left;
@@ -1148,7 +1149,8 @@ export class MathBackendCPU implements MathBackend {
     return result;
   }
 
-  private pool(x: Array4D, convInfo: Conv2DInfo, poolType: "max"|"min"|"avg") {
+  private pool(x: Array4D, convInfo: Conv2DInfo,
+      poolType: "max" | "min" | "avg") {
     const strideHeight = convInfo.strideHeight;
     const strideWidth = convInfo.strideWidth;
     const filterHeight = convInfo.filterHeight;
@@ -1350,9 +1352,9 @@ export class MathBackendCPU implements MathBackend {
   }
 
   batchNormalization2D(
-      x: Array2D, mean: Array2D|Array1D, variance: Array2D|Array1D,
-      varianceEpsilon: number, scale?: Array2D|Array1D,
-      offset?: Array2D|Array1D): Array2D {
+      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
+      varianceEpsilon: number, scale?: Array2D | Array1D,
+      offset?: Array2D | Array1D): Array2D {
     const xValues = x.dataSync();
     const meanValues = mean.dataSync();
     const varianceValues = variance.dataSync();
@@ -1371,9 +1373,9 @@ export class MathBackendCPU implements MathBackend {
   }
 
   batchNormalization3D(
-      x: Array3D, mean: Array3D|Array1D, variance: Array3D|Array1D,
-      varianceEpsilon: number, scale?: Array3D|Array1D,
-      offset?: Array3D|Array1D): Array3D {
+      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
+      varianceEpsilon: number, scale?: Array3D | Array1D,
+      offset?: Array3D | Array1D): Array3D {
     const xValues = x.dataSync();
     const meanValues = mean.dataSync();
     const varianceValues = variance.dataSync();
@@ -1392,9 +1394,9 @@ export class MathBackendCPU implements MathBackend {
   }
 
   batchNormalization4D(
-      x: Array4D, mean: Array4D|Array1D, variance: Array4D|Array1D,
-      varianceEpsilon: number, scale?: Array4D|Array1D,
-      offset?: Array4D|Array1D): Array4D {
+      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
+      varianceEpsilon: number, scale?: Array4D | Array1D,
+      offset?: Array4D | Array1D): Array4D {
     const xValues = x.dataSync();
     const meanValues = mean.dataSync();
     const varianceValues = variance.dataSync();

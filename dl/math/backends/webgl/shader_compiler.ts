@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {ENV} from "../../../environment";
+import { ENV } from "../../../environment";
 import * as util from "../../../util";
 import * as broadcast_util from "../../broadcast_util";
 import * as tex_util from "./tex_util";
-import {TextureType} from "./tex_util";
+import { TextureType } from "./tex_util";
 
 export type ShapeInfo = {
   logicalShape: number[],

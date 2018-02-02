@@ -64,7 +64,7 @@ export function expandShapeToKeepDim(
 }
 
 export function parseAxisParam(
-    axis: number|number[], shape: number[]): number[] {
+    axis: number | number[], shape: number[]): number[] {
   // Normalize input.
   if (axis == null) {
     axis = shape.map((s, i) => i);
@@ -100,7 +100,7 @@ export function assertAxesAreInnerMostDims(
  * permutation is neccesary. Otherwise it returns null. This method is used by
  * math operations that operate only on inner-most axes.
  */
-export function getPermutedAxes(axes: number[], rank: number): number[]|null {
+export function getPermutedAxes(axes: number[], rank: number): number[] | null {
   if (axesAreInnerMostDims(axes, rank)) {
     return null;
   }

@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-import {MathBackend} from "./math/backends/backend";
-import {NDArrayMath} from "./math/math";
+import { MathBackend } from "./math/backends/backend";
+import { NDArrayMath } from "./math/math";
 import * as util from "./util";
 
 export enum Type {
@@ -76,7 +76,7 @@ function loseContext(gl: WebGLRenderingContext) {
   }
 }
 
-function isWebGLVersionEnabled(webGLVersion: 1|2) {
+function isWebGLVersionEnabled(webGLVersion: 1 | 2) {
   const gl = getWebGLRenderingContext(webGLVersion);
   if (gl != null) {
     loseContext(gl);
@@ -152,7 +152,7 @@ function isWebGLGetBufferSubDataAsyncExtensionEnabled(webGLVersion: number) {
   return isEnabled;
 }
 
-export type BackendType = "webgl"|"cpu";
+export type BackendType = "webgl" | "cpu";
 
 export class Environment {
   private features: Features = {};

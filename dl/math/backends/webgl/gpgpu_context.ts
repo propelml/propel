@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {ENV} from "../../../environment";
+import { ENV } from "../../../environment";
 import * as util from "../../../util";
 import * as gpgpu_util from "./gpgpu_util";
 import * as tex_util from "./tex_util";
 import * as webgl_util from "./webgl_util";
-import {WebGLLoseContextExtension} from "./webgl_util";
+import { WebGLLoseContextExtension } from "./webgl_util";
 
 export class GPGPUContext {
   gl: WebGLRenderingContext;
@@ -31,8 +31,8 @@ export class GPGPUContext {
   vertexBuffer: WebGLBuffer;
   indexBuffer: WebGLBuffer;
   framebuffer: WebGLFramebuffer;
-  outputTexture: WebGLTexture|null = null;
-  program: WebGLProgram|null = null;
+  outputTexture: WebGLTexture | null = null;
+  program: WebGLProgram | null = null;
   private disposed = false;
   private autoDebugValidate = false;
 
@@ -107,7 +107,7 @@ export class GPGPUContext {
 
   uploadPixelDataToTexture(
       texture: WebGLTexture,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement) {
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement) {
     this.throwIfDisposed();
     gpgpu_util.uploadPixelDataToTexture(this.gl, texture, pixels);
   }
@@ -211,7 +211,7 @@ export class GPGPUContext {
     }
   }
 
-  setProgram(program: WebGLProgram|null) {
+  setProgram(program: WebGLProgram | null) {
     this.throwIfDisposed();
     this.program = program;
     if ((this.program != null) && this.autoDebugValidate) {

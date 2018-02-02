@@ -16,9 +16,9 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array1D} from "./ndarray";
+import { Array1D } from "./ndarray";
 
 {
   const tests: MathTests = it => {

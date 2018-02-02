@@ -15,9 +15,9 @@
  * =============================================================================
  */
 
-import {MatrixOrientation} from "../../types";
+import { MatrixOrientation } from "../../types";
 
-import {GPGPUContext} from "./gpgpu_context";
+import { GPGPUContext } from "./gpgpu_context";
 import * as webgl_util from "./webgl_util";
 
 export function getFragmentShaderSource(

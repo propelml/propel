@@ -17,7 +17,7 @@
 
 import * as util from "../util";
 
-import {NDArray} from "./ndarray";
+import { NDArray } from "./ndarray";
 
 export function assertParamsValid(
     input: NDArray, begin: number[], size: number[]): void {

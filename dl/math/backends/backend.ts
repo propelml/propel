@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from "../conv_util";
+import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from "../ndarray";
-import {MatrixOrientation, SumTypes} from "../types";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
+import { MatrixOrientation, SumTypes } from "../types";
 
 export interface NDArrayStorage {
   read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;
@@ -27,7 +27,8 @@ export interface NDArrayStorage {
   write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void;
   writePixels(
       dataId: DataId,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels: number): void;
   time(query: () => NDArray): Promise<number>;
   register(dataId: DataId, shape: number[], dtype: DataType): void;
@@ -129,8 +130,8 @@ export interface MathBackend extends NDArrayStorage {
 
   step<T extends NDArray>(x: T, alpha: number): T;
 
-  conv2d(x: Array4D, filter: Array4D, bias: Array1D|null, convInfo: Conv2DInfo):
-      Array4D;
+  conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
+      convInfo: Conv2DInfo): Array4D;
   conv2dDerInput(dy: Array4D, filter: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerFilter(x: Array4D, dY: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerBias(dY: Array4D): Array1D;
@@ -152,17 +153,17 @@ export interface MathBackend extends NDArrayStorage {
       x: Array3D, newShape2D: [number, number], alignCorners: boolean): Array3D;
 
   batchNormalization2D(
-      x: Array2D, mean: Array2D|Array1D, variance: Array2D|Array1D,
-      varianceEpsilon: number, scale?: Array2D|Array1D,
-      offset?: Array2D|Array1D): Array2D;
+      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
+      varianceEpsilon: number, scale?: Array2D | Array1D,
+      offset?: Array2D | Array1D): Array2D;
   batchNormalization3D(
-      x: Array3D, mean: Array3D|Array1D, variance: Array3D|Array1D,
-      varianceEpsilon: number, scale?: Array3D|Array1D,
-      offset?: Array3D|Array1D): Array3D;
+      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
+      varianceEpsilon: number, scale?: Array3D | Array1D,
+      offset?: Array3D | Array1D): Array3D;
   batchNormalization4D(
-      x: Array4D, mean: Array4D|Array1D, variance: Array4D|Array1D,
-      varianceEpsilon: number, scale?: Array4D|Array1D,
-      offset?: Array4D|Array1D): Array4D;
+      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
+      varianceEpsilon: number, scale?: Array4D | Array1D,
+      offset?: Array4D | Array1D): Array4D;
 
   multinomial(probabilities: Array2D, numSamples: number, seed: number):
       Array2D<"int32">;

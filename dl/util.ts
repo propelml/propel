@@ -1,4 +1,4 @@
-import {DataType, DataTypeMap, NDArray} from "./math/ndarray";
+import { DataType, DataTypeMap, NDArray } from "./math/ndarray";
 
 /**
  * @license
@@ -17,10 +17,11 @@ import {DataType, DataTypeMap, NDArray} from "./math/ndarray";
  * =============================================================================
  */
 
-export type TypedArray = Float32Array|Int32Array|Uint8Array;
-export type FlatVector = boolean[]|number[]|TypedArray;
-export type RegularArray<T> = T[]|T[][]|T[][][]|T[][][][];
-export type ArrayData = TypedArray|RegularArray<number>|RegularArray<boolean>;
+export type TypedArray = Float32Array | Int32Array | Uint8Array;
+export type FlatVector = boolean[] | number[] | TypedArray;
+export type RegularArray<T> = T[] | T[][] | T[][][] | T[][][][];
+export type ArrayData =
+    TypedArray | RegularArray<number> | RegularArray<boolean>;
 
 export type NamedArrayMap = {
   [name: string]: NDArray
@@ -28,7 +29,7 @@ export type NamedArrayMap = {
 
 /** Shuffles the array using Fisher-Yates algorithm. */
 // tslint:disable-next-line:no-any
-export function shuffle(array: any[]|Uint32Array|Int32Array|
+export function shuffle(array: any[] | Uint32Array | Int32Array |
                         Float32Array): void {
   let counter = array.length;
   let temp = 0;
@@ -88,8 +89,8 @@ export function assertTypesMatch(a: NDArray, b: NDArray): void {
 
 // tslint:disable-next-line:no-any
 export function flatten(
-    arr: number|boolean|RegularArray<number>|RegularArray<boolean>,
-    ret: Array<number|boolean> = []): Array<number|boolean> {
+    arr: number | boolean | RegularArray<number> | RegularArray<boolean>,
+    ret: Array<number | boolean> = []): Array<number | boolean> {
   if (Array.isArray(arr)) {
     for (let i = 0; i < arr.length; ++i) {
       flatten(arr[i], ret);
@@ -100,7 +101,7 @@ export function flatten(
   return ret;
 }
 
-export function inferShape(arr: number|boolean|RegularArray<number>|
+export function inferShape(arr: number | boolean | RegularArray<number> |
                            RegularArray<boolean>): number[] {
   const shape: number[] = [];
   while (arr instanceof Array) {
@@ -351,7 +352,7 @@ export function checkForNaN(
 }
 
 export function flattenNameArrayMap(
-    nameArrayMap: NDArray|NamedArrayMap, keys?: string[]): NDArray[] {
+    nameArrayMap: NDArray | NamedArrayMap, keys?: string[]): NDArray[] {
   const xs: NDArray[] = [];
   if (nameArrayMap instanceof NDArray) {
     xs.push(nameArrayMap);

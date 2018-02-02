@@ -16,7 +16,7 @@
  */
 
 import * as broadcast_util from "../../broadcast_util";
-import {GPGPUProgram} from "./gpgpu_math";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class BatchNormProgram implements GPGPUProgram {
   variableNames: string[];
@@ -26,7 +26,7 @@ export class BatchNormProgram implements GPGPUProgram {
 
   constructor(
       xShape: number[], meanShape: number[], varianceShape: number[],
-      offsetShape: number[]|null, scaleShape: number[]|null,
+      offsetShape: number[] | null, scaleShape: number[] | null,
       varianceEpsilon: number) {
     this.variableNames = ["x", "mean", "variance"];
     broadcast_util.assertAndGetBroadcastShape(xShape, meanShape);
