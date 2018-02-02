@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import {ENV} from "../environment";
+import { ENV } from "../environment";
 import * as util from "../util";
-import {ArrayData} from "../util";
-import {NDArrayMath} from "./math";
-import {RandNormalDataTypes} from "./rand";
-import {MPRandGauss} from "./rand";
+import { ArrayData } from "../util";
+import { NDArrayMath } from "./math";
+import { RandNormalDataTypes } from "./rand";
+import { MPRandGauss } from "./rand";
 
 export enum DType {
   float32 = "float32",
@@ -193,7 +193,8 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   }
 
   static fromPixels(
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels = 3, math?: NDArrayMath): Array3D<"int32"> {
     if (numChannels > 4) {
       throw new Error(
@@ -420,8 +421,8 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
 }
 
 export class Scalar<D extends DataType = DataType> extends NDArray<D, "0"> {
-  static new<D extends DataType = "float32">(value: number|boolean, dtype?: D):
-      Scalar<D> {
+  static new<D extends DataType = "float32">(
+      value: number | boolean, dtype?: D): Scalar<D> {
     const values = [value] as number[] | boolean[];
     return new Scalar([], dtype, toTypedArray(values, dtype));
   }
@@ -454,7 +455,7 @@ export class Scalar<D extends DataType = DataType> extends NDArray<D, "0"> {
 
 export class Array1D<D extends DataType = DataType> extends NDArray<D, "1"> {
   static new<D extends DataType = "float32">(
-      values: DataTypeMap[D]|number[]|boolean[], dtype?: D): Array1D<D> {
+      values: DataTypeMap[D] | number[] | boolean[], dtype?: D): Array1D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
       util.assert(
@@ -541,7 +542,7 @@ export class Array2D<D extends DataType = DataType> extends NDArray<D, "2"> {
 
   static new<D extends DataType = "float32">(
       shape: [number, number],
-      values: DataTypeMap[D]|number[]|number[][]|boolean[]|boolean[][],
+      values: DataTypeMap[D] | number[] | number[][] | boolean[] | boolean[][],
       dtype?: D): Array2D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -632,7 +633,8 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, "3"> {
 
   static new<D extends DataType = "float32">(
       shape: [number, number, number],
-      values: DataTypeMap[D]|number[]|number[][][]|boolean[]|boolean[][][],
+      values: DataTypeMap[D] | number[] | number[][][] | boolean[] |
+              boolean[][][],
       dtype?: D): Array3D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -725,7 +727,8 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, "4"> {
 
   static new<D extends DataType = "float32">(
       shape: [number, number, number, number],
-      values: DataTypeMap[D]|number[]|number[][][][]|boolean[]|boolean[][][][],
+      values: DataTypeMap[D] | number[] | number[][][][] | boolean[] |
+              boolean[][][][],
       dtype?: D): Array4D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -816,7 +819,7 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, "4"> {
 }
 
 function copyTypedArray<D extends DataType>(
-    array: DataTypeMap[D]|number[]|boolean[], dtype: D): DataTypeMap[D] {
+    array: DataTypeMap[D] | number[] | boolean[], dtype: D): DataTypeMap[D] {
   if (dtype == null || dtype === "float32") {
     return new Float32Array(array as number[]);
   } else if (dtype === "int32") {

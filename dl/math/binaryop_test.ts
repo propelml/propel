@@ -16,8 +16,8 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
-import {Array1D, Array2D, Scalar} from "./ndarray";
+import { MathTests } from "../test_util";
+import { Array1D, Array2D, Scalar } from "./ndarray";
 
 // math.prelu
 {

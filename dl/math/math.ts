@@ -15,18 +15,18 @@
  * =============================================================================
  */
 
-import {BackendType, ENV} from "../environment";
+import { BackendType, ENV } from "../environment";
 import * as util from "../util";
 import * as axis_util from "./axis_util";
-import {MathBackend} from "./backends/backend";
-import {BackendEngine, ScopeResult} from "./backends/backend_engine";
+import { MathBackend } from "./backends/backend";
+import { BackendEngine, ScopeResult } from "./backends/backend_engine";
 import * as broadcast_util from "./broadcast_util";
 import * as concat_util from "./concat_util";
 import * as conv_util from "./conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar} from "./ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar } from "./ndarray";
 import * as slice_util from "./slice_util";
-import {MatrixOrientation, SumTypes} from "./types";
+import { MatrixOrientation, SumTypes } from "./types";
 
 export interface LSTMCell {
   (data: Array2D, c: Array2D, h: Array2D): [Array2D, Array2D];
@@ -66,7 +66,8 @@ export class NDArrayMath implements NDArrayManager {
 
   writePixels(
       dataId: DataId,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels: number): void {
     this.backend.writePixels(dataId, pixels, numChannels);
   }
@@ -84,7 +85,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param safeMode In safe mode, you must use math operations inside
    *     a math.scope() which will automatically clean up intermediate NDArrays.
    */
-  constructor(backend: BackendType|MathBackend) {
+  constructor(backend: BackendType | MathBackend) {
     if (typeof backend === "string") {
       this.backend = ENV.getBackend(backend);
     } else {
@@ -463,7 +464,7 @@ export class NDArrayMath implements NDArrayManager {
    *     of 1. Defaults to false.
    */
   logSumExp<T extends NDArray>(
-      input: NDArray, axis: number|number[] = null, keepDims = false): T {
+      input: NDArray, axis: number | number[] = null, keepDims = false): T {
     const axes = axis_util.parseAxisParam(axis, input.shape);
     return this.executeOp("logSumExp", () => {
       const xMax = this.max(input, axes, true /* keepDims */);
@@ -496,7 +497,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param keepDims Optional. If true, retains reduced dimensions with size 1.
    */
   sum<D extends DataType, T extends NDArray<SumTypes[D]>>(
-      x: NDArray<D>, axis: number|number[] = null, keepDims = false): T {
+      x: NDArray<D>, axis: number | number[] = null, keepDims = false): T {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
@@ -528,7 +529,7 @@ export class NDArrayMath implements NDArrayManager {
    *     all dimensions.
    * @param keepDims Optional. If true, retains reduced dimensions with size 1.
    */
-  mean(x: NDArray, axis: number|number[] = null, keepDims = false):
+  mean(x: NDArray, axis: number | number[] = null, keepDims = false):
       NDArray<"float32"> {
     const axes = axis_util.parseAxisParam(axis, x.shape);
     const shapes = axis_util.computeOutAndReduceShapes(x.shape, axes);
@@ -705,7 +706,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param keepDims Optional. If true, retains reduced dimensions with size 1.
    */
   min<D extends DataType, T extends NDArray<D>>(
-      x: NDArray<D>, axis: number|number[] = null, keepDims = false): T {
+      x: NDArray<D>, axis: number | number[] = null, keepDims = false): T {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
@@ -752,7 +753,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param keepDims Optional. If true, retains reduced dimensions with size 1.
    */
   max<D extends DataType, T extends NDArray<D>>(
-      x: NDArray<D>, axis: number|number[] = null, keepDims = false): T {
+      x: NDArray<D>, axis: number | number[] = null, keepDims = false): T {
     const origAxes = axis_util.parseAxisParam(axis, x.shape);
     let axes = origAxes;
     const permutedAxes = axis_util.getPermutedAxes(axes, x.rank);
@@ -1414,8 +1415,8 @@ export class NDArrayMath implements NDArrayManager {
    *     https://www.tensorflow.org/api_guides/python/nn#Convolution
    */
   conv1d<T extends NDArray>(
-      input: T, filter: Array3D, bias: Array1D|null, stride: number,
-      pad: "valid"|"same"|number): T {
+      input: T, filter: Array3D, bias: Array1D | null, stride: number,
+      pad: "valid" | "same" | number): T {
     let input3D = input as NDArray as Array3D;
     let reshapedTo3D = false;
     if (input.rank === 2) {
@@ -1477,8 +1478,8 @@ export class NDArrayMath implements NDArrayManager {
    *     https://www.tensorflow.org/api_guides/python/nn#Convolution
    */
   conv2d<T extends NDArray>(
-      input: T, filter: Array4D, bias: Array1D|null,
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      input: T, filter: Array4D, bias: Array1D | null,
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1532,9 +1533,9 @@ export class NDArrayMath implements NDArrayManager {
    *     used in the forward prop of the op.
    */
   conv2dDerInput<T extends NDArray>(
-      inShape: [number, number, number, number]|[number, number, number], dy: T,
-      filter: Array4D, strides: [number, number]|number,
-      pad: "valid"|"same"|number): T {
+      inShape: [number, number, number, number] | [number, number, number],
+      dy: T, filter: Array4D, strides: [number, number] | number,
+      pad: "valid" | "same" | number): T {
     util.assert(
         inShape.length === dy.rank,
         `Length of inShape ` +
@@ -1591,7 +1592,7 @@ export class NDArrayMath implements NDArrayManager {
    *   shape [batch, height, width, outDepth]. If rank 3, batch of 1 is
    * assumed.
    */
-  conv2dDerBias(dy: Array3D|Array4D): Array1D {
+  conv2dDerBias(dy: Array3D | Array4D): Array1D {
     let dy4D = dy as Array4D;
     if (dy.rank === 3) {
       dy4D = dy.as4D(1, dy.shape[0], dy.shape[1], dy.shape[2]);
@@ -1615,7 +1616,8 @@ export class NDArrayMath implements NDArrayManager {
    */
   conv2dDerFilter<T extends NDArray>(
       input: T, dy: T, filterShape: [number, number, number, number],
-      strides: [number, number]|number, pad: "valid"|"same"|number): Array4D {
+      strides: [number, number] | number, pad: "valid" | "same" | number):
+      Array4D {
     let input4D = input as NDArray as Array4D;
     if (input.rank === 3) {
       input4D = input.as4D(1, input.shape[0], input.shape[1], input.shape[2]);
@@ -1668,8 +1670,8 @@ export class NDArrayMath implements NDArrayManager {
    */
   conv2dTranspose<T extends NDArray>(
       x: T, filter: Array4D,
-      outputShape: [number, number, number, number]|[number, number, number],
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      outputShape: [number, number, number, number] | [number, number, number],
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     return this.conv2dDerInput(outputShape, x, filter, strides, pad);
   }
 
@@ -1708,8 +1710,9 @@ export class NDArrayMath implements NDArrayManager {
    * of `strides` must be 1.
    */
   depthwiseConv2D<T extends NDArray>(
-      input: T, filter: Array4D, strides: [number, number]|number,
-      pad: "valid"|"same"|number, rates: [number, number]|number = [1, 1]): T {
+      input: T, filter: Array4D, strides: [number, number] | number,
+      pad: "valid" | "same" | number,
+      rates: [number, number] | number = [1, 1]): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1764,8 +1767,8 @@ export class NDArrayMath implements NDArrayManager {
    *     https://www.tensorflow.org/api_guides/python/nn#Convolution
    */
   maxPool<T extends NDArray>(
-      input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      input: T, filterSize: [number, number] | number,
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1803,8 +1806,8 @@ export class NDArrayMath implements NDArrayManager {
    *     used in the forward prop of the op.
    */
   maxPoolBackprop<T extends NDArray>(
-      dy: T, input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      dy: T, input: T, filterSize: [number, number] | number,
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     util.assert(
         input.rank === dy.rank,
         `Rank of input (${input.rank}) does not match rank of dy (${dy.rank})`);
@@ -1855,8 +1858,8 @@ export class NDArrayMath implements NDArrayManager {
    *     https://www.tensorflow.org/api_guides/python/nn#Convolution
    */
   minPool<T extends NDArray>(
-      input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      input: T, filterSize: [number, number] | number,
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1895,8 +1898,8 @@ export class NDArrayMath implements NDArrayManager {
    *     https://www.tensorflow.org/api_guides/python/nn#Convolution
    */
   avgPool<T extends NDArray>(
-      input: T, filterSize: [number, number]|number,
-      strides: [number, number]|number, pad: "valid"|"same"|number): T {
+      input: T, filterSize: [number, number] | number,
+      strides: [number, number] | number, pad: "valid" | "same" | number): T {
     let input4D = input as NDArray as Array4D;
     let reshapedTo4D = false;
     if (input.rank === 3) {
@@ -1954,9 +1957,9 @@ export class NDArrayMath implements NDArrayManager {
    * @param offset An offset NDArray.
    */
   batchNormalization2D(
-      x: Array2D, mean: Array2D|Array1D, variance: Array2D|Array1D,
-      varianceEpsilon = .001, scale?: Array2D|Array1D,
-      offset?: Array2D|Array1D): Array2D {
+      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
+      varianceEpsilon = .001, scale?: Array2D | Array1D,
+      offset?: Array2D | Array1D): Array2D {
     util.assert(
         x.rank === 2,
         `Error in batchNormalization3D: x must be rank 3 but got rank ` +
@@ -1999,9 +2002,9 @@ export class NDArrayMath implements NDArrayManager {
    * @param offset An offset NDArray.
    */
   batchNormalization3D(
-      x: Array3D, mean: Array3D|Array1D, variance: Array3D|Array1D,
-      varianceEpsilon = .001, scale?: Array3D|Array1D,
-      offset?: Array3D|Array1D): Array3D {
+      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
+      varianceEpsilon = .001, scale?: Array3D | Array1D,
+      offset?: Array3D | Array1D): Array3D {
     util.assert(
         x.rank === 3,
         `Error in batchNormalization3D: x must be rank 3 but got rank ` +
@@ -2044,9 +2047,9 @@ export class NDArrayMath implements NDArrayManager {
    * @param offset An offset NDArray.
    */
   batchNormalization4D(
-      x: Array4D, mean: Array4D|Array1D, variance: Array4D|Array1D,
-      varianceEpsilon = .001, scale?: Array4D|Array1D,
-      offset?: Array4D|Array1D): Array4D {
+      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
+      varianceEpsilon = .001, scale?: Array4D | Array1D,
+      offset?: Array4D | Array1D): Array4D {
     util.assert(
         x.rank === 4,
         `Error in batchNormalization4D: x must be rank 4 but got rank ` +
@@ -2166,8 +2169,8 @@ export class NDArrayMath implements NDArrayManager {
    *     `[batchSize, numSamples]`, depending on the rank of the input.
    */
   multinomial(
-      probabilities: Array1D|Array2D, numSamples: number,
-      seed?: number): Array1D<"int32">|Array2D<"int32"> {
+      probabilities: Array1D | Array2D, numSamples: number,
+      seed?: number): Array1D<"int32"> | Array2D<"int32"> {
     const numOutcomes = probabilities.size;
     if (numOutcomes < 2) {
       throw new Error(
@@ -2225,7 +2228,7 @@ export class NDArrayMath implements NDArrayManager {
    *     input.
    * @return An object with two keys: `mean` and `variance`.
    */
-  moments(x: NDArray, axis: number|number[] = null, keepDims = false):
+  moments(x: NDArray, axis: number | number[] = null, keepDims = false):
       {mean: NDArray<"float32">, variance: NDArray<"float32">} {
     const axes = axis_util.parseAxisParam(axis, x.shape);
     const result = this.scope(() => {
@@ -2271,8 +2274,9 @@ export class NDArrayMath implements NDArrayManager {
    * as the input.
    */
   norm<D extends DataType>(
-      x: NDArray<D>, ord: number|"euclidean"|"fro" = "euclidean",
-      axis: number|number[] = null, keepDims = false): NDArray<D|SumTypes[D]> {
+      x: NDArray<D>, ord: number | "euclidean" | "fro" = "euclidean",
+      axis: number | number[] = null, keepDims = false):
+      NDArray<D | SumTypes[D]> {
     return this.scope(() => {
       const norm = this.normInternal(x, ord, axis);
       let keepDimsShape = norm.shape;
@@ -2292,8 +2296,8 @@ export class NDArrayMath implements NDArrayManager {
    * Calculate the norm for different NDAarray.
    */
   private normInternal<D extends DataType>(
-      x: NDArray<D>, p: number|string,
-      axis: number|number[] = null): NDArray<D|SumTypes[D]> {
+      x: NDArray<D>, p: number | string,
+      axis: number | number[] = null): NDArray<D | SumTypes[D]> {
     // scalar
     if (x.rank === 0) {
       return this.abs(x);
@@ -2365,6 +2369,6 @@ export class NDArrayMath implements NDArrayManager {
   }
 }
 
-function parseTupleParam(param: number|[number, number]): [number, number] {
+function parseTupleParam(param: number | [number, number]): [number, number] {
   return typeof param === "number" ? [param, param] : param;
 }

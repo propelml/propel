@@ -15,9 +15,9 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from "./gpgpu_context";
-import {GPGPUProgram} from "./gpgpu_math";
-import {getCoordsDataType} from "./shader_compiler";
+import { GPGPUContext } from "./gpgpu_context";
+import { GPGPUProgram } from "./gpgpu_math";
+import { getCoordsDataType } from "./shader_compiler";
 
 export class SliceProgram implements GPGPUProgram {
   variableNames = ["source"];

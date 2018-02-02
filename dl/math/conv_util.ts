@@ -37,7 +37,7 @@ export type Conv2DInfo = {
   outHeight: number,
   outWidth: number,
   outChannels: number,
-  dataFormat: "channelsFirst"|"channelsLast",
+  dataFormat: "channelsFirst" | "channelsLast",
   strideHeight: number,
   strideWidth: number,
   filterHeight: number,
@@ -50,9 +50,9 @@ export type Conv2DInfo = {
 
 export function computePool2DInfo(
     inShape: [number, number, number, number],
-    filterSize: [number, number]|number, strides: number|[number, number],
-    pad: "same"|"valid"|number,
-    dataFormat: "channelsFirst"|"channelsLast" = "channelsLast"): Conv2DInfo {
+    filterSize: [number, number] | number, strides: number | [number, number],
+    pad: "same" | "valid" | number,
+    dataFormat: "channelsFirst" | "channelsLast" = "channelsLast"): Conv2DInfo {
   const [filterHeight, filterWidth] = parseTupleParam(filterSize);
 
   let filterShape: [number, number, number, number];
@@ -74,7 +74,7 @@ export function computePool2DInfo(
 export function computeConv2DInfo(
     inShape: [number, number, number, number],
     filterShape: [number, number, number, number],
-    strides: number|[number, number], pad: "same"|"valid"|number,
+    strides: number | [number, number], pad: "same" | "valid" | number,
     depthwise = false,
     dataFormat: "channelsFirst" | "channelsLast" = "channelsLast"): Conv2DInfo {
   let [batchSize, inHeight, inWidth, inChannels] = [-1, -1, -1, -1];
@@ -167,12 +167,12 @@ export function computeDilatedRC(
   return [rowsDilated, colsDilated];
 }
 
-function parseTupleParam(param: number|[number, number]): [number, number] {
+function parseTupleParam(param: number | [number, number]): [number, number] {
   return typeof param === "number" ? [param, param] : param;
 }
 
 function getPadAndOutInfo(
-    pad: "same"|"valid"|number, inHeight: number, inWidth: number,
+    pad: "same" | "valid" | number, inHeight: number, inWidth: number,
     strideHeight: number, strideWidth: number, filterHeight: number,
     filterWidth: number):
     {padInfo: PadInfo, outHeight: number, outWidth: number} {

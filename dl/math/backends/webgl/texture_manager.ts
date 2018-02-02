@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from "./gpgpu_context";
+import { GPGPUContext } from "./gpgpu_context";
 
 export class TextureManager {
   private numUsedTextures = 0;

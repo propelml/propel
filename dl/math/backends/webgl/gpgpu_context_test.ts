@@ -16,7 +16,7 @@
  */
 
 import * as test_util from "../../../test_util";
-import {GPGPUContext} from "./gpgpu_context";
+import { GPGPUContext } from "./gpgpu_context";
 import * as tex_util from "./tex_util";
 
 test_util.describeCustom(

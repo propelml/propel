@@ -17,7 +17,7 @@
 
 let MAX_TEXTURE_SIZE: number = null;
 
-import {ENV} from "../../../environment";
+import { ENV } from "../../../environment";
 import * as util from "../../../util";
 
 export interface WebGLContextAttributes {
@@ -365,7 +365,7 @@ export function getFramebufferErrorMessage(
 function throwIfNull<T>(
     gl: WebGLRenderingContext, returnTOrNull: () => T | null,
     failureMessage: string): T {
-  const tOrNull: T|null = callAndCheck(gl, () => returnTOrNull());
+  const tOrNull: T | null = callAndCheck(gl, () => returnTOrNull());
   if (tOrNull == null) {
     throw new Error(failureMessage);
   }

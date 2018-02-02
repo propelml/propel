@@ -16,10 +16,10 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
+import { MathTests } from "../test_util";
 import * as util from "../util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DType, NDArray, Scalar} from "./ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DType, NDArray, Scalar } from "./ndarray";
 
 const tests: MathTests = it => {
   it("NDArrays of arbitrary size", () => {

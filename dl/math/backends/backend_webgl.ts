@@ -15,46 +15,46 @@
  * =============================================================================
  */
 
-import {ENV} from "../../environment";
+import { ENV } from "../../environment";
 import * as util from "../../util";
-import {TypedArray} from "../../util";
+import { TypedArray } from "../../util";
 import * as axis_util from "../axis_util";
-import {Conv2DInfo} from "../conv_util";
+import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank} from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
 import * as reduce_util from "../reduce_util";
 import * as types from "../types";
-import {SumTypes, SumTypesMap} from "../types";
-import {MathBackend} from "./backend";
-import {ArgMinMaxProgram} from "./webgl/argminmax_gpu";
-import {BatchNormProgram} from "./webgl/batchnorm_gpu";
+import { SumTypes, SumTypesMap } from "../types";
+import { MathBackend } from "./backend";
+import { ArgMinMaxProgram } from "./webgl/argminmax_gpu";
+import { BatchNormProgram } from "./webgl/batchnorm_gpu";
 import * as binaryop_gpu from "./webgl/binaryop_gpu";
-import {BinaryOpProgram} from "./webgl/binaryop_gpu";
-import {ClipProgram} from "./webgl/clip_gpu";
-import {ConcatProgram} from "./webgl/concat_gpu";
+import { BinaryOpProgram } from "./webgl/binaryop_gpu";
+import { ClipProgram } from "./webgl/clip_gpu";
+import { ConcatProgram } from "./webgl/concat_gpu";
 // tslint:disable-next-line:max-line-length
-import {Conv2DDerBiasProgram, Conv2DDerFilterProgram, Conv2DDerInputProgram} from "./webgl/conv_backprop_gpu";
-import {Conv2DProgram} from "./webgl/conv_gpu";
-import {DepthwiseConv2DProgram} from "./webgl/conv_gpu_depthwise";
-import {Copy2DProgram} from "./webgl/copy_gpu";
-import {GPGPUContext} from "./webgl/gpgpu_context";
+import { Conv2DDerBiasProgram, Conv2DDerFilterProgram, Conv2DDerInputProgram } from "./webgl/conv_backprop_gpu";
+import { Conv2DProgram } from "./webgl/conv_gpu";
+import { DepthwiseConv2DProgram } from "./webgl/conv_gpu_depthwise";
+import { Copy2DProgram } from "./webgl/copy_gpu";
+import { GPGPUContext } from "./webgl/gpgpu_context";
 import * as gpgpu_math from "./webgl/gpgpu_math";
-import {ArrayData, GPGPUBinary, GPGPUProgram} from "./webgl/gpgpu_math";
+import { ArrayData, GPGPUBinary, GPGPUProgram } from "./webgl/gpgpu_math";
 import * as gpgpu_util from "./webgl/gpgpu_util";
-import {MaxPool2DBackpropProgram} from "./webgl/max_pool_backprop_gpu";
-import {MatMulProgram} from "./webgl/mulmat_gpu";
-import {MultinomialProgram} from "./webgl/multinomial_gpu";
-import {OneHotProgram} from "./webgl/onehot_gpu";
-import {Pool2DProgram} from "./webgl/pool_gpu";
-import {ReduceProgram} from "./webgl/reduce_gpu";
-import {ResizeBilinear3DProgram} from "./webgl/resize_bilinear_gpu";
-import {SliceProgram} from "./webgl/slice_gpu";
-import {TextureData, TextureType} from "./webgl/tex_util";
-import {TextureManager} from "./webgl/texture_manager";
-import {TileProgram} from "./webgl/tile_gpu";
-import {TransposeProgram} from "./webgl/transpose_gpu";
+import { MaxPool2DBackpropProgram } from "./webgl/max_pool_backprop_gpu";
+import { MatMulProgram } from "./webgl/mulmat_gpu";
+import { MultinomialProgram } from "./webgl/multinomial_gpu";
+import { OneHotProgram } from "./webgl/onehot_gpu";
+import { Pool2DProgram } from "./webgl/pool_gpu";
+import { ReduceProgram } from "./webgl/reduce_gpu";
+import { ResizeBilinear3DProgram } from "./webgl/resize_bilinear_gpu";
+import { SliceProgram } from "./webgl/slice_gpu";
+import { TextureData, TextureType } from "./webgl/tex_util";
+import { TextureManager } from "./webgl/texture_manager";
+import { TileProgram } from "./webgl/tile_gpu";
+import { TransposeProgram } from "./webgl/transpose_gpu";
 import * as unary_op from "./webgl/unaryop_gpu";
-import {UnaryOpProgram} from "./webgl/unaryop_gpu";
+import { UnaryOpProgram } from "./webgl/unaryop_gpu";
 import * as webgl_util from "./webgl/webgl_util";
 
 export class MathBackendWebGL implements MathBackend {
@@ -76,7 +76,8 @@ export class MathBackendWebGL implements MathBackend {
   }
   writePixels(
       dataId: DataId,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
       throw new Error("MathBackendWebGL.writePixels(): pixels can not be null");
@@ -324,9 +325,9 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   batchNormalization2D(
-      x: Array2D, mean: Array2D|Array1D, variance: Array2D|Array1D,
-      varianceEpsilon: number, scale?: Array2D|Array1D,
-      offset?: Array2D|Array1D): Array2D {
+      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
+      varianceEpsilon: number, scale?: Array2D | Array1D,
+      offset?: Array2D | Array1D): Array2D {
     const inputs = [x, mean, variance];
 
     let offsetShape = null;
@@ -348,9 +349,9 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   batchNormalization3D(
-      x: Array3D, mean: Array3D|Array1D, variance: Array3D|Array1D,
-      varianceEpsilon: number, scale?: Array3D|Array1D,
-      offset?: Array3D|Array1D): Array3D {
+      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
+      varianceEpsilon: number, scale?: Array3D | Array1D,
+      offset?: Array3D | Array1D): Array3D {
     const inputs = [x, mean, variance];
 
     let offsetShape = null;
@@ -372,9 +373,9 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   batchNormalization4D(
-      x: Array4D, mean: Array4D|Array1D, variance: Array4D|Array1D,
-      varianceEpsilon: number, scale?: Array4D|Array1D,
-      offset?: Array4D|Array1D): Array4D {
+      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
+      varianceEpsilon: number, scale?: Array4D | Array1D,
+      offset?: Array4D | Array1D): Array4D {
     const inputs = [x, mean, variance];
 
     let offsetShape = null;
@@ -406,7 +407,7 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   private reduce<D extends DataType>(
-      x: Array2D, reduceType: "max"|"min"|"sum", dtype: D): Array2D<D> {
+      x: Array2D, reduceType: "max" | "min" | "sum", dtype: D): Array2D<D> {
     const batchSize = x.shape[0];
     const inSize = x.shape[1];
     const windowSize = reduce_util.computeOptimalWindowSize(inSize);
@@ -424,7 +425,7 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   private argReduce(
-      x: Array2D, reduceType: "max"|"min",
+      x: Array2D, reduceType: "max" | "min",
       bestIndicesA: Array2D = null): Array2D<"int32"> {
     let batchSize = x.shape[0];
     let inSize = x.shape[1];
@@ -727,8 +728,8 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun(program, [x]) as T;
   }
 
-  conv2d(x: Array4D, filter: Array4D, bias: Array1D|null, convInfo: Conv2DInfo):
-      Array4D {
+  conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
+      convInfo: Conv2DInfo): Array4D {
     const program = new Conv2DProgram(convInfo, bias != null);
     const inputs = bias != null ? [x, filter, bias] : [x, filter];
     return this.compileAndRun(program, inputs);

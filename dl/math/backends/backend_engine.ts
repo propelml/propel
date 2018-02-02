@@ -16,10 +16,10 @@
  */
 
 import * as util from "../../util";
-import {DataType, NDArray} from "../ndarray";
+import { DataType, NDArray } from "../ndarray";
 
 export type ScopeResult =
-    void|NDArray|NDArray[]|{[key: string]: NDArray};
+    void | NDArray | NDArray[] | {[key: string]: NDArray};
 
 export function extractNDArraysFromScopeResult(result: ScopeResult):
     NDArray[] {

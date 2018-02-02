@@ -16,7 +16,7 @@
  */
 
 import * as test_util from "../test_util";
-import {MPRandGauss} from "./rand";
+import { MPRandGauss } from "./rand";
 
 function isFloat(n: number): boolean {
   return Number(n) === n && n % 1 !== 0;

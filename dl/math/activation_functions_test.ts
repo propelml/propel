@@ -14,12 +14,12 @@
  * limitations under the License.
  * =============================================================================
  */
-import {ENV} from "../environment";
+import { ENV } from "../environment";
 import * as test_util from "../test_util";
 import * as util from "../util";
 // tslint:disable-next-line:max-line-length
-import {EluFunc, LeakyReluFunc, ReLUFunc, SigmoidFunc, TanHFunc} from "./activation_functions";
-import {Array1D} from "./ndarray";
+import { EluFunc, LeakyReluFunc, ReLUFunc, SigmoidFunc, TanHFunc } from "./activation_functions";
+import { Array1D } from "./ndarray";
 
 describe("Activation functions", () => {
   const math = ENV.math;

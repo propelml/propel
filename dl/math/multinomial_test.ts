@@ -16,8 +16,8 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
-import {Array1D, Array2D, NDArray} from "./ndarray";
+import { MathTests } from "../test_util";
+import { Array1D, Array2D, NDArray } from "./ndarray";
 
 const tests: MathTests = it => {
   const NUM_SAMPLES = 10000;
@@ -100,7 +100,7 @@ const tests: MathTests = it => {
   });
 
   function computeProbs(
-      events: Float32Array|Uint8Array|Int32Array, numOutcomes: number) {
+      events: Float32Array | Uint8Array | Int32Array, numOutcomes: number) {
     const counts = [];
     for (let i = 0; i < numOutcomes; ++i) {
       counts[i] = 0;

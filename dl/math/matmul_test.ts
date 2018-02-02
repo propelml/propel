@@ -16,9 +16,9 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
-import {Array1D, Array2D, Array3D} from "./ndarray";
-import {MatrixOrientation} from "./types";
+import { MathTests } from "../test_util";
+import { Array1D, Array2D, Array3D } from "./ndarray";
+import { MatrixOrientation } from "./types";
 
 const commonTests: MathTests = it => {
   it("A x B", math => {

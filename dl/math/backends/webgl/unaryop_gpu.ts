@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {GPGPUProgram} from "./gpgpu_math";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class UnaryOpProgram implements GPGPUProgram {
   variableNames = ["A"];

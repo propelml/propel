@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {Array1D, NDArray, Scalar} from "./math/ndarray";
+import { Array1D, NDArray, Scalar } from "./math/ndarray";
 import * as test_util from "./test_util";
-import {MathTests} from "./test_util";
+import { MathTests } from "./test_util";
 import * as util from "./util";
-import {NamedArrayMap} from "./util";
+import { NamedArrayMap } from "./util";
 
 describe("Util", () => {
   it("Flatten arrays", () => {

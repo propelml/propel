@@ -16,9 +16,9 @@
  */
 
 import * as test_util from "../test_util";
-import {MathTests} from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array2D} from "./ndarray";
+import { Array2D } from "./ndarray";
 
 const commonTests: MathTests = it => {
   it("returns a ndarray with the same shape and value", math => {

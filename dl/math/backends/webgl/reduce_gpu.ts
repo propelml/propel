@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import {ReduceInfo} from "../../reduce_util";
-import {GPGPUProgram} from "./gpgpu_math";
+import { ReduceInfo } from "../../reduce_util";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class ReduceProgram implements GPGPUProgram {
   variableNames = ["x"];
   outputShape: number[];
   userCode: string;
 
-  constructor(reduceInfo: ReduceInfo, reduceType: "max"|"min"|"sum") {
+  constructor(reduceInfo: ReduceInfo, reduceType: "max" | "min" | "sum") {
     const windowSize = reduceInfo.windowSize;
     const batchSize = reduceInfo.batchSize;
     const inSize = reduceInfo.inSize;
