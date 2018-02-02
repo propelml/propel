@@ -15,7 +15,6 @@
  * =============================================================================
  */
 
-import * as device_util from './device_util';
 import {MathBackend} from './math/backends/backend';
 import {NDArrayMath} from './math/math';
 import * as util from './util';
@@ -28,9 +27,6 @@ export enum Type {
 export interface Features {
   // Whether the disjoint_query_timer extension is an available extension.
   'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED'?: boolean;
-  // Whether the timer object from the disjoint_query_timer extension gives
-  // timing information that is reliable.
-  'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE'?: boolean;
   // 0: No WebGL, 1: WebGL 1.0, 2: WebGL 2.0.
   'WEBGL_VERSION'?: number;
   // Whether writing & reading floating point textures is enabled. When
@@ -42,7 +38,6 @@ export interface Features {
 
 export const URL_PROPERTIES: URLProperty[] = [
   {name: 'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED', type: Type.BOOLEAN},
-  {name: 'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE', type: Type.BOOLEAN},
   {name: 'WEBGL_VERSION', type: Type.NUMBER},
   {name: 'WEBGL_FLOAT_TEXTURE_ENABLED', type: Type.BOOLEAN}, {
     name: 'WEBGL_GET_BUFFER_SUB_DATA_ASYNC_EXTENSION_ENABLED',
@@ -203,9 +198,6 @@ export class Environment {
       }
 
       return isWebGLDisjointQueryTimerEnabled(webGLVersion);
-    } else if (feature === 'WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_RELIABLE') {
-      return this.get('WEBGL_DISJOINT_QUERY_TIMER_EXTENSION_ENABLED') &&
-          !device_util.isMobile();
     } else if (feature === 'WEBGL_VERSION') {
       if (isWebGLVersionEnabled(2)) {
         return 2;
