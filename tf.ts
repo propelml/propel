@@ -225,8 +225,11 @@ export class OpsTF implements types.BackendOps {
     if (value.shape.length !== 0) {
       throw new Error("Fill value must be a scalar.");
     }
-    const shapeT = int32Small(shape);
-    return execute1("Fill", [shapeT, value], value.dtype);
+    const attrs = [["T", binding.ATTR_TYPE, dtypePropel2TF(value.dtype)],
+                   ["index_type", binding.ATTR_TYPE, binding.TF_INT32]];
+    const handles = [int32Small(shape).handle, value.handle];
+    const r = binding.execute(ctx, "Fill", attrs, handles);
+    return new TensorTF(r[0]);
   }
 
   square(x: TensorTF): TensorTF {
