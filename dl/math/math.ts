@@ -116,10 +116,7 @@ export class NDArrayMath implements NDArrayManager {
    * also be tracked, which means there must be yet another wrapping scope.
    * @param scopeFn The function to execute with chained math operations.
    */
-  scope<T extends ScopeResult>(
-      scopeFn:
-          (keep: <T1 extends NDArray>(ndarray: T1) => T1,
-           track: <T2 extends NDArray>(ndarray: T2) => T2) => T): T {
+  scope<T extends ScopeResult>(scopeFn: () => T): T {
     return this.backendEngine.scope('scope', scopeFn);
   }
 
@@ -137,19 +134,6 @@ export class NDArrayMath implements NDArrayManager {
    */
   endScope(result: {}) {
     this.backendEngine.endScope(result);
-  }
-
-  /**
-   * Keeps an NDArray in the current scope from being disposed automatically.
-   * @param result The NDArray to keep from being disposed.
-   */
-  keep<T extends NDArray>(result: T): T {
-    return this.backendEngine.keep(result);
-  }
-
-  /** @deprecated This is a no-op. */
-  track<T extends NDArray>(result: T): T {
-    return result;
   }
 
   dispose() {
@@ -566,7 +550,7 @@ export class NDArrayMath implements NDArrayManager {
     const reduceShape = shapes[1];
     const reduceSize = util.sizeFromShape(reduceShape);
     return this.executeOp('mean', () => {
-      return this.scope(keep => {
+      return this.scope(() => {
         const res = this.divide(x, Scalar.new(reduceSize));
         return this.sum(res, axis, keepDims);
       });
