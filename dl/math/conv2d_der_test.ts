@@ -72,9 +72,9 @@ import {Array3D, Array4D} from './ndarray';
 
   test_util.describeMathCPU('conv2dDerFilter', [tests]);
   test_util.describeMathGPU('conv2dDerFilter', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
   ]);
 }
 
@@ -109,8 +109,8 @@ import {Array3D, Array4D} from './ndarray';
 
   test_util.describeMathCPU('conv2dDerBias', [tests]);
   test_util.describeMathGPU('conv2dDerBias', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
   ]);
 }

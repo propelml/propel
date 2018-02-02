@@ -77,8 +77,8 @@ import {Array3D} from './ndarray';
 
   test_util.describeMathCPU('resizeBilinear3D', [tests]);
   test_util.describeMathGPU('resizeBilinear3D', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
   ]);
 }

@@ -189,7 +189,7 @@ describe('Backend', () => {
 
   it('custom webgl registration', () => {
     const features:
-        Features = {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2};
+        Features = {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true};
     ENV.setFeatures(features);
 
     let backend: MathBackend;
@@ -203,7 +203,7 @@ describe('Backend', () => {
   });
 
   it('double registration fails', () => {
-    ENV.setFeatures({'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2});
+    ENV.setFeatures({'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true});
     ENV.registerBackend('webgl', () => new MathBackendWebGL());
     expect(() => ENV.registerBackend('webgl', () => new MathBackendWebGL()))
         .toThrowError();
