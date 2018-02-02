@@ -65,9 +65,9 @@ test_util.describeCustom(
       });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+      {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+      {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+      {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
     ]);
 
 test_util.describeCustom(
@@ -94,8 +94,8 @@ test_util.describeCustom(
       });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
+      {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+      {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
     ]);
 
 test_util.describeCustom('GPGPUContext color texture with byte packing', () => {
@@ -121,7 +121,7 @@ test_util.describeCustom('GPGPUContext color texture with byte packing', () => {
     const result = gpgpu.downloadMatrixFromTexture(texture, 1, 1);
     test_util.expectNumbersClose(result[0], 0.123);
   });
-}, [{'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}]);
+}, [{'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}]);
 
 test_util.describeCustom(
     'GPGPUContext setOutputMatrixTexture',
@@ -186,9 +186,9 @@ test_util.describeCustom(
          });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+      {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+      {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
+      {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
     ]);
 
 describe('GPGPUContext setOutputPackedMatrixTexture', () => {
