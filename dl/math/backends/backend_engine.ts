@@ -22,7 +22,7 @@ import {MathBackend} from './backend';
 import * as kernel_registry from './kernel_registry';
 import {KernelConfigRegistry} from './kernel_registry';
 import * as tape_util from './tape_util';
-import {ScopeResult, ScopeResultImmediate} from './tape_util';
+import {ScopeResult} from './tape_util';
 
 export class BackendEngine {
   private activeScope: NDArray[];
@@ -79,16 +79,9 @@ export class BackendEngine {
    */
   scope<T extends ScopeResult>(name: string, scopeFn: () => T): T {
     this.startScope();
-
     const result = scopeFn();
-
-    if (result instanceof Promise) {
-      result.then(r => this.endScope(r));
-      return result;
-    } else {
-      this.endScope(result as ScopeResultImmediate);
-      return result;
-    }
+    this.endScope(result);
+    return result;
   }
 
   /**
@@ -105,7 +98,7 @@ export class BackendEngine {
    * End a scope. Use this with startScope() to achieve the same functionality
    * as scope() without the need for a function closure.
    */
-  endScope(result: ScopeResultImmediate) {
+  endScope(result: ScopeResult) {
     const arraysToTrackInParent =
       tape_util.extractNDArraysFromScopeResult(result);
 
