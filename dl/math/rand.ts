@@ -54,7 +54,7 @@ export class MPRandGauss implements RandGauss {
   }
 
   /** Returns next sample from a gaussian distribution. */
-  public nextValue(): number {
+  nextValue(): number {
     if (!isNaN(this.nextVal)) {
       const value = this.nextVal;
       this.nextVal = NaN;
