@@ -86,14 +86,14 @@ export class NDArrayMath implements NDArrayManager {
    * @param safeMode In safe mode, you must use math operations inside
    *     a math.scope() which will automatically clean up intermediate NDArrays.
    */
-  constructor(backend: BackendType|MathBackend, safeMode: boolean) {
+  constructor(backend: BackendType|MathBackend) {
     if (typeof backend === 'string') {
       this.backend = ENV.getBackend(backend);
     } else {
       this.customBackend = true;
       this.backend = backend;
     }
-    this.backendEngine = new BackendEngine(this.backend, safeMode);
+    this.backendEngine = new BackendEngine(this.backend);
   }
 
   /**
