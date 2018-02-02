@@ -62,7 +62,7 @@ export interface ShapeMap {
   higher: number[];
 }
 
-export class DataId {};
+export class DataId {}
 
 export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   private static nextId = 0;
