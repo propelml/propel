@@ -31,6 +31,17 @@ function createPackageJson(src, dst, packageJson = {}) {
   console.log("Wrote " + dst);
 }
 
+function checkNoTars(dir) {
+  for (const f of fs.readdirSync(dir)) {
+    if (f.match(/\.tgz$/) != null ||
+        f.match(/\.tar.gz$/) != null ||
+        f.match(/\.zip$/) != null) {
+      console.error("Bad filename in package dir", dir, f);
+      process.exit(1);
+    }
+  }
+}
+
 function npmPack(name, cb) {
   const distDir = run.root + "/build/" + name;
   if (clean) {
@@ -38,13 +49,23 @@ function npmPack(name, cb) {
   }
   run.mkdir(distDir);
   fs.writeFileSync(distDir + "/README.md", "See http://propelml.org\n");
-  if (cb) cb(distDir);
+
+  cb(distDir);
+  checkNoTars(distDir);
+
   process.chdir(distDir);
   console.log("npm pack");
-  const pkgFn = path.resolve(execSync("npm pack", { encoding: "utf8" }));
+  const pkgFn = path.resolve(execSync("npm pack", { encoding: "utf8" })).trim();
   process.chdir(run.root);
-  console.log("pkgFn", pkgFn);
-  return pkgFn;
+
+  // Move the tarball created by npm to the root of the build dir. This is so
+  // it doesn't accidentally get included in future builds.
+  const pkgBaseName = path.basename(pkgFn);
+  const newPkgFn = path.resolve(run.root, "build", pkgBaseName);
+  fs.renameSync(pkgFn, newPkgFn);
+
+  console.log("pkgFn", newPkgFn);
+  return newPkgFn;
 }
 
 function buildAndTest() {
