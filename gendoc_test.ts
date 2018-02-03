@@ -20,6 +20,10 @@ test(async function gendoc_smoke() {
   const docs = gendoc.genJSON();
   console.log("length", docs.length);
   assert(docs.length > 5);
-  assert(docs.map(e => e.name).indexOf("Tensor") >= 0);
+  const names = docs.map(e => e.name);
+  // Check that a few of the names are correct.
+  assert(names.indexOf("Tensor") >= 0);
+  assert(names.indexOf("Tensor.add") >= 0);
+  assert(names.indexOf("Tensor[Symbol.iterator]") >= 0);
 });
 

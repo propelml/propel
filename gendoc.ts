@@ -189,7 +189,15 @@ export function genJSON(): DocEntry[] {
 
     const sig = checker.getSignatureFromDeclaration(methodNode);
     const sigStr = checker.signatureToString(sig);
-    const name = className ? `${className}.${methodName}` : methodName;
+    let name;
+    if (!className) {
+      name = methodName
+    } else if (methodName.startsWith("[")) {
+      // EG [Symbol.iterator]
+      name = className + methodName;
+    } else {
+      name = `${className}.${methodName}`;
+    }
 
     // Print each of the parameters.
     const argEntries: ArgEntry[] = [];
