@@ -201,14 +201,11 @@ export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
   return div("references",
     h(GlobalHeader, null),
-    h("header", { "class": "container" },
-      div("column",
-        h("h1", null, "References"),
-        p("This work is inspired by and built upon great technologies."),
-      )
+    h("header", null,
+      h("h1", null, "References"),
+      p("This work is inspired by and built upon great technologies."),
     ),
     h("div", {
-      "class": "container",
       dangerouslySetInnerHTML: { __html: refhtml },
     }),
   );
@@ -240,19 +237,15 @@ class NotebookIndex extends Component<any, any> {
     });
     return div("notebook",
       h(GlobalHeader, null),
-      div("container",
-        h("header", { "class": "row" },
-          div("column",
-            h("h1", null, "Notebook")
-          )
-        ),
-        div("cells", ...notebooks),
-        div("container nb-footer",
-          h("button", {
-            id: "newCell",
-            onclick: this.newCellClick.bind(this),
-          }, "New Cell")
-        ),
+      h("header", null,
+        h("h1", null, "Notebook")
+      ),
+      div("cells", ...notebooks),
+      div("nb-footer",
+        h("button", {
+          id: "newCell",
+          onclick: this.newCellClick.bind(this),
+        }, "New Cell")
       ),
     );
   }
@@ -299,73 +292,61 @@ const ReferencesFooter = (props) => {
 };
 
 const Splash = (props) => {
-  return div("container",
-    h("section", { "class": "splash" },
-      h("header", { "class": "row" },
-        div("column",
-          h("h1", null, "Propel"),
-          h("p", null, "Differential Programming in JavaScript")
-        )
-      ),
-      div("row",
-        div("column",
-          p(
-            headerButton("/docs", "API Ref"),
-            // Hide notebook link until more developed.
-            // headerButton("/notebook", "Notebook"),
-            headerButton("http://github.com/propelml/propel", "Github")
-          ),
-          h("p", { "class": "snippet-title" }, "Use it in Node:"),
-          fixed("npm install propel\nimport { grad } from \"propel\";"),
-          h("p", { "class": "snippet-title" }, "Use it in a browser:"),
-          fixed("<script src=\"https://unpkg.com/propel@3.0.0\"></script>"),
-        )
-      )
-    )
+  return h("section", { "class": "splash" },
+    h("header", null,
+      h("h1", null, "Propel"),
+      h("p", null, "Differential Programming in JavaScript")
+    ),
+    p(
+      headerButton("/docs", "API Ref"),
+      // Hide notebook link until more developed.
+      // headerButton("/notebook", "Notebook"),
+      headerButton("http://github.com/propelml/propel", "Github")
+    ),
+    h("p", { "class": "snippet-title" }, "Use it in Node:"),
+    fixed("npm install propel\nimport { grad } from \"propel\";"),
+    h("p", { "class": "snippet-title" }, "Use it in a browser:"),
+    fixed("<script src=\"https://unpkg.com/propel@3.0.0\"></script>"),
   );
 };
 
 const Exlainer = (props) => {
   return div("explainer-container",
-    div("container",
-      div("explainer",
-        div("row explainer-inner",
-          div("one-half column",
-            p(b("Propel"), ` provides a GPU-backed numpy-like infrastructure
-              for scientific computing in JavaScript.  JavaScript is a fast,
-              dynamic language which, we think, could act as an ideal workflow
-              for scientific programmers of all sorts.`),
-            p(`Propel runs both in the browser and natively from Node. In
-              both environments Propel is able to use GPU hardware for
-              computations.  In the browser it utilizes WebGL through `,
-              link("https://deeplearnjs.org/", "deeplearn.js"),
-              " and on Node it uses TensorFlow's ",
-              link("https://www.tensorflow.org/install/install_c", "C API"),
-              "."),
-            p("Propel has an imperative ",
-              link("https://github.com/HIPS/autograd", "autograd"),
-              `-style API, unlike TensorFlow.  Computation graphs are traced as
-              you run them -- a general purpose `,
-              i("gradient function"),
-              ` provides an elegant interface to backpropagation. `),
-            p(`Browsers are great for demos, but they are not a great numerics
-              platform. WebGL is a far cry from CUDA. By running Propel outside
-              of the browser, users will be able to target multiple GPUs and
-              make TCP connections. The models developed server-side will be
-              much easier to deploy as HTML demos.`),
-            p(`The basic propel npm package is javascript only,
-              without TensorFlow bindings. To upgrade your speed dramatically
-              install`),
-            fixed([
-              "npm install propel_mac",
-              "npm install propel_windows",
-              "npm install propel_linux",
-              "npm install propel_linux_gpu",
-            ].join("\n")),
-          ),
-          div("one-half column", notebook(tanhGrads))
-        )
-      )
+    div("explainer",
+      div("explainer-text",
+        p(b("Propel"), ` provides a GPU-backed numpy-like infrastructure
+          for scientific computing in JavaScript.  JavaScript is a fast,
+          dynamic language which, we think, could act as an ideal workflow
+          for scientific programmers of all sorts.`),
+        p(`Propel runs both in the browser and natively from Node. In
+          both environments Propel is able to use GPU hardware for
+          computations.  In the browser it utilizes WebGL through `,
+          link("https://deeplearnjs.org/", "deeplearn.js"),
+          " and on Node it uses TensorFlow's ",
+          link("https://www.tensorflow.org/install/install_c", "C API"),
+          "."),
+        p("Propel has an imperative ",
+          link("https://github.com/HIPS/autograd", "autograd"),
+          `-style API, unlike TensorFlow.  Computation graphs are traced as
+          you run them -- a general purpose `,
+          i("gradient function"),
+          ` provides an elegant interface to backpropagation. `),
+        p(`Browsers are great for demos, but they are not a great numerics
+          platform. WebGL is a far cry from CUDA. By running Propel outside
+          of the browser, users will be able to target multiple GPUs and
+          make TCP connections. The models developed server-side will be
+          much easier to deploy as HTML demos.`),
+        p(`The basic propel npm package is javascript only,
+          without TensorFlow bindings. To upgrade your speed dramatically
+          install`),
+        fixed([
+          "npm install propel_mac",
+          "npm install propel_windows",
+          "npm install propel_linux",
+          "npm install propel_linux_gpu",
+        ].join("\n")),
+      ),
+      div("explainer-notebook", notebook(tanhGrads))
     )
   );
 };
