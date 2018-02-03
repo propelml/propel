@@ -220,8 +220,8 @@ export function genJSON(): DocEntry[] {
   }
 
   function getFlatDocstr(sym: ts.Symbol): string | undefined {
-    if (sym && sym.getDocumentationComment().length > 0) {
-      return ts.displayPartsToString(sym.getDocumentationComment());
+    if (sym && sym.getDocumentationComment(checker).length > 0) {
+      return ts.displayPartsToString(sym.getDocumentationComment(checker));
     }
     return undefined;
   }
@@ -245,8 +245,8 @@ export function genJSON(): DocEntry[] {
     const className = symbol.getName();
 
     let docstr = null;
-    if (symbol.getDocumentationComment().length > 0) {
-      docstr = ts.displayPartsToString(symbol.getDocumentationComment());
+    if (symbol.getDocumentationComment(checker).length > 0) {
+      docstr = ts.displayPartsToString(symbol.getDocumentationComment(checker));
     }
     output.push({
       name: className,
