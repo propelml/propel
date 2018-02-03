@@ -214,7 +214,7 @@ export const References = (props) => {
 export const PropelIndex = (props) => {
   return div("index",
     h(Splash, null),
-    h(Exlainer, null),
+    h(Explainer, null),
     h(ReferencesFooter, null),
   );
 };
@@ -310,7 +310,7 @@ const Splash = (props) => {
   );
 };
 
-const Exlainer = (props) => {
+const Explainer = (props) => {
   return div("explainer-container",
     div("explainer",
       div("explainer-text",
