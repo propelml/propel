@@ -8,6 +8,11 @@ branches:
 language: node_js
 os:
 - linux
+dist: xenial 
+sudo: required # Required in order for Travis to pick up 'dist: xenial'.
+group: edge    # Seems to make Travis err out less often.
+before_install:
+- sudo apt-get install -y libstdc++6
 git:
   submodules_depth: 1
 node_js:
