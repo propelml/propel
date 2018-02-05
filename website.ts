@@ -5,6 +5,7 @@ import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
 import * as nb from "./notebook";
 import { IS_WEB } from "./util";
+const { version } = require("./package.json");
 export { resetIds, notebookExecuteQueue } from "./notebook";
 
 export interface DocEntry {
@@ -306,7 +307,7 @@ const Splash = (props) => {
     h("p", { "class": "snippet-title" }, "Use it in Node:"),
     fixed("npm install propel\nimport { grad } from \"propel\";"),
     h("p", { "class": "snippet-title" }, "Use it in a browser:"),
-    fixed("<script src=\"https://unpkg.com/propel@3.0.0\"></script>"),
+    fixed(`<script src="https://unpkg.com/propel@${version}"></script>`),
   );
 };
 
