@@ -1029,6 +1029,11 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   nstatus = napi_create_reference(env, handle_class, 1, &handle_class_ref);
   check(nstatus == napi_ok);
 
+  napi_value tensorflowVersion;
+  nstatus =
+      napi_create_string_latin1(env, TF_Version(), -1, &tensorflowVersion);
+  check(nstatus == napi_ok);
+
   // Fill the exports.
   napi_property_descriptor exports_properties[] = {
       {"Context", NULL, NULL, NULL, NULL, context_class, napi_default, NULL},
@@ -1070,7 +1075,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
        NULL,
        napi_default,
        NULL},
-  };
+      {"tensorflowVersion",
+       NULL,
+       NULL,
+       NULL,
+       NULL,
+       tensorflowVersion,
+       napi_default,
+       NULL}};
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
   check(nstatus == napi_ok);
