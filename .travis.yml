@@ -6,8 +6,8 @@ branches:
   only:
   - master
 language: node_js
-os:
-- linux
+os: linux
+dist: xenial
 git:
   submodules_depth: 1
 node_js:
