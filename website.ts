@@ -4,7 +4,6 @@
 import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
 import * as nb from "./notebook";
-import { IS_WEB } from "./util";
 const { version } = require("./package.json");
 export { resetIds, notebookExecuteQueue } from "./notebook";
 
@@ -374,7 +373,7 @@ export function getHTML(title, markup) {
     <meta id="viewport" name="viewport" content="width=device-width,
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="/bundle.css"/>
-    <script src="/website.js"></script>
+    <script src="/website_main.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
   <body>${markup}
@@ -390,7 +389,7 @@ export function getHTML(title, markup) {
 </html>`;
 }
 
-function route(pathname: string): Page {
+export function route(pathname: string): Page {
   for (const page of pages) {
     if (pathname.match(page.route)) {
       return page;
@@ -426,10 +425,3 @@ export const pages: Page[] = [
     route: /^\/docs/,
   },
 ];
-
-if (IS_WEB) {
-  window.addEventListener("load", () => {
-    const page = route(document.location.pathname);
-    render(h(page.root, null), document.body, document.body.children[0]);
-  });
-}
