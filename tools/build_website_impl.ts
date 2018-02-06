@@ -2,46 +2,32 @@ import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
 import { renderSync } from "sass";
+import { drainExecuteQueue } from "../notebook";
 import * as website from "../website";
-// import * as nodeFetch from "node-fetch";
 import * as run from "./run";
+
+// tslint:disable:no-reference
+/// <reference path="deps/firebase/firebase.d.ts" />
 
 const websiteRoot = run.root + "/build/website/";
 
 async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
-  website.resetIds();
-
   const jsdomConfig = { };
   const window = new JSDOM("", jsdomConfig).window;
 
   global["window"] = window;
+  global["self"] = window;
   global["document"] = window.document;
   global["navigator"] = window.navigator;
   global["Node"] = window.Node;
   global["getComputedStyle"] = window.getComputedStyle;
-  // TODO when JSDOM supports fetch, just call window.fetch here.
-  // https://github.com/tmpvar/jsdom/issues/1724
-  /*
-  global['fetch'] = function (x) {
-    let fn = join(websiteRoot, x);
-    console.log("server-side fetch", fn);
-    let {Promise, Response} = nodeFetch;
-    return new Promise((resolve, reject) => {
-      let stream = fs.createReadStream(fn)
-      resolve(Response(stream).text());
-    })
-  }
-  console.log("fetch", window.fetch);
-   */
 
   website.renderPage(page);
 
   const p = new Promise<string>((resolve, reject) => {
     window.addEventListener("load", async() => {
       try {
-        while (website.notebookExecuteQueue.length > 0) {
-          await website.notebookExecuteQueue.shift();
-        }
+        await drainExecuteQueue();
         const bodyHtml = document.body.innerHTML;
         const html =  website.getHTML(page.title, bodyHtml);
         resolve(html);

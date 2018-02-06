@@ -6,6 +6,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
 $githubGreen: #39aa56;
+$small: 5px;
 
 /* NOTE html is set to 62.5% so that all the REM measurements
 throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
@@ -344,14 +345,6 @@ header h1 {
   height: 28px;
 }
 
-.docindex a:hover,
-.docindex a:focus,
-.docindex a:active {
-  color: rgb(31, 119, 180);
-  text-decoration: underline;
-  background-color: $base1;
-}
-
 .doc-entry > .name {
   font-size: 20px;
   color: $linkColor;
@@ -487,4 +480,31 @@ svg {
 .clone:hover {
   color: #fff;
   background: darken($githubGreen, 10%);
+}
+
+.most-recent ol {
+  display: flex;
+  list-style-type: none;
+  flex-wrap: wrap;
+}
+
+.most-recent li {
+  max-width: 200px;
+  max-height: 200px;
+  overflow: hidden;
+  background-color: $cellBackground;
+  margin: $small;
+}
+
+.most-recent li a,
+.most-recent li p {
+  color: #fff;
+}
+
+.docindex a:hover,
+.docindex a:focus,
+.docindex a:active {
+  color: rgb(31, 119, 180);
+  text-decoration: underline;
+  background-color: $base1;
 }
