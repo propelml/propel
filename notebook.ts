@@ -28,7 +28,7 @@ import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
 import { assert, delay, IS_WEB } from "./util";
-import { div, GlobalHeader } from "./website";
+import { div, GlobalHeader, Loading } from "./website";
 
 let cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -359,128 +359,191 @@ async function importModule(target) {
   throw new Error("Unknown module: " + target);
 }
 
-interface NotebookProps {
-  nbId?: string;
-}
-
-interface NotebookState {
+interface NotebookRootState {
   loadingAuth: boolean;
+  nbId?: string;
   userInfo?: db.UserInfo;
-  doc?: db.NotebookDoc;
-  nbId: string;
-  errorMsg?: string;
 }
 
-const exampleNbId = "2f0lhH2kP1ySYtY4sK9y";
-
-// This defines the Notebook page which loads Cells from Firebase.
-export class Notebook extends Component<NotebookProps, NotebookState> {
-  handle: db.Handle;
-
+export class NotebookRoot extends Component<any, NotebookRootState> {
   constructor(props) {
     super(props);
 
-    // Extract the nbId from props or query string.
     let nbId;
     if (this.props.nbId) {
       nbId = this.props.nbId;
     } else {
-      const matches = document.location.search.match(/nbId=(\w+)/);
-      if (matches) {
-        nbId = matches[1];
-      } else {
-        nbId = exampleNbId;
-      }
+      const matches = window.location.search.match(/nbId=(\w+)/);
+      nbId = matches ? matches[1] : null;
     }
 
     this.state = {
       loadingAuth: true,
-      userInfo: null,
-      doc: null,
       nbId,
+      userInfo: null,
     };
   }
 
-  onError(errorMsg: string) {
-    this.setState({ errorMsg });
+  unsubscribe: db.UnsubscribeCb;
+  componentWillMount() {
+    this.unsubscribe = db.active.subscribeAuthChange((userInfo) => {
+      this.setState({ loadingAuth: false, userInfo });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    let menuItems;
+    if (this.state.userInfo) {
+      menuItems = [
+        h(Avatar, { userInfo: this.state.userInfo }),
+        h("button", {
+          "onclick": db.active.signOut,
+        }, "Sign out"),
+      ];
+
+    } else {
+      menuItems = [
+        h("button", {
+          "class": "clone",
+          "onclick": db.active.signIn,
+        }, "Sign in"),
+      ];
+    }
+
+    let body;
+    if (this.state.nbId) {
+      body = h(Notebook, {nbId: this.state.nbId});
+    } else {
+      body = h(MostRecent, null);
+    }
+
+    return div("notebook",
+      h(GlobalHeader, null, ...menuItems),
+      body,
+      div("container nb-footer", null),
+    );
+  }
+}
+
+interface MostRecentState {
+  latest: db.NbInfo[];
+}
+
+function nbUrl(nbId: string): string {
+  // Careful, S3 is finicy about what URLs it serves. So
+  // /notebook?nbId=blah  will get redirect to /notebook/
+  // because it is a directory with an index.html in it.
+  const u = window.location.origin + "/notebook/?nbId=" + nbId;
+  console.log("nbUrl", u);
+  return u;
+}
+
+export class MostRecent extends Component<any, MostRecentState> {
+  async componentWillMount() {
+    // Only query firebase when in the browser.
+    // This is to avoiding calling into firebase during static HTML generation.
+    if (IS_WEB) {
+      const latest = await db.active.queryLatest();
+      this.setState({latest});
+    }
+  }
+
+  render() {
+    if (!this.state.latest) {
+      return h(Loading, null);
+    }
+    const notebookList = this.state.latest.map(info => {
+      const snippit = info.doc.cells.join("\n")
+        .trim()
+        .slice(0, 100);
+      const href = nbUrl(info.nbId);
+      return h("li", null,
+        h("a", { href },
+          notebookBlurb(info.doc, false),
+          snippit
+        ),
+      );
+    });
+    return div("most-recent",
+      h("h1", null, "Propel Notebooks"),
+      h("h2", null, "Recently Updated"),
+      h("ol", null, ...notebookList),
+    );
+  }
+}
+
+interface NotebookProps {
+  nbId: string;
+}
+
+interface NotebookState {
+  doc?: db.NotebookDoc;
+  errorMsg?: string;
+}
+
+// This defines the Notebook cells component.
+export class Notebook extends Component<NotebookProps, NotebookState> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      doc: null,
+      errorMsg: null,
+    };
+  }
+
+  async componentWillMount() {
+    try {
+      const doc = await db.active.getDoc(this.props.nbId);
+      this.setState({ doc });
+    } catch (e) {
+      this.setState({ errorMsg: e.message });
+    }
+  }
+
+  private async update(doc): Promise<void> {
+    this.setState({ doc });
+    try {
+      await db.active.updateDoc(this.props.nbId, doc);
+    } catch (e) {
+      this.setState({ errorMsg: e.message });
+    }
   }
 
   async onRun(updatedCode, i) {
-    if (this.handle) {
-      const doc = this.state.doc;
-      doc.cells[i] = updatedCode;
-      this.setState({ doc });
-      this.handle.update(doc.cells);
-    }
+    const doc = this.state.doc;
+    doc.cells[i] = updatedCode;
+    this.update(doc);
   }
 
   async onDelete(i) {
     const doc = this.state.doc;
     doc.cells.splice(i, 1);
-    this.setState({ doc });
-    this.handle.update(doc.cells);
+    this.update(doc);
   }
 
   async onInsertCell(i) {
     const doc = this.state.doc;
     doc.cells.splice(i + 1, 0, "");
-    this.setState({ doc });
-    this.handle.update(doc.cells);
+    this.update(doc);
   }
 
-  loading() {
-    return this.state.loadingAuth || this.state.doc == null;
-  }
-
-  removeAuthListener: () => void;
-  componentDidMount() {
-    let hasSetStateFromDoc = false;
-    if (IS_WEB) {
-      this.handle = new db.Handle({
-        nbId: this.state.nbId,
-        onAuthStateChange: userInfo =>
-            this.setState({ loadingAuth: false, userInfo }),
-        onDocChange: doc => {
-          // We only take the very first change....
-          // Hacky.
-          if (!hasSetStateFromDoc) { this.setState({ doc }),
-          hasSetStateFromDoc = true;
-          }
-          console.log("Doc change from database.", doc);
-        },
-        onError: this.onError.bind(this),
-      });
-      this.handle.subscribe();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.handle) this.handle.dispose();
-  }
-
-  signIn() {
-    console.log("Click signIn");
-    if (this.handle && !this.state.userInfo && !this.state.loadingAuth) {
-      this.handle.signIn();
-      this.setState({ loadingAuth: true });
-    }
-  }
-
-  async clone() {
+  async onClone() {
     console.log("Click clone");
-    const clonedId = await this.handle.clone(this.state.doc);
+    const clonedId = await db.active.clone(this.state.doc);
     // Redirect to new cloned notebook.
-    window.location.href = "/notebook?nbId=" + clonedId;
+    window.location.href = nbUrl(clonedId);
   }
 
-  signOut() {
-    console.log("Click signOut");
-    this.handle.signOut();
-    this.setState({ loadingAuth: true });
+  get loading() {
+    return this.state.doc == null;
   }
 
-  stateToCells(): JSX.Element[] {
-    return this.state.doc.cells.map((code, i) => {
+  renderCells(doc): JSX.Element {
+    return div("cells", doc.cells.map((code, i) => {
       return notebook(code, {
         // TODO(rld) i + 1 is because nextCellId starts at 1. So the statically
         // generated version starts at 1. In order to consistantly update those
@@ -490,69 +553,51 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         onDelete: () => { this.onDelete(i); },
         onInsertCell: () => { this.onInsertCell(i); },
       });
-    });
+    }));
   }
 
   render() {
-    let menuItems;
     let body;
 
     if (this.state.errorMsg) {
-      menuItems = [];
       body = [
         h("h1", null, "Error"),
         h("b", null, this.state.errorMsg),
       ];
 
-    } else if (this.loading()) {
-      menuItems = [];
-      body = [h("b", null, "loading")];
+    } else if (this.state.doc == null) {
+      body = [
+        h(Loading, null)
+      ];
 
     } else {
-      const nbCells = this.stateToCells();
-
-      if (this.state.userInfo) {
-        menuItems = [
-          h(Avatar, { userInfo: this.state.userInfo }),
-          h("button", {
-            "onclick": this.signOut.bind(this),
-          }, "Sign out")
-        ];
-
-        // If we don't own the doc, show a clone button.
-        menuItems.push(h("button", {
-          "class": "clone",
-          "onclick": this.clone.bind(this),
-        }, "Clone"));
-
-      } else {
-        menuItems = [
-          h("button", {
-            "class": "clone",
-            "onclick": this.signIn.bind(this),
-          }, "Sign in to Clone")
-        ];
-      }
-
+      const doc = this.state.doc;
       body = [
         h("header", null,
-          h(Avatar, { userInfo: this.state.doc.owner }),
-          h("b", null,
-            ` Notebook created
-              by ${this.state.doc.owner.displayName}
-              on ${fmtDate(this.state.doc.created)}.
-          `),
+          notebookBlurb(doc),
+          h("button", {
+            "class": "clone",
+            "onClick": () => this.onClone(),
+          }, "Clone"),
         ),
-        div("cells", ...nbCells),
-        div("container nb-footer", null),
+        this.renderCells(doc),
       ];
     }
 
-    return div("notebook",
-      h(GlobalHeader, null, ...menuItems),
-      ...body,
-    );
+    return h("div", null, ...body);
   }
+}
+
+function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
+  const dates = !showDates ? [] : [
+    h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
+    h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
+  ];
+  return div("blurb", null, [
+    h(Avatar, { userInfo: doc.owner }),
+    h("p", { "class": "displayName" }, doc.owner.displayName),
+    ...dates
+  ]);
 }
 
 const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {

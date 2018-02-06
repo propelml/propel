@@ -187,6 +187,10 @@ export class GlobalHeader extends Component<any, any> {
   }
 }
 
+export const Loading = (props) => {
+  return h("h1", null, "Loading");
+};
+
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
   return div("references",
@@ -286,9 +290,16 @@ plot(x, f(x),
      x, grad(grad(grad(grad(f))))(x))
 `;
 
+export let firebaseUrls = [
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase.js",
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js",
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase-firestore.js",
+];
+
 // Called by tools/build_website.ts
 export function getHTML(title, markup) {
-  const fbUrl = "https://www.gstatic.com/firebasejs/4.9.0";
+  const scriptTags = firebaseUrls.map(u =>
+    `<script src="${u}"></script>`).join("\n");
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -297,9 +308,7 @@ export function getHTML(title, markup) {
     <meta id="viewport" name="viewport" content="width=device-width,
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="/bundle.css"/>
-    <script src="${fbUrl}/firebase.js"></script>
-    <script src="${fbUrl}/firebase-auth.js"></script>
-    <script src="${fbUrl}/firebase-firestore.js"></script>
+    ${scriptTags}
     <script src="/website_main.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
@@ -336,7 +345,7 @@ export const pages: Page[] = [
   {
     title: "Propel Notebook",
     path: "website/notebook/index.html",
-    root: nb.Notebook,
+    root: nb.NotebookRoot,
     route: /^\/notebook/,
   },
   {

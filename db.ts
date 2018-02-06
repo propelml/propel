@@ -20,13 +20,23 @@
 // tslint:disable:no-reference
 /// <reference path="firebase.d.ts" />
 
-import { assert } from "./util";
+export interface Database {
+  getDoc(nbId): Promise<NotebookDoc>;
+  updateDoc(nbId: string, doc: NotebookDoc): Promise<void>;
+  clone(existingDoc: NotebookDoc): Promise<string>;
+  queryLatest(): Promise<NbInfo[]>;
+  signIn(): void;
+  signOut(): void;
+  ownsDoc(doc: NotebookDoc): boolean;
+  subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb;
+}
 
 export interface UserInfo {
-  uid: string;
-  photoURL: string;
   displayName: string;
+  photoURL: string;
+  uid: string;
 }
+
 // Defines the scheme of the notebooks collection.
 export interface NotebookDoc {
   cells: string[];
@@ -35,6 +45,19 @@ export interface NotebookDoc {
   created: Date;
 }
 
+export interface UnsubscribeCb {
+  (): void;
+}
+
+export interface NbInfo {
+  nbId: string;
+  doc: NotebookDoc;
+}
+
+// These are shared by all functions and are lazily constructed by lazyInit.
+let db: firebase.firestore.Firestore;
+let nbCollection: firebase.firestore.CollectionReference;
+let auth: firebase.auth.Auth;
 const firebaseConfig = {
   apiKey: "AIzaSyAc5XVKd27iXdGf1ZEFLWudZbpFg3nAwjQ",
   authDomain: "propel-ml.firebaseapp.com",
@@ -44,93 +67,33 @@ const firebaseConfig = {
   storageBucket: "propel-ml.appspot.com",
 };
 
-// Constructor arguments to Handle.
-interface HandleConfig {
-  nbId: string;
-  onAuthStateChange: (user: UserInfo) => void;
-  onDocChange: (doc: NotebookDoc) => void;
-  onError: (msg: string) => void;
-}
-
-export class Handle {
-  private db: firebase.firestore.Firestore;
-  private nbCollection: firebase.firestore.CollectionReference;
-  private auth: firebase.auth.Auth;
-  private nbDoc: NotebookDoc;
-  private docRef: firebase.firestore.DocumentReference;
-  private removeDocListener: () => void;
-  private removeAuthListener: () => void;
-
-  constructor(public config: HandleConfig) {
-    firebase.initializeApp(firebaseConfig);
-    firebase.firestore.setLogLevel("debug");
-    this.db = firebase.firestore();
-    this.auth = firebase.auth();
-    this.nbDoc = null;
-    this.nbCollection = this.db.collection("notebooks");
-    this.docRef = this.nbCollection.doc(this.config.nbId);
-  }
-
-  dispose() {
-    if (this.removeDocListener) this.removeDocListener();
-    if (this.removeAuthListener) this.removeAuthListener();
-  }
-
-  signIn() {
-    const provider = new firebase.auth.GithubAuthProvider();
-    this.auth.signInWithPopup(provider);
-  }
-
-  signOut() {
-    this.auth.signOut();
-  }
-
-  // Call this in order to receive the various callbacks.
-  subscribe(): void {
-    assert(this.removeAuthListener == null);
-    assert(this.removeDocListener == null);
-
-    this.removeAuthListener = this.auth.onAuthStateChanged(
-        this.config.onAuthStateChange);
-
-    this.removeDocListener = this.docRef.onSnapshot((doc) => {
-      // console.log("onSnapshot", doc);
-      if (doc.exists) {
-        const d = doc.data() as NotebookDoc;
-        this.nbDoc = d;
-        this.config.onDocChange(d);
-      } else {
-        this.config.onError(`Notebook does not exist ${this.config.nbId}`);
-      }
-    }, (error) => {
-      this.config.onError(error.message);
-    });
-  }
-
-  ownsDoc(): boolean {
-    const u = this.auth.currentUser;
-    const d = this.nbDoc;
-    return u && d && u.uid === d.owner.uid;
-  }
-
-  async update(cells: string[]): Promise<void> {
-    if (!this.ownsDoc()) return;
-    try {
-      await this.docRef.update({
-        cells,
-        updated: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      // TODO Display error in UI.
-      this.config.onError(e.message);
+class DatabaseFB implements Database {
+  async getDoc(nbId): Promise<NotebookDoc> {
+    const docRef = nbCollection.doc(nbId);
+    const snap = await docRef.get();
+    if (snap.exists) {
+      return snap.data() as NotebookDoc;
+    } else {
+      throw Error(`Notebook does not exist ${nbId}`);
     }
+  }
+
+  // Caller must catch errors.
+  async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
+    if (!this.ownsDoc(doc)) return;
+    const docRef = nbCollection.doc(nbId);
+    await docRef.update({
+      cells: doc.cells,
+      updated: firebase.firestore.FieldValue.serverTimestamp(),
+    });
   }
 
   // Attempts to clone the given notebook given the Id.
   // Promise resolves to the id of the new notebook which will be owned by the
   // current user.
   async clone(existingDoc: NotebookDoc): Promise<string> {
-    const u = this.auth.currentUser;
+    lazyInit();
+    const u = auth.currentUser;
     if (!u) throw Error("Cannot clone. User must be logged in.");
 
     if (existingDoc.cells.length === 0) {
@@ -148,7 +111,126 @@ export class Handle {
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     };
     console.log({newDoc});
-    const docRef = await this.nbCollection.add(newDoc);
+    const docRef = await nbCollection.add(newDoc);
     return docRef.id;
   }
+
+  async queryLatest(): Promise<NbInfo[]> {
+    lazyInit();
+    const query = nbCollection.orderBy("updated").limit(100);
+    const snapshots = await query.get();
+    const out = [];
+    snapshots.forEach(snap => {
+      const nbId = snap.id;
+      const doc = snap.data();
+      out.unshift({ nbId, doc });
+    });
+    return out;
+  }
+
+  signIn() {
+    lazyInit();
+    const provider = new firebase.auth.GithubAuthProvider();
+    auth.signInWithPopup(provider);
+  }
+
+  signOut() {
+    lazyInit();
+    auth.signOut();
+  }
+
+  ownsDoc(d: NotebookDoc): boolean {
+    const u = auth.currentUser;
+    return u && d && u.uid === d.owner.uid;
+  }
+
+  subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
+    lazyInit();
+    return auth.onAuthStateChanged(cb);
+  }
+}
+
+class DatabaseMock implements Database {
+  counts = {};
+  inc(method) {
+    if (method in this.counts) {
+      this.counts[method] += 1;
+    } else {
+      this.counts[method] = 1;
+    }
+  }
+
+  async getDoc(nbId: string): Promise<NotebookDoc> {
+    this.inc("getDoc");
+    return {
+      cells: ["var i = 0"],
+      owner: {
+        displayName: "displayName",
+        photoURL: "photoURL",
+        uid: "uid",
+      },
+      updated: new Date(),
+      created: new Date(),
+    };
+  }
+
+  async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
+    this.inc("updateDoc");
+  }
+
+  async clone(existingDoc: NotebookDoc): Promise<string> {
+    this.inc("clone");
+    return "clonedNbId";
+  }
+
+  queryLatest(): Promise<NbInfo[]> {
+    this.inc("queryLatest");
+    return new Promise((resolve) => {  } );
+  }
+
+  signIn(): void {
+    this.inc("signIn");
+  }
+
+  signOut(): void {
+    this.inc("signOut");
+  }
+
+  ownsDoc(doc: NotebookDoc): boolean {
+    this.inc("ownsDoc");
+    return false;
+  }
+
+  subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
+    this.inc("subscribeAuthChange");
+    return null;
+  }
+}
+
+// Default to a mock, so none of the functions errors out during operation in
+// Node. Firebase cannot be loaded in Node.
+// We cannot load Firebase in Node because grpc has an unreasonable
+// amount of dependencies, included a whole copy of OpenSSL.
+// The firebase web client is very difficult to get working in Node
+// even when trying to use the grpc-web-client library.
+export let active: Database = new DatabaseMock();
+
+export function enableFirebase() {
+  active = new DatabaseFB();
+}
+
+export function enableMock(): DatabaseMock {
+  const d = new DatabaseMock();
+  active = d;
+  return d;
+}
+
+function lazyInit() {
+  if (db == null) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    auth = firebase.auth();
+    nbCollection = db.collection("notebooks");
+  }
+  return true;
 }
