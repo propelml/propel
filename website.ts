@@ -2,10 +2,9 @@
 // This is the propelml.org website. It is used both server-side and
 // client-side for generating HTML.
 import { readFileSync } from "fs";
-import { Component, h, render } from "preact";
+import { h, render } from "preact";
 import * as nb from "./notebook";
 const { version } = require("./package.json");
-export { resetIds, notebookExecuteQueue } from "./notebook";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";
@@ -176,21 +175,10 @@ const Docs = (props) => {
   );
 };
 
-export class GlobalHeader extends Component<any, any> {
-  render() {
-    return div("global-header",
-      div("global-header-inner",
-        h("a", { "class": "button", href: "/" }, "← Propel"),
-        ...this.props.children,
-      ),
-    );
-  }
-}
-
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
   return div("references",
-    h(GlobalHeader, null),
+    h(nb.GlobalHeader, null),
     h("header", null,
       h("h1", null, "References"),
       p("This work is inspired by and built upon great technologies."),
@@ -286,9 +274,16 @@ plot(x, f(x),
      x, grad(grad(grad(grad(f))))(x))
 `;
 
+export let firebaseUrls = [
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase.js",
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js",
+  "https://www.gstatic.com/firebasejs/4.9.0/firebase-firestore.js",
+];
+
 // Called by tools/build_website.ts
 export function getHTML(title, markup) {
-  const fbUrl = "https://www.gstatic.com/firebasejs/4.9.0";
+  const scriptTags = firebaseUrls.map(u =>
+    `<script src="${u}"></script>`).join("\n");
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -297,9 +292,7 @@ export function getHTML(title, markup) {
     <meta id="viewport" name="viewport" content="width=device-width,
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="/bundle.css"/>
-    <script src="${fbUrl}/firebase.js"></script>
-    <script src="${fbUrl}/firebase-auth.js"></script>
-    <script src="${fbUrl}/firebase-firestore.js"></script>
+    ${scriptTags}
     <script src="/website_main.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
@@ -336,7 +329,7 @@ export const pages: Page[] = [
   {
     title: "Propel Notebook",
     path: "website/notebook/index.html",
-    root: nb.Notebook,
+    root: nb.NotebookRoot,
     route: /^\/notebook/,
   },
   {

@@ -152,5 +152,5 @@ console.log("\n\nPackage tested and ready.");
 for (const name of ["propel", config.tfPkg]) {
   let vname = `${name}-${v}`;
   run.symlink(name, vname);
-  console.log("./tools/ar.js %s", "build/" + vname);
+  // console.log("./tools/ar.js %s", "build/" + vname);
 }

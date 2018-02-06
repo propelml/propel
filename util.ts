@@ -247,3 +247,16 @@ export function delay(t: number): Promise<void> {
     setTimeout(resolve, t);
   });
 }
+
+export function objectsEqual(a, b) {
+  const aProps = Object.getOwnPropertyNames(a);
+  const bProps = Object.getOwnPropertyNames(b);
+  if (aProps.length !== bProps.length) return false;
+  for (let i = 0; i < aProps.length; i++) {
+    const k = aProps[i];
+    if (a[k] !== b[k]) {
+      return false;
+    }
+  }
+  return true;
+}
