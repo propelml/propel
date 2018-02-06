@@ -56,6 +56,13 @@ export function test(t: TestDefinition | TestFunction): void {
   }
 }
 
+// Browser-only test.
+export function testBrowser(t: TestDefinition | TestFunction): void {
+  if (!IS_NODE) {
+    test(t);
+  }
+}
+
 function filter(name: string): boolean {
   if (filterRegExp) {
     return filterRegExp.test(name);
