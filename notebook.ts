@@ -81,7 +81,10 @@ const codemirrorOptions = {
 export interface CellProps {
   code?: string;
   id?: number;
-  onEdit?: (code: string) => void;
+  onRun?: (code: null | string) => void;
+  // If onDelete or onInsertCell is null, it hides the button.
+  onDelete?: () => void;
+  onInsertCell?: () => void;
 }
 export interface CellState { }
 
@@ -171,17 +174,13 @@ export class Cell extends Component<CellProps, CellState> {
       this.editor.on("focus", this.focus.bind(this));
       this.editor.on("blur", this.blur.bind(this));
       this.editor.setOption("extraKeys", {
-        "Ctrl-Enter": () =>  { this.update(); return true; },
-        "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
+        "Ctrl-Enter": () =>  { this.run(); return true; },
+        "Shift-Enter": () => { this.run(); this.nextCell(); return true; }
       });
     }
   }
 
   async update() {
-    if (this.props.onEdit) {
-      this.props.onEdit(this.code);
-    }
-
     this.clearOutput();
     const classList = (this.input.parentNode as HTMLElement).classList;
     classList.add("notebook-cell-running");
@@ -199,9 +198,19 @@ export class Cell extends Component<CellProps, CellState> {
     // TODO
   }
 
-  clickedRun() {
-    console.log("Run was clicked.");
+  run() {
     this.update();
+    if (this.props.onRun) this.props.onRun(this.code);
+  }
+
+  clickedDelete() {
+    console.log("Delete was clicked.");
+    if (this.props.onDelete) this.props.onDelete();
+  }
+
+  clickedInsertCell() {
+    console.log("NewCell was clicked.");
+    if (this.props.onInsertCell) this.props.onInsertCell();
   }
 
   blur() {
@@ -213,6 +222,27 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
+    const buttons = [
+      h("button", {
+        "class": "run-button",
+        "onClick": this.run.bind(this),
+      }, "Run")
+    ];
+
+    if (this.props.onDelete) {
+      buttons.unshift(h("button", {
+          "class": "delete-button",
+          "onClick": this.clickedDelete.bind(this),
+      }, "Delete"));
+    }
+
+    if (this.props.onInsertCell) {
+      buttons.unshift(h("button", {
+          "class": "delete-button",
+          "onClick": this.clickedInsertCell.bind(this),
+      }, "Insert Cell"));
+    }
+
     return h("div", {
         "class": "notebook-cell",
         "id": `cell${this.id}`
@@ -224,13 +254,7 @@ export class Cell extends Component<CellProps, CellState> {
         // This pre is replaced by CodeMirror if users have JavaScript enabled.
         h("pre", { }, this.code)
       ),
-      h("div", { "class": "buttons" },
-        h("button", {
-          "class": "run-button",
-          "onClick": this.clickedRun.bind(this),
-        }, "Run"),
-        // h("button", { "class": "", "onClick": null, }, "Delete"),
-      ),
+      h("div", { "class": "buttons" }, ...buttons),
       h("div", {
         "class": "output",
         "id": "output" + this.id,
@@ -381,13 +405,27 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({ errorMsg });
   }
 
-  async onEdit(updatedCode, i) {
+  async onRun(updatedCode, i) {
     if (this.handle) {
       const doc = this.state.doc;
       doc.cells[i] = updatedCode;
       this.setState({ doc });
       this.handle.update(doc.cells);
     }
+  }
+
+  async onDelete(i) {
+    const doc = this.state.doc;
+    doc.cells.splice(i, 1);
+    this.setState({ doc });
+    this.handle.update(doc.cells);
+  }
+
+  async onInsertCell(i) {
+    const doc = this.state.doc;
+    doc.cells.splice(i + 1, 0, "");
+    this.setState({ doc });
+    this.handle.update(doc.cells);
   }
 
   loading() {
@@ -420,12 +458,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     if (this.handle) this.handle.dispose();
   }
 
-  newCellClick() {
-    const doc = this.state.doc;
-    doc.cells.push("");
-    this.setState({ doc });
-  }
-
   signIn() {
     console.log("Click signIn");
     if (this.handle && !this.state.userInfo && !this.state.loadingAuth) {
@@ -454,9 +486,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         // generated version starts at 1. In order to consistantly update those
         // cells, we use the same ids here. This brittle and should be fixed.
         id: i + 1,
-        onEdit: (updatedCode) => {
-          this.onEdit(updatedCode, i);
-        }
+        onRun: (updatedCode) => { this.onRun(updatedCode, i); },
+        onDelete: () => { this.onDelete(i); },
+        onInsertCell: () => { this.onInsertCell(i); },
       });
     });
   }
@@ -512,12 +544,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           `),
         ),
         div("cells", ...nbCells),
-        div("container nb-footer",
-          h("button", {
-            id: "newCell",
-            onclick: this.newCellClick.bind(this),
-          }, "New Cell")
-        ),
+        div("container nb-footer", null),
       ];
     }
 
