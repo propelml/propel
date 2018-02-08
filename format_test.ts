@@ -17,9 +17,14 @@ import { test } from "./test";
 import { assert } from "./util";
 
 test(async function format_1DInt32() {
-  const actual = toString([4], new Int32Array([1, 2, 3, 4]));
-  const expected = "[1, 2, 3, 4]";
-  console.log(actual);
+  let actual = toString([4], new Int32Array([1, 2, 3, 4]));
+  let expected = "[1, 2, 3, 4]";
+  assert(actual === expected);
+
+  // With negative values.
+  const d = [-2, -1, 0, 1];
+  actual = toString([4], new Int32Array(d));
+  expected = "[-2, -1, 0, 1]";
   assert(actual === expected);
 });
 
@@ -31,12 +36,22 @@ test(async function format_2DInt32() {
 });
 
 test(async function format_1DFloat32() {
-  const d = [ 1.2,  0. ,  0. ,  0.123];
-  const actual = toString([4], new Float32Array(d));
-  const expected = "[ 1.2  ,  0.   ,  0.   ,  0.123]";
+  let d = [ 1.2,  0. ,  0. ,  0.123];
+  let actual = toString([4], new Float32Array(d));
+  let expected = "[ 1.2  ,  0.   ,  0.   ,  0.123]";
   console.log(actual);
+  console.log(expected);
+  assert(actual === expected);
+
+  // With negative values.
+  d = [-1, -0.5, 0, 0.5, 1];
+  actual = toString([5], new Float32Array(d));
+  expected = "[-1. , -0.5,  0. ,  0.5,  1. ]";
+  console.log(actual);
+  console.log(expected);
   assert(actual === expected);
 });
+
 test(async function format_2DFloat32() {
   let actual = toString([2, 2], new Float32Array([1, 2, 3, 4]));
   let expected = "[[ 1.,  2.],\n [ 3.,  4.]]";

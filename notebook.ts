@@ -28,9 +28,12 @@ import * as matplotlib from "./matplotlib";
 import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
 import { assert, delay, IS_WEB } from "./util";
+<<<<<<< HEAD
 import { div, GlobalHeader, Loading } from "./website";
+=======
+>>>>>>> upstream/master
 
-let cellTable = new Map<number, Cell>(); // Maps id to Cell.
+const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
 let lastExecutedCellId = null;
 // If you use the eval function indirectly, by invoking it via a reference
@@ -40,26 +43,17 @@ let lastExecutedCellId = null;
 // local variables within the scope where it's being called.
 const globalEval = eval;
 
-// FIXME This is a hack. When rendering server-side the ids keep increasing
-// over all pages - that makes it not line up with how client-side ids will be
-// generated.
-export function resetIds() {
-  nextCellId = 1;
-  cellTable = new Map<number, Cell>();
-}
-
-export function getNextId(): number {
-  return nextCellId++;
-}
-
 export function lookupCell(id: number) {
   return cellTable.get(id);
 }
 
 // Convenience function to create Notebook JSX element.
 export function notebook(code: string, props: CellProps = {}): JSX.Element {
+<<<<<<< HEAD
   props.id = props.id || getNextId();
   // console.log("create notebook", props.id);
+=======
+>>>>>>> upstream/master
   props.code = code;
   return h(Cell, props);
 }
@@ -72,7 +66,11 @@ const cellExecuteQueue: Cell[] = [];
 export async function drainExecuteQueue() {
   while (cellExecuteQueue.length > 0) {
     const cell = cellExecuteQueue.shift();
+<<<<<<< HEAD
     await cell.update();
+=======
+    await cell.run();
+>>>>>>> upstream/master
   }
 }
 
@@ -87,7 +85,10 @@ const codemirrorOptions = {
 
 export interface CellProps {
   code?: string;
+<<<<<<< HEAD
   id?: number;
+=======
+>>>>>>> upstream/master
   onRun?: (code: null | string) => void;
   // If onDelete or onInsertCell is null, it hides the button.
   onDelete?: () => void;
@@ -99,18 +100,23 @@ export class Cell extends Component<CellProps, CellState> {
   input: Element;
   output: Element;
   editor: CodeMirror.Editor;
+  readonly id: number;
 
   constructor(props) {
     super(props);
+    this.id = nextCellId++;
     cellTable.set(this.id, this);
   }
 
   componentWillMount() {
     cellExecuteQueue.push(this);
+<<<<<<< HEAD
   }
 
   get id(): number {
     return this.props.id;
+=======
+>>>>>>> upstream/master
   }
 
   _console: Console;
@@ -122,11 +128,13 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   get code(): string {
-    return (this.editor ? this.editor.getValue() : this.props.code).trim();
+    return normalizeCode(this.editor ? this.editor.getValue()
+                                     : this.props.code);
   }
 
   clearOutput() {
     this.output.innerHTML = "";
+<<<<<<< HEAD
   }
 
   componentWillReceiveProps(nextProps: CellProps) {
@@ -141,26 +149,22 @@ export class Cell extends Component<CellProps, CellState> {
   // Code updates are done in componentWillReceiveProps.
   shouldComponentUpdate() {
     return false;
+=======
+>>>>>>> upstream/master
   }
 
-  async execute(): Promise<void> {
-    lastExecutedCellId = this.id;
-    let rval, error;
-    try {
-      rval = await evalCell(this.code, this.id);
-    } catch (e) {
-      error = e instanceof Error ? e : new Error(e);
+  componentWillReceiveProps(nextProps: CellProps) {
+    const nextCode = normalizeCode(nextProps.code);
+    if (nextCode !== this.code) {
+      this.editor.setValue(nextCode);
+      this.clearOutput();
     }
-    if (error) {
-      this.console.error(error.stack);
-    } else if (rval !== undefined) {
-      this.console.log(rval);
-    }
-    // When running tests, rethrow any errors. This ensures that errors
-    // occurring during notebook cell evaluation result in test failure.
-    if (error && window.navigator.webdriver) {
-      throw error;
-    }
+  }
+
+  // Never update the component, because CodeMirror has complex state.
+  // Code updates are done in componentWillReceiveProps.
+  shouldComponentUpdate() {
+    return false;
   }
 
   componentDidMount() {
@@ -187,29 +191,56 @@ export class Cell extends Component<CellProps, CellState> {
     }
   }
 
+<<<<<<< HEAD
   async update() {
+=======
+  // This method executes the code in the cell, and updates the output div with
+  // the result. The onRun callback is called if provided.
+  async run() {
+>>>>>>> upstream/master
     this.clearOutput();
     const classList = (this.input.parentNode as HTMLElement).classList;
     classList.add("notebook-cell-running");
+
+    lastExecutedCellId = this.id;
+    let rval, error;
     try {
-      await this.execute();
-    } finally {
-      classList.add("notebook-cell-updating");
-      await delay(100);
-      classList.remove("notebook-cell-updating");
-      classList.remove("notebook-cell-running");
+      rval = await evalCell(this.code, this);
+    } catch (e) {
+      error = e instanceof Error ? e : new Error(e);
     }
+
+    if (error) {
+      this.console.error(error.stack);
+    } else if (rval !== undefined) {
+      this.console.log(rval);
+    }
+    // When running tests, rethrow any errors. This ensures that errors
+    // occurring during notebook cell evaluation result in test failure.
+    if (error && window.navigator.webdriver) {
+      throw error;
+    }
+
+    classList.add("notebook-cell-updating");
+    await delay(100);
+    classList.remove("notebook-cell-updating");
+    classList.remove("notebook-cell-running");
+
+    if (this.props.onRun) this.props.onRun(this.code);
   }
 
   nextCell() {
     // TODO
   }
 
+<<<<<<< HEAD
   run() {
     this.update();
     if (this.props.onRun) this.props.onRun(this.code);
   }
 
+=======
+>>>>>>> upstream/master
   clickedDelete() {
     console.log("Delete was clicked.");
     if (this.props.onDelete) this.props.onDelete();
@@ -283,7 +314,7 @@ export class FixedCell extends Component<FixedProps, CellState> {
     // Render as a pre in case people don't have javascript turned on.
     return h("div", { "class": "notebook-cell", },
       h("div", { "class": "input" },
-        h("pre", { }, this.props.code.trim()),
+        h("pre", { }, normalizeCode(this.props.code)),
       )
     );
   }
@@ -318,12 +349,15 @@ export class Console {
   }
 }
 
-export async function evalCell(source: string, cellId: number): Promise<any> {
+export async function evalCell(source: string, cell: Cell): Promise<any> {
   source = transpile(source);
-  source += `\n//# sourceURL=__cell${cellId}__.js`;
+  source += `\n//# sourceURL=__cell${cell.id}__.js`;
   const fn = globalEval(source);
   const g = IS_WEB ? window : global;
+<<<<<<< HEAD
   const cell = lookupCell(cellId);
+=======
+>>>>>>> upstream/master
   assert(cell != null);
   return await fn(g, importModule, cell.console);
 }
@@ -423,15 +457,29 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
 
     let body;
     if (this.state.nbId) {
+<<<<<<< HEAD
       body = h(Notebook, {nbId: this.state.nbId});
+=======
+      body = h(Notebook, {
+        nbId: this.state.nbId,
+        userInfo: this.state.userInfo,
+      });
+>>>>>>> upstream/master
     } else {
       body = h(MostRecent, null);
     }
 
+<<<<<<< HEAD
     return div("notebook",
       h(GlobalHeader, null, ...menuItems),
       body,
       div("container nb-footer", null),
+=======
+    return h("div", { "class": "notebook" },
+      h(GlobalHeader, null, ...menuItems),
+      body,
+      h("div", { "class": "container nb-footer" }),
+>>>>>>> upstream/master
     );
   }
 }
@@ -464,8 +512,13 @@ export class MostRecent extends Component<any, MostRecentState> {
       return h(Loading, null);
     }
     const notebookList = this.state.latest.map(info => {
+<<<<<<< HEAD
       const snippit = info.doc.cells.join("\n")
         .trim()
+=======
+      const snippit = info.doc.cells.map(normalizeCode)
+        .join("\n")
+>>>>>>> upstream/master
         .slice(0, 100);
       const href = nbUrl(info.nbId);
       return h("li", null,
@@ -475,7 +528,11 @@ export class MostRecent extends Component<any, MostRecentState> {
         ),
       );
     });
+<<<<<<< HEAD
     return div("most-recent",
+=======
+    return h("div", { "class": "most-recent" },
+>>>>>>> upstream/master
       h("h1", null, "Propel Notebooks"),
       h("h2", null, "Recently Updated"),
       h("ol", null, ...notebookList),
@@ -485,6 +542,11 @@ export class MostRecent extends Component<any, MostRecentState> {
 
 interface NotebookProps {
   nbId: string;
+<<<<<<< HEAD
+=======
+  onReady?: () => void;
+  userInfo?: db.UserInfo;  // Info about the currently logged in user.
+>>>>>>> upstream/master
 }
 
 interface NotebookState {
@@ -520,10 +582,21 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   }
 
+<<<<<<< HEAD
   async onRun(updatedCode, i) {
     const doc = this.state.doc;
     doc.cells[i] = updatedCode;
     this.update(doc);
+=======
+  async onRun(updatedCode: string, i: number) {
+    const doc = this.state.doc;
+    updatedCode = normalizeCode(updatedCode);
+    // Save updated code in database if different.
+    if (normalizeCode(doc.cells[i]) !== updatedCode) {
+      doc.cells[i] = updatedCode;
+      this.update(doc);
+    }
+>>>>>>> upstream/master
   }
 
   async onDelete(i) {
@@ -550,12 +623,17 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   renderCells(doc): JSX.Element {
+<<<<<<< HEAD
     return div("cells", doc.cells.map((code, i) => {
       return notebook(code, {
         // TODO(rld) i + 1 is because nextCellId starts at 1. So the statically
         // generated version starts at 1. In order to consistantly update those
         // cells, we use the same ids here. This brittle and should be fixed.
         id: i + 1,
+=======
+    return h("div", { "class": "cells" }, doc.cells.map((code, i) => {
+      return notebook(code, {
+>>>>>>> upstream/master
         onRun: (updatedCode) => { this.onRun(updatedCode, i); },
         onDelete: () => { this.onDelete(i); },
         onInsertCell: () => { this.onInsertCell(i); },
@@ -579,6 +657,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     } else {
       const doc = this.state.doc;
+<<<<<<< HEAD
       body = [
         h("header", null,
           notebookBlurb(doc),
@@ -587,6 +666,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
             "onClick": () => this.onClone(),
           }, "Clone"),
         ),
+=======
+      const cloneButton = this.props.userInfo == null ? ""
+        : h("button", {
+            "class": "clone",
+            "onClick": () => this.onClone(),
+          }, "Clone");
+
+      body = [
+        h("header", null, notebookBlurb(doc), cloneButton),
+>>>>>>> upstream/master
         this.renderCells(doc),
       ];
     }
@@ -594,8 +683,18 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     return h("div", null, ...body);
   }
 
+<<<<<<< HEAD
   componentDidUpdate() {
     drainExecuteQueue();
+=======
+  async componentDidUpdate() {
+    await drainExecuteQueue();
+
+    // We've rendered the Notebook with either a document or errorMsg.
+    if (this.state.doc || this.state.errorMsg) {
+      if (this.props.onReady) this.props.onReady();
+    }
+>>>>>>> upstream/master
   }
 }
 
@@ -604,7 +703,11 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
     h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
     h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
   ];
+<<<<<<< HEAD
   return div("blurb", null, [
+=======
+  return h("div", { "class": "blurb" }, null, [
+>>>>>>> upstream/master
     h(Avatar, { userInfo: doc.owner }),
     h("p", { "class": "displayName" }, doc.owner.displayName),
     ...dates
@@ -621,3 +724,24 @@ const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
 function fmtDate(d: Date): string {
   return d.toISOString();
 }
+<<<<<<< HEAD
+=======
+
+function Loading(props) {
+  return h("h1", null, "Loading");
+}
+
+export function GlobalHeader(props) {
+  return h("div", { "class": "global-header" },
+    h("div", { "class": "global-header-inner" },
+      h("a", { "class": "button", href: "/" }, "← Propel"),
+      ...props.children,
+    ),
+  );
+}
+
+// Trims whitespace.
+function normalizeCode(code: string): string {
+  return code.trim();
+}
+>>>>>>> upstream/master

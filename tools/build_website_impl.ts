@@ -2,7 +2,11 @@ import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
 import { renderSync } from "sass";
+<<<<<<< HEAD
 import { drainExecuteQueue, resetIds } from "../notebook";
+=======
+import { drainExecuteQueue } from "../notebook";
+>>>>>>> upstream/master
 import * as website from "../website";
 import * as run from "./run";
 
@@ -12,8 +16,11 @@ import * as run from "./run";
 const websiteRoot = run.root + "/build/website/";
 
 async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
+<<<<<<< HEAD
   resetIds();
 
+=======
+>>>>>>> upstream/master
   const jsdomConfig = { };
   const window = new JSDOM("", jsdomConfig).window;
 
@@ -23,9 +30,12 @@ async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
   global["navigator"] = window.navigator;
   global["Node"] = window.Node;
   global["getComputedStyle"] = window.getComputedStyle;
+<<<<<<< HEAD
   global["matchAll"] = async(x: any): Promise<any[]> => {
     return [];
   };
+=======
+>>>>>>> upstream/master
 
   website.renderPage(page);
 

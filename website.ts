@@ -2,7 +2,7 @@
 // This is the propelml.org website. It is used both server-side and
 // client-side for generating HTML.
 import { readFileSync } from "fs";
-import { Component, h, render } from "preact";
+import { h, render } from "preact";
 import * as nb from "./notebook";
 const { version } = require("./package.json");
 
@@ -193,7 +193,7 @@ export const Loading = (props) => {
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
   return div("references",
-    h(GlobalHeader, null),
+    h(nb.GlobalHeader, null),
     h("header", null,
       h("h1", null, "References"),
       p("This work is inspired by and built upon great technologies."),
