@@ -15,22 +15,22 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../../conv_util';
-import {GPGPUProgram} from './gpgpu_math';
+import { Conv2DInfo } from "../../conv_util";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class Conv2DProgram implements GPGPUProgram {
-  variableNames = ['x', 'W'];
+  variableNames = ["x", "W"];
   outputShape: number[];
   userCode: string;
 
   constructor(convInfo: Conv2DInfo, hasBias: boolean) {
     if (hasBias) {
-      this.variableNames.push('bias');
+      this.variableNames.push("bias");
     }
 
     this.outputShape = convInfo.outShape;
 
-    const biasSnippet = hasBias ? 'dotProd += getBias(d2);' : '';
+    const biasSnippet = hasBias ? "dotProd += getBias(d2);" : "";
     const padTop = convInfo.padInfo.top;
     const padLeft = convInfo.padInfo.left;
     const strideHeight = convInfo.strideHeight;

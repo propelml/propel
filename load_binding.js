@@ -21,7 +21,9 @@ module.exports = (function() {
     try {
       return require(m);
     } catch(e) {
-      // Ignore error.
+      // Ignore "module not found" errors.
+      if (e.code !== "MODULE_NOT_FOUND")
+        throw e;
     }
   }
   return null;

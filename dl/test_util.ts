@@ -15,19 +15,19 @@
  * =============================================================================
  */
 
-import {ENV, Features} from './environment';
-import {MathBackendCPU} from './math/backends/backend_cpu';
-import {MathBackendWebGL} from './math/backends/backend_webgl';
-import {NDArrayMath} from './math/math';
-import {DataType, NDArray} from './math/ndarray';
-import * as util from './util';
-import {TypedArray} from './util';
+import { ENV, Features } from "./environment";
+import { MathBackendCPU } from "./math/backends/backend_cpu";
+import { MathBackendWebGL } from "./math/backends/backend_webgl";
+import { NDArrayMath } from "./math/math";
+import { DataType, NDArray } from "./math/ndarray";
+import * as util from "./util";
+import { TypedArray } from "./util";
 
 /** Accuracy for tests. */
 // TODO(nsthorat || smilkov): Fix this low precision for byte-backed textures.
 export const TEST_EPSILON = 1e-2;
 
-export function mean(values: TypedArray|number[]) {
+export function mean(values: TypedArray | number[]) {
   let sum = 0;
   for (let i = 0; i < values.length; i++) {
     sum += values[i];
@@ -35,7 +35,7 @@ export function mean(values: TypedArray|number[]) {
   return sum / values.length;
 }
 
-export function standardDeviation(values: TypedArray|number[], mean: number) {
+export function standardDeviation(values: TypedArray | number[], mean: number) {
   let squareDiffSum = 0;
   for (let i = 0; i < values.length; i++) {
     const diff = values[i] - mean;
@@ -44,7 +44,7 @@ export function standardDeviation(values: TypedArray|number[], mean: number) {
   return Math.sqrt(squareDiffSum / values.length);
 }
 
-export function kurtosis(values: TypedArray|number[]) {
+export function kurtosis(values: TypedArray | number[]) {
   // https://en.wikipedia.org/wiki/Kurtosis
   const valuesMean = mean(values);
   const n = values.length;
@@ -58,7 +58,7 @@ export function kurtosis(values: TypedArray|number[]) {
   return (1 / n) * sum4 / Math.pow((1 / n) * sum2, 2);
 }
 
-export function skewness(values: TypedArray|number[]) {
+export function skewness(values: TypedArray | number[]) {
   // https://en.wikipedia.org/wiki/Skewness
   const valuesMean = mean(values);
   const n = values.length;
@@ -72,8 +72,8 @@ export function skewness(values: TypedArray|number[]) {
   return (1 / n) * sum3 / Math.pow((1 / (n - 1)) * sum2, 3 / 2);
 }
 
-export function jarqueBeraNormalityTest(a: NDArray|TypedArray|number[]) {
-  let values: TypedArray|number[];
+export function jarqueBeraNormalityTest(a: NDArray | TypedArray | number[]) {
+  let values: TypedArray | number[];
   if (a instanceof NDArray) {
     values = a.dataSync();
   } else {
@@ -93,9 +93,9 @@ export function jarqueBeraNormalityTest(a: NDArray|TypedArray|number[]) {
 }
 
 export function expectArrayInMeanStdRange(
-    actual: NDArray|TypedArray|number[], expectedMean: number,
+    actual: NDArray | TypedArray | number[], expectedMean: number,
     expectedStdDev: number, epsilon = TEST_EPSILON) {
-  let actualValues: TypedArray|number[];
+  let actualValues: TypedArray | number[];
   if (actual instanceof NDArray) {
     actualValues = actual.dataSync();
   } else {
@@ -108,8 +108,9 @@ export function expectArrayInMeanStdRange(
 }
 
 export function expectArraysClose(
-    actual: NDArray|TypedArray|number[],
-    expected: NDArray|TypedArray|number[]|boolean[], epsilon = TEST_EPSILON) {
+    actual: NDArray | TypedArray | number[],
+    expected: NDArray | TypedArray | number[] | boolean[],
+    epsilon = TEST_EPSILON) {
   if (!(actual instanceof NDArray) && !(expected instanceof NDArray)) {
     const aType = actual.constructor.name;
     const bType = expected.constructor.name;
@@ -132,8 +133,8 @@ export function expectArraysClose(
     }
   }
 
-  let actualValues: TypedArray|number[];
-  let expectedValues: TypedArray|number[]|boolean[];
+  let actualValues: TypedArray | number[];
+  let expectedValues: TypedArray | number[] | boolean[];
   if (actual instanceof NDArray) {
     actualValues = actual.dataSync();
   } else {
@@ -157,14 +158,14 @@ export function expectArraysClose(
     if (!areClose(a, Number(e), epsilon)) {
       const actualStr = `actual[${i}] === ${a}`;
       const expectedStr = `expected[${i}] === ${e}`;
-      throw new Error('Arrays differ: ' + actualStr + ', ' + expectedStr);
+      throw new Error("Arrays differ: " + actualStr + ", " + expectedStr);
     }
   }
 }
 
 export function expectArraysEqual(
-    actual: NDArray|TypedArray|number[],
-    expected: NDArray|TypedArray|number[]|boolean[]) {
+    actual: NDArray | TypedArray | number[],
+    expected: NDArray | TypedArray | number[] | boolean[]) {
   return expectArraysClose(actual, expected, 0);
 }
 
@@ -186,8 +187,8 @@ function areClose(a: number, e: number, epsilon: number): boolean {
 }
 
 export function expectValuesInRange(
-    actual: NDArray|TypedArray|number[], low: number, high: number) {
-  let actualVals: TypedArray|number[];
+    actual: NDArray | TypedArray | number[], low: number, high: number) {
+  let actualVals: TypedArray | number[];
   if (actual instanceof NDArray) {
     actualVals = actual.dataSync();
   } else {
@@ -239,7 +240,7 @@ export function cpuMultiplyMatrix(
 
 export function cpuDotProduct(a: Float32Array, b: Float32Array): number {
   if (a.length !== b.length) {
-    throw new Error('cpuDotProduct: incompatible vectors.');
+    throw new Error("cpuDotProduct: incompatible vectors.");
   }
   let d = 0;
   for (let i = 0; i < a.length; ++i) {
@@ -254,23 +255,21 @@ export type Tests = (it: (name: string, testFn: () => void) => void) => void;
 
 export function describeMathCPU(
     name: string, tests: MathTests[], featuresList?: Features[]) {
-  const testNameBase = 'CPU: math.' + name;
+  const testNameBase = "CPU: math." + name;
   describeWithFeaturesAndExecutor(
       testNameBase, tests as Tests[],
       (testName, tests, features) => executeMathTests(testName, tests, () => {
-        const safeMode = true;
-        return new NDArrayMath(new MathBackendCPU(), safeMode);
+        return new NDArrayMath(new MathBackendCPU());
       }, features), featuresList);
 }
 
 export function describeMathGPU(
     name: string, tests: MathTests[], featuresList?: Features[]) {
-  const testNameBase = 'WebGL: math.' + name;
+  const testNameBase = "WebGL: math." + name;
   describeWithFeaturesAndExecutor(
       testNameBase, tests as Tests[],
       (testName, tests, features) => executeMathTests(testName, tests, () => {
-        const safeMode = true;
-        return new NDArrayMath(new MathBackendWebGL(), safeMode);
+        return new NDArrayMath(new MathBackendWebGL());
       }, features), featuresList);
 }
 
@@ -291,7 +290,7 @@ function describeWithFeaturesAndExecutor(
     featuresList?: Features[]) {
   if (featuresList != null) {
     featuresList.forEach(features => {
-      const testName = testNameBase + ' ' + JSON.stringify(features);
+      const testName = testNameBase + " " + JSON.stringify(features);
       executor(testName, tests, features);
     });
   } else {
@@ -301,7 +300,7 @@ function describeWithFeaturesAndExecutor(
 
 // A wrapper around it() that calls done automatically if the function returns
 // a Promise, aka if it's an async/await function.
-const PROMISE_IT = (name: string, testFunc: () => void|Promise<void>) => {
+const PROMISE_IT = (name: string, testFunc: () => void | Promise<void>) => {
   it(name, (done: DoneFn) => {
     const result = testFunc();
     if (result instanceof Promise) {
@@ -330,7 +329,7 @@ export function executeMathTests(
     math.dispose();
   };
   const customIt =
-      (name: string, testFunc: (math: NDArrayMath) => void|Promise<void>) => {
+      (name: string, testFunc: (math: NDArrayMath) => void | Promise<void>) => {
         PROMISE_IT(name, () => testFunc(math));
       };
 
@@ -342,14 +341,14 @@ export function executeMathTests(
 export function executeTests(
     testName: string, tests: Tests[], features?: Features,
     customBeforeEach?: () => void, customAfterEach?: () => void,
-    customIt: (expectation: string, testFunc: () => void|Promise<void>) =>
+    customIt: (expectation: string, testFunc: () => void | Promise<void>) =>
         void = PROMISE_IT) {
   describe(testName, () => {
     beforeEach(() => {
       if (features != null) {
         ENV.setFeatures(features);
-        ENV.registerBackend('webgl', () => new MathBackendWebGL());
-        ENV.registerBackend('cpu', () => new MathBackendCPU());
+        ENV.registerBackend("webgl", () => new MathBackendWebGL());
+        ENV.registerBackend("cpu", () => new MathBackendCPU());
       }
 
       if (customBeforeEach != null) {

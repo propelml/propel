@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import {SquareCostFunc} from './cost_functions';
-import {Array1D} from './ndarray';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
+import { SquareCostFunc } from "./cost_functions";
+import { Array1D } from "./ndarray";
 
 const tests: MathTests = it => {
-  it('Square cost', math => {
+  it("Square cost", math => {
     const y = Array1D.new([1, 3, -2]);
     const target = Array1D.new([0, 3, -1.5]);
     const square = new SquareCostFunc();
@@ -33,7 +33,7 @@ const tests: MathTests = it => {
     test_util.expectNumbersClose(cost.get(2), 0.25 / 2);
   });
 
-  it('Square derivative', math => {
+  it("Square derivative", math => {
     const y = Array1D.new([1, 3, -2]);
     const target = Array1D.new([0, 3, -1.5]);
     const square = new SquareCostFunc();
@@ -45,9 +45,9 @@ const tests: MathTests = it => {
   });
 };
 
-test_util.describeMathCPU('Square cost', [tests]);
-test_util.describeMathGPU('Square cost', [tests], [
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+test_util.describeMathCPU("Square cost", [tests]);
+test_util.describeMathGPU("Square cost", [tests], [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

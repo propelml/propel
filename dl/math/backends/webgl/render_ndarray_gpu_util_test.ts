@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
-import * as gpgpu_util from './gpgpu_util';
-import * as render_ndarray_gpu_util from './render_ndarray_gpu_util';
+import { GPGPUContext } from "./gpgpu_context";
+import * as gpgpu_util from "./gpgpu_util";
+import * as render_ndarray_gpu_util from "./render_ndarray_gpu_util";
 
 function uploadRenderRGBDownload(
     source: Float32Array, sourceShape: [number, number, number]) {
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = sourceShape[0];
   canvas.height = sourceShape[1];
 
@@ -51,14 +51,14 @@ function uploadRenderRGBDownload(
   return result;
 }
 
-describe('render_gpu', () => {
-  it('Packs a 1x1x3 vector to a 1x1 color texture', () => {
+describe("render_gpu", () => {
+  it("Packs a 1x1x3 vector to a 1x1 color texture", () => {
     const source = new Float32Array([1, 2, 3]);
     const result = uploadRenderRGBDownload(source, [1, 1, 3]);
     expect(result).toEqual(new Float32Array([1, 2, 3, 1]));
   });
 
-  it('Packs a 2x2x3 vector to a 2x2 color texture, mirrored vertically', () => {
+  it("Packs a 2x2x3 vector to a 2x2 color texture, mirrored vertically", () => {
     const source = new Float32Array([1, 2, 3, 30, 20, 10, 2, 3, 4, 40, 30, 20]);
     const result = uploadRenderRGBDownload(source, [2, 2, 3]);
     // The resulting rendered image is flipped vertically.

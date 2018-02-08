@@ -20,6 +20,11 @@ assert(tf.loadBinding());
 const binding = tf.binding;
 const ctx = tf.ctx;
 
+test(async function binding_version() {
+  assert(binding.tensorflowVersion);
+  console.log(`Tensorflow version: ${binding.tensorflowVersion}`);
+});
+
 test(async function binding_equals() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
   const b = new binding.Handle(new Float32Array([2, 4]), [2], binding.TF_FLOAT);

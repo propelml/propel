@@ -1,4 +1,4 @@
-import {DataType, DataTypeMap, NDArray} from './math/ndarray';
+import { DataType, DataTypeMap, NDArray } from "./math/ndarray";
 
 /**
  * @license
@@ -17,10 +17,11 @@ import {DataType, DataTypeMap, NDArray} from './math/ndarray';
  * =============================================================================
  */
 
-export type TypedArray = Float32Array|Int32Array|Uint8Array;
-export type FlatVector = boolean[]|number[]|TypedArray;
-export type RegularArray<T> = T[]|T[][]|T[][][]|T[][][][];
-export type ArrayData = TypedArray|RegularArray<number>|RegularArray<boolean>;
+export type TypedArray = Float32Array | Int32Array | Uint8Array;
+export type FlatVector = boolean[] | number[] | TypedArray;
+export type RegularArray<T> = T[] | T[][] | T[][][] | T[][][][];
+export type ArrayData =
+    TypedArray | RegularArray<number> | RegularArray<boolean>;
 
 export type NamedArrayMap = {
   [name: string]: NDArray
@@ -28,7 +29,7 @@ export type NamedArrayMap = {
 
 /** Shuffles the array using Fisher-Yates algorithm. */
 // tslint:disable-next-line:no-any
-export function shuffle(array: any[]|Uint32Array|Int32Array|
+export function shuffle(array: any[] | Uint32Array | Int32Array |
                         Float32Array): void {
   let counter = array.length;
   let temp = 0;
@@ -73,7 +74,7 @@ export function assert(expr: boolean, msg: string) {
 }
 
 export function assertShapesMatch(
-    shapeA: number[], shapeB: number[], errorMessagePrefix = ''): void {
+    shapeA: number[], shapeB: number[], errorMessagePrefix = ""): void {
   assert(
       arraysEqual(shapeA, shapeB),
       errorMessagePrefix + `Shapes ${shapeA} and ${shapeB} must match`);
@@ -88,8 +89,8 @@ export function assertTypesMatch(a: NDArray, b: NDArray): void {
 
 // tslint:disable-next-line:no-any
 export function flatten(
-    arr: number|boolean|RegularArray<number>|RegularArray<boolean>,
-    ret: Array<number|boolean> = []): Array<number|boolean> {
+    arr: number | boolean | RegularArray<number> | RegularArray<boolean>,
+    ret: Array<number | boolean> = []): Array<number | boolean> {
   if (Array.isArray(arr)) {
     for (let i = 0; i < arr.length; ++i) {
       flatten(arr[i], ret);
@@ -100,7 +101,7 @@ export function flatten(
   return ret;
 }
 
-export function inferShape(arr: number|boolean|RegularArray<number>|
+export function inferShape(arr: number | boolean | RegularArray<number> |
                            RegularArray<boolean>): number[] {
   const shape: number[] = [];
   while (arr instanceof Array) {
@@ -180,7 +181,7 @@ export function rightPad(a: string, size: number): string {
   if (size <= a.length) {
     return a;
   }
-  return a + ' '.repeat(size - a.length);
+  return a + " ".repeat(size - a.length);
 }
 
 export function repeatedTry(
@@ -214,14 +215,14 @@ export function getQueryParams(queryString: string): {[key: string]: string} {
   const params = {};
   queryString.replace(/[?&]([^=?&]+)(?:=([^&]*))?/g, (s, ...t) => {
     decodeParam(params, t[0], t[1]);
-    return t.join('=');
+    return t.join("=");
   });
   return params;
 }
 
 function decodeParam(
     params: {[key: string]: string}, name: string, value?: string) {
-  params[decodeURIComponent(name)] = decodeURIComponent(value || '');
+  params[decodeURIComponent(name)] = decodeURIComponent(value || "");
 }
 
 /**
@@ -276,11 +277,11 @@ export const NAN_BOOL = 255;
 export const NAN_FLOAT32 = NaN;
 
 export function getNaN(dtype: DataType): number {
-  if (dtype === 'float32') {
+  if (dtype === "float32") {
     return NAN_FLOAT32;
-  } else if (dtype === 'int32') {
+  } else if (dtype === "int32") {
     return NAN_INT32;
-  } else if (dtype === 'bool') {
+  } else if (dtype === "bool") {
     return NAN_BOOL;
   } else {
     throw new Error(`Unknown dtype ${dtype}`);
@@ -291,11 +292,11 @@ export function isValNaN(val: number, dtype: DataType): boolean {
   if (isNaN(val)) {
     return true;
   }
-  if (dtype === 'float32') {
+  if (dtype === "float32") {
     return false;
-  } else if (dtype === 'int32') {
+  } else if (dtype === "int32") {
     return val === NAN_INT32;
-  } else if (dtype === 'bool') {
+  } else if (dtype === "bool") {
     return val === NAN_BOOL;
   } else {
     throw new Error(`Unknown dtype ${dtype}`);
@@ -319,11 +320,11 @@ export function squeezeShape(shape: number[]):
 export function getTypedArrayFromDType<D extends DataType>(
     dtype: D, size: number): DataTypeMap[D] {
   let values = null;
-  if (dtype == null || dtype === 'float32') {
+  if (dtype == null || dtype === "float32") {
     values = new Float32Array(size);
-  } else if (dtype === 'int32') {
+  } else if (dtype === "int32") {
     values = new Int32Array(size);
-  } else if (dtype === 'bool') {
+  } else if (dtype === "bool") {
     values = new Uint8Array(size);
   } else {
     throw new Error(`Unknown data type ${dtype}`);
@@ -351,7 +352,7 @@ export function checkForNaN(
 }
 
 export function flattenNameArrayMap(
-    nameArrayMap: NDArray|NamedArrayMap, keys?: string[]): NDArray[] {
+    nameArrayMap: NDArray | NamedArrayMap, keys?: string[]): NDArray[] {
   const xs: NDArray[] = [];
   if (nameArrayMap instanceof NDArray) {
     xs.push(nameArrayMap);
@@ -382,13 +383,13 @@ export function unflattenToNameArrayMap(
  * precision.
  */
 export function hasEncodingLoss(oldType: DataType, newType: DataType): boolean {
-  if (newType === 'float32') {
+  if (newType === "float32") {
     return false;
   }
-  if (newType === 'int32' && oldType !== 'float32') {
+  if (newType === "int32" && oldType !== "float32") {
     return false;
   }
-  if (newType === 'bool' && oldType === 'bool') {
+  if (newType === "bool" && oldType === "bool") {
     return false;
   }
   return true;

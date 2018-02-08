@@ -1,10 +1,87 @@
 @import './normalize.scss';
-@import './skeleton.scss';
 @import './codemirror.scss';
 @import './syntax_dark.scss';
 // @import './syntax_light.scss';
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
+
+/* NOTE html is set to 62.5% so that all the REM measurements
+throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
+html {
+  font-size: 62.5%;
+}
+
+body {
+  background-color: $bodyBackground;
+  color: $textColor;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'avenir next',
+    avenir,
+    helvetica,
+    'helvetica neue',
+    ubuntu,
+    roboto,
+    noto,
+    'segoe ui',
+    arial,
+    sans-serif;
+  font-size: 1.5em;
+  line-height: 1.6;
+}
+
+body p {
+  font-size: 16px;
+  line-height: 32px;
+  color: $textColor;
+  margin: 16px 12px;
+}
+
+h1 {
+  font-size: 4rem;
+  letter-spacing: -0.1rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 550px) {
+  h1 {
+    font-size: 5rem;
+  }
+}
+
+/* Used in docs */
+h2 {
+  line-height: 1.25;
+}
+
+a {
+  color: $linkColor;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.button,
+button,
+input[type=button] {
+  border: 1px solid #1163c2;
+  border-radius: 4px;
+  color: #1163c2;
+  height: 38px;
+  font-size: 13px;
+  line-height: 38px;
+  letter-spacing: 0.1rem;
+  padding: 0 30px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+li {
+  margin-bottom: 1rem;
+}
 
 .sans-serif {
   font-family:
@@ -20,36 +97,6 @@
     'segoe ui',
     arial,
     sans-serif;
-}
-
-body {
-  background-color: $bodyBackground;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'avenir next',
-    avenir,
-    helvetica,
-    'helvetica neue',
-    ubuntu,
-    roboto,
-    noto,
-    'segoe ui',
-    arial,
-    sans-serif;
-  color: $textColor;
-}
-
-body p {
-  font-size: 16px;
-  line-height: 32px;
-  color: $textColor;
-  margin: 16px 12px;
-}
-
-a {
-  color: $linkColor;
-  text-decoration: none;
 }
 
 .name,
@@ -69,10 +116,6 @@ pre,
   word-break: keep-all;
 }
 
-.container {
-  padding: 0;
-}
-
 .splash {
   padding-bottom: 32px;
   background-color: $bodyBackground;
@@ -86,13 +129,6 @@ pre,
 
 .explainer {
   padding: 4em 0;
-  margin: 0;
-}
-
-.explainer-content {
-  padding-bottom: 24px;
-  border-bottom: 1px solid #00f;
-  margin-bottom: 24px;
 }
 
 .footer {
@@ -102,8 +138,34 @@ pre,
   background-color: #fff;
 }
 
-/* Don't allow SVGs to get wider than the screen. */
+/* Centers and gives max-width to index, references, notebook pages */
+.splash,
+.explainer,
+.references,
+.notebook {
+  max-width: 960px;
+  margin: 0 auto;
+}
 
+/* Column layout for screens wider than 550px, below that they stack. */
+@media (min-width: 550px) {
+  .explainer {
+    display: flex;
+  }
+
+  .explainer-text,
+  .explainer-notebook {
+    flex-basis: 50%;
+  }
+
+  /* Right column has a left-margin only for min-width: 550px.
+  At 550 the columns stack, so that margin then defaults to 0. */
+  .explainer-notebook {
+    margin-left: 4%;
+  }
+}
+
+/* Don't allow SVGs to get wider than the screen. */
 svg {
   max-width: 100%;
 }
@@ -157,17 +219,10 @@ h1,
 }
 
 header {
-  align-items: center;
   background-color: $bodyBackground;
   border-bottom: 1px solid $textColor;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   color: $textColor;
-}
-
-header * {
-  margin: 8px auto;
+  padding: 8px 0;
 }
 
 header p {
@@ -180,10 +235,6 @@ header p {
 
 header h1 {
   margin: 16px 0 0 12px;
-}
-
-.nav-buttons {
-  text-align: center;
 }
 
 .panel {
@@ -413,6 +464,7 @@ svg {
   border: 0;
   height: 0;
   transition: height 0.2s ease-in-out;
+  transition-delay: 0.1s;
   overflow: hidden;
 }
 

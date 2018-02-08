@@ -15,38 +15,38 @@
  * =============================================================================
  */
 
-import * as test_util from '../../test_util';
-import {MathTests} from '../../test_util';
-import {Scalar} from '../ndarray';
+import * as test_util from "../../test_util";
+import { MathTests } from "../../test_util";
+import { Scalar } from "../ndarray";
 
-import * as tape_util from './tape_util';
+import { extractNDArraysFromScopeResult } from "./backend_engine";
 
 // extractNDArraysFromScopeResult
 {
   const tests: MathTests = it => {
-    it('null input returns empty array', math => {
-      const results = tape_util.extractNDArraysFromScopeResult(null);
+    it("null input returns empty array", math => {
+      const results = extractNDArraysFromScopeResult(null);
 
       expect(results).toEqual([]);
     });
 
-    it('ndarray input returns one element array', math => {
+    it("ndarray input returns one element array", math => {
       const x = Scalar.new(1);
-      const results = tape_util.extractNDArraysFromScopeResult(x);
+      const results = extractNDArraysFromScopeResult(x);
 
       expect(results).toEqual([x]);
     });
 
-    it('name array map returns flattened array', math => {
+    it("name array map returns flattened array", math => {
       const x1 = Scalar.new(1);
       const x2 = Scalar.new(3);
       const x3 = Scalar.new(4);
-      const results = tape_util.extractNDArraysFromScopeResult({x1, x2, x3});
+      const results = extractNDArraysFromScopeResult({x1, x2, x3});
 
       expect(results).toEqual([x1, x2, x3]);
     });
   };
 
   test_util.describeMathCPU(
-      'tape_util.extractNDArraysFromScopeResult', [tests]);
+      "tape_util.extractNDArraysFromScopeResult", [tests]);
 }

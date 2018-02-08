@@ -15,22 +15,21 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
-import * as util from '../util';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array1D, Array3D, Scalar} from './ndarray';
+import { Array1D, Array3D, Scalar } from "./ndarray";
 
 // math.scope
 {
   const gpuTests: MathTests = it => {
-    it('scope returns NDArray', async math => {
-      await math.scope(async () => {
+    it("scope returns NDArray", async math => {
+      math.scope(() => {
         const a = Array1D.new([1, 2, 3]);
         let b = Array1D.new([0, 0, 0]);
 
         expect(math.getNumArrays()).toBe(2);
-        await math.scope(async () => {
+        math.scope(() => {
           const result = math.scope(() => {
             b = math.addStrict(a, b);
             b = math.addStrict(a, b);
@@ -50,7 +49,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('multiple disposes does not affect num arrays', math => {
+    it("multiple disposes does not affect num arrays", math => {
       expect(math.getNumArrays()).toBe(0);
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([1, 2, 3]);
@@ -62,12 +61,12 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('scope returns NDArray[]', async math => {
+    it("scope returns NDArray[]", async math => {
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([0, -1, 1]);
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           math.add(a, b);
           return [math.add(a, b), math.subtract(a, b)];
@@ -87,7 +86,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('basic scope usage without return', math => {
+    it("basic scope usage without return", math => {
       const a = Array1D.new([1, 2, 3]);
       let b = Array1D.new([0, 0, 0]);
 
@@ -104,13 +103,13 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(2);
     });
 
-    it('scope returns Promise<NDArray>', async math => {
+    it("scope returns Promise<NDArray>", async math => {
       const a = Array1D.new([1, 2, 3]);
       const b = Array1D.new([0, 0, 0]);
 
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           let c = math.add(a, b);
           c = math.add(a, c);
@@ -130,13 +129,13 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       expect(math.getNumArrays()).toBe(0);
     });
 
-    it('nested scope usage', async math => {
+    it("nested scope usage", async math => {
       const a = Array1D.new([1, 2, 3]);
       let b = Array1D.new([0, 0, 0]);
 
       expect(math.getNumArrays()).toBe(2);
 
-      await math.scope(async () => {
+      math.scope(() => {
         const result = math.scope(() => {
           b = math.addStrict(a, b);
           b = math.scope(() => {
@@ -166,63 +165,17 @@ import {Array1D, Array3D, Scalar} from './ndarray';
     });
   };
 
-  test_util.describeMathGPU('scope', [gpuTests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
-  ]);
-}
-
-// debug mode
-{
-  const gpuTests: MathTests = it => {
-    it('debug mode does not error when no nans', math => {
-      math.enableDebugMode();
-      const a = Array1D.new([2, -1, 0, 3]);
-      const res = math.relu(a);
-      test_util.expectArraysClose(res, [2, 0, 0, 3]);
-    });
-
-    it('debug mode errors when there are nans, float32', math => {
-      math.enableDebugMode();
-      const a = Array1D.new([2, NaN]);
-      const f = () => math.relu(a);
-      expect(f).toThrowError();
-    });
-
-    it('debug mode errors when there are nans, int32', math => {
-      math.enableDebugMode();
-      const a = Array1D.new([2, util.NAN_INT32], 'int32');
-      const f = () => math.relu(a);
-      expect(f).toThrowError();
-    });
-
-    it('debug mode errors when there are nans, bool', math => {
-      math.enableDebugMode();
-      const a = Array1D.new([1, util.NAN_BOOL], 'bool');
-      const f = () => math.relu(a);
-      expect(f).toThrowError();
-    });
-
-    it('no errors where there are nans, and debug mode is disabled', math => {
-      const a = Array1D.new([2, NaN]);
-      const res = math.relu(a);
-      test_util.expectArraysClose(res, [2, NaN]);
-    });
-  };
-
-  test_util.describeMathCPU('debug mode', [gpuTests]);
-  test_util.describeMathGPU('debug mode', [gpuTests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathGPU("scope", [gpuTests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // fromPixels & math
 {
   const tests: MathTests = it => {
-    it('debug mode does not error when no nans', math => {
+    it("debug mode does not error when no nans", math => {
       const pixels = new ImageData(2, 2);
       for (let i = 0; i < 8; i++) {
         pixels.data[i] = 100;
@@ -232,7 +185,7 @@ import {Array1D, Array3D, Scalar} from './ndarray';
       }
 
       const a = Array3D.fromPixels(pixels, 4);
-      const b = Scalar.new(20, 'int32');
+      const b = Scalar.new(20, "int32");
 
       const res = math.add(a, b);
 
@@ -243,9 +196,9 @@ import {Array1D, Array3D, Scalar} from './ndarray';
     });
   };
 
-  test_util.describeMathGPU('fromPixels + math', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathGPU("fromPixels + math", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

@@ -17,7 +17,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Turns a javascript array of numbers into a tensor. Like this:\n\n  import { T } from \"propel\";\n  T([[1, 2, 3], [4, 5, 6]]).square();\n\nIf a tensor is given to T, it simply returns it.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L23-L36"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L23-L36"
   },
   {
     "name": "listDevices",
@@ -26,25 +26,25 @@
     "args": [],
     "retType": "string[]",
     "docstr": "Returns a list of available device names.\n\n  import { listDevices } from \"propel\";\n  listDevices();",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L38-L45"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L38-L45"
   },
   {
     "name": "Tensor",
     "kind": "class",
     "docstr": "Tensor wraps a BasicTensor object. This is the main public\ninterface to tensor operatiors. Each instance has a unique id for use in\nbackprop.  Nothing about Tensors is backend specific.\nTensor might be renamed to BoxedTensor in the near future. To\nexternal users this class is called just Tensor. We use a more specific name\ninternally so as not to confuse it with the many other tensor classes in\nPropel.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L28-L532"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L28-L553"
   },
   {
     "name": "Tensor.basic",
     "kind": "property",
     "typestr": "BasicTensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L42"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L42"
   },
   {
     "name": "Tensor.id",
     "kind": "property",
     "typestr": "number",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L45"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L45"
   },
   {
     "name": "Tensor.constructor",
@@ -57,7 +57,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L47-L51"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L47-L51"
   },
   {
     "name": "Tensor.dispose",
@@ -66,7 +66,7 @@
     "args": [],
     "retType": "void",
     "docstr": "Manually collect garbage. This is required in some form or another\nwhen using the DL/WebGL backend, see also gc().",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L53-L60"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L53-L60"
   },
   {
     "name": "Tensor.assign",
@@ -80,7 +80,15 @@
     ],
     "retType": "void",
     "docstr": "In-place replacement of a tensor.\nThe argument passed to assign is destroyed and cannot be used after this\ncall. (FIXME this behavior is very aggressive.)",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L62-L77"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L62-L77"
+  },
+  {
+    "name": "Tensor[Symbol.iterator]",
+    "kind": "method",
+    "typestr": "(): { next: () => { value: number; done: boolean; }; }",
+    "args": [],
+    "retType": "{ next: () => { value: number; done: boolean; }; }",
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L79-L98"
   },
   {
     "name": "Tensor.getData",
@@ -88,31 +96,31 @@
     "typestr": "(): TypedArray",
     "args": [],
     "retType": "TypedArray",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L93-L95"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L114-L116"
   },
   {
     "name": "Tensor.rank",
     "kind": "property",
     "typestr": "number",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L97-L99"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L118-L120"
   },
   {
     "name": "Tensor.device",
     "kind": "property",
     "typestr": "string",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L101-L103"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L122-L124"
   },
   {
     "name": "Tensor.dtype",
     "kind": "property",
     "typestr": "DType",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L105-L107"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L126-L128"
   },
   {
     "name": "Tensor.shape",
     "kind": "property",
     "typestr": "number[]",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L109-L111"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L130-L132"
   },
   {
     "name": "Tensor.toString",
@@ -120,7 +128,8 @@
     "typestr": "(): string",
     "args": [],
     "retType": "string",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L113-L115"
+    "docstr": "Returns a string representation of an object. ",
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L134-L136"
   },
   {
     "name": "Tensor.copy",
@@ -134,7 +143,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Copies the tensor to the specified device (usually \"CPU:0\" or \"GPU:0\").\nIf device is unspecified, it makse a copy on the same device.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L117-L124"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L138-L145"
   },
   {
     "name": "Tensor.gpu",
@@ -142,7 +151,7 @@
     "typestr": "(): Tensor",
     "args": [],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L126-L131"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L147-L152"
   },
   {
     "name": "Tensor.cpu",
@@ -150,7 +159,7 @@
     "typestr": "(): Tensor",
     "args": [],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L133-L138"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L154-L159"
   },
   {
     "name": "Tensor.cast",
@@ -163,7 +172,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L140-L142"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L161-L163"
   },
   {
     "name": "Tensor.add",
@@ -176,7 +185,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L144-L146"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L165-L167"
   },
   {
     "name": "Tensor.sub",
@@ -189,7 +198,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L148-L150"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L169-L171"
   },
   {
     "name": "Tensor.mul",
@@ -202,7 +211,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L152-L154"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L173-L175"
   },
   {
     "name": "Tensor.div",
@@ -215,7 +224,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L156-L158"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L177-L179"
   },
   {
     "name": "Tensor.matmul",
@@ -228,7 +237,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L160-L162"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L181-L183"
   },
   {
     "name": "Tensor.onesLike",
@@ -236,7 +245,7 @@
     "typestr": "(): Tensor",
     "args": [],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L164-L167"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L185-L188"
   },
   {
     "name": "Tensor.zerosLike",
@@ -244,7 +253,7 @@
     "typestr": "(): Tensor",
     "args": [],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L169-L172"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L190-L193"
   },
   {
     "name": "Tensor.neg",
@@ -253,7 +262,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Negates each element of the tensor.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-5, 5, 200);\n  plot(x, x.neg())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L174-L182"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L195-L203"
   },
   {
     "name": "Tensor.exp",
@@ -262,7 +271,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Exponentiates each element of the tensor.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-5, 5, 200);\n  plot(x, x.exp())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L184-L192"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L205-L213"
   },
   {
     "name": "Tensor.log",
@@ -271,7 +280,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the natural logarithm to each element of the tensor.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(0.001, 5, 200);\n  plot(x, x.log())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L194-L202"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L215-L223"
   },
   {
     "name": "Tensor.square",
@@ -280,7 +289,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Squares each element of the tensor.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-5, 5, 200);\n  plot(x, x.square())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L204-L212"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L225-L233"
   },
   {
     "name": "Tensor.sinh",
@@ -289,7 +298,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the hyperbolic sine function component-wise.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-5, 5, 200);\n  plot(x, x.sinh())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L214-L222"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L235-L243"
   },
   {
     "name": "Tensor.cosh",
@@ -298,7 +307,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the hyperbolic cosine function component-wise.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-5, 5, 200);\n  plot(x, x.cosh())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L224-L232"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L245-L253"
   },
   {
     "name": "Tensor.tanh",
@@ -307,7 +316,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the hyperbolic tangent function component-wise.\nWhere tanh(x) is defined to be (1 - exp(-2x)) / (1 + exp(-2x)).\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-10, 10, 200);\n  plot(x, x.tanh())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L234-L243"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L255-L264"
   },
   {
     "name": "Tensor.relu",
@@ -316,7 +325,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the rectified linear unit function component-wise.\nWhere relu(x) is defined to be max(x, 0).\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-10, 10, 200);\n  plot(x, x.relu())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L245-L254"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L266-L275"
   },
   {
     "name": "Tensor.sigmoid",
@@ -325,7 +334,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies the sigmoid function component-wise to the tensor.\nThe sigmoid function is defined as 1 / (1 + exp(-x)).\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-10, 10, 200);\n  plot(x, x.sigmoid())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L256-L265"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L277-L286"
   },
   {
     "name": "Tensor.abs",
@@ -334,7 +343,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Applies absolute value component-wise to the tensor.\n\n  import { linspace, plot } from \"propel\";\n  x = linspace(-10, 10, 200);\n  plot(x, x.abs())",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L267-L275"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L288-L296"
   },
   {
     "name": "Tensor.transpose",
@@ -347,7 +356,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L277-L283"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L298-L304"
   },
   {
     "name": "Tensor.reverse",
@@ -361,7 +370,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Reverses specific dimensions of a tensor. ",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L285-L298"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L306-L319"
   },
   {
     "name": "Tensor.argmax",
@@ -376,7 +385,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns the index with the largest value across an axis of a tensor.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L300-L306"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L321-L327"
   },
   {
     "name": "Tensor.argmin",
@@ -391,7 +400,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns the index with the smallest value across an axis of a tensor.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L308-L314"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L329-L335"
   },
   {
     "name": "Tensor.reduceSum",
@@ -410,7 +419,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Sum the tensor over the given axes.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L316-L322"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L337-L343"
   },
   {
     "name": "Tensor.reduceMean",
@@ -429,7 +438,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Mean the tensor over the given axes.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L324-L330"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L345-L351"
   },
   {
     "name": "Tensor.reduceMax",
@@ -448,7 +457,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Take the maximum value over the given axes.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L332-L338"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L353-L359"
   },
   {
     "name": "Tensor.reduceLogSumExp",
@@ -465,7 +474,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L340-L343"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L361-L364"
   },
   {
     "name": "Tensor.equal",
@@ -479,7 +488,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Element-wise comparison. Returns a tensor with dtype == \"bool\". ",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L345-L348"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L366-L369"
   },
   {
     "name": "Tensor.greater",
@@ -493,7 +502,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns a boolean tensor with the truth value of (this > x)\nelement-wise.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L350-L355"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L371-L376"
   },
   {
     "name": "Tensor.greaterEqual",
@@ -507,7 +516,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns a boolean tensor with the truth value of (this >= x)\nelement-wise.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L357-L362"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L378-L383"
   },
   {
     "name": "Tensor.less",
@@ -521,7 +530,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns a boolean tensor with the truth value of (this < x)\nelement-wise.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L364-L369"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L385-L390"
   },
   {
     "name": "Tensor.lessEqual",
@@ -535,7 +544,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns a boolean tensor with the truth value of (this <= x)\nelement-wise.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L371-L376"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L392-L397"
   },
   {
     "name": "Tensor.select",
@@ -553,7 +562,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Selects elements from `t` or `f`, depending on the condition (this).\nthis should be a boolean Tensor.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L378-L385"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L399-L406"
   },
   {
     "name": "Tensor.sign",
@@ -562,7 +571,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Returns an element-wise indication of the sign of a number.\n-1 for negative values and 1 for positive values.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L387-L392"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L408-L413"
   },
   {
     "name": "Tensor.slice",
@@ -580,7 +589,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Return a slice from 'input'.\nThe output tensor is a tensor with dimensions described by 'size' whose\nvalues are extracted from 'input' starting at the offsets in 'begin'.\nbegin[i] specifies the offset into the ith dimension of 'input' to slice\nfrom.  size[i] specifies the number of elements of the ith dimension of\n'input' to slice. If size[i] is -1, all remaining elements in dimension\nare included in the slice -- this is equivalent to setting\nsize[i] = input.shape[i] - begin[i]",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L394-L407"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L415-L428"
   },
   {
     "name": "Tensor.reshape",
@@ -594,7 +603,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Reshapes the tensor without changing its data. O(1).\n\n  import { range } from \"propel\";\n  n = 5\n  m = 2\n  t = range(m*n)\n  console.log(t.reshape([n, m]))\n  console.log(t.reshape([m, n]))",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L409-L420"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L430-L441"
   },
   {
     "name": "Tensor.flatten",
@@ -603,7 +612,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Return a copy of the tensor collapsed into one dimension.\n\n  import { T } from \"propel\";\n  T([[1, 2], [3, 4]]).flatten();",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L422-L429"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L443-L450"
   },
   {
     "name": "Tensor.squeeze",
@@ -612,7 +621,7 @@
     "args": [],
     "retType": "Tensor",
     "docstr": "Remove single-dimensional axes from the shape of a tensor.\n\n  import { T } from \"propel\";\n  T([[[2, 3, 4]]]).squeeze();",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L431-L439"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L452-L460"
   },
   {
     "name": "Tensor.softmax",
@@ -626,7 +635,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns the softmax activations of a tensor. ",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L441-L444"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L462-L465"
   },
   {
     "name": "Tensor.logSoftmax",
@@ -640,7 +649,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Numerically stable log(softmax(x)). ",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L446-L449"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L467-L470"
   },
   {
     "name": "Tensor.dot",
@@ -654,7 +663,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Dot product of two tensors. For 2D tensors it is equivalent to matrix\nmultiplication. For 1D tensors to inner product of vectors (without\ncomplex conjugation). Currently higher order tensors are not supported.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L451-L493"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L472-L514"
   },
   {
     "name": "Tensor.oneHot",
@@ -676,7 +685,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Build a one-hot tensor from labels.\n\n  import { T } from \"propel\";\n  let labels = T([1, 3, 0], {dtype: \"int32\"});\n  labels.oneHot(5);",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L495-L506"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L516-L527"
   },
   {
     "name": "Tensor.softmaxCE",
@@ -691,7 +700,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Computes softmax cross entropy on logits.\nThis is known as softmax_cross_entropy_with_logits in TF.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L508-L522"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L529-L543"
   },
   {
     "name": "Tensor.setDiag",
@@ -705,7 +714,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Sets the diagonal part of a matrix.\n\n  import { zeros } from \"propel\";\n  zeros([4, 3]).setDiag([1, 2, 3]);",
-    "sourceUrl": "https://github.com/propelml/propel/blob/5f9f72295327e1c1eccffadd125c4da19c69ae19/tensor.ts#L524-L531"
+    "sourceUrl": "https://github.com/propelml/propel/blob/9eb5d8c425415fd8eb5ddb84bd928287fc72a4ed/tensor.ts#L545-L552"
   },
   {
     "name": "grad",
@@ -810,7 +819,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns the identity matrix of a given size.\n\n  import { eye } from \"propel\";\n  eye(5);",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L52-L62"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L52-L62"
   },
   {
     "name": "linspace",
@@ -832,7 +841,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Returns num evenly spaced samples, calculated over the interval\n[start, stop].\n\n  import { linspace } from \"propel\"\n  linspace(-1, 1, 5);",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L64-L73"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L64-L73"
   },
   {
     "name": "range",
@@ -846,7 +855,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Return evenly spaced numbers over a specified interval.\nThis as a similar interface as arange in numpy.\n\n  import { range } from \"propel\"\n  range(10);",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L75-L107"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L75-L107"
   },
   {
     "name": "randn",
@@ -859,8 +868,8 @@
       }
     ],
     "retType": "Tensor",
-    "docstr": "Produces a new tensor with random values, drawn from the standard normal\ndistribution.\n\n  import { randn } from \"propel\"\n  randn([3, 4])",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L109-L118"
+    "docstr": "Produces a new tensor with random values, drawn from the standard normal\ndistribution.\n\n  import { range, randn, plot } from \"propel\"\n  n = 1000\n  plot(range(n), randn([n]))",
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L109-L119"
   },
   {
     "name": "fill",
@@ -878,7 +887,7 @@
     ],
     "retType": "Tensor",
     "docstr": "fill returns a new tensor of the given shape, filled with constant values\nspecified by the `value` argument. `value` must be a scalar tensor.\n\n  import { fill } from \"propel\"\n  fill(31337, [2, 2])",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L120-L128"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L121-L129"
   },
   {
     "name": "zeros",
@@ -896,7 +905,7 @@
     ],
     "retType": "Tensor",
     "docstr": "Return a new tensor of given shape and dtype, filled with zeros.\n\n  import { zeros } from \"propel\"\n  zeros([5, 2])",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L130-L138"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L131-L139"
   },
   {
     "name": "ones",
@@ -914,13 +923,13 @@
     ],
     "retType": "Tensor",
     "docstr": "Return a new tensor of given shape and dtype, filled with ones.\n\n  import { ones } from \"propel\"\n  ones([2, 3])",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L140-L148"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L141-L149"
   },
   {
     "name": "Params",
     "kind": "class",
     "docstr": "A collection of named Tensors. Used with OptimizerSGD.\nIterate over it like this:\n\n  import { Params } from \"propel\";\n  let params = new Params()\n  params.randn(\"A\", [2]);\n  params.zeros(\"B\", [2, 2]);\n  params.forEach((tensor, name) => {\n    console.log(name);\n    console.log(tensor);\n  });",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L150-L219"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L151-L220"
   },
   {
     "name": "Params.has",
@@ -933,7 +942,7 @@
       }
     ],
     "retType": "boolean",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L167-L169"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L168-L170"
   },
   {
     "name": "Params.get",
@@ -946,7 +955,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L171-L173"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L172-L174"
   },
   {
     "name": "Params.set",
@@ -963,7 +972,7 @@
       }
     ],
     "retType": "Tensor",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L175-L178"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L176-L179"
   },
   {
     "name": "Params.forEach",
@@ -976,12 +985,12 @@
       }
     ],
     "retType": "void",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L180-L182"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L181-L183"
   },
   {
     "name": "Params.randn",
     "kind": "method",
-    "typestr": "(name: string, shape: number[], {device, scale}?: { device?: string; scale?: number; }): Tensor",
+    "typestr": "(name: string, shape: number[], { device, scale }?: { device?: string; scale?: number; }): Tensor",
     "args": [
       {
         "name": "name",
@@ -998,7 +1007,7 @@
     ],
     "retType": "Tensor",
     "docstr": "If the given name does not exist in the parameters object, this\ninitializes a new random normal tensor. If the name does exist\nin the parameters object, this just returns that stored tensor.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L184-L200"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L185-L201"
   },
   {
     "name": "Params.zeros",
@@ -1024,31 +1033,31 @@
     ],
     "retType": "Tensor",
     "docstr": "If the given name does not exist in the parameters object, this\ninitializes a new tensor with zero values. If the name does exist\nin the parameters object, this just returns that stored tensor.",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L202-L218"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L203-L219"
   },
   {
     "name": "OptimizerSGD",
     "kind": "class",
     "docstr": "Stochastic gradient descent with momentum. ",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L221-L285"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L222-L286"
   },
   {
     "name": "OptimizerSGD.steps",
     "kind": "property",
     "typestr": "number",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L223"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L224"
   },
   {
     "name": "OptimizerSGD.params",
     "kind": "property",
     "typestr": "Params",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L224"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L225"
   },
   {
     "name": "OptimizerSGD.velocity",
     "kind": "property",
     "typestr": "Params",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L233"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L234"
   },
   {
     "name": "OptimizerSGD.constructor",
@@ -1056,7 +1065,7 @@
     "typestr": "(): OptimizerSGD",
     "args": [],
     "retType": "OptimizerSGD",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L235-L239"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L236-L240"
   },
   {
     "name": "OptimizerSGD.step",
@@ -1077,7 +1086,7 @@
       }
     ],
     "retType": "number",
-    "sourceUrl": "https://github.com/propelml/propel/blob/e89e31c33cc9e1484e9e7243892b10cd8c779318/api.ts#L241-L284"
+    "sourceUrl": "https://github.com/propelml/propel/blob/956279aaa3727e7c9fc15662db23adfcc21c6166/api.ts#L242-L285"
   },
   {
     "name": "plot",

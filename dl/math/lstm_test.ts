@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array1D, Array2D, Scalar} from './ndarray';
+import { Array1D, Array2D, Scalar } from "./ndarray";
 
 // math.basicLSTMCell
 {
   const tests: MathTests = it => {
-    it('MultiRNNCell with 2 BasicLSTMCells', math => {
+    it("MultiRNNCell with 2 BasicLSTMCells", math => {
       const lstmKernel1 = Array2D.new([3, 4], [
         0.26242125034332275, -0.8787832260131836, 0.781475305557251,
         1.337337851524353, 0.6180247068405151, -0.2760246992111206,
@@ -66,7 +66,7 @@ import {Array1D, Array2D, Scalar} from './ndarray';
       test_util.expectArraysClose(output[1][1], [0.5745711922645569]);
     });
 
-    it('basicLSTMCell with batch=2', math => {
+    it("basicLSTMCell with batch=2", math => {
       const lstmKernel = Array2D.randNormal([3, 4]);
       const lstmBias = Array1D.randNormal([4]);
       const forgetBias = Scalar.new(1.0);
@@ -84,10 +84,10 @@ import {Array1D, Array2D, Scalar} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('basicLSTMCell', [tests]);
-  test_util.describeMathGPU('basicLSTMCell', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("basicLSTMCell", [tests]);
+  test_util.describeMathGPU("basicLSTMCell", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

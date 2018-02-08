@@ -15,23 +15,23 @@
  * =============================================================================
  */
 
-import {Conv2DInfo} from '../conv_util';
+import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import {Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, Rank} from '../ndarray';
-import {SumTypes} from '../types';
-import {MatrixOrientation} from './types/matmul';
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
+import { MatrixOrientation, SumTypes } from "../types";
 
 export interface NDArrayStorage {
-  read<D extends DataType>(dataId: number): Promise<DataTypeMap[D]>;
-  readSync<D extends DataType>(dataId: number): DataTypeMap[D];
-  disposeData(dataId: number): void;
-  write<D extends DataType>(dataId: number, values: DataTypeMap[D]): void;
+  read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;
+  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D];
+  disposeData(dataId: DataId): void;
+  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void;
   writePixels(
-      dataId: number,
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
+      dataId: DataId,
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
       numChannels: number): void;
   time(query: () => NDArray): Promise<number>;
-  register(dataId: number, shape: number[], dtype: DataType): void;
+  register(dataId: DataId, shape: number[], dtype: DataType): void;
 }
 
 /**
@@ -66,24 +66,24 @@ export interface MathBackend extends NDArrayStorage {
   add<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
   subtract<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
   multiply<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
-  divide<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<'float32'>;
+  divide<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<"float32">;
 
   sum<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<SumTypes[D]>;
 
-  argMin(x: NDArray, axes: number[]): NDArray<'int32'>;
-  argMax(x: NDArray, axes: number[]): NDArray<'int32'>;
+  argMin(x: NDArray, axes: number[]): NDArray<"int32">;
+  argMax(x: NDArray, axes: number[]): NDArray<"int32">;
 
-  equal(a: NDArray, b: NDArray): NDArray<'bool'>;
-  notEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  greater(a: NDArray, b: NDArray): NDArray<'bool'>;
-  greaterEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  less(a: NDArray, b: NDArray): NDArray<'bool'>;
-  lessEqual(a: NDArray, b: NDArray): NDArray<'bool'>;
-  select(cond: NDArray<'bool'>, a: NDArray, b: NDArray): NDArray;
+  equal(a: NDArray, b: NDArray): NDArray<"bool">;
+  notEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  greater(a: NDArray, b: NDArray): NDArray<"bool">;
+  greaterEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  less(a: NDArray, b: NDArray): NDArray<"bool">;
+  lessEqual(a: NDArray, b: NDArray): NDArray<"bool">;
+  select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray;
 
   topKValues<D extends DataType, T extends NDArray<D>>(x: T, k: number):
       Array1D<D>;
-  topKIndices(x: NDArray, k: number): Array1D<'int32'>;
+  topKIndices(x: NDArray, k: number): Array1D<"int32">;
 
   min<D extends DataType>(x: NDArray<D>, axes: number[]): NDArray<D>;
   minimum<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D>;
@@ -94,7 +94,7 @@ export interface MathBackend extends NDArrayStorage {
   ceil<T extends NDArray>(x: T): T;
   floor<T extends NDArray>(x: T): T;
 
-  pow<T extends NDArray>(a: T, b: NDArray<'int32'>): T;
+  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T;
   exp<T extends NDArray>(x: T): T;
   log<T extends NDArray>(x: T): T;
   sqrt<T extends NDArray>(x: T): T;
@@ -108,7 +108,7 @@ export interface MathBackend extends NDArrayStorage {
   leakyRelu<T extends NDArray>(x: T, alpha: number): T;
   prelu<T extends NDArray>(x: T, alpha: T): T;
   preluDer<T extends NDArray>(x: T, alpha: T): T;
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<'int32', R>;
+  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R>;
 
   clip<T extends NDArray>(x: T, min: number, max: number): T;
 
@@ -130,8 +130,8 @@ export interface MathBackend extends NDArrayStorage {
 
   step<T extends NDArray>(x: T, alpha: number): T;
 
-  conv2d(x: Array4D, filter: Array4D, bias: Array1D|null, convInfo: Conv2DInfo):
-      Array4D;
+  conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
+      convInfo: Conv2DInfo): Array4D;
   conv2dDerInput(dy: Array4D, filter: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerFilter(x: Array4D, dY: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerBias(dY: Array4D): Array1D;
@@ -153,20 +153,20 @@ export interface MathBackend extends NDArrayStorage {
       x: Array3D, newShape2D: [number, number], alignCorners: boolean): Array3D;
 
   batchNormalization2D(
-      x: Array2D, mean: Array2D|Array1D, variance: Array2D|Array1D,
-      varianceEpsilon: number, scale?: Array2D|Array1D,
-      offset?: Array2D|Array1D): Array2D;
+      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
+      varianceEpsilon: number, scale?: Array2D | Array1D,
+      offset?: Array2D | Array1D): Array2D;
   batchNormalization3D(
-      x: Array3D, mean: Array3D|Array1D, variance: Array3D|Array1D,
-      varianceEpsilon: number, scale?: Array3D|Array1D,
-      offset?: Array3D|Array1D): Array3D;
+      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
+      varianceEpsilon: number, scale?: Array3D | Array1D,
+      offset?: Array3D | Array1D): Array3D;
   batchNormalization4D(
-      x: Array4D, mean: Array4D|Array1D, variance: Array4D|Array1D,
-      varianceEpsilon: number, scale?: Array4D|Array1D,
-      offset?: Array4D|Array1D): Array4D;
+      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
+      varianceEpsilon: number, scale?: Array4D | Array1D,
+      offset?: Array4D | Array1D): Array4D;
 
   multinomial(probabilities: Array2D, numSamples: number, seed: number):
-      Array2D<'int32'>;
+      Array2D<"int32">;
 
   oneHot(indices: Array1D, depth: number, onValue: number, offValue: number):
       Array2D;

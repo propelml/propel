@@ -15,9 +15,9 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
+import { GPGPUContext } from "./gpgpu_context";
 
-import * as webgl_util from './webgl_util';
+import * as webgl_util from "./webgl_util";
 
 export function getRenderRGBShader(
     gpgpu: GPGPUContext, destinationWidth: number): WebGLProgram {
@@ -58,7 +58,7 @@ export function renderToFramebuffer(
   gpgpu.setProgram(renderShader);
 
   const sourceSamplerLocation = webgl_util.getProgramUniformLocationOrThrow(
-      gpgpu.gl, renderShader, 'source');
+      gpgpu.gl, renderShader, "source");
   gpgpu.setInputMatrixTexture(sourceTex, sourceSamplerLocation, 0);
   gpgpu.executeProgram();
 }

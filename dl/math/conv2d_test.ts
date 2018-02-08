@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
+import { Array1D, Array2D, Array3D, Array4D } from "./ndarray";
 
 // math.conv2d
 {
   const tests: MathTests = it => {
-    it('input=2x2x1,d2=1,f=1,s=1,p=0', math => {
+    it("input=2x2x1,d2=1,f=1,s=1,p=0", math => {
       const inputDepth = 1;
       const inputShape: [number, number, number] = [2, 2, inputDepth];
       const outputDepth = 1;
@@ -40,7 +40,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [1, 3, 5, 7]);
     });
 
-    it('input=2x2x1,d2=1,f=1,s=1,p=0,batch=2', math => {
+    it("input=2x2x1,d2=1,f=1,s=1,p=0,batch=2", math => {
       const inputDepth = 1;
       const inShape: [number, number, number, number] = [2, 2, 2, inputDepth];
       const outputDepth = 1;
@@ -59,7 +59,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('input=2x2x1,d2=1,f=2,s=1,p=0', math => {
+    it("input=2x2x1,d2=1,f=2,s=1,p=0", math => {
       const inputDepth = 1;
       const inputShape: [number, number, number] = [2, 2, inputDepth];
       const outputDepth = 1;
@@ -76,7 +76,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, [19]);
     });
 
-    it('throws when x is not rank 3', math => {
+    it("throws when x is not rank 3", math => {
       const inputDepth = 1;
       const outputDepth = 1;
       const fSize = 2;
@@ -92,7 +92,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       expect(() => math.conv2d(x, w, bias, stride, pad)).toThrowError();
     });
 
-    it('throws when weights is not rank 4', math => {
+    it("throws when weights is not rank 4", math => {
       const inputDepth = 1;
       const inputShape: [number, number, number] = [2, 2, inputDepth];
       const pad = 0;
@@ -106,7 +106,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       expect(() => math.conv2d(x, w, bias, stride, pad)).toThrowError();
     });
 
-    it('throws when biases is not rank 1', math => {
+    it("throws when biases is not rank 1", math => {
       const inputDepth = 1;
       const inputShape: [number, number, number] = [2, 2, inputDepth];
       const outputDepth = 1;
@@ -123,7 +123,7 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
       expect(() => math.conv2d(x, w, bias, stride, pad)).toThrowError();
     });
 
-    it('throws when x depth does not match weight depth', math => {
+    it("throws when x depth does not match weight depth", math => {
       const inputDepth = 1;
       const wrongInputDepth = 5;
       const inputShape: [number, number, number] = [2, 2, inputDepth];
@@ -141,10 +141,10 @@ import {Array1D, Array2D, Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('conv2d', [tests]);
-  test_util.describeMathGPU('conv2d', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("conv2d", [tests]);
+  test_util.describeMathGPU("conv2d", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

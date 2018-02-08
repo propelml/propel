@@ -17,8 +17,8 @@
 
 let MAX_TEXTURE_SIZE: number = null;
 
-import * as util from '../../../util';
-import {ENV} from '../../../environment';
+import { ENV } from "../../../environment";
+import * as util from "../../../util";
 
 export interface WebGLContextAttributes {
   alpha?: boolean;
@@ -34,7 +34,7 @@ export interface WebGLLoseContextExtension { loseContext(): void; }
 
 export function createWebGLRenderingContext(attributes: WebGLContextAttributes):
     WebGLRenderingContext {
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = 1;
   canvas.height = 1;
   return createWebGLRenderingContextFromCanvas(canvas, attributes);
@@ -45,17 +45,17 @@ export function createWebGLRenderingContextFromCanvas(
     attributes: WebGLContextAttributes): WebGLRenderingContext {
   let gl: WebGLRenderingContext;
 
-  const webglVersion = ENV.get('WEBGL_VERSION');
+  const webglVersion = ENV.get("WEBGL_VERSION");
   if (webglVersion === 2) {
-    gl = canvas.getContext('webgl2', attributes) as WebGLRenderingContext;
+    gl = canvas.getContext("webgl2", attributes) as WebGLRenderingContext;
   } else if (webglVersion === 1) {
-    gl = (canvas.getContext('webgl', attributes) ||
-          canvas.getContext('experimental-webgl', attributes)) as
+    gl = (canvas.getContext("webgl", attributes) ||
+          canvas.getContext("experimental-webgl", attributes)) as
         WebGLRenderingContext;
   }
 
   if (webglVersion === 0 || gl == null) {
-    throw new Error('This browser does not support WebGL.');
+    throw new Error("This browser does not support WebGL.");
   }
   return gl;
 }
@@ -76,7 +76,7 @@ export function checkWebGLError(gl: WebGLRenderingContext) {
   if (webGLDebugErrorCheckingEnabled) {
     const error = gl.getError();
     if (error !== gl.NO_ERROR) {
-      throw new Error('WebGL Error: ' + getWebGLErrorMessage(gl, error));
+      throw new Error("WebGL Error: " + getWebGLErrorMessage(gl, error));
     }
   }
 }
@@ -85,19 +85,19 @@ export function getWebGLErrorMessage(
     gl: WebGLRenderingContext, status: number): string {
   switch (status) {
     case gl.NO_ERROR:
-      return 'NO_ERROR';
+      return "NO_ERROR";
     case gl.INVALID_ENUM:
-      return 'INVALID_ENUM';
+      return "INVALID_ENUM";
     case gl.INVALID_VALUE:
-      return 'INVALID_VALUE';
+      return "INVALID_VALUE";
     case gl.INVALID_OPERATION:
-      return 'INVALID_OPERATION';
+      return "INVALID_OPERATION";
     case gl.INVALID_FRAMEBUFFER_OPERATION:
-      return 'INVALID_FRAMEBUFFER_OPERATION';
+      return "INVALID_FRAMEBUFFER_OPERATION";
     case gl.OUT_OF_MEMORY:
-      return 'OUT_OF_MEMORY';
+      return "OUT_OF_MEMORY";
     case gl.CONTEXT_LOST_WEBGL:
-      return 'CONTEXT_LOST_WEBGL';
+      return "CONTEXT_LOST_WEBGL";
     default:
       return `Unknown error code ${status}`;
   }
@@ -107,19 +107,19 @@ export function getExtensionOrThrow(
     gl: WebGLRenderingContext, extensionName: string): {} {
   return throwIfNull<{}>(
       gl, () => gl.getExtension(extensionName),
-      'Extension "' + extensionName + '" not supported on this browser.');
+      "Extension \"" + extensionName + "\" not supported on this browser.");
 }
 
 export function createVertexShader(
     gl: WebGLRenderingContext, vertexShaderSource: string): WebGLShader {
   const vertexShader: WebGLShader = throwIfNull<WebGLShader>(
       gl, () => gl.createShader(gl.VERTEX_SHADER),
-      'Unable to create vertex WebGLShader.');
+      "Unable to create vertex WebGLShader.");
   callAndCheck(gl, () => gl.shaderSource(vertexShader, vertexShaderSource));
   callAndCheck(gl, () => gl.compileShader(vertexShader));
   if (gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) === false) {
     console.log(gl.getShaderInfoLog(vertexShader));
-    throw new Error('Failed to compile vertex shader.');
+    throw new Error("Failed to compile vertex shader.");
   }
   return vertexShader;
 }
@@ -128,13 +128,13 @@ export function createFragmentShader(
     gl: WebGLRenderingContext, fragmentShaderSource: string): WebGLShader {
   const fragmentShader: WebGLShader = throwIfNull<WebGLShader>(
       gl, () => gl.createShader(gl.FRAGMENT_SHADER),
-      'Unable to create fragment WebGLShader.');
+      "Unable to create fragment WebGLShader.");
   callAndCheck(gl, () => gl.shaderSource(fragmentShader, fragmentShaderSource));
   callAndCheck(gl, () => gl.compileShader(fragmentShader));
   if (gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) === false) {
     logShaderSourceAndInfoLog(
         fragmentShaderSource, gl.getShaderInfoLog(fragmentShader));
-    throw new Error('Failed to compile fragment shader.');
+    throw new Error("Failed to compile fragment shader.");
   }
   return fragmentShader;
 }
@@ -151,7 +151,7 @@ function logShaderSourceAndInfoLog(
 
   const lineNumber = +lineNumberRegexResult[1];
 
-  const shaderLines = shaderSource.split('\n');
+  const shaderLines = shaderSource.split("\n");
   const pad = shaderLines.length.toString().length + 2;
   const linesWithLineNumbers = shaderLines.map(
       (line, lineNumber) =>
@@ -165,24 +165,24 @@ function logShaderSourceAndInfoLog(
   const errorLine = linesWithLineNumbers.slice(lineNumber - 1, lineNumber);
   const afterErrorLines = linesWithLineNumbers.slice(lineNumber);
 
-  console.log(beforeErrorLines.join('\n'));
-  console.log(shaderInfoLog.split('\n')[0]);
+  console.log(beforeErrorLines.join("\n"));
+  console.log(shaderInfoLog.split("\n")[0]);
   console.log(
       `%c ${util.rightPad(errorLine[0], maxLineLength)}`,
-      'border:1px solid red; background-color:#e3d2d2; color:#a61717');
-  console.log(afterErrorLines.join('\n'));
+      "border:1px solid red; background-color:#e3d2d2; color:#a61717");
+  console.log(afterErrorLines.join("\n"));
 }
 
 export function createProgram(gl: WebGLRenderingContext): WebGLProgram {
   return throwIfNull<WebGLProgram>(
-      gl, () => gl.createProgram(), 'Unable to create WebGLProgram.');
+      gl, () => gl.createProgram(), "Unable to create WebGLProgram.");
 }
 
 export function linkProgram(gl: WebGLRenderingContext, program: WebGLProgram) {
   callAndCheck(gl, () => gl.linkProgram(program));
   if (gl.getProgramParameter(program, gl.LINK_STATUS) === false) {
     console.log(gl.getProgramInfoLog(program));
-    throw new Error('Failed to link vertex and fragment shaders.');
+    throw new Error("Failed to link vertex and fragment shaders.");
   }
 }
 
@@ -191,14 +191,14 @@ export function validateProgram(
   callAndCheck(gl, () => gl.validateProgram(program));
   if (gl.getProgramParameter(program, gl.VALIDATE_STATUS) === false) {
     console.log(gl.getProgramInfoLog(program));
-    throw new Error('Shader program validation failed.');
+    throw new Error("Shader program validation failed.");
   }
 }
 
 export function createStaticVertexBuffer(
     gl: WebGLRenderingContext, data: Float32Array): WebGLBuffer {
   const buffer: WebGLBuffer = throwIfNull<WebGLBuffer>(
-      gl, () => gl.createBuffer(), 'Unable to create WebGLBuffer');
+      gl, () => gl.createBuffer(), "Unable to create WebGLBuffer");
   callAndCheck(gl, () => gl.bindBuffer(gl.ARRAY_BUFFER, buffer));
   callAndCheck(gl, () => gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW));
   return buffer;
@@ -207,7 +207,7 @@ export function createStaticVertexBuffer(
 export function createStaticIndexBuffer(
     gl: WebGLRenderingContext, data: Uint16Array): WebGLBuffer {
   const buffer: WebGLBuffer = throwIfNull<WebGLBuffer>(
-      gl, () => gl.createBuffer(), 'Unable to create WebGLBuffer');
+      gl, () => gl.createBuffer(), "Unable to create WebGLBuffer");
   callAndCheck(gl, () => gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer));
   callAndCheck(
       gl, () => gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW));
@@ -224,11 +224,11 @@ export function queryMaxTextureSize(gl: WebGLRenderingContext): number {
 }
 
 export function getChannelsPerTexture(): number {
-  if (!ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED')) {
+  if (!ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED")) {
     return 4;
   }
 
-  if (ENV.get('WEBGL_VERSION') === 2) {
+  if (ENV.get("WEBGL_VERSION") === 2) {
     return 1;
   }
   return 4;
@@ -236,7 +236,7 @@ export function getChannelsPerTexture(): number {
 
 export function createTexture(gl: WebGLRenderingContext): WebGLTexture {
   return throwIfNull<WebGLTexture>(
-      gl, () => gl.createTexture(), 'Unable to create WebGLTexture.');
+      gl, () => gl.createTexture(), "Unable to create WebGLTexture.");
 }
 
 export function validateTextureSize(
@@ -244,20 +244,20 @@ export function validateTextureSize(
   const maxTextureSize: number = queryMaxTextureSize(gl);
   if ((width <= 0) || (height <= 0)) {
     const requested = `[${width}x${height}]`;
-    throw new Error('Requested texture size ' + requested + ' is invalid.');
+    throw new Error("Requested texture size " + requested + " is invalid.");
   }
   if ((width > maxTextureSize) || (height > maxTextureSize)) {
     const requested = `[${width}x${height}]`;
     const max = `[${maxTextureSize}x${maxTextureSize}]`;
     throw new Error(
-        'Requested texture size ' + requested +
-        ' greater than WebGL maximum on this browser / GPU ' + max + '.');
+        "Requested texture size " + requested +
+        " greater than WebGL maximum on this browser / GPU " + max + ".");
   }
 }
 
 export function createFramebuffer(gl: WebGLRenderingContext): WebGLFramebuffer {
   return throwIfNull<WebGLFramebuffer>(
-      gl, () => gl.createFramebuffer(), 'Unable to create WebGLFramebuffer.');
+      gl, () => gl.createFramebuffer(), "Unable to create WebGLFramebuffer.");
 }
 
 export function bindVertexBufferToProgramAttribute(
@@ -303,7 +303,7 @@ export function getProgramUniformLocationOrThrow(
     uniformName: string): WebGLUniformLocation {
   return throwIfNull<WebGLUniformLocation>(
       gl, () => gl.getUniformLocation(program, uniformName),
-      'uniform "' + uniformName + '" not present in program.');
+      "uniform \"" + uniformName + "\" not present in program.");
 }
 
 export function bindTextureToProgramUniformSampler(
@@ -342,7 +342,7 @@ export function validateFramebuffer(gl: WebGLRenderingContext) {
   const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status !== gl.FRAMEBUFFER_COMPLETE) {
     throw new Error(
-        'Error binding framebuffer: ' + getFramebufferErrorMessage(gl, status));
+        "Error binding framebuffer: " + getFramebufferErrorMessage(gl, status));
   }
 }
 
@@ -350,13 +350,13 @@ export function getFramebufferErrorMessage(
     gl: WebGLRenderingContext, status: number): string {
   switch (status) {
     case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-      return 'FRAMEBUFFER_INCOMPLETE_ATTACHMENT';
+      return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
     case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-      return 'FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT';
+      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
     case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-      return 'FRAMEBUFFER_INCOMPLETE_DIMENSIONS';
+      return "FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
     case gl.FRAMEBUFFER_UNSUPPORTED:
-      return 'FRAMEBUFFER_UNSUPPORTED';
+      return "FRAMEBUFFER_UNSUPPORTED";
     default:
       return `unknown error ${status}`;
   }
@@ -365,7 +365,7 @@ export function getFramebufferErrorMessage(
 function throwIfNull<T>(
     gl: WebGLRenderingContext, returnTOrNull: () => T | null,
     failureMessage: string): T {
-  const tOrNull: T|null = callAndCheck(gl, () => returnTOrNull());
+  const tOrNull: T | null = callAndCheck(gl, () => returnTOrNull());
   if (tOrNull == null) {
     throw new Error(failureMessage);
   }

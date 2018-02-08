@@ -15,17 +15,17 @@
  * =============================================================================
  */
 
-import {ENV} from '../environment';
-import * as util from '../util';
-import {ArrayData} from '../util';
-import {NDArrayMath} from './math';
-import {RandNormalDataTypes} from './rand';
-import {MPRandGauss} from './rand';
+import { ENV } from "../environment";
+import * as util from "../util";
+import { ArrayData } from "../util";
+import { NDArrayMath } from "./math";
+import { RandNormalDataTypes } from "./rand";
+import { MPRandGauss } from "./rand";
 
 export enum DType {
-  float32 = 'float32',
-  int32 = 'int32',
-  bool = 'bool'
+  float32 = "float32",
+  int32 = "int32",
+  bool = "bool"
 }
 
 /** @hidden */
@@ -43,13 +43,13 @@ export interface RankMap<D extends DataType> {
   2: Array2D<D>;
   3: Array3D<D>;
   4: Array4D<D>;
-  higher: NDArray<D, 'higher'>;
+  higher: NDArray<D, "higher">;
 }
 export type Rank = keyof RankMap<DataType>;
 
 /** @hidden */
 export interface NDArrayData<D extends DataType> {
-  dataId?: number;
+  dataId?: DataId;
   values?: DataTypeMap[D];
 }
 
@@ -62,9 +62,10 @@ export interface ShapeMap {
   higher: number[];
 }
 
+export class DataId {}
+
 export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   private static nextId = 0;
-  private static nextDataId = 0;
 
   /** Unique id of this ndarray. */
   id: number;
@@ -72,7 +73,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
    * Id of the bucket holding the data for this ndarray. Multiple arrays can
    * point to the same bucket (e.g. when calling array.reshape()).
    */
-  dataId: number;
+  dataId: DataId;
   /** The shape of the ndarray. */
   shape: ShapeMap[R];
   /** Number of elements in the ndarray. */
@@ -92,7 +93,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   protected math: NDArrayMath;
 
   protected constructor(
-      shape: number[], dtype: D, values?: DataTypeMap[D], dataId?: number,
+      shape: number[], dtype: D, values?: DataTypeMap[D], dataId?: DataId,
       math?: NDArrayMath) {
     this.math = math || ENV.math;
     this.size = util.sizeFromShape(shape);
@@ -103,7 +104,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
               `length of values (${values.length})`);
     }
     this.shape = shape;
-    this.dtype = dtype || ('float32' as D);
+    this.dtype = dtype || ("float32" as D);
     const dim = this.shape.length;
 
     if (dim < 2) {
@@ -117,9 +118,9 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
         this.strides[i] = this.strides[i + 1] * this.shape[i + 1];
       }
     }
-    this.dataId = dataId != null ? dataId : NDArray.nextDataId++;
+    this.dataId = dataId != null ? dataId : new DataId();
     this.id = NDArray.nextId++;
-    this.rankType = (this.rank < 5 ? this.rank.toString() : 'higher') as R;
+    this.rankType = (this.rank < 5 ? this.rank.toString() : "higher") as R;
     this.math.register(this);
     if (values != null) {
       this.math.write(this.dataId, values);
@@ -166,7 +167,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
    * Makes a new ndarray with the provided shape and values. Values should be in
    * a flat array.
    */
-  static make<D extends DataType = 'float32', R extends Rank = Rank>(
+  static make<D extends DataType = "float32", R extends Rank = Rank>(
       shape: number[], data: NDArrayData<D>, dtype?: D,
       math?: NDArrayMath): RankMap<D>[R] {
     switch (shape.length) {
@@ -192,18 +193,19 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   }
 
   static fromPixels(
-      pixels: ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement,
-      numChannels = 3, math?: NDArrayMath): Array3D<'int32'> {
+      pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
+              HTMLVideoElement,
+      numChannels = 3, math?: NDArrayMath): Array3D<"int32"> {
     if (numChannels > 4) {
       throw new Error(
-          'Cannot construct NDArray with more than 4 channels from pixels.');
+          "Cannot construct NDArray with more than 4 channels from pixels.");
     }
-    const ndarrayData: NDArrayData<'int32'> = {};
+    const ndarrayData: NDArrayData<"int32"> = {};
     const shape: [number, number, number] =
         [pixels.height, pixels.width, numChannels];
     math = math || ENV.math;
     const res =
-        NDArray.make(shape, ndarrayData, 'int32', math) as Array3D<'int32'>;
+        NDArray.make(shape, ndarrayData, "int32", math) as Array3D<"int32">;
     math.writePixels(res.dataId, pixels, numChannels);
     return res;
   }
@@ -225,29 +227,29 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
 
   asScalar(): Scalar<D> {
     this.throwIfDisposed();
-    util.assert(this.size === 1, 'The array must have only 1 element.');
-    return this.reshape<'0'>([]);
+    util.assert(this.size === 1, "The array must have only 1 element.");
+    return this.reshape<"0">([]);
   }
 
   as1D(): Array1D<D> {
     this.throwIfDisposed();
-    return this.reshape<'1'>([this.size]);
+    return this.reshape<"1">([this.size]);
   }
 
   as2D(rows: number, columns: number): Array2D<D> {
     this.throwIfDisposed();
-    return this.reshape<'2'>([rows, columns]);
+    return this.reshape<"2">([rows, columns]);
   }
 
   as3D(rows: number, columns: number, depth: number): Array3D<D> {
     this.throwIfDisposed();
-    return this.reshape<'3'>([rows, columns, depth]);
+    return this.reshape<"3">([rows, columns, depth]);
   }
 
   as4D(rows: number, columns: number, depth: number, depth2: number):
       Array4D<D> {
     this.throwIfDisposed();
-    return this.reshape<'4'>([rows, columns, depth, depth2]);
+    return this.reshape<"4">([rows, columns, depth, depth2]);
   }
 
   asType<D2 extends DataType>(dtype: D2): NDArray<D2, R> {
@@ -366,11 +368,11 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
     const size = util.sizeFromShape(shape);
 
     let values = null;
-    if (dtype == null || dtype === 'float32') {
+    if (dtype == null || dtype === "float32") {
       values = new Float32Array(size);
-    } else if (dtype === 'int32') {
+    } else if (dtype === "int32") {
       values = new Int32Array(size);
-    } else if (dtype === 'bool') {
+    } else if (dtype === "bool") {
       values = new Uint8Array(size);
     } else {
       throw new Error(`Unknown data type ${dtype}`);
@@ -385,7 +387,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   static randNormal<D extends keyof RandNormalDataTypes, R extends Rank>(
       shape: number[], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): RankMap<D>[R] {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -397,7 +399,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
                                        R extends Rank>(
       shape: number[], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): RankMap<D>[R] {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -418,9 +420,9 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
   }
 }
 
-export class Scalar<D extends DataType = DataType> extends NDArray<D, '0'> {
-  static new<D extends DataType = 'float32'>(value: number|boolean, dtype?: D):
-      Scalar<D> {
+export class Scalar<D extends DataType = DataType> extends NDArray<D, "0"> {
+  static new<D extends DataType = "float32">(
+      value: number | boolean, dtype?: D): Scalar<D> {
     const values = [value] as number[] | boolean[];
     return new Scalar([], dtype, toTypedArray(values, dtype));
   }
@@ -451,9 +453,9 @@ export class Scalar<D extends DataType = DataType> extends NDArray<D, '0'> {
   }
 }
 
-export class Array1D<D extends DataType = DataType> extends NDArray<D, '1'> {
-  static new<D extends DataType = 'float32'>(
-      values: DataTypeMap[D]|number[]|boolean[], dtype?: D): Array1D<D> {
+export class Array1D<D extends DataType = DataType> extends NDArray<D, "1"> {
+  static new<D extends DataType = "float32">(
+      values: DataTypeMap[D] | number[] | boolean[], dtype?: D): Array1D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
       util.assert(
@@ -491,18 +493,18 @@ export class Array1D<D extends DataType = DataType> extends NDArray<D, '1'> {
 
   static ones<D extends DataType = DataType>(shape: [number], dtype?: D):
       Array1D<D> {
-    return NDArray.ones<D, '1'>(shape, dtype);
+    return NDArray.ones<D, "1">(shape, dtype);
   }
 
   static zeros<D extends DataType = DataType>(shape: [number], dtype?: D):
       Array1D<D> {
-    return NDArray.zeros<D, '1'>(shape, dtype);
+    return NDArray.zeros<D, "1">(shape, dtype);
   }
 
   static randNormal<D extends keyof RandNormalDataTypes>(
       shape: [number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array1D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -514,7 +516,7 @@ export class Array1D<D extends DataType = DataType> extends NDArray<D, '1'> {
   static randTruncatedNormal<D extends keyof RandNormalDataTypes>(
       shape: [number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array1D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -530,17 +532,17 @@ export class Array1D<D extends DataType = DataType> extends NDArray<D, '1'> {
   }
 }
 
-export class Array2D<D extends DataType = DataType> extends NDArray<D, '2'> {
+export class Array2D<D extends DataType = DataType> extends NDArray<D, "2"> {
   constructor(
       shape: [number, number], dtype: D, values?: DataTypeMap[D],
-      dataId?: number, math?: NDArrayMath) {
-    util.assert(shape.length === 2, 'Shape should be of length 2');
+      dataId?: DataId, math?: NDArrayMath) {
+    util.assert(shape.length === 2, "Shape should be of length 2");
     super(shape, dtype, values, dataId, math);
   }
 
-  static new<D extends DataType = 'float32'>(
+  static new<D extends DataType = "float32">(
       shape: [number, number],
-      values: DataTypeMap[D]|number[]|number[][]|boolean[]|boolean[][],
+      values: DataTypeMap[D] | number[] | number[][] | boolean[] | boolean[][],
       dtype?: D): Array2D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -582,18 +584,18 @@ export class Array2D<D extends DataType = DataType> extends NDArray<D, '2'> {
 
   static ones<D extends DataType = DataType>(
       shape: [number, number], dtype?: D): Array2D<D> {
-    return NDArray.ones<D, '2'>(shape, dtype);
+    return NDArray.ones<D, "2">(shape, dtype);
   }
 
   static zeros<D extends DataType = DataType>(
       shape: [number, number], dtype?: D): Array2D<D> {
-    return NDArray.zeros<D, '2'>(shape, dtype);
+    return NDArray.zeros<D, "2">(shape, dtype);
   }
 
   static randNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array2D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -605,7 +607,7 @@ export class Array2D<D extends DataType = DataType> extends NDArray<D, '2'> {
   static randTruncatedNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array2D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -621,17 +623,18 @@ export class Array2D<D extends DataType = DataType> extends NDArray<D, '2'> {
   }
 }
 
-export class Array3D<D extends DataType = DataType> extends NDArray<D, '3'> {
+export class Array3D<D extends DataType = DataType> extends NDArray<D, "3"> {
   constructor(
       shape: [number, number, number], dtype: D, values?: DataTypeMap[D],
-      dataId?: number, math?: NDArrayMath) {
-    util.assert(shape.length === 3, 'Shape should be of length 3');
+      dataId?: DataId, math?: NDArrayMath) {
+    util.assert(shape.length === 3, "Shape should be of length 3");
     super(shape, dtype, values, dataId, math);
   }
 
-  static new<D extends DataType = 'float32'>(
+  static new<D extends DataType = "float32">(
       shape: [number, number, number],
-      values: DataTypeMap[D]|number[]|number[][][]|boolean[]|boolean[][][],
+      values: DataTypeMap[D] | number[] | number[][][] | boolean[] |
+              boolean[][][],
       dtype?: D): Array3D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -670,7 +673,7 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, '3'> {
   }
   static ones<D extends DataType = DataType>(
       shape: [number, number, number], dtype?: D): Array3D<D> {
-    return NDArray.ones<D, '3'>(shape, dtype);
+    return NDArray.ones<D, "3">(shape, dtype);
   }
 
   asType<D2 extends DataType>(dtype: D2): Array3D<D2> {
@@ -679,13 +682,13 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, '3'> {
 
   static zeros<D extends DataType = DataType>(
       shape: [number, number, number], dtype?: D): Array3D<D> {
-    return NDArray.zeros<D, '3'>(shape, dtype);
+    return NDArray.zeros<D, "3">(shape, dtype);
   }
 
   static randNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array3D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -697,7 +700,7 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, '3'> {
   static randTruncatedNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array3D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -714,17 +717,18 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, '3'> {
   }
 }
 
-export class Array4D<D extends DataType = DataType> extends NDArray<D, '4'> {
+export class Array4D<D extends DataType = DataType> extends NDArray<D, "4"> {
   constructor(
       shape: [number, number, number, number], dtype: D,
-      values?: DataTypeMap[D], dataId?: number, math?: NDArrayMath) {
-    util.assert(shape.length === 4, 'Shape should be of length 4');
+      values?: DataTypeMap[D], dataId?: DataId, math?: NDArrayMath) {
+    util.assert(shape.length === 4, "Shape should be of length 4");
     super(shape, dtype, values, dataId, math);
   }
 
-  static new<D extends DataType = 'float32'>(
+  static new<D extends DataType = "float32">(
       shape: [number, number, number, number],
-      values: DataTypeMap[D]|number[]|number[][][][]|boolean[]|boolean[][][][],
+      values: DataTypeMap[D] | number[] | number[][][][] | boolean[] |
+              boolean[][][][],
       dtype?: D): Array4D<D> {
     if (!instanceofTypedArray(values)) {
       const inferredShape = util.inferShape(values as number[] | boolean[]);
@@ -774,18 +778,18 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, '4'> {
 
   static ones<D extends DataType = DataType>(
       shape: [number, number, number, number], dtype?: D): Array4D<D> {
-    return NDArray.ones<D, '4'>(shape, dtype);
+    return NDArray.ones<D, "4">(shape, dtype);
   }
 
   static zeros<D extends DataType = DataType>(
       shape: [number, number, number, number], dtype?: D): Array4D<D> {
-    return NDArray.zeros<D, '4'>(shape, dtype);
+    return NDArray.zeros<D, "4">(shape, dtype);
   }
 
   static randNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number, number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array4D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -797,7 +801,7 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, '4'> {
   static randTruncatedNormal<D extends keyof RandNormalDataTypes>(
       shape: [number, number, number, number], mean = 0, stdDev = 1, dtype?: D,
       seed?: number): Array4D<D> {
-    if (dtype != null && dtype === 'bool') {
+    if (dtype != null && dtype === "bool") {
       throw new Error(`Unsupported data type ${dtype}`);
     }
     const randGauss =
@@ -815,26 +819,26 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, '4'> {
 }
 
 function copyTypedArray<D extends DataType>(
-    array: DataTypeMap[D]|number[]|boolean[], dtype: D): DataTypeMap[D] {
-  if (dtype == null || dtype === 'float32') {
+    array: DataTypeMap[D] | number[] | boolean[], dtype: D): DataTypeMap[D] {
+  if (dtype == null || dtype === "float32") {
     return new Float32Array(array as number[]);
-  } else if (dtype === 'int32') {
+  } else if (dtype === "int32") {
     const vals = new Int32Array(array.length);
     for (let i = 0; i < vals.length; ++i) {
       const val = array[i] as number;
-      if (util.isValNaN(val, 'int32')) {
-        vals[i] = util.getNaN('int32');
+      if (util.isValNaN(val, "int32")) {
+        vals[i] = util.getNaN("int32");
       } else {
         vals[i] = val;
       }
     }
     return vals;
-  } else if (dtype === 'bool') {
+  } else if (dtype === "bool") {
     const bool = new Uint8Array(array.length);
     for (let i = 0; i < bool.length; ++i) {
       const val = array[i] as number;
-      if (util.isValNaN(val as number, 'bool')) {
-        bool[i] = util.getNaN('bool');
+      if (util.isValNaN(val as number, "bool")) {
+        bool[i] = util.getNaN("bool");
       } else if (Math.round(val) !== 0) {
         bool[i] = 1;
       }
@@ -851,9 +855,9 @@ function instanceofTypedArray(a: ArrayData): boolean {
 }
 
 function noConversionNeeded(a: ArrayData, dtype: DataType): boolean {
-  return (a instanceof Float32Array && dtype === 'float32') ||
-      (a instanceof Int32Array && dtype === 'int32') ||
-      (a instanceof Uint8Array && dtype === 'bool');
+  return (a instanceof Float32Array && dtype === "float32") ||
+      (a instanceof Int32Array && dtype === "int32") ||
+      (a instanceof Uint8Array && dtype === "bool");
 }
 
 function toTypedArray<D extends DataType>(
@@ -869,11 +873,11 @@ function toTypedArray<D extends DataType>(
 
 function makeZerosTypedArray<D extends DataType>(
     size: number, dtype: D): DataTypeMap[D] {
-  if (dtype == null || dtype === 'float32') {
+  if (dtype == null || dtype === "float32") {
     return new Float32Array(size);
-  } else if (dtype === 'int32') {
+  } else if (dtype === "int32") {
     return new Int32Array(size);
-  } else if (dtype === 'bool') {
+  } else if (dtype === "bool") {
     return new Uint8Array(size);
   } else {
     throw new Error(`Unknown data type ${dtype}`);
