@@ -125,6 +125,9 @@ export function randn(shape: number[]): Tensor {
  *    fill(31337, [2, 2])
  */
 export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
+  if (!(shape instanceof Array)) {
+    throw new Error("Fill takes a shape as an argument");
+  }
   return ops.fill(T(value), shape);
 }
 
@@ -135,6 +138,9 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
  */
 export function zeros(shape: types.Shape,
                       opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  if (!(shape instanceof Array)) {
+    throw new Error("Zeros takes a shape as an argument");
+  }
   return ops.zeros(shape, opts);
 }
 
@@ -145,6 +151,9 @@ export function zeros(shape: types.Shape,
  */
 export function ones(shape: types.Shape,
                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  if (!(shape instanceof Array)) {
+    throw new Error("Ones takes a shape as an argument");
+  }
   return ops.ones(shape, opts);
 }
 
@@ -188,6 +197,9 @@ export class Params {
    */
   randn(name: string, shape: types.Shape,
         { device = "CPU:0", scale = 0.1 } = {}): Tensor {
+    if (!(shape instanceof Array)) {
+      throw new Error("Randn takes a shape as an argument");
+    }
     if (this.has(name)) {
       return this.get(name);
     }
@@ -206,6 +218,9 @@ export class Params {
    */
   zeros(name: string, shape: types.Shape, dtype: types.DType = "float32",
         device = "CPU:0"): Tensor {
+    if (!(shape instanceof Array)) {
+      throw new Error("Zeros takes a shape as an argument");
+    }
     if (this.has(name)) {
       return this.get(name);
     }
