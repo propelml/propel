@@ -736,7 +736,7 @@ TF_Tensor* CreateSmallTensor(napi_env env,
     switch (dtype) {
       case TF_FLOAT: {
         float* data = new float[1];
-        data[0] = GetDoubleValue(env, data_js);
+        data[0] = static_cast<float>(GetDoubleValue(env, data_js));
         return TF_NewTensor(dtype, NULL, 0, data, 4, ReleaseSmallHandle, NULL);
       }
 
@@ -763,7 +763,7 @@ TF_Tensor* CreateSmallTensor(napi_env env,
       auto data = new float[data_length];
       for (uint32_t i = 0; i < data_length; ++i) {
         napi_value val = GetElement(env, data_js, i);
-        data[i] = GetDoubleValue(env, val);
+        data[i] = static_cast<float>(GetDoubleValue(env, val));
       }
       return TF_NewTensor(
           dtype, shape, 1, data, 4 * data_length, ReleaseSmallHandle, NULL);
@@ -882,7 +882,8 @@ static napi_value ListDevices(napi_env env, napi_callback_info info) {
     check(nstatus == napi_ok);
 
     napi_value memory_js;
-    nstatus = napi_create_int32(env, memory_bytes, &memory_js);
+    nstatus =
+        napi_create_double(env, static_cast<double>(memory_bytes), &memory_js);
     check(nstatus == napi_ok);
     nstatus =
         napi_set_named_property(env, device_obj, "memoryBytes", memory_js);
@@ -1028,6 +1029,11 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
   nstatus = napi_create_reference(env, handle_class, 1, &handle_class_ref);
   check(nstatus == napi_ok);
 
+  napi_value tensorflowVersion;
+  nstatus =
+      napi_create_string_latin1(env, TF_Version(), -1, &tensorflowVersion);
+  check(nstatus == napi_ok);
+
   // Fill the exports.
   napi_property_descriptor exports_properties[] = {
       {"Context", NULL, NULL, NULL, NULL, context_class, napi_default, NULL},
@@ -1069,7 +1075,14 @@ static napi_value InitBinding(napi_env env, napi_value exports) {
        NULL,
        napi_default,
        NULL},
-  };
+      {"tensorflowVersion",
+       NULL,
+       NULL,
+       NULL,
+       NULL,
+       tensorflowVersion,
+       napi_default,
+       NULL}};
   nstatus = napi_define_properties(
       env, exports, COUNT_OF(exports_properties), exports_properties);
   check(nstatus == napi_ok);

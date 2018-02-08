@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
-import {GPGPUProgram} from './gpgpu_math';
+import { GPGPUContext } from "./gpgpu_context";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class OneHotProgram implements GPGPUProgram {
-  variableNames = ['indices'];
+  variableNames = ["indices"];
   outputShape: number[];
   userCode: string;
 
@@ -43,7 +43,7 @@ export class OneHotProgram implements GPGPUProgram {
   getCustomSetupFunc(seed: number) {
     return (gpgpu: GPGPUContext, webGLProgram: WebGLProgram) => {
       if (this.seedLoc == null) {
-        this.seedLoc = gpgpu.getUniformLocation(webGLProgram, 'seed');
+        this.seedLoc = gpgpu.getUniformLocation(webGLProgram, "seed");
       }
       gpgpu.gl.uniform1f(this.seedLoc, seed);
     };

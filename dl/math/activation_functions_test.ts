@@ -14,17 +14,17 @@
  * limitations under the License.
  * =============================================================================
  */
-import {ENV} from '../environment';
-import * as test_util from '../test_util';
-import * as util from '../util';
+import { ENV } from "../environment";
+import * as test_util from "../test_util";
+import * as util from "../util";
 // tslint:disable-next-line:max-line-length
-import {EluFunc, LeakyReluFunc, ReLUFunc, SigmoidFunc, TanHFunc} from './activation_functions';
-import {Array1D} from './ndarray';
+import { EluFunc, LeakyReluFunc, ReLUFunc, SigmoidFunc, TanHFunc } from "./activation_functions";
+import { Array1D } from "./ndarray";
 
-describe('Activation functions', () => {
+describe("Activation functions", () => {
   const math = ENV.math;
 
-  it('Tanh output', () => {
+  it("Tanh output", () => {
     const x = Array1D.new([1, 3, -2, 100, -100, 0]);
     const tanH = new TanHFunc();
     const y = tanH.output(math, x);
@@ -37,7 +37,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(y.get(5), 0);
   });
 
-  it('Tanh derivative', () => {
+  it("Tanh derivative", () => {
     const x = Array1D.new([1, 3, -2, 100, -100, 0]);
     const tanH = new TanHFunc();
     const y = tanH.output(math, x);
@@ -48,7 +48,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(dx.get(2), 1 - Math.pow(y.get(2), 2));
   });
 
-  it('ReLU output', () => {
+  it("ReLU output", () => {
     const x = Array1D.new([1, 3, -2]);
     const relu = new ReLUFunc();
     const y = relu.output(math, x);
@@ -58,7 +58,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(y.get(2), 0);
   });
 
-  it('ReLU derivative', () => {
+  it("ReLU derivative", () => {
     const x = Array1D.new([1, 3, -2]);
     const relu = new ReLUFunc();
     const y = relu.output(math, x);
@@ -69,7 +69,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(dx.get(2), 0);
   });
 
-  it('LeakyRelu output', () => {
+  it("LeakyRelu output", () => {
     const x = Array1D.new([1, 3, -2]);
     const relu = new LeakyReluFunc(0.2);
     const y = relu.output(math, x);
@@ -79,7 +79,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(y.get(2), -0.4);
   });
 
-  it('LeakyRelu derivative', () => {
+  it("LeakyRelu derivative", () => {
     const x = Array1D.new([1, 3, -2]);
     const relu = new LeakyReluFunc(0.2);
     const y = relu.output(math, x);
@@ -90,7 +90,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(dx.get(2), 0.2);
   });
 
-  it('Sigmoid output', () => {
+  it("Sigmoid output", () => {
     const x = Array1D.new([1, 3, -2, 100, -100, 0]);
     const sigmoid = new SigmoidFunc();
     const y = sigmoid.output(math, x);
@@ -103,7 +103,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(y.get(5), 0.5);
   });
 
-  it('Sigmoid derivative', () => {
+  it("Sigmoid derivative", () => {
     const x = Array1D.new([1, 3, -2, 100, -100, 0]);
     const sigmoid = new SigmoidFunc();
     const y = sigmoid.output(math, x);
@@ -114,7 +114,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(dx.get(2), y.get(2) * (1 - y.get(2)));
   });
 
-  it('ELU output', () => {
+  it("ELU output", () => {
     const x = Array1D.new([1, 3, -2]);
     const elu = new EluFunc();
     const y = elu.output(math, x);
@@ -124,7 +124,7 @@ describe('Activation functions', () => {
     test_util.expectNumbersClose(y.get(2), Math.exp(-2.0) - 1.0);
   });
 
-  it('ELU derivative', () => {
+  it("ELU derivative", () => {
     const x = Array1D.new([1, 3, -2]);
     const elu = new EluFunc();
     const y = elu.output(math, x);

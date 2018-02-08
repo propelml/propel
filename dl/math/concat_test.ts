@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array1D, Array2D, Array3D} from './ndarray';
+import { Array1D, Array2D, Array3D } from "./ndarray";
 
 // math.concat1D
 {
   const tests: MathTests = it => {
-    it('3 + 5', math => {
+    it("3 + 5", math => {
       const a = Array1D.new([3]);
       const b = Array1D.new([5]);
 
@@ -32,7 +32,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('3 + [5,7]', math => {
+    it("3 + [5,7]", math => {
       const a = Array1D.new([3]);
       const b = Array1D.new([5, 7]);
 
@@ -41,7 +41,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('[3,5] + 7', math => {
+    it("[3,5] + 7", math => {
       const a = Array1D.new([3, 5]);
       const b = Array1D.new([7]);
 
@@ -51,18 +51,18 @@ import {Array1D, Array2D, Array3D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('concat1D', [tests]);
-  test_util.describeMathGPU('concat1D', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("concat1D", [tests]);
+  test_util.describeMathGPU("concat1D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // math.concat2D
 {
   const tests: MathTests = it => {
-    it('[[3]] + [[5]], axis=0', math => {
+    it("[[3]] + [[5]], axis=0", math => {
       const axis = 0;
       const a = Array2D.new([1, 1], [3]);
       const b = Array2D.new([1, 1], [5]);
@@ -74,7 +74,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('[[3]] + [[5]], axis=1', math => {
+    it("[[3]] + [[5]], axis=1", math => {
       const axis = 1;
       const a = Array2D.new([1, 1], [3]);
       const b = Array2D.new([1, 1], [5]);
@@ -86,7 +86,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('[[1, 2], [3, 4]] + [[5, 6]], axis=0', math => {
+    it("[[1, 2], [3, 4]] + [[5, 6]], axis=0", math => {
       const axis = 0;
       const a = Array2D.new([2, 2], [[1, 2], [3, 4]]);
       const b = Array2D.new([1, 2], [[5, 6]]);
@@ -98,7 +98,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('[[1, 2], [3, 4]] + [[5, 6]], axis=1 throws error', math => {
+    it("[[1, 2], [3, 4]] + [[5, 6]], axis=1 throws error", math => {
       const axis = 1;
       const a = Array2D.new([2, 2], [[1, 2], [3, 4]]);
       const b = Array2D.new([1, 2], [[5, 6]]);
@@ -106,7 +106,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       expect(() => math.concat2D(a, b, axis)).toThrowError();
     });
 
-    it('[[1, 2], [3, 4]] + [[5, 6], [7, 8]], axis=1', math => {
+    it("[[1, 2], [3, 4]] + [[5, 6], [7, 8]], axis=1", math => {
       const axis = 1;
       const a = Array2D.new([2, 2], [[1, 2], [3, 4]]);
       const b = Array2D.new([2, 2], [[5, 6], [7, 8]]);
@@ -119,18 +119,18 @@ import {Array1D, Array2D, Array3D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('concat2D', [tests]);
-  test_util.describeMathGPU('concat2D', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("concat2D", [tests]);
+  test_util.describeMathGPU("concat2D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // math.concat3D
 {
   const tests: MathTests = it => {
-    it('shapes correct concat axis=0', math => {
+    it("shapes correct concat axis=0", math => {
       const ndarray1 = Array3D.new([1, 1, 3], [1, 2, 3]);
       const ndarray2 = Array3D.new([1, 1, 3], [4, 5, 6]);
       const values = math.concat3D(ndarray1, ndarray2, 0);
@@ -138,7 +138,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(values, [1, 2, 3, 4, 5, 6]);
     });
 
-    it('concat axis=0', math => {
+    it("concat axis=0", math => {
       const ndarray1 = Array3D.new([1, 2, 3], [1, 11, 111, 2, 22, 222]);
       const ndarray2 = Array3D.new(
           [2, 2, 3], [5, 55, 555, 6, 66, 666, 7, 77, 777, 8, 88, 888]);
@@ -149,7 +149,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       ]);
     });
 
-    it('shapes correct concat axis=1', math => {
+    it("shapes correct concat axis=1", math => {
       const ndarray1 = Array3D.new([1, 1, 3], [1, 2, 3]);
       const ndarray2 = Array3D.new([1, 1, 3], [4, 5, 6]);
       const values = math.concat3D(ndarray1, ndarray2, 1);
@@ -157,7 +157,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(values, [1, 2, 3, 4, 5, 6]);
     });
 
-    it('concat axis=1', math => {
+    it("concat axis=1", math => {
       const ndarray1 = Array3D.new([2, 1, 3], [1, 11, 111, 3, 33, 333]);
       const ndarray2 = Array3D.new(
           [2, 2, 3], [5, 55, 555, 6, 66, 666, 7, 77, 777, 8, 88, 888]);
@@ -168,7 +168,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       ]);
     });
 
-    it('shapes correct concat axis=2', math => {
+    it("shapes correct concat axis=2", math => {
       const ndarray1 = Array3D.new([1, 1, 3], [1, 2, 3]);
       const ndarray2 = Array3D.new([1, 1, 3], [4, 5, 6]);
       const values = math.concat3D(ndarray1, ndarray2, 2);
@@ -176,7 +176,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       test_util.expectArraysClose(values, [1, 2, 3, 4, 5, 6]);
     });
 
-    it('concat axis=2', math => {
+    it("concat axis=2", math => {
       const ndarray1 = Array3D.new([2, 2, 2], [1, 11, 2, 22, 3, 33, 4, 44]);
       const ndarray2 = Array3D.new(
           [2, 2, 3], [5, 55, 555, 6, 66, 666, 7, 77, 777, 8, 88, 888]);
@@ -188,7 +188,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       ]);
     });
 
-    it('concat throws when invalid non-axis shapes, axis=0', math => {
+    it("concat throws when invalid non-axis shapes, axis=0", math => {
       const axis = 0;
       const x1 = Array3D.new([1, 1, 3], [1, 11, 111]);
       const x2 = Array3D.new(
@@ -196,7 +196,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       expect(() => math.concat3D(x1, x2, axis)).toThrowError();
     });
 
-    it('concat throws when invalid non-axis shapes, axis=1', math => {
+    it("concat throws when invalid non-axis shapes, axis=1", math => {
       const axis = 1;
       const x1 = Array3D.new([1, 1, 3], [1, 11, 111]);
       const x2 = Array3D.new(
@@ -204,7 +204,7 @@ import {Array1D, Array2D, Array3D} from './ndarray';
       expect(() => math.concat3D(x1, x2, axis)).toThrowError();
     });
 
-    it('concat throws when invalid non-axis shapes, axis=2', math => {
+    it("concat throws when invalid non-axis shapes, axis=2", math => {
       const axis = 2;
       const x1 = Array3D.new([1, 2, 2], [1, 11, 2, 22]);
       const x2 = Array3D.new(
@@ -213,10 +213,10 @@ import {Array1D, Array2D, Array3D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('concat3D', [tests]);
-  test_util.describeMathGPU('concat3D', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("concat3D", [tests]);
+  test_util.describeMathGPU("concat3D", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

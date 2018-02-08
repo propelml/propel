@@ -3,6 +3,9 @@ const fs = require("fs");
 const { resolve } = require("path");
 const rimraf = require("rimraf");
 
+// Be extra careful to enable ts-node type checking.
+process.env.TS_NODE_TYPE_CHECK = true;
+
 // Always chdir to propel's project root.
 const root = resolve(__dirname, "..");
 process.chdir(root);
@@ -72,8 +75,8 @@ function symlink(a, b) {
   }
 }
 
-function tsnode(args) {
-  sh("node ./node_modules/ts-node/dist/bin.js " + args);
+function tsnode(args, env = {}) {
+  sh("node ./node_modules/ts-node/dist/bin.js --type-check " + args, env);
 }
 
 const parcelCli = "./node_modules/parcel-bundler/bin/cli.js";

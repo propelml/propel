@@ -15,64 +15,69 @@
  * =============================================================================
  */
 
-import * as test_util from '../../test_util';
-import {Tests} from '../../test_util';
-import {MathBackendWebGL} from './backend_webgl';
+import * as test_util from "../../test_util";
+import { Tests } from "../../test_util";
+import { DataId } from "../ndarray";
+import { MathBackendWebGL } from "./backend_webgl";
 
 const tests: Tests = () => {
-  it('reading', () => {
+  it("reading", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
-    backend.register(0, [3], 'float32');
-    backend.write(0, new Float32Array([1, 2, 3]));
+    const id = new DataId();
+    backend.register(id, [3], "float32");
+    backend.write(id, new Float32Array([1, 2, 3]));
     expect(texManager.getNumUsedTextures()).toBe(0);
-    backend.getTexture(0);
+    backend.getTexture(id);
     expect(texManager.getNumUsedTextures()).toBe(1);
     test_util.expectArraysClose(
-        backend.readSync(0), new Float32Array([1, 2, 3]));
+        backend.readSync(id), new Float32Array([1, 2, 3]));
     expect(texManager.getNumUsedTextures()).toBe(0);
-    backend.getTexture(0);
+    backend.getTexture(id);
     expect(texManager.getNumUsedTextures()).toBe(1);
-    backend.disposeData(0);
+    backend.disposeData(id);
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-  it('overwriting', () => {
+  it("overwriting", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
-    backend.register(0, [3], 'float32');
-    backend.write(0, new Float32Array([1, 2, 3]));
-    backend.getTexture(0);
+    const id = new DataId();
+    backend.register(id, [3], "float32");
+    backend.write(id, new Float32Array([1, 2, 3]));
+    backend.getTexture(id);
     expect(texManager.getNumUsedTextures()).toBe(1);
     // overwrite.
-    backend.write(0, new Float32Array([4, 5, 6]));
+    backend.write(id, new Float32Array([4, 5, 6]));
     expect(texManager.getNumUsedTextures()).toBe(0);
     test_util.expectArraysClose(
-        backend.readSync(0), new Float32Array([4, 5, 6]));
-    backend.getTexture(0);
+        backend.readSync(id), new Float32Array([4, 5, 6]));
+    backend.getTexture(id);
     expect(texManager.getNumUsedTextures()).toBe(1);
     test_util.expectArraysClose(
-        backend.readSync(0), new Float32Array([4, 5, 6]));
+        backend.readSync(id), new Float32Array([4, 5, 6]));
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-   it('disposal of backend disposes all textures', () => {
+   it("disposal of backend disposes all textures", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
-    backend.register(0, [3], 'float32');
-    backend.write(0, new Float32Array([1, 2, 3]));
-    backend.getTexture(0); // Forces upload to GPU.
-    backend.register(1, [3], 'float32');
-    backend.write(1, new Float32Array([4, 5, 6]));
-    backend.getTexture(1); // Forces upload to GPU.
+    const id1 = new DataId();
+    const id2 = new DataId();
+    backend.register(id1, [3], "float32");
+    backend.write(id1, new Float32Array([1, 2, 3]));
+    backend.getTexture(id1); // Forces upload to GPU.
+    backend.register(id2, [3], "float32");
+    backend.write(id2, new Float32Array([4, 5, 6]));
+    backend.getTexture(id2); // Forces upload to GPU.
     expect(texManager.getNumUsedTextures()).toBe(2);
     backend.dispose();
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 };
 
-test_util.describeCustom('backend_webgl', tests, [
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-  {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+test_util.describeCustom("backend_webgl", tests, [
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+  {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
 ]);

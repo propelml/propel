@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as seedrandom from 'seedrandom';
+import * as seedrandom from "seedrandom";
 
 export interface RandGauss {
   nextValue(): number;
@@ -54,7 +54,7 @@ export class MPRandGauss implements RandGauss {
   }
 
   /** Returns next sample from a gaussian distribution. */
-  public nextValue(): number {
+  nextValue(): number {
     if (!isNaN(this.nextVal)) {
       const value = this.nextVal;
       this.nextVal = NaN;
@@ -88,7 +88,7 @@ export class MPRandGauss implements RandGauss {
 
   /** Handles proper rounding for non floating point numbers. */
   private convertValue(value: number): number {
-    if (this.dtype == null || this.dtype === 'float32') {
+    if (this.dtype == null || this.dtype === "float32") {
       return value;
     }
     return Math.round(value);

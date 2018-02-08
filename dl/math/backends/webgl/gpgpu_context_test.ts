@@ -15,12 +15,12 @@
  * =============================================================================
  */
 
-import * as test_util from '../../../test_util';
-import {GPGPUContext} from './gpgpu_context';
-import * as tex_util from './tex_util';
+import * as test_util from "../../../test_util";
+import { GPGPUContext } from "./gpgpu_context";
+import * as tex_util from "./tex_util";
 
 test_util.describeCustom(
-    'GPGPUContext .downloadMatrixFromTexture',
+    "GPGPUContext .downloadMatrixFromTexture",
     () => {
       let gpgpu: GPGPUContext;
       let texture: WebGLTexture;
@@ -36,13 +36,13 @@ test_util.describeCustom(
         gpgpu.dispose();
       });
 
-      it('returns 1x1 matrix that was uploaded', () => {
+      it("returns 1x1 matrix that was uploaded", () => {
         gpgpu.uploadMatrixToTexture(texture, 1, 1, new Float32Array([1.234]));
         const result = gpgpu.downloadMatrixFromTexture(texture, 1, 1);
         test_util.expectNumbersClose(result[0], 1.234);
       });
 
-      it('returns 2x2 matrix that was uploaded', () => {
+      it("returns 2x2 matrix that was uploaded", () => {
         const texture2 = gpgpu.createMatrixTexture(2, 2);
         gpgpu.uploadMatrixToTexture(
             texture2, 2, 2, new Float32Array([1.234, 2, 3, 4]));
@@ -51,7 +51,7 @@ test_util.describeCustom(
         gpgpu.deleteMatrixTexture(texture2);
       });
 
-      it('uses texture parameter', () => {
+      it("uses texture parameter", () => {
         const texture2: WebGLTexture = gpgpu.createMatrixTexture(1, 1);
         gpgpu.uploadMatrixToTexture(texture, 1, 1, new Float32Array([1]));
         gpgpu.uploadMatrixToTexture(texture2, 1, 1, new Float32Array([2]));
@@ -65,13 +65,13 @@ test_util.describeCustom(
       });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+      {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+      {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+      {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
     ]);
 
 test_util.describeCustom(
-    'GPGPUContext color texture with float textures',
+    "GPGPUContext color texture with float textures",
     () => {
       let gpgpu: GPGPUContext;
       let texture: WebGLTexture;
@@ -81,7 +81,7 @@ test_util.describeCustom(
         gpgpu.dispose();
       });
 
-      it('basic', () => {
+      it("basic", () => {
         gpgpu = new GPGPUContext();
         gpgpu.enableAutomaticDebugValidation(true);
         texture = gpgpu.createMatrixTexture(1, 1);
@@ -94,11 +94,11 @@ test_util.describeCustom(
       });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
+      {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+      {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
     ]);
 
-test_util.describeCustom('GPGPUContext color texture with byte packing', () => {
+test_util.describeCustom("GPGPUContext color texture with byte packing", () => {
   let gpgpu: GPGPUContext;
   let texture: WebGLTexture;
 
@@ -107,7 +107,7 @@ test_util.describeCustom('GPGPUContext color texture with byte packing', () => {
     gpgpu.dispose();
   });
 
-  it('basic', () => {
+  it("basic", () => {
     gpgpu = new GPGPUContext();
     gpgpu.enableAutomaticDebugValidation(true);
     texture = gpgpu.createMatrixTexture(1, 1);
@@ -121,10 +121,10 @@ test_util.describeCustom('GPGPUContext color texture with byte packing', () => {
     const result = gpgpu.downloadMatrixFromTexture(texture, 1, 1);
     test_util.expectNumbersClose(result[0], 0.123);
   });
-}, [{'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}]);
+}, [{"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}]);
 
 test_util.describeCustom(
-    'GPGPUContext setOutputMatrixTexture',
+    "GPGPUContext setOutputMatrixTexture",
     () => {
       let gpgpu: GPGPUContext;
       let texture: WebGLTexture;
@@ -140,12 +140,12 @@ test_util.describeCustom(
         gpgpu.dispose();
       });
 
-      it('sets the output texture property to the output texture', () => {
+      it("sets the output texture property to the output texture", () => {
         gpgpu.setOutputMatrixTexture(texture, 1, 1);
         expect(gpgpu.outputTexture).toBe(texture);
       });
 
-      it('rebinds the output texture to the color buffer target', () => {
+      it("rebinds the output texture to the color buffer target", () => {
         const output: WebGLTexture = gpgpu.createMatrixTexture(1, 1);
         gpgpu.uploadMatrixToTexture(texture, 1, 1, new Float32Array([10]));
         gpgpu.setOutputMatrixTexture(output, 1, 1);
@@ -158,14 +158,14 @@ test_util.describeCustom(
         gpgpu.deleteMatrixTexture(output);
       });
 
-      it('resets output texture to null if nothing was previously bound',
+      it("resets output texture to null if nothing was previously bound",
          () => {
            expect(gpgpu.outputTexture).toBeNull();
            gpgpu.downloadMatrixFromTexture(texture, 1, 1);
            expect(gpgpu.outputTexture).toBeNull();
          });
 
-      it('sets the gl viewport to the output texture dimensions', () => {
+      it("sets the gl viewport to the output texture dimensions", () => {
         const columns = 456;
         const rows = 123;
         const output = gpgpu.createMatrixTexture(rows, columns);
@@ -175,7 +175,7 @@ test_util.describeCustom(
         gpgpu.deleteMatrixTexture(output);
       });
 
-      it('doesn\'t change gl viewport when downloading a non-output tex',
+      it("doesn't change gl viewport when downloading a non-output tex",
          () => {
            const output = gpgpu.createMatrixTexture(128, 128);
            gpgpu.setOutputMatrixTexture(output, 128, 128);
@@ -186,12 +186,12 @@ test_util.describeCustom(
          });
     },
     [
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-      {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+      {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+      {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+      {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
     ]);
 
-describe('GPGPUContext setOutputPackedMatrixTexture', () => {
+describe("GPGPUContext setOutputPackedMatrixTexture", () => {
   let gpgpu: GPGPUContext;
   let texture: WebGLTexture;
 
@@ -207,13 +207,13 @@ describe('GPGPUContext setOutputPackedMatrixTexture', () => {
     gpgpu.dispose();
   });
 
-  it('sets the output texture property to the output texture', () => {
+  it("sets the output texture property to the output texture", () => {
     texture = gpgpu.createPackedMatrixTexture(1, 1);
     gpgpu.setOutputPackedMatrixTexture(texture, 1, 1);
     expect(gpgpu.outputTexture).toBe(texture);
   });
 
-  it('sets the gl viewport to the output packed texture dimensions', () => {
+  it("sets the gl viewport to the output packed texture dimensions", () => {
     const columns = 456;
     const rows = 123;
     texture = gpgpu.createPackedMatrixTexture(rows, columns);
@@ -225,7 +225,7 @@ describe('GPGPUContext setOutputPackedMatrixTexture', () => {
   });
 });
 
-describe('GPGPUContext setOutputMatrixWriteRegion', () => {
+describe("GPGPUContext setOutputMatrixWriteRegion", () => {
   let gpgpu: GPGPUContext;
   let program: WebGLProgram;
   let output: WebGLTexture;
@@ -234,7 +234,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     gpgpu = new GPGPUContext();
     gpgpu.enableAutomaticDebugValidation(true);
     const src =
-        'precision highp float; void main() { gl_FragColor = vec4(2,0,0,0); }';
+        "precision highp float; void main() { gl_FragColor = vec4(2,0,0,0); }";
     program = gpgpu.createProgram(src);
     output = gpgpu.createMatrixTexture(4, 4);
     gpgpu.uploadMatrixToTexture(output, 4, 4, new Float32Array(16));
@@ -248,7 +248,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     gpgpu.dispose();
   });
 
-  it('writes to all pixels by default', () => {
+  it("writes to all pixels by default", () => {
     gpgpu.executeProgram();
     const result = gpgpu.downloadMatrixFromTexture(output, 4, 4);
     const expected = new Float32Array(4 * 4);
@@ -256,7 +256,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('sets the scissor box to the requested parameters', () => {
+  it("sets the scissor box to the requested parameters", () => {
     gpgpu.setOutputMatrixWriteRegion(0, 1, 2, 3);
     const scissorBox = gpgpu.gl.getParameter(gpgpu.gl.SCISSOR_BOX);
     expect(scissorBox[0]).toEqual(2);
@@ -265,7 +265,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     expect(scissorBox[3]).toEqual(1);
   });
 
-  it('writes only to center 2x2 region of 4x4 texture', () => {
+  it("writes only to center 2x2 region of 4x4 texture", () => {
     gpgpu.setOutputMatrixWriteRegion(1, 2, 1, 2);
     gpgpu.executeProgram();
     const result = gpgpu.downloadMatrixFromTexture(output, 4, 4);
@@ -274,7 +274,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('preserves data from previous writes outside of write region', () => {
+  it("preserves data from previous writes outside of write region", () => {
     gpgpu.setOutputMatrixWriteRegion(0, 1, 0, 4);  // top row
     gpgpu.executeProgram();
     gpgpu.setOutputMatrixWriteRegion(3, 1, 0, 4);  // bottom row
@@ -285,7 +285,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
     test_util.expectArraysClose(result, expected);
   });
 
-  it('writes adjacent cells across multiple calls', () => {
+  it("writes adjacent cells across multiple calls", () => {
     for (let row = 0; row < 4; ++row) {
       for (let col = 0; col < 4; ++col) {
         gpgpu.setOutputMatrixWriteRegion(row, 1, col, 1);
@@ -299,7 +299,7 @@ describe('GPGPUContext setOutputMatrixWriteRegion', () => {
   });
 });
 
-describe('GPGPUContext', () => {
+describe("GPGPUContext", () => {
   let gpgpu: GPGPUContext;
 
   beforeEach(() => {
@@ -311,13 +311,13 @@ describe('GPGPUContext', () => {
     gpgpu.dispose();
   });
 
-  it('throws an error if used after dispose', () => {
+  it("throws an error if used after dispose", () => {
     const gpgpuContext = new GPGPUContext();
     gpgpuContext.dispose();
     expect(gpgpuContext.dispose).toThrowError();
   });
 
-  it('throws an error if validation is on and framebuffer incomplete', () => {
+  it("throws an error if validation is on and framebuffer incomplete", () => {
     const src = `precision highp float; void main() {}`;
     const program = gpgpu.createProgram(src);
     const result = gpgpu.createMatrixTexture(1, 1);

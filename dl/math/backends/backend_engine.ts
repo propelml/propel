@@ -15,62 +15,42 @@
  * =============================================================================
  */
 
-import * as util from '../../util';
-import {DataType, NDArray} from '../ndarray';
+import * as util from "../../util";
+import { DataType, NDArray } from "../ndarray";
 
-import {MathBackend} from './backend';
-import * as kernel_registry from './kernel_registry';
-import {KernelConfigRegistry} from './kernel_registry';
-import * as tape_util from './tape_util';
-import {ScopeResult, ScopeResultImmediate} from './tape_util';
+export type ScopeResult =
+    void | NDArray | NDArray[] | {[key: string]: NDArray};
 
-interface ScopeState {
-  keep: NDArray[];
-  track: NDArray[];
+export function extractNDArraysFromScopeResult(result: ScopeResult):
+    NDArray[] {
+  if (result == null) {
+    return [];
+  }
+  if (result instanceof NDArray) {
+    return [result];
+  }
+
+  const list: NDArray[] = [];
+  const resultObj = result as {[key: string]: NDArray};
+  // Iteration over keys works also for arrays.
+  for (const k in resultObj) {
+    if (!resultObj.hasOwnProperty(k)) continue;
+    const val = resultObj[k];
+    if (val instanceof NDArray) {
+      list.push(val);
+    }
+  }
+  return list;
 }
 
 export class BackendEngine {
-  private activeScope: ScopeState;
-  private scopeStack: ScopeState[];
+  private activeScope: NDArray[];
+  private scopeStack: NDArray[][];
 
-  private debugMode = false;
-
-  constructor(private backend: MathBackend, private safeMode: boolean) {
+  constructor() {
     // Create a default outer scope.
-    this.activeScope = {keep: [], track: []};
+    this.activeScope = [];
     this.scopeStack = [this.activeScope];
-  }
-
-  enableDebugMode() {
-    this.debugMode = true;
-  }
-
-  executeKernel<K extends keyof KernelConfigRegistry,
-                          C extends KernelConfigRegistry[K]['inputAndArgs']>(
-      kernelName: K, config: C):
-      KernelConfigRegistry[K]['output'] {
-    const kernelFn = () =>
-        kernel_registry.executeKernel(this.backend, kernelName, config);
-
-    let start: number;
-    if (this.debugMode) {
-      start = performance.now();
-    }
-    const result = kernelFn();
-    if (this.debugMode) {
-      const vals = result.dataSync();
-      const time = util.rightPad(`${performance.now() - start}ms`, 9);
-      const paddedName = util.rightPad(kernelName, 25);
-      const rank = result.rank;
-      const size = result.size;
-      const shape = util.rightPad(result.shape.toString(), 14);
-      console.log(
-          `%c${paddedName}\t%c${time}\t%c${rank}D ${shape}\t%c${size}`,
-          'font-weight:bold', 'color:red', 'color:blue', 'color: orange');
-      util.checkForNaN(vals, result.dtype, name);
-    }
-
-    return result;
   }
 
   /**
@@ -82,29 +62,11 @@ export class BackendEngine {
    * @param name The name of the scope. Used for logging.
    * @param scopeFn The function to execute with chained math operations.
    */
-  scope<T extends ScopeResult>(
-      name: string,
-      scopeFn:
-          (keep:
-               <D1 extends DataType, T1 extends NDArray<D1>>(ndarray: T1) => T1,
-           track: <D2 extends DataType, T2 extends NDArray<D2>>(ndarray: T2) =>
-               T2) => T
-      ): T {
+  scope<T extends ScopeResult>(name: string, scopeFn: () => T): T {
     this.startScope();
-
-    const keepFn = <T extends NDArray>(ndarray: T): T => this.keep(ndarray);
-    // TODO(smilkov): trackFn is a no-op since we have global tracking.
-    // Remove when we break backward compatibility.
-    const trackFn = <T extends NDArray>(ndarray: T): T => ndarray;
-    const result = scopeFn(keepFn, trackFn);
-
-    if (result instanceof Promise) {
-      result.then(r => this.endScope(r));
-      return result;
-    } else {
-      this.endScope(result as ScopeResultImmediate);
-      return result;
-    }
+    const result = scopeFn();
+    this.endScope(result);
+    return result;
   }
 
   /**
@@ -112,7 +74,7 @@ export class BackendEngine {
    * as scope() without the need for a function closure.
    */
   startScope() {
-    const newScopeArrays: ScopeState = {keep: [], track: []};
+    const newScopeArrays: NDArray[] = [];
     this.scopeStack.push(newScopeArrays);
     this.activeScope = newScopeArrays;
   }
@@ -121,16 +83,13 @@ export class BackendEngine {
    * End a scope. Use this with startScope() to achieve the same functionality
    * as scope() without the need for a function closure.
    */
-  endScope(result: ScopeResultImmediate) {
-    let arraysToKeep = this.activeScope.keep;
-    const arraysToTrackInParent =
-        tape_util.extractNDArraysFromScopeResult(result);
-    arraysToKeep = arraysToKeep.concat(arraysToTrackInParent);
+  endScope(result: ScopeResult) {
+    const arraysToTrackInParent = extractNDArraysFromScopeResult(result);
 
     // Dispose the arrays tracked in this scope.
-    for (let i = 0; i < this.activeScope.track.length; i++) {
-      const ndarray = this.activeScope.track[i];
-      if (util.isNDArrayInList(ndarray, arraysToKeep)) {
+    for (let i = 0; i < this.activeScope.length; i++) {
+      const ndarray = this.activeScope[i];
+      if (util.isNDArrayInList(ndarray, arraysToTrackInParent)) {
         continue;
       }
 
@@ -144,28 +103,8 @@ export class BackendEngine {
 
     // Track the current result in the parent scope.
     arraysToTrackInParent.forEach(ndarray => {
-      if (!util.isNDArrayInList(ndarray, this.activeScope.keep)) {
-        this.track(ndarray);
-      }
+      this.track(ndarray);
     });
-  }
-
-  /**
-   * Keeps an NDArray in the current scope from being disposed automatically.
-   * @param result The NDArray to keep from being disposed.
-   */
-  keep<T extends NDArray>(result: T): T {
-    if (this.scopeStack.length === 1) {
-      if (this.safeMode) {
-        throw new Error(
-            'You are using math in safe mode. Enclose all ' +
-            'math.method() calls inside a scope: ' +
-            'math.scope(() => {math.method();...}) to avoid memory ' +
-            'leaks.');
-      }
-    }
-    this.activeScope.keep.push(result);
-    return result;
   }
 
   /**
@@ -175,20 +114,13 @@ export class BackendEngine {
    * @param result The NDArray to track in the current scope.
    */
   track<D extends DataType, T extends NDArray<D>>(result: T): T {
-    if (this.scopeStack.length === 1) {
-      if (this.safeMode) {
-        throw new Error(
-            'You are using math in safe mode. Enclose all ' +
-            'math.method() calls inside a scope: ' +
-            'math.scope(() => {math.method();...}) to avoid memory ' +
-            'leaks.');
-      }
+    if (this.scopeStack.length > 1) {
+      // Only track NDArrays that are created in an explicit scope; when
+      // created in the global scope, tracking them makes no sense -- the
+      // global scope never gets cleaned up, and adding them to an array
+      // just prevents the NDArray from ever being garbage collected.
+      this.activeScope.push(result);
     }
-    this.activeScope.track.push(result);
     return result;
-  }
-
-  getBackend(): MathBackend {
-    return this.backend;
   }
 }

@@ -99,19 +99,19 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     globalSavedForBackward = null;
 
     backprop.recordOp({
-      inputIds,
-      inputShapeDTypes,
       name,
       oid: nextOpId++,
+      inputIds,
+      inputShapeDTypes,
       outputIds: [ans.id],
       savedForBackward,
     });
     return ans;
   };
   ops[name] = {
-    bwFuncs: null,
     name,
     opFunc,
+    bwFuncs: null,
   };
   return opFunc;
 }

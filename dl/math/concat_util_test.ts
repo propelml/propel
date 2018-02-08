@@ -15,10 +15,10 @@
  * =============================================================================
  */
 
-import * as concat_util from './concat_util';
+import * as concat_util from "./concat_util";
 
-describe('concat_util.assertConcatShapesMatch rank=3D', () => {
-  it('Non-3D tensor x1', () => {
+describe("concat_util.assertConcatShapesMatch rank=3D", () => {
+  it("Non-3D tensor x1", () => {
     const assertFn = () => {
       concat_util.assertParams([1], [1, 2, 3], 1);
     };
@@ -26,7 +26,7 @@ describe('concat_util.assertConcatShapesMatch rank=3D', () => {
     expect(assertFn).toThrow();
   });
 
-  it('Non-3D tensor x2', () => {
+  it("Non-3D tensor x2", () => {
     const assertFn = () => {
       concat_util.assertParams([1, 2, 3], [2, 3], 1);
     };
@@ -34,7 +34,7 @@ describe('concat_util.assertConcatShapesMatch rank=3D', () => {
     expect(assertFn).toThrow();
   });
 
-  it('axis out of bound', () => {
+  it("axis out of bound", () => {
     const assertFn = () => {
       concat_util.assertParams([1, 2, 3], [1, 2, 3], 4);
     };
@@ -42,7 +42,7 @@ describe('concat_util.assertConcatShapesMatch rank=3D', () => {
     expect(assertFn).toThrow();
   });
 
-  it('non-axis shape mismatch', () => {
+  it("non-axis shape mismatch", () => {
     const assertFn = () => {
       concat_util.assertParams([2, 3, 3], [2, 2, 4], 2);
     };
@@ -50,7 +50,7 @@ describe('concat_util.assertConcatShapesMatch rank=3D', () => {
     expect(assertFn).toThrow();
   });
 
-  it('shapes line up', () => {
+  it("shapes line up", () => {
     const assertFn = () => {
       concat_util.assertParams([2, 3, 3], [2, 3, 4], 2);
     };
@@ -59,8 +59,8 @@ describe('concat_util.assertConcatShapesMatch rank=3D', () => {
   });
 });
 
-describe('concat_util.computeConcatOutputShape', () => {
-  it('compute output shape, axis=0', () => {
+describe("concat_util.computeConcatOutputShape", () => {
+  it("compute output shape, axis=0", () => {
     expect(concat_util.computeOutShape([2, 2, 3], [1, 2, 3], 0)).toEqual([
       3, 2, 3
     ]);

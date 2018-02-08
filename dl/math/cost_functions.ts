@@ -15,9 +15,8 @@
  * =============================================================================
  */
 
-import {ENV} from '../environment';
-import {NDArrayMath} from './math';
-import {NDArray, Scalar} from './ndarray';
+import { NDArrayMath } from "./math";
+import { NDArray, Scalar } from "./ndarray";
 
 /**
  * An error function and its derivative.
@@ -25,32 +24,23 @@ import {NDArray, Scalar} from './ndarray';
 export interface ElementWiseCostFunction {
   cost<T extends NDArray>(math: NDArrayMath, x1: T, x2: T): T;
   der<T extends NDArray>(math: NDArrayMath, x1: T, x2: T): T;
-  dispose(): void;
 }
 
 export class SquareCostFunc implements ElementWiseCostFunction {
-  constructor() {
-    this.halfOne = ENV.math.keep(Scalar.new(0.5));
-  }
-
-  private halfOne: Scalar;
-
   cost<T extends NDArray>(math: NDArrayMath, x1: T, x2: T): T {
     const diff = math.subStrict(x1, x2);
     const diffSquared = math.elementWiseMul(diff, diff);
-    const result = math.scalarTimesArray(this.halfOne, diffSquared);
+    const halfOne = Scalar.new(0.5);
+    const result = math.scalarTimesArray(halfOne, diffSquared);
 
     diff.dispose();
     diffSquared.dispose();
+    halfOne.dispose();
 
     return result;
   }
 
   der<T extends NDArray>(math: NDArrayMath, x1: T, x2: T): T {
     return math.subStrict(x1, x2);
-  }
-
-  dispose() {
-    this.halfOne.dispose();
   }
 }

@@ -15,11 +15,11 @@
  * =============================================================================
  */
 
-import {GPGPUContext} from './gpgpu_context';
-import {GPGPUProgram} from './gpgpu_math';
+import { GPGPUContext } from "./gpgpu_context";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class Copy2DProgram implements GPGPUProgram {
-  variableNames = ['source'];
+  variableNames = ["source"];
   outputShape: number[];
   userCode: string;
 
@@ -46,10 +46,10 @@ export class Copy2DProgram implements GPGPUProgram {
       gpgpu.setOutputMatrixWriteRegion(
           destStart[0], destSize[0], destStart[1], destSize[1]);
       const sourceStartCRLoc =
-          gpgpu.getUniformLocation(webGLProgram, 'sourceStart');
+          gpgpu.getUniformLocation(webGLProgram, "sourceStart");
       gpgpu.gl.uniform2i(sourceStartCRLoc, sourceStart[0], sourceStart[1]);
       const destStartCRLoc =
-          gpgpu.getUniformLocation(webGLProgram, 'destStart');
+          gpgpu.getUniformLocation(webGLProgram, "destStart");
       gpgpu.gl.uniform2i(destStartCRLoc, destStart[0], destStart[1]);
     };
   }

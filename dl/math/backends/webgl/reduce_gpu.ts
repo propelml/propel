@@ -15,37 +15,37 @@
  * =============================================================================
  */
 
-import {ReduceInfo} from '../../reduce_util';
-import {GPGPUProgram} from './gpgpu_math';
+import { ReduceInfo } from "../../reduce_util";
+import { GPGPUProgram } from "./gpgpu_math";
 
 export class ReduceProgram implements GPGPUProgram {
-  variableNames = ['x'];
+  variableNames = ["x"];
   outputShape: number[];
   userCode: string;
 
-  constructor(reduceInfo: ReduceInfo, reduceType: 'max'|'min'|'sum') {
+  constructor(reduceInfo: ReduceInfo, reduceType: "max" | "min" | "sum") {
     const windowSize = reduceInfo.windowSize;
     const batchSize = reduceInfo.batchSize;
     const inSize = reduceInfo.inSize;
     const outSize = Math.ceil(inSize / windowSize);
     this.outputShape = [batchSize, outSize];
 
-    const isReduceSum = reduceType === 'sum';
+    const isReduceSum = reduceType === "sum";
 
-    let initializationValue = '0.0';
+    let initializationValue = "0.0";
     if (!isReduceSum) {
-      if (reduceType === 'min') {
-        initializationValue = '1.0 / 0.0';
+      if (reduceType === "min") {
+        initializationValue = "1.0 / 0.0";
       } else {
-        initializationValue = '-1.0 / 0.0';
+        initializationValue = "-1.0 / 0.0";
       }
     }
 
-    const compareOp = reduceType === 'min' ? 'min' : 'max';
+    const compareOp = reduceType === "min" ? "min" : "max";
 
     let returnValue = `${reduceType}(${reduceType}(${reduceType}(` +
-        'minMaxValue[0], minMaxValue[1]), minMaxValue[2]), minMaxValue[3])';
-    if (reduceType === 'sum') {
+        "minMaxValue[0], minMaxValue[1]), minMaxValue[2]), minMaxValue[3])";
+    if (reduceType === "sum") {
       returnValue = `sumValue`;
     }
 
@@ -64,7 +64,7 @@ export class ReduceProgram implements GPGPUProgram {
       }
     `;
 
-    let checkOutOfBounds = '';
+    let checkOutOfBounds = "";
     if (inSize % windowSize > 0) {
       checkOutOfBounds = `
         if (inIdx < 0 || inIdx >= ${inSize}) {

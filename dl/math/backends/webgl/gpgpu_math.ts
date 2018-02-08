@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import {ENV} from '../../../environment';
-import * as util from '../../../util';
-import {NDArray} from '../../ndarray';
-import {GPGPUContext} from './gpgpu_context';
-import * as shader_compiler from './shader_compiler';
-import {ShapeInfo} from './shader_compiler';
-import {TextureData} from './tex_util';
+import { ENV } from "../../../environment";
+import * as util from "../../../util";
+import { NDArray } from "../../ndarray";
+import { GPGPUContext } from "./gpgpu_context";
+import * as shader_compiler from "./shader_compiler";
+import { ShapeInfo } from "./shader_compiler";
+import { TextureData } from "./tex_util";
 
-const ATTRIBUTE_NAMES = ['uv', 'clipSpacePos'];
+const ATTRIBUTE_NAMES = ["uv", "clipSpacePos"];
 
 export interface GPGPUProgram {
   variableNames: string[];
@@ -43,10 +43,10 @@ export interface GPGPUBinary {
   outShapeInfo: ShapeInfo;
 }
 
-const NAN_UNIFORM_NAME = 'NaN';
+const NAN_UNIFORM_NAME = "NaN";
 
 function shouldUploadNaNUniform(): boolean {
-  return !ENV.get('WEBGL_FLOAT_TEXTURE_ENABLED');
+  return !ENV.get("WEBGL_FLOAT_TEXTURE_ENABLED");
 }
 
 export interface ArrayData<T extends NDArray> {
@@ -61,7 +61,7 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   const inputInfos = inputs.map((input, i) => {
     const shapeInfo = {
       logicalShape: input.array.shape,
-      texShape: input.texData.texShape,
+      textureShape: input.texData.textureShape,
       textureType: input.texData.textureType
     };
     return {name: program.variableNames[i], shapeInfo};
@@ -69,7 +69,7 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   const inShapeInfos = inputInfos.map(x => x.shapeInfo);
   const outShapeInfo = {
     logicalShape: output.array.shape,
-    texShape: output.texData.texShape,
+    textureShape: output.texData.textureShape,
     textureType: output.texData.textureType
   };
   const source = shader_compiler.makeShader(
@@ -96,12 +96,12 @@ export function compileProgram<T extends NDArray, K extends NDArray>(
   }
 
   return {
-    program,
-    source,
     webGLProgram,
+    program,
     uniformLocations,
     attributeLocations,
     gpgpu,
+    source,
     inShapeInfos,
     outShapeInfo
   };
@@ -117,9 +117,9 @@ function validateBinaryAndProgram(
 
   shapeInfos.forEach((s, i) => {
     const shapeA = s.logicalShape;
-    const texShapeA = s.texShape;
+    const texShapeA = s.textureShape;
     const shapeB = inputs[i].array.shape;
-    const texShapeB = inputs[i].texData.texShape;
+    const texShapeB = inputs[i].texData.textureShape;
 
     if (!util.arraysEqual(shapeA, shapeB)) {
       throw Error(
@@ -142,7 +142,7 @@ export function runProgram<T extends NDArray, K extends NDArray>(
   validateBinaryAndProgram([binary.outShapeInfo], [output]);
 
   const outTex = output.texData.texture;
-  const outTexShape = output.texData.texShape;
+  const outTexShape = output.texData.textureShape;
   const gpgpu = binary.gpgpu;
   gpgpu.setOutputMatrixTexture(outTex, outTexShape[0], outTexShape[1]);
   gpgpu.setProgram(binary.webGLProgram);
@@ -166,15 +166,15 @@ export function runProgram<T extends NDArray, K extends NDArray>(
 export function makeShaderKey(
     program: GPGPUProgram, inputs: Array<ArrayData<NDArray>>,
     output: ArrayData<NDArray>): string {
-  let keyInputs = '';
+  let keyInputs = "";
   inputs.concat(output).forEach(x => {
     keyInputs +=
-        `${x.array.shape}_${x.texData.texShape}_${x.texData.textureType}`;
+        `${x.array.shape}_${x.texData.textureShape}_${x.texData.textureType}`;
   });
   const keyUserCode = program.userCode;
   const keyBroadcast = (program.supportsBroadcasting === true).toString();
   let key = program.constructor.name;
   // Fast string concat. See https://jsperf.com/string-concatenation/14.
-  key += '_' + keyBroadcast + '_' + keyInputs + '_' + keyUserCode;
+  key += "_" + keyBroadcast + "_" + keyInputs + "_" + keyUserCode;
   return key;
 }

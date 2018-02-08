@@ -15,15 +15,15 @@
  * =============================================================================
  */
 
-import * as test_util from '../test_util';
-import {MathTests} from '../test_util';
+import * as test_util from "../test_util";
+import { MathTests } from "../test_util";
 
-import {Array3D, Array4D} from './ndarray';
+import { Array3D, Array4D } from "./ndarray";
 
 // math.conv2dDerFilter
 {
   const tests: MathTests = it => {
-    it('input=3x3x1,d2=1,f=2,s=1,p=0', math => {
+    it("input=3x3x1,d2=1,f=2,s=1,p=0", math => {
       const inputDepth = 1;
       const outputDepth = 1;
       const inputShape: [number, number, number] = [3, 3, inputDepth];
@@ -45,7 +45,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected, 1e-1);
     });
 
-    it('input=3x3x1,d2=1,f=2,s=1,p=0, batch=2', math => {
+    it("input=3x3x1,d2=1,f=2,s=1,p=0, batch=2", math => {
       const inputDepth = 1;
       const outputDepth = 1;
       const inputShape: [number, number, number, number] =
@@ -70,18 +70,18 @@ import {Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('conv2dDerFilter', [tests]);
-  test_util.describeMathGPU('conv2dDerFilter', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("conv2dDerFilter", [tests]);
+  test_util.describeMathGPU("conv2dDerFilter", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }
 
 // math.conv2dDerBias
 {
   const tests: MathTests = it => {
-    it('dy=2x2x2', math => {
+    it("dy=2x2x2", math => {
       const outputDepth = 2;
       const dyShape: [number, number, number] = [2, 2, outputDepth];
       const dy = Array3D.new(dyShape, [1, 2, 3, 4, 5, 6, 7, 8]);
@@ -93,7 +93,7 @@ import {Array3D, Array4D} from './ndarray';
       test_util.expectArraysClose(result, expected);
     });
 
-    it('dy=2x2x2, batch=2', math => {
+    it("dy=2x2x2, batch=2", math => {
       const outputDepth = 2;
       const dyShape: [number, number, number, number] = [2, 2, 2, outputDepth];
       const dy = Array4D.new(
@@ -107,10 +107,10 @@ import {Array3D, Array4D} from './ndarray';
     });
   };
 
-  test_util.describeMathCPU('conv2dDerBias', [tests]);
-  test_util.describeMathGPU('conv2dDerBias', [tests], [
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 1},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': true, 'WEBGL_VERSION': 2},
-    {'WEBGL_FLOAT_TEXTURE_ENABLED': false, 'WEBGL_VERSION': 1}
+  test_util.describeMathCPU("conv2dDerBias", [tests]);
+  test_util.describeMathGPU("conv2dDerBias", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
 }

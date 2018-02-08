@@ -109,7 +109,7 @@ export function range(...args: number[]): Tensor {
 /** Produces a new tensor with random values, drawn from the standard normal
  * distribution.
  *
- *    import { range, randn } from "propel"
+ *    import { range, randn, plot } from "propel"
  *    n = 1000
  *    plot(range(n), randn([n]))
  */
