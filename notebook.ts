@@ -182,7 +182,7 @@ export class Cell extends Component<CellProps, CellState> {
       this.editor.on("blur", this.blur.bind(this));
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  { this.run(); return true; },
-        "Shift-Enter": () => { this.run(); this.nextCell(); return true; }
+        "Alt-Enter": () => { this.run(); this.nextCell(); return true; }
       });
     }
   }
