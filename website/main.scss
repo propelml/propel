@@ -487,24 +487,40 @@ svg {
   list-style-type: none;
   flex-wrap: wrap;
 }
-
-.most-recent li {
-  max-width: 200px;
-  max-height: 200px;
-  overflow: hidden;
-  background-color: $cellBackground;
-  margin: $small;
+.most-recent li:hover{
+  background-color: #dee1e2;
 }
-
+.most-recent li {
+  min-height: 200px;
+  background: transparent;
+  margin: 5px;
+  box-shadow: -3px 2px 17px #6b767b;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.5s ease;
+}
+.most-recent .blurb{
+  display: flex;
+  height: 55px;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 5px;
+}
+.most-recent .blurb img{
+  border-radius: 90px;
+  height: 50px;
+  width: 50px;
+  margin-right: 5px;
+}
 .most-recent li a,
 .most-recent li p {
-  color: #fff;
+  color: #373737;
 }
 
 .docindex a:hover,
 .docindex a:focus,
 .docindex a:active {
-  color: rgb(31, 119, 180);
+  color: #1f77b4;
   text-decoration: underline;
-  background-color: $base1;
+  background-color: #ddd;
 }
