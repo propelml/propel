@@ -488,13 +488,13 @@ svg {
   flex-wrap: wrap;
 }
 .most-recent li:hover{
-  background-color: #dee1e2;
+  background-color: $base2;
 }
 .most-recent li {
   min-height: 200px;
   background: transparent;
   margin: 5px;
-  box-shadow: -3px 2px 17px #6b767b;
+  box-shadow: -3px 2px 17px $base00;
   width: 100%;
   padding: 5px;
   border-radius: 5px;
@@ -503,7 +503,7 @@ svg {
 .most-recent .blurb{
   display: flex;
   height: 55px;
-  border-bottom: 2px solid #ccc;
+  border-bottom: 2px solid $base01;
   margin-bottom: 5px;
 }
 .most-recent .blurb img{
@@ -514,7 +514,7 @@ svg {
 }
 .most-recent li a,
 .most-recent li p {
-  color: #373737;
+  color: $base03;
 }
 
 .most-recent li a:hover{
