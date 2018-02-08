@@ -2,8 +2,8 @@ import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
 import { renderSync } from "sass";
+import { drainExecuteQueue, resetIds } from "../notebook";
 import * as website from "../website";
-// import * as nodeFetch from "node-fetch";
 import * as run from "./run";
 
 // tslint:disable:no-reference
@@ -12,7 +12,7 @@ import * as run from "./run";
 const websiteRoot = run.root + "/build/website/";
 
 async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
-  website.resetIds();
+  resetIds();
 
   const jsdomConfig = { };
   const window = new JSDOM("", jsdomConfig).window;
@@ -32,9 +32,7 @@ async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
   const p = new Promise<string>((resolve, reject) => {
     window.addEventListener("load", async() => {
       try {
-        while (website.notebookExecuteQueue.length > 0) {
-          await website.notebookExecuteQueue.shift();
-        }
+        await drainExecuteQueue();
         const bodyHtml = document.body.innerHTML;
         const html =  website.getHTML(page.title, bodyHtml);
         resolve(html);

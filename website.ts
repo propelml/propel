@@ -5,7 +5,6 @@ import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
 import * as nb from "./notebook";
 const { version } = require("./package.json");
-export { resetIds, notebookExecuteQueue } from "./notebook";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";

@@ -67,7 +67,14 @@ export function notebook(code: string, props: CellProps = {}): JSX.Element {
 // When rendering HTML server-side, all of the notebook cells are executed so
 // their output can be placed in the generated HTML. This queue tracks the
 // execution promises for each cell.
-export let notebookExecuteQueue: Array<Promise<void>> = [];
+const cellExecuteQueue: Cell[] = [];
+
+export async function drainExecuteQueue() {
+  while (cellExecuteQueue.length > 0) {
+    const cell = cellExecuteQueue.shift();
+    await cell.update();
+  }
+}
 
 const codemirrorOptions = {
   lineNumbers: false,
@@ -96,6 +103,10 @@ export class Cell extends Component<CellProps, CellState> {
   constructor(props) {
     super(props);
     cellTable.set(this.id, this);
+  }
+
+  componentWillMount() {
+    cellExecuteQueue.push(this);
   }
 
   get id(): number {
@@ -153,10 +164,6 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   componentDidMount() {
-    // Execute the cell automatically.
-    this.clearOutput();
-    notebookExecuteQueue.push(this.execute());
-
     const options = Object.assign({}, codemirrorOptions, {
       mode: "javascript",
       value: this.code,
@@ -585,6 +592,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
 
     return h("div", null, ...body);
+  }
+
+  componentDidUpdate() {
+    drainExecuteQueue();
   }
 }
 
