@@ -12,13 +12,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { listDevices } from "./api";
+// Use this to run nn_example on node.
+import { listDevices } from "./../../api";
 import { Trainer } from "./nn_example";
-import { test } from "./test";
 
-test(async function testNNExample() {
-  const useGPU = (listDevices().length > 1);
+const useGPU = (listDevices().length > 1);
+async function main() {
   const trainer = new Trainer(useGPU);
-  await trainer.step();
-  await trainer.step();
-});
+  while (trainer.opt.steps < 10000) {
+    await trainer.step();
+  }
+}
+
+main();

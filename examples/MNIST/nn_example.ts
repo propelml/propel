@@ -15,10 +15,10 @@
 // Simple MNIST classifier.
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
-import { OptimizerSGD, Params, T, Tensor } from "./api";
-import * as plt from "./matplotlib";
-import * as mnist from "./mnist";
-import { assert, IS_WEB } from "./util";
+import { OptimizerSGD, Params, T, Tensor } from "./../../api";
+import * as plt from "./../../matplotlib";
+import * as mnist from "./../../mnist";
+import { assert, IS_WEB } from "./../../util";
 
 let device;  // Set in train()
 
