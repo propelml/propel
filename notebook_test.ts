@@ -39,9 +39,6 @@ testBrowser(async function notebook_Notebook() {
   assert(1 === blurbs.length);
 
   // Because we aren't logged in, we shouldn't see any clone button.
-  /* Currently failing.
-  let clones = document.getElementsByClassName("clone")
-  console.log("clone buttons", clones);
+  const clones = document.getElementsByClassName("clone");
   assert(0 === clones.length);
-   */
 });

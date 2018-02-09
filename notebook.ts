@@ -400,7 +400,10 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
 
     let body;
     if (this.state.nbId) {
-      body = h(Notebook, {nbId: this.state.nbId});
+      body = h(Notebook, {
+        nbId: this.state.nbId,
+        userInfo: this.state.userInfo,
+      });
     } else {
       body = h(MostRecent, null);
     }
@@ -463,6 +466,7 @@ export class MostRecent extends Component<any, MostRecentState> {
 interface NotebookProps {
   nbId: string;
   onReady?: () => void;
+  userInfo?: db.UserInfo;  // Info about the currently logged in user.
 }
 
 interface NotebookState {
@@ -557,14 +561,14 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     } else {
       const doc = this.state.doc;
-      body = [
-        h("header", null,
-          notebookBlurb(doc),
-          h("button", {
+      const cloneButton = this.props.userInfo == null ? ""
+        : h("button", {
             "class": "clone",
             "onClick": () => this.onClone(),
-          }, "Clone"),
-        ),
+          }, "Clone");
+
+      body = [
+        h("header", null, notebookBlurb(doc), cloneButton),
         this.renderCells(doc),
       ];
     }
