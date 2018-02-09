@@ -184,8 +184,23 @@ export class Cell extends Component<CellProps, CellState> {
     if (this.props.onRun) this.props.onRun(this.code);
   }
 
-  nextCell() {
-    // TODO
+  async nextCell() {
+    const currentId = "cell" + this.id;
+    const noteBooks = document.querySelectorAll(".notebook-cell");
+    let found = false, i;
+    const len = noteBooks.length - 1;
+    for (i = 0; i < len; i++) {
+      if (noteBooks[i].id === currentId) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      return;
+    }
+    const cell = noteBooks[i + 1];
+    lookupCell(Number(cell.id.replace("cell", ""))).focus();
+    cell.scrollIntoView();
   }
 
   clickedDelete() {
