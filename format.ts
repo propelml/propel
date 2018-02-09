@@ -34,10 +34,14 @@ function preprocess(shape: types.Shape, data: types.TypedArray,
   for (let i = 0; i < data.length; i++) {
     const [before, after] = data[i].toFixed(precision)
                                    .replace(/0+$/, "")
+                                   .replace(/^-/, "")
                                    .split(".", 2);
     if (maxBefore < before.length) maxBefore = before.length;
     if (maxAfter < after.length) maxAfter = after.length;
   }
+  // We removed the negative sign. We always want to leave room for it, even if
+  // there are no negative values. So add one more here.
+  maxBefore += 1;
   return { precision, dtype, maxBefore, maxAfter };
 }
 
@@ -48,7 +52,7 @@ function formatNumber(value: number, opts: FormatOptions): string {
         return "" + value;
       case "float32":
         const [before, after] = split(value, opts.precision);
-        const b = 1 + opts.maxBefore - before.length;
+        const b = opts.maxBefore - before.length;
         const a = opts.maxAfter - after.length;
         return " ".repeat(b) + before + "." + after + " ".repeat(a);
       default:
