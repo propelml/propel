@@ -38,7 +38,7 @@ const TESTS = [
   {
     doneMsg: /^DONE.*failed: 0/,
     href: "static/test.html#script=/test_isomorphic.js",
-    timeout: 30 * 1000
+    timeout: 40 * 1000
   },
 
   // These web pages are simply loaded; the test passes if no unhandled
