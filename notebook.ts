@@ -168,31 +168,19 @@ export class Cell extends Component<Props, State> {
     const currentId = "cell" + this.id;
     const noteBooks = document.querySelectorAll(".notebook-cell");
     let found = false, i;
-    for (i = 0; i < noteBooks.length; i++) {
+    const len = noteBooks.length - 1;
+    for (i = 0; i < len; i++) {
       if (noteBooks[i].id === currentId) {
         found = true;
-        i++;
         break;
       }
     }
     if (!found) {
       return;
     }
-    let cell = noteBooks[i];
-    if (!cell) {
-      // create a new cell
-      const newBtn = document.querySelector("#newCell");
-      if (!newBtn) {
-        return;
-      }
-      newBtn.click();
-      await delay(100);
-      cell = document.querySelector(".notebook-cell:last-child");
-    }
-    // scroll & focus
-    // TODO: Scroll with a nice animation
+    const cell = noteBooks[i + 1];
+    lookupCell(Number(cell.id.replace("cell", ""))).focus();
     cell.scrollIntoView();
-    document.querySelector("#" + cell.id + " textarea").focus();
   }
 
   clickedRun() {
