@@ -1,5 +1,7 @@
 # Propel
 
+[![Join the chat at https://gitter.im/propelml/propel](https://badges.gitter.im/propelml/propel.svg)](https://gitter.im/propelml/propel?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Machine Learning Framework for JavaScript.
 
 [![Build Status](https://travis-ci.com/propelml/propel.svg?token=eWz4oGVxypBGsz78gdKp&branch=master)](https://travis-ci.com/propelml/propel)
