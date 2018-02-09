@@ -22,8 +22,11 @@
   'targets': [
     {
       'target_name': 'tensorflow-binding',
-      'sources': [ 'binding.cc' ],
-      'include_dirs': [ '<(tensorflow_include_dir)' ],
+      'sources': [ 'src/binding.cc' ],
+      'include_dirs': [
+        '<(tensorflow_include_dir)',
+        '<(module_root_dir)',
+      ],
       'conditions': [
         ['OS=="win"', {
           'defines': [ 'COMPILER_MSVC' ],

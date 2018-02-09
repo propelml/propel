@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { test } from "../tools/tester";
 import { bo, convertBasic } from "./backend";
-import { test } from "./test";
 import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
 const T = convertBasic;

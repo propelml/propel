@@ -14,7 +14,7 @@
  */
 import * as acorn from "acorn/dist/acorn";
 import * as walk from "acorn/dist/walk";
-import { assert } from "./util";
+import { assert } from "../src/util";
 
 const importFn = "__import";
 const globalVar = "__global";

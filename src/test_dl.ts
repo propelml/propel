@@ -1,4 +1,4 @@
-import "./jasmine_shim";
+import "../tools/jasmine_shim";
 
 import "./dl/environment_test";
 import "./dl/math/activation_functions_test";

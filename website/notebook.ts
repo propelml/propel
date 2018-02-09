@@ -19,15 +19,15 @@
 // server-side so the results can be displayed even if javascript is disabled.
 
 // tslint:disable:no-reference
-/// <reference path="node_modules/@types/codemirror/index.d.ts" />
+/// <reference path="../node_modules/@types/codemirror/index.d.ts" />
 
 import { Component, h } from "preact";
-import * as propel from "./api";
+import * as propel from "../src/api";
+import * as matplotlib from "../src/matplotlib";
+import * as mnist from "../src/mnist";
+import { assert, delay, IS_WEB } from "../src/util";
 import * as db from "./db";
-import * as matplotlib from "./matplotlib";
-import * as mnist from "./mnist";
 import { transpile } from "./nb_transpiler";
-import { assert, delay, IS_WEB } from "./util";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;

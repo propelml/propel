@@ -2,8 +2,8 @@ import * as fs from "fs";
 import { JSDOM } from "jsdom";
 import { join } from "path";
 import { renderSync } from "sass";
-import { drainExecuteQueue } from "../notebook";
-import * as website from "../website";
+import { drainExecuteQueue } from "../website/notebook";
+import * as website from "../website/website";
 import * as run from "./run";
 
 // tslint:disable:no-reference
@@ -68,7 +68,7 @@ run.symlink(run.root + "/website/", "build/website/static");
 scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
 writePages().then(() => {
-  run.parcel("website_main.ts", "build/website");
+  run.parcel("website/website_main.ts", "build/website");
   console.log("Website built in", websiteRoot);
   // Firebase keeps network connections open, so we have force exit the process.
   process.exit(0);

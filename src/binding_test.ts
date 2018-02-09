@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { test } from "./test";
+import { test } from "../tools/tester";
 import * as tf from "./tf";
 import { assert, assertAllEqual } from "./util";
 

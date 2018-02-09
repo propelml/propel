@@ -13,9 +13,9 @@
    limitations under the License.
  */
 
+import { assert } from "../src/util";
+import { test } from "../tools/tester";
 import { transpile } from "./nb_transpiler";
-import { test } from "./test";
-import { assert } from "./util";
 
 const t = (src, out) => test(
   function nb_transpiler() {

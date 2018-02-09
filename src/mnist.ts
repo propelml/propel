@@ -33,7 +33,7 @@ export function makeHref(fn) {
     const path = require("path");
     const dirname = path.basename(__dirname) === "build" ?
       path.resolve(__dirname, "../deps/mnist") :
-      path.resolve(__dirname, "deps/mnist");
+      path.resolve(__dirname, "../deps/mnist");
     return path.resolve(dirname, fn);
   }
 }

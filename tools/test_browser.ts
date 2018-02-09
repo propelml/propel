@@ -15,7 +15,7 @@
 import { createServer } from "http-server";
 import * as puppeteer from "puppeteer";
 import { format } from "util";
-import "./util"; // To make unhandled rejections crash node.
+import "../src/util"; // To make unhandled rejections crash node.
 
 // The PP_TEST_DEBUG environment variable can be used to run the tests in
 // debug mode. When debug mode is enabled...
@@ -37,7 +37,7 @@ const TESTS = [
   // page, the test fails.
   {
     doneMsg: /^DONE.*failed: 0/,
-    href: "static/test.html#script=/test_isomorphic.js",
+    href: "static/test.html#script=/test_website.js",
     timeout: 40 * 1000
   },
 

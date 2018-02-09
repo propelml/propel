@@ -70,8 +70,10 @@ function npmPack(name, cb) {
 
 function buildAndTest() {
   const propelPkgFn = npmPack("propel", distDir => {
-    run.parcel("api.ts", distDir);
+    run.parcel("src/api.ts", distDir);
+    const genFn = distDir + "/api.js";
     const mainFn = distDir + "/propel.js";
+    fs.renameSync(genFn, mainFn);
 
     let c = fs.readFileSync(mainFn, "utf8");
     fs.writeFileSync(mainFn, c + `
@@ -88,7 +90,7 @@ function buildAndTest() {
   });
 
   const tfPkgFn = npmPack(config.tfPkg, distDir => {
-    fs.copyFileSync("load_binding.js", distDir + "/load_binding.js");
+    fs.copyFileSync("src/load_binding.js", distDir + "/load_binding.js");
     // Copy over the TF binding.
     fs.copyFileSync("build/Release/tensorflow-binding.node",
                     distDir + "/tensorflow-binding.node"

@@ -12,10 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { test } from "../tools/tester";
 import { fill, grad, linspace, listDevices, multigrad, ones,
   Params, randn, range, T, Tensor, TensorLike, zeros } from "./api";
 import * as api from "./api";
-import { test } from "./test";
 import * as types from "./types";
 import { assert, assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual, IS_NODE } from "./util";

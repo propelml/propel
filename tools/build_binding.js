@@ -27,8 +27,9 @@ if (process.platform === "darwin" || process.platform === "linux") {
   let cflags = `
     -c
     -o Release/binding.o 
-    ../binding.cc
+    ../src/binding.cc
     -I${nodeInclude}
+    -I${run.root}
     -I${run.root}/deps/libtensorflow/include
     -Wall
     -W

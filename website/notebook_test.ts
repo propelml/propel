@@ -1,8 +1,8 @@
 import { h, render } from "preact";
+import { assert, objectsEqual } from "../src/util";
+import { testBrowser } from "../tools/tester";
 import { enableMock } from "./db";
 import * as nb from "./notebook";
-import { testBrowser } from "./test";
-import { assert, objectsEqual } from "./util";
 
 testBrowser(function notebook_NotebookRoot() {
   const mdb = enableMock();
