@@ -69,6 +69,11 @@ const firebaseConfig = {
 
 class DatabaseFB implements Database {
   async getDoc(nbId): Promise<NotebookDoc> {
+    // We have one special doc that is loaded from memory, used for testing and
+    // debugging.
+    if (nbId === "default") {
+      return defaultDoc;
+    }
     const docRef = nbCollection.doc(nbId);
     const snap = await docRef.get();
     if (snap.exists) {
@@ -80,6 +85,7 @@ class DatabaseFB implements Database {
 
   // Caller must catch errors.
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
+    if (nbId === "default") return; // Don't save the default doc.
     if (!this.ownsDoc(doc)) return;
     const docRef = nbCollection.doc(nbId);
     await docRef.update({
@@ -162,16 +168,7 @@ class DatabaseMock implements Database {
 
   async getDoc(nbId: string): Promise<NotebookDoc> {
     this.inc("getDoc");
-    return {
-      cells: ["var i = 0"],
-      owner: {
-        displayName: "displayName",
-        photoURL: "photoURL",
-        uid: "uid",
-      },
-      updated: new Date(),
-      created: new Date(),
-    };
+    return defaultDoc;
   }
 
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
@@ -235,3 +232,48 @@ function lazyInit() {
   }
   return true;
 }
+
+const defaultOwner: UserInfo = {
+  displayName: "default owner",
+  photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
+  uid: "abc",
+};
+
+const defaultDocCells: string[] = [
+`
+import { T } from "propel";
+t = T([[2, 3], [30, 20]])
+t.mul(5)
+`,
+`
+import { grad, linspace, plot } from "propel";
+f = (x) => T(x).mul(x);
+x = linspace(-4, 4, 200);
+plot(x, f(x),
+     x, grad(f)(x));
+`,
+`
+f = await fetch('/static/mnist/README');
+t = await f.text();
+t;
+`,
+`
+import { T } from "propel";
+function f(x) {
+  let y = x.sub(1);
+  let z = T(-1).sub(x);
+  return x.greater(0).select(y,z).relu();
+}
+x = linspace(-5, 5, 100)
+plot(x, f(x))
+plot(x, grad(f)(x))
+grad(f)([-3, -0.5, 0.5, 3])
+`
+];
+
+const defaultDoc: NotebookDoc = {
+  cells: defaultDocCells,
+  owner: defaultOwner,
+  updated: new Date(),
+  created: new Date(),
+};
