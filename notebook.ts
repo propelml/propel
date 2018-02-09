@@ -31,6 +31,7 @@ import { assert, delay, IS_WEB } from "./util";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
+let focusedCellId = null;
 let lastExecutedCellId = null;
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
@@ -141,11 +142,11 @@ export class Cell extends Component<CellProps, CellState> {
       require("codemirror/mode/javascript/javascript.js");
       this.input.innerHTML = "" ; // Delete the <pre>
       this.editor = CodeMirror(this.input, options);
-      this.editor.on("focus", this.focus.bind(this));
-      this.editor.on("blur", this.blur.bind(this));
+      this.editor.on("focus", this.focus.bind(this, false));
+      this.editor.on("blur", this.blur.bind(this, false));
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  { this.run(); return true; },
-        "Shift-Enter": () => { this.run(); this.nextCell(); return true; }
+        "Shift-Enter": () => { this.run(); this.focusNextCell(); return true; }
       });
     }
   }
@@ -184,8 +185,23 @@ export class Cell extends Component<CellProps, CellState> {
     if (this.props.onRun) this.props.onRun(this.code);
   }
 
-  nextCell() {
-    // TODO
+  focusNextCell() {
+    const currentId = "cell" + this.id;
+    const cellElements = document.querySelectorAll(".notebook-cell");
+    let found, i = 0;
+    const len = cellElements.length - 1;
+    while (!found && i < len) {
+      if (cellElements[i++].id === currentId) {
+        found = i;
+      }
+    }
+    if (!found) {
+      return;
+    }
+    const cellElement = cellElements[found];
+    lookupCell(Number(cellElement.id.replace("cell", ""))).focus();
+    // TODO: Scroll with a nice animation
+    cellElement.scrollIntoView();
   }
 
   clickedDelete() {
@@ -198,12 +214,25 @@ export class Cell extends Component<CellProps, CellState> {
     if (this.props.onInsertCell) this.props.onInsertCell();
   }
 
-  blur() {
+  blur(shouldBlurEditor = true) {
+    if (focusedCellId === this.id) {
+      focusedCellId = null;
+    }
     this.input.classList.remove("focus");
+    if (shouldBlurEditor) {
+      this.editor.getInputField().blur();
+    }
   }
 
-  focus() {
+  focus(shouldFocusOnEditor = true) {
+    if (focusedCellId) {
+      lookupCell(focusedCellId).blur();
+    }
+    focusedCellId = this.id;
     this.input.classList.add("focus");
+    if (shouldFocusOnEditor) {
+      this.editor.focus();
+    }
   }
 
   render() {
