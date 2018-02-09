@@ -104,7 +104,8 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   get code(): string {
-    return (this.editor ? this.editor.getValue() : this.props.code).trim();
+    return normalizeCode(this.editor ? this.editor.getValue()
+                                     : this.props.code);
   }
 
   clearOutput() {
@@ -112,7 +113,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   componentWillReceiveProps(nextProps: CellProps) {
-    const nextCode = nextProps.code.trim();
+    const nextCode = normalizeCode(nextProps.code);
     if (nextCode !== this.code) {
       this.editor.setValue(nextCode);
       this.clearOutput();
@@ -260,7 +261,7 @@ export class FixedCell extends Component<FixedProps, CellState> {
     // Render as a pre in case people don't have javascript turned on.
     return h("div", { "class": "notebook-cell", },
       h("div", { "class": "input" },
-        h("pre", { }, this.props.code.trim()),
+        h("pre", { }, normalizeCode(this.props.code)),
       )
     );
   }
@@ -440,8 +441,8 @@ export class MostRecent extends Component<any, MostRecentState> {
       return h(Loading, null);
     }
     const notebookList = this.state.latest.map(info => {
-      const snippit = info.doc.cells.join("\n")
-        .trim()
+      const snippit = info.doc.cells.map(normalizeCode)
+        .join("\n")
         .slice(0, 100);
       const href = nbUrl(info.nbId);
       return h("li", null,
@@ -461,6 +462,7 @@ export class MostRecent extends Component<any, MostRecentState> {
 
 interface NotebookProps {
   nbId: string;
+  onReady?: () => void;
 }
 
 interface NotebookState {
@@ -496,9 +498,11 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   }
 
-  async onRun(updatedCode, i) {
+  async onRun(updatedCode: string, i: number) {
     const doc = this.state.doc;
-    if (doc.cells[i] !== updatedCode) {
+    updatedCode = normalizeCode(updatedCode);
+    // Save updated code in database if different.
+    if (normalizeCode(doc.cells[i]) !== updatedCode) {
       doc.cells[i] = updatedCode;
       this.update(doc);
     }
@@ -568,8 +572,13 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     return h("div", null, ...body);
   }
 
-  componentDidUpdate() {
-    drainExecuteQueue();
+  async componentDidUpdate() {
+    await drainExecuteQueue();
+
+    // We've rendered the Notebook with either a document or errorMsg.
+    if (this.state.doc || this.state.errorMsg) {
+      if (this.props.onReady) this.props.onReady();
+    }
   }
 }
 
@@ -607,4 +616,9 @@ export function GlobalHeader(props) {
       ...props.children,
     ),
   );
+}
+
+// Trims whitespace.
+function normalizeCode(code: string): string {
+  return code.trim();
 }

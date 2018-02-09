@@ -17,12 +17,31 @@ testBrowser(function notebook_NotebookRoot() {
   assert(c.className === "notebook");
 });
 
-testBrowser(function notebook_Notebook() {
+testBrowser(async function notebook_Notebook() {
   const mdb = enableMock();
-  const el = h(nb.Notebook, { nbId: "abc" });
-  render(el, document.body);
+  document.body.innerHTML = "";
+
+  const readyPromise = new Promise((resolve) => {
+    const el = h(nb.Notebook, {
+      nbId: "default",
+      onReady: resolve,
+    });
+    render(el, document.body);
+  });
+
+  await readyPromise;
+
   console.log(mdb.counts);
-  assert(objectsEqual(mdb.counts, {
-    getDoc: 1,
-  }));
+  assert(objectsEqual(mdb.counts, { getDoc: 1 }));
+
+  // Check that we rendered the blurb.
+  const blurbs = document.getElementsByClassName("blurb");
+  assert(1 === blurbs.length);
+
+  // Because we aren't logged in, we shouldn't see any clone button.
+  /* Currently failing.
+  let clones = document.getElementsByClassName("clone")
+  console.log("clone buttons", clones);
+  assert(0 === clones.length);
+   */
 });
