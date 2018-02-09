@@ -143,7 +143,7 @@ export class Cell extends Component<Props, State> {
       this.editor.on("blur", this.blur.bind(this));
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  { this.update(); return true; },
-        "Shift-Enter": () => { this.update(); this.nextCell(); return true; }
+        "Shift-Enter": () => { this.update(); this.focusNextCell(); return true; }
       });
     }
     // Execute the cell automatically.
@@ -164,7 +164,7 @@ export class Cell extends Component<Props, State> {
     }
   }
 
-  async nextCell() {
+  async focusNextCell() {
     const currentId = "cell" + this.id;
     const noteBooks = document.querySelectorAll(".notebook-cell");
     let found = false, i;
