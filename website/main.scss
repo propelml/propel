@@ -489,16 +489,37 @@ svg {
 }
 
 .most-recent li {
-  max-width: 200px;
-  max-height: 200px;
-  overflow: hidden;
-  background-color: $cellBackground;
-  margin: $small;
+  min-height: 200px;
+  background: transparent;
+  margin: 5px;
+  box-shadow: -3px 2px 17px $base00;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.5s ease;
+}
+
+.most-recent li:hover {
+  background-color: $base2;
+}
+
+.most-recent .blurb {
+  display: flex;
+  height: 55px;
+  border-bottom: 2px solid $base01;
+  margin-bottom: 5px;
+}
+
+.most-recent .blurb img {
+  border-radius: 90px;
+  height: 50px;
+  width: 50px;
+  margin-right: 5px;
 }
 
 .most-recent li a,
 .most-recent li p {
-  color: #fff;
+  color: $base03;
 }
 
 .docindex a:hover,
@@ -507,4 +528,8 @@ svg {
   color: rgb(31, 119, 180);
   text-decoration: underline;
   background-color: $base1;
+}
+
+.most-recent li a:hover {
+  text-decoration: none;
 }
