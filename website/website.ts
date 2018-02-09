@@ -4,7 +4,7 @@
 import { readFileSync } from "fs";
 import { h, render } from "preact";
 import * as nb from "./notebook";
-const { version } = require("./package.json");
+const { version } = require("../package.json");
 
 export interface DocEntry {
   kind: "class" | "method" | "property";
@@ -150,7 +150,7 @@ function startsWithUpperCase(s: string): boolean {
 }
 
 const Docs = (props) => {
-  let docs: DocEntry[] = require("./website/docs.json");
+  let docs: DocEntry[] = require("./docs.json");
   docs = docs.sort((a, b) => {
     // Special case "T" to be at the top of the docs.
     if (a.name === "T") return -1;
@@ -176,7 +176,7 @@ const Docs = (props) => {
 };
 
 export const References = (props) => {
-  const refhtml = readFileSync(__dirname + "/website/references.html", "utf8");
+  const refhtml = readFileSync(__dirname + "/references.html", "utf8");
   return div("references",
     h(nb.GlobalHeader, null),
     h("header", null,

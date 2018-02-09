@@ -3,7 +3,6 @@
   "version": "3.1.0",
   "description": "Differentiable Programming in JavaScript",
   "license": "Apache-2.0",
-  "main": "api.ts",
   "private": true,
   "engines": {
     "node": ">=8.0.0"

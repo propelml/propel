@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-#ifndef CHECK_H_
-#define CHECK_H_
+#ifndef SRC_CHECK_H_
+#define SRC_CHECK_H_
 
 #ifdef _MSC_VER  // msvc
 #define no_return __declspec(noreturn)
@@ -53,4 +53,4 @@ void abort_with_message(const char* message) {
   abort();
 }
 
-#endif  // CHECK_H_
+#endif  // SRC_CHECK_H_

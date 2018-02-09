@@ -13,7 +13,7 @@
    limitations under the License.
  */
 
-import { IS_NODE } from "./util";
+import { IS_NODE } from "../src/util";
 
 export type TestFunction = () => void | Promise<void>;
 

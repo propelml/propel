@@ -5,5 +5,10 @@
     "declaration": false,
     "outDir": "build/"
   },
-  "include": ["load_binding.js", "api.ts", "*_test.ts", "test_*.ts"]
+  "include": [
+    "src/load_binding.js",
+    "src/api.ts",
+    "src/*_test.ts",
+    "tools/test_*.ts"
+  ]
 }

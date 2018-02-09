@@ -2,8 +2,8 @@
 /// <reference path='./jasmine_types.d.ts' />
 
 import { inspect } from "util";
-import { test } from "./test";
-import { global } from "./util";
+import { global } from "../src/util";
+import { test } from "./tester";
 
 class Suite {
   constructor(readonly name: string) {}

@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { test } from "../tools/tester";
 import { toString } from "./format";
-import { test } from "./test";
 import { assert } from "./util";
 
 test(async function format_1DInt32() {

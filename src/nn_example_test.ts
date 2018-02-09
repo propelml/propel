@@ -12,9 +12,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { test } from "../tools/tester";
 import { listDevices } from "./api";
 import { Trainer } from "./nn_example";
-import { test } from "./test";
 
 test(async function testNNExample() {
   const useGPU = (listDevices().length > 1);
