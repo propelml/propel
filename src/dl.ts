@@ -27,7 +27,7 @@ import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./dl/math/ndarray";
 import { MatrixOrientation } from "./dl/math/types";
 import * as types from "./types";
-import { assert } from "./util";
+import { assert, getDType, makeTypedArray } from "./util";
 
 const deviceRegistry = new Map<string, NDArrayMath>();
 function lookupMath(device: string): NDArrayMath {
@@ -74,7 +74,7 @@ export class TensorDL implements types.BasicTensor {
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
                         dtype?: types.DType, device?: string): TensorDL {
     if (dtype == null) {
-      dtype = types.getDType(data);
+      dtype = getDType(data);
     }
     if (device == null) {
       device = "CPU:0";
@@ -305,7 +305,7 @@ export class OpsDL implements types.BackendOps {
     const a = x.ndarray;
     const dims_ = dims.getData();
     // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
-    const resultValues = types.makeTypedArray(a.size, x.dtype);
+    const resultValues = makeTypedArray(a.size, x.dtype);
     const values = a.getValues();
     const dtype = dtypeDL(x.dtype);
     const result = NDArray.make(a.shape, {values: resultValues},

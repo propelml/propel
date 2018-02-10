@@ -20,7 +20,8 @@
 import * as dl from "./dl";
 import * as tf from "./tf";
 import * as types from "./types";
-import { deepCloneArray, flatten, inferShape, IS_WEB } from "./util";
+import { deepCloneArray, flatten, inferShape, IS_WEB, isTypedArray,
+  makeTypedArray } from "./util";
 
 // These globals will be set by onLoad
 let tensorClass: any;
@@ -76,8 +77,8 @@ export function convertBasic(x: types.TensorLike,
 
   if (typeof x === "number") {
     // TODO On TF we should take advantage of createSmallHandle for scalars.
-    return create(types.makeTypedArray([x], dtype), [], dtype, device);
-  } else if (types.isTypedArray(x)) {
+    return create(makeTypedArray([x], dtype), [], dtype, device);
+  } else if (isTypedArray(x)) {
     return create(x, [x.length], dtype, device);
   } else if (Array.isArray(x)) {
     if (!(x instanceof Array)) {
@@ -87,7 +88,7 @@ export function convertBasic(x: types.TensorLike,
     }
     const shape = inferShape(x);
     const data = flatten(x) as number[];
-    return create(types.makeTypedArray(data, dtype), shape, dtype, device);
+    return create(makeTypedArray(data, dtype), shape, dtype, device);
   }
   throw new Error("Unreachable");
 }

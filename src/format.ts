@@ -14,7 +14,7 @@
  */
 // This module is just to implement tensor.toString.
 import * as types from "./types";
-
+import { getDType } from "./util";
 interface FormatOptions {
   precision: number;
   dtype: types.DType;
@@ -28,7 +28,7 @@ function split(s, precision): [string, string] {
 
 function preprocess(shape: types.Shape, data: types.TypedArray,
                     precision: number): FormatOptions {
-  const dtype = types.getDType(data);
+  const dtype = getDType(data);
   let maxBefore = 0;
   let maxAfter = 0;
   for (let i = 0; i < data.length; i++) {
