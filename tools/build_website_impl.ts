@@ -58,18 +58,22 @@ function scss(inFile, outFile) {
   fs.writeFileSync(outFile, result);
 }
 
-run.mkdir("build");
-run.mkdir("build/website");
-run.mkdir("build/website/docs");
-run.mkdir("build/website/notebook");
+process.on("unhandledRejection", e => { throw e; });
 
-run.symlink(run.root + "/website/", "build/website/static");
+(async() => {
+  run.mkdir("build");
+  run.mkdir("build/website");
+  run.mkdir("build/website/docs");
+  run.mkdir("build/website/notebook");
 
-scss("website/main.scss", join(websiteRoot, "bundle.css"));
+  run.symlink(run.root + "/website/", "build/website/static");
 
-writePages().then(() => {
-  run.parcel("website/website_main.ts", "build/website");
+  scss("website/main.scss", join(websiteRoot, "bundle.css"));
+
+  await writePages();
+  await run.parcel("website/website_main.ts", "build/website");
   console.log("Website built in", websiteRoot);
+
   // Firebase keeps network connections open, so we have force exit the process.
   process.exit(0);
-});
+})();

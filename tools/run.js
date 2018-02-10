@@ -81,13 +81,18 @@ function tsnode(args, env = {}) {
 
 const parcelCli = "./node_modules/parcel-bundler/bin/cli.js";
 
-function parcel(inFile, outDir, debug = null) {
-  let opts = "";
-  const debugInArgv = (process.argv.indexOf("debug") >= 0);
-  if (debug === true || (debug === null && debugInArgv)) {
-    opts = "--no-minify";
-  }
-  sh(`node ${parcelCli} build ${inFile} -d ${outDir} ${opts}`);
+function parcel(inFile, outDir, debug) {
+  debug = debug != null ? !!debug : process.argv.indexOf("debug") >= 1;
+  const Bundler = require("parcel-bundler");
+  const bundler = new Bundler(inFile, {
+    cache: true,
+    logLevel: process.env.CI ? 1 : null,
+    minify: !debug,
+    outDir,
+    production: !debug,
+    watch: false
+  });
+  return bundler.bundle(); // Returns Promise.
 }
 
 function version() {

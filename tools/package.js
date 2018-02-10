@@ -42,7 +42,7 @@ function checkNoTars(dir) {
   }
 }
 
-function npmPack(name, cb) {
+async function npmPack(name, cb) {
   const distDir = run.root + "/build/" + name;
   if (clean) {
     run.rmrf(distDir);
@@ -50,7 +50,7 @@ function npmPack(name, cb) {
   run.mkdir(distDir);
   fs.writeFileSync(distDir + "/README.md", "See http://propelml.org\n");
 
-  cb(distDir);
+  await cb(distDir);
   checkNoTars(distDir);
 
   process.chdir(distDir);
@@ -68,9 +68,9 @@ function npmPack(name, cb) {
   return newPkgFn;
 }
 
-function buildAndTest() {
-  const propelPkgFn = npmPack("propel", distDir => {
-    run.parcel("src/api.ts", distDir);
+async function buildAndTest() {
+  const propelPkgFn = await npmPack("propel", async distDir => {
+    await run.parcel("src/api.ts", distDir);
     const genFn = distDir + "/api.js";
     const mainFn = distDir + "/propel.js";
     fs.renameSync(genFn, mainFn);
@@ -89,7 +89,7 @@ function buildAndTest() {
     });
   });
 
-  const tfPkgFn = npmPack(config.tfPkg, distDir => {
+  const tfPkgFn = await npmPack(config.tfPkg, async distDir => {
     fs.copyFileSync("src/load_binding.js", distDir + "/load_binding.js");
     // Copy over the TF binding.
     fs.copyFileSync("build/Release/tensorflow-binding.node",
@@ -142,17 +142,21 @@ function buildAndTest() {
   return [propelPkgFn, tfPkgFn];
 }
 
-const skipBuild = (process.argv.indexOf("skip-build") >= 0);
-if (!skipBuild) {
-  buildAndTest();
-}
+process.on("unhandledRejection", e => { throw e; });
 
-// chdir for symlink.
-process.chdir(run.root + "/build");
+(async() => {
+  const skipBuild = (process.argv.indexOf("skip-build") >= 0);
+  if (!skipBuild) {
+    await buildAndTest();
+  }
 
-console.log("\n\nPackage tested and ready.");
-for (const name of ["propel", config.tfPkg]) {
-  let vname = `${name}-${v}`;
-  run.symlink(name, vname);
-  // console.log("./tools/ar.js %s", "build/" + vname);
-}
+  // chdir for symlink.
+  process.chdir(run.root + "/build");
+
+  console.log("\n\nPackage tested and ready.");
+  for (const name of ["propel", config.tfPkg]) {
+    let vname = `${name}-${v}`;
+    run.symlink(name, vname);
+    // console.log("./tools/ar.js %s", "build/" + vname);
+  }
+})();
