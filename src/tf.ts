@@ -15,7 +15,7 @@
 // TensorFlow backend.
 import { Handle } from "./binding";
 import * as types from "./types";
-import { assert, assertEqual } from "./util";
+import { assert, assertEqual, getDType } from "./util";
 
 export let binding;
 export let ctx;
@@ -103,7 +103,7 @@ export class TensorTF implements types.BasicTensor {
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
                         dtype?: types.DType, device?: string): TensorTF {
     if (dtype == null) {
-      dtype = types.getDType(data);
+      dtype = getDType(data);
     }
     const dtypeTF = dtypePropel2TF(dtype);
     let h = new binding.Handle(data, shape, dtypeTF);

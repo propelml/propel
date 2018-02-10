@@ -102,38 +102,6 @@ export interface TapeEntry {
   savedForBackward: any[];
 }
 
-export function isTypedArray(x: any): x is TypedArray {
-  return (x instanceof Float32Array || x instanceof Uint8Array ||
-          x instanceof Int32Array);
-}
-
-export function getDType(data: TypedArray): DType {
-  if (data instanceof Int32Array) {
-    return "int32";
-  } else if (data instanceof Float32Array) {
-    return "float32";
-  } else if (data instanceof Uint8Array) {
-    return "uint8";
-  } else {
-    throw new Error("Unsupported TypedArray flavor");
-  }
-}
-
-export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
-  switch (dtype) {
-    case "bool":
-      return new Uint8Array(data);
-    case "float32":
-      return new Float32Array(data);
-    case "int32":
-      return new Int32Array(data);
-    case "uint8":
-      return new Uint8Array(data);
-    default:
-      throw new Error("Not implemented");
-  }
-}
-
 /** TensorOpts are used to build Tensors in functions like T() and zeros().
  * Note that Tensors themselves implement the TensorOpts interface, so existing
  * tensors can be used to construct similiarly typed and located tensors.
