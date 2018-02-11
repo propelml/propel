@@ -211,14 +211,15 @@ export class Cell extends Component<CellProps, CellState> {
       h("button", {
         "class": "run-button",
         "onClick": this.run.bind(this),
-      }, "Run")
+      }, "Run ►")
     ];
 
+    let deleteButton = null;
     if (this.props.onDelete) {
-      buttons.unshift(h("button", {
+      deleteButton = h("button", {
           "class": "delete-button",
           "onClick": this.clickedDelete.bind(this),
-      }, "Delete"));
+      }, "");
     }
 
     if (this.props.onInsertCell) {
@@ -232,6 +233,7 @@ export class Cell extends Component<CellProps, CellState> {
         "class": "notebook-cell",
         "id": `cell${this.id}`
       },
+      h("div", { "class": "delete-row" }, deleteButton),
       h("div", {
         "class": "input",
         "ref": (ref => { this.input = ref; }),

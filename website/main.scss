@@ -1,7 +1,7 @@
 @import './normalize.scss';
 @import './codemirror.scss';
-@import './syntax_dark.scss';
-// @import './syntax_light.scss';
+//@import './syntax_dark.scss';
+@import './syntax_light.scss';
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
@@ -400,6 +400,26 @@ header h1 {
   color: #fff;
 }
 
+.delete-row {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-bottom: 4px;
+  z-index: 100;
+  button {
+    border-radius: 100px;
+    border: 0px;
+    padding: 12px;
+    color: $base6;
+    background-color: transparent;
+    background-image: url(/static/img/deleteButtonOutline.svg);
+    height: auto;
+    line-height: 8px;
+    &:hover {
+      background-image: url(/static/img/deleteButtonFill.svg);
+    }
+  }
+}
+
 .notebook-cell {
   margin: 24px 0;
 }
@@ -413,9 +433,8 @@ header h1 {
 }
 
 .CodeMirror,
-.notebook-cell .output,
 .notebook-cell .input > pre {
-  border: 0;
+  border: 1px solid #eee;
   margin: 0;
   padding: 10px;
   white-space: pre-wrap;
@@ -429,8 +448,10 @@ header h1 {
 
 .CodeMirror-focused {
   /* Color matches D3 lines. */
-  border-left-color: $base03;
+  border-left-color: $base0;
   transition: border-left-color 0s;
+  background-color: rgba(88, 157, 239, 0.03);
+  border-radius: 4px 4px 0 0;
 }
 
 .CodeMirror,
@@ -452,24 +473,43 @@ svg {
 .buttons {
   text-align: right;
   border: 0;
-  height: 0;
+  height: 32px;
   transition: height 0.2s ease-in-out;
   transition-delay: 0.1s;
-  overflow: hidden;
+  background-color: #f4f4f5;
+  opacity: 0.5;
 }
 
 // When either the cell is in focus, or the button is in focus show the
 // buttons. Note the transition above.
 .buttons:focus,
-.input.focus + .buttons {
-  height: 50px;
+.input.focus + .buttons, {
+  opacity: 1;
 }
 
 .buttons button {
-  background: #fff;
   z-index: 1;
-  margin: 5px;
+  font-weight: 500;
+  height: 32px;
+  border: 0px;
+  padding: 0 8px;
+  margin: auto 0px;
+  border-radius: 0px;
+  letter-spacing: .15em;
+  line-height: 32px;
+  color: #9B9B9B;
+  background: #f4f4f5;
+    &:hover {
+      color: $linkColor;
+    }
 }
+
+buttons button.delete-button {
+    color: inherit;
+    &:hover {
+      color: $base6;
+    }
+ }
 
 .clone {
   background: $githubGreen;
