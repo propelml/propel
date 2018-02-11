@@ -9,9 +9,9 @@ testBrowser(function notebook_NotebookRoot() {
   document.body.innerHTML = "";
   const el = h(nb.NotebookRoot, { });
   render(el, document.body);
+  console.log("mdb.counts", mdb.counts);
   assert(objectsEqual(mdb.counts, {
     queryLatest: 1,
-    subscribeAuthChange: 1,
   }));
   const c = document.body.children[0];
   assert(c.className === "notebook");

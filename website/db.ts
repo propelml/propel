@@ -24,6 +24,7 @@ export interface Database {
   getDoc(nbId): Promise<NotebookDoc>;
   updateDoc(nbId: string, doc: NotebookDoc): Promise<void>;
   clone(existingDoc: NotebookDoc): Promise<string>;
+  create(): Promise<string>;
   queryLatest(): Promise<NbInfo[]>;
   signIn(): void;
   signOut(): void;
@@ -121,6 +122,26 @@ class DatabaseFB implements Database {
     return docRef.id;
   }
 
+  async create(): Promise<string> {
+    lazyInit();
+    const u = auth.currentUser;
+    if (!u) throw Error("Cannot create. User must be logged in.");
+
+    const newDoc = {
+      cells: [ "// New Notebook. Insert code here." ],
+      created: firebase.firestore.FieldValue.serverTimestamp(),
+      owner: {
+        displayName: u.displayName,
+        photoURL: u.photoURL,
+        uid: u.uid,
+      },
+      updated: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+    console.log({newDoc});
+    const docRef = await nbCollection.add(newDoc);
+    return docRef.id;
+  }
+
   async queryLatest(): Promise<NbInfo[]> {
     lazyInit();
     const query = nbCollection.orderBy("updated").limit(100);
@@ -178,6 +199,11 @@ class DatabaseMock implements Database {
   async clone(existingDoc: NotebookDoc): Promise<string> {
     this.inc("clone");
     return "clonedNbId";
+  }
+
+  async create(): Promise<string> {
+    this.inc("create");
+    return "createdNbId";
   }
 
   async queryLatest(): Promise<NbInfo[]> {

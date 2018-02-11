@@ -1,0 +1,23 @@
+<svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title> deleteButtonOutline</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(-3313 0)">
+<g id="NOTEBOOK / CELL / deleteButtonOutline">
+<g id="NOTEBOOK / CELL / deleteButtonOutline">
+<g id="Rectangle 2">
+<use xlink:href="#path0_fill" transform="matrix(0.707107 0.707107 -0.707107 0.707107 3328.09 7.88592)" fill="#D8D8D8"/>
+</g>
+<g id="Rectangle 2 Copy">
+<use xlink:href="#path0_fill" transform="matrix(-0.707107 0.707107 -0.707107 -0.707107 3329.11 15.0856)" fill="#D8D8D8"/>
+</g>
+<g id="Oval 4">
+<use xlink:href="#path1_stroke" transform="translate(3317 4)" fill="#D8D8D8"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 0 0L 1.45455 0L 1.45455 10.1818L 0 10.1818L 0 0Z"/>
+<path id="path1_stroke" d="M 8 16.5C 12.6944 16.5 16.5 12.6944 16.5 8L 15.5 8C 15.5 12.1421 12.1421 15.5 8 15.5L 8 16.5ZM 16.5 8C 16.5 3.30558 12.6944 -0.5 8 -0.5L 8 0.5C 12.1421 0.5 15.5 3.85786 15.5 8L 16.5 8ZM 8 -0.5C 3.30558 -0.5 -0.5 3.30558 -0.5 8L 0.5 8C 0.5 3.85786 3.85786 0.5 8 0.5L 8 -0.5ZM -0.5 8C -0.5 12.6944 3.30558 16.5 8 16.5L 8 15.5C 3.85786 15.5 0.5 12.1421 0.5 8L -0.5 8Z"/>
+</defs>
+</svg>

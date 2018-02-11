@@ -6,6 +6,22 @@ A Machine Learning Framework for JavaScript.
 |:---------------:|:-----------:|
 | [![][Travis CI badge]][Travis CI link] | [![][AppVeyor badge]][AppVeyor link] |
 
+## How to run TF examples
+
+```
+$ ./tools/build_binding.js
+$ ts-node src/nn_example_main.ts
+```
+
+If you're on Linux and would like to build a CUDA version of
+Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
+
+```
+$ PROPEL_BUILD_GPU=1 ./tools/build_binding.js
+$ ts-node src/nn_example_main.ts
+```
+
+
 ## Packages
 
 npm packages are built with `./tools/package.js`. Here are links
@@ -16,9 +32,6 @@ to the various packages:
     https://www.npmjs.com/package/propel_linux_gpu
     https://www.npmjs.com/package/propel_mac
     https://www.npmjs.com/package/propel_windows
-
-If you're on Linux and would like to build a CUDA version of
-Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
 
 
 ## Contributing

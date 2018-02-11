@@ -1,26 +1,27 @@
+/*!
+   Copyright 2018 Propel http://propel.site/.  All rights reserved.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 // tslint:disable:variable-name
 // This is the propelml.org website. It is used both server-side and
 // client-side for generating HTML.
 import { readFileSync } from "fs";
-import { h, render } from "preact";
+import { Component, h, render } from "preact";
+import { div, GlobalHeader, p, UserMenu } from "./common";
+import * as db from "./db";
+import { Docs } from "./docs";
 import * as nb from "./notebook";
 const { version } = require("../package.json");
-
-export interface DocEntry {
-  kind: "class" | "method" | "property";
-  name: string;
-  typestr?: string;
-  docstr?: string;
-  args?: ArgEntry[];
-  retType?: string;
-  sourceUrl?: string;
-}
-
-export interface ArgEntry {
-  name: string;
-  typestr?: string;
-  docstr?: string;
-}
 
 export interface Page {
   title: string;
@@ -33,20 +34,12 @@ export function renderPage(p: Page): void {
   render(h(p.root, null), document.body, document.body.children[0]);
 }
 
-function p(...children) {
-  return h("p", null, ...children);
-}
-
 function b(...children) {
   return h("b", null, ...children);
 }
 
 function i(...children) {
   return h("i", null, ...children);
-}
-
-export function div(className, ...children) {
-  return h("div", { "class": className }, ...children);
 }
 
 function headerButton(href, text) {
@@ -61,128 +54,11 @@ function fixed(code: string): JSX.Element {
   return h(nb.FixedCell, { code });
 }
 
-function toTagName(s: string): string {
-  return s.replace(/[.$]/g, "_");
-}
-
-function isIndented(s: string): boolean {
-  return s.match(/^  +[^\s]/) != null;
-}
-
-function unindent(s: string): string {
-  return s.replace(/^  /, "");
-}
-
-// Given some bit of documentation text, this function can detect indented
-// portions denoting examples and mark them up with <script type="notebook">.
-export function markupDocStr(docstr: string): JSX.Element {
-  const input = docstr.split("\n");
-  let buf = [];
-  const elements = [];
-
-  let state: "normal" | "code" = "normal";
-
-  function evalState(line) {
-    switch (state) {
-      case "normal":
-        if (line == null || isIndented(line)) {
-          state = "code";
-          const src = buf.join("\n");
-          elements.push(p(src));
-          buf = [];
-        }
-        break;
-      case "code":
-        if (line == null || !isIndented(line)) {
-          state = "normal";
-          const src = buf.map(unindent).join("\n");
-          elements.push(nb.notebook(src));
-          buf = [];
-        }
-        break;
-    }
-  }
-
-  for (let i = 0; i < input.length; ++i) {
-    const line = input[i];
-    evalState(line);
-    buf.push(line);
-  }
-  evalState(null);
-
-  return div("docstr", elements);
-}
-
-const DocIndex = ({docs}) => {
-  const list = docs.map(entry => {
-    const tag = toTagName(entry.name);
-    const className = "name " + entry.kind;
-    return h("li", null, h("a", { href: "#" + tag, "class": className },
-      entry.name));
-  });
-  return h("ol", { "class": "docindex" }, list);
-};
-
-const DocEntries = ({docs}) => {
-  const entries = docs.map(entry => {
-    const tag = toTagName(entry.name);
-    const out = [];
-
-    out.push(h("h2", { id: tag, "class": "name" }, entry.name,
-      entry.sourceUrl
-        ? h("a", { "class": "source-link", "href": entry.sourceUrl }, " source")
-        : null));
-    if (entry.typestr) {
-      out.push(div("typestr", entry.typestr));
-    }
-
-    if (entry.docstr) {
-      out.push(markupDocStr(entry.docstr));
-    }
-
-    return div("doc-entry", ...out);
-  });
-  return div("doc-entries", ...entries);
-};
-
-function startsWithUpperCase(s: string): boolean {
-  return s[0].toLowerCase() !== s[0];
-}
-
-const Docs = (props) => {
-  let docs: DocEntry[] = require("./docs.json");
-  docs = docs.sort((a, b) => {
-    // Special case "T" to be at the top of the docs.
-    if (a.name === "T") return -1;
-    if (b.name === "T") return 1;
-    if (!startsWithUpperCase(a.name) && startsWithUpperCase(b.name)) {
-      return -1;
-    }
-    if (startsWithUpperCase(a.name) && !startsWithUpperCase(b.name)) {
-      return 1;
-    }
-    if (a.name < b.name) return -1;
-    if (a.name > b.name) return 1;
-    return 0;
-  });
-
-  return div("docs",
-    div("panel",
-      h("h1", null, "Propel"),
-      h(DocIndex, { docs }),
-    ),
-    h(DocEntries, { docs }),
-  );
-};
-
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/references.html", "utf8");
   return div("references",
-    h(nb.GlobalHeader, null),
-    h("header", null,
-      h("h1", null, "References"),
-      p("This work is inspired by and built upon great technologies."),
-    ),
+    h(GlobalHeader, { subtitle: "References" }),
+    p("This work is inspired by and built upon great technologies."),
     h("div", {
       dangerouslySetInnerHTML: { __html: refhtml },
     }),
@@ -191,62 +67,97 @@ export const References = (props) => {
 
 export const PropelIndex = (props) => {
   return div("index",
-    h(Splash, null),
-    h(Explainer, null),
+    h(Splash, props),
+    h(Intro, null),
+    h(UseIt, null),
+    h(Perks, null),
     h(ReferencesFooter, null),
   );
 };
 
-const ReferencesFooter = (props) => {
-  return h("section", { "class": "footer" }, link("references.html",
-    "References"));
-};
+const ReferencesFooter = () =>
+  div("footer", link("references.html", "References"));
 
-const Splash = (props) => {
-  return h("section", { "class": "splash" },
+const Splash = (props) =>
+  div("splash",
+    // TODO "header" should be inside GlobalHeader.
     h("header", null,
-      h("h1", null, "Propel"),
-      h("p", null, "Differential Programming in JavaScript")
-    ),
-    p(
-      headerButton("/docs", "API Ref"),
-      // Hide notebook link until more developed.
-      // headerButton("/notebook", "Notebook"),
-      headerButton("http://github.com/propelml/propel", "Github")
-    ),
-    h("p", { "class": "snippet-title" }, "Use it in Node:"),
-    fixed("npm install propel\nimport { grad } from \"propel\";"),
-    h("p", { "class": "snippet-title" }, "Use it in a browser:"),
-    fixed(`<script src="https://unpkg.com/propel@${version}"></script>`),
+      h(GlobalHeader, null,
+        h("a", { href: "/notebook" }, "Notebook"),
+        h(UserMenu, props)
+      ),
+    )
   );
-};
 
-const Explainer = (props) => {
-  return div("explainer-container",
-    div("explainer",
-      div("explainer-text",
-        p(b("Propel"), ` provides a GPU-backed numpy-like infrastructure
-          for scientific computing in JavaScript.  JavaScript is a fast,
-          dynamic language which, we think, could act as an ideal workflow
-          for scientific programmers of all sorts.`),
-        p(`Propel runs both in the browser and natively from Node. In
+const Intro = () =>
+  div("intro flex-row",
+    div("flex-cell",
+      h("h2", {}, "Machine learning for Javascript"),
+      p(
+        b("Propel"), ` provides a GPU-backed numpy-like infrastructure
+        for scientific computing in JavaScript.  JavaScript is a fast,
+        dynamic language which, we think, could act as an ideal workflow
+        for scientific programmers of all sorts.`),
+      p(
+        headerButton("/docs", "API Ref"),
+        // Hide notebook link until more developed.
+        // headerButton("/notebook", "Notebook"),
+        headerButton("http://github.com/propelml/propel", "Github")
+      )
+    ),
+    div("intro-notebook flex-cell", nb.notebook(tanhGrads))
+  );
+
+const UseIt = () =>
+  div("use-it",
+    div("use-it-inner",
+      h("p", { "class": "snippet-title" }, "Use it in Node:"),
+      fixed("npm install propel\nimport { grad } from \"propel\";"),
+      h("p", { "class": "snippet-title" }, "Use it in a browser:"),
+      fixed(`<script src="https://unpkg.com/propel@${version}"></script>`)
+    )
+  );
+
+const Perks = () =>
+  div("perks",
+    div("flex-row",
+      div("flex-cell",
+        h("h2", { "class": "world" }, "Run anywhere."),
+        p(
+          `Propel runs both in the browser and natively from Node. In
           both environments Propel is able to use GPU hardware for
           computations.  In the browser it utilizes WebGL through `,
           link("https://deeplearnjs.org/", "deeplearn.js"),
           " and on Node it uses TensorFlow's ",
           link("https://www.tensorflow.org/install/install_c", "C API"),
-          "."),
-        p("Propel has an imperative ",
+          "."
+        ),
+      ),
+      div("flex-cell",
+        h("h2", { "class": "upward" }, "Phd optional."),
+        p(
+          "Propel has an imperative ",
           link("https://github.com/HIPS/autograd", "autograd"),
-          `-style API, unlike TensorFlow.  Computation graphs are traced as
+          `-style API.  Computation graphs are traced as
           you run them -- a general purpose `,
           i("gradient function"),
-          ` provides an elegant interface to backpropagation. `),
-        p(`Browsers are great for demos, but they are not a great numerics
+          ` provides an elegant interface to backpropagation.`
+        ),
+      ),
+    ),
+    div("flex-row",
+      div("flex-cell",
+        h("h2", { "class": "chip" }, "Did somebody say GPUs?"),
+        p(
+          `Browsers are great for demos, but they are not a great numerics
           platform. WebGL is a far cry from CUDA. By running Propel outside
           of the browser, users will be able to target multiple GPUs and
           make TCP connections. The models developed server-side will be
-          much easier to deploy as HTML demos.`),
+          much easier to deploy as HTML demos.`
+        ),
+      ),
+      div("flex-cell",
+        h("h2", { "class": "lightning" }, "Let's do this."),
         p(`The basic propel npm package is javascript only,
           without TensorFlow bindings. To upgrade your speed dramatically
           install`),
@@ -255,12 +166,10 @@ const Explainer = (props) => {
           "npm install propel_windows",
           "npm install propel_linux",
           "npm install propel_linux_gpu",
-        ].join("\n")),
+        ].join("\n"))
       ),
-      div("explainer-notebook", nb.notebook(tanhGrads))
     )
   );
-};
 
 const tanhGrads = `
 import { grad, linspace, plot } from "propel";
@@ -307,6 +216,39 @@ export function getHTML(title, markup) {
   </script>
   </body>
 </html>`;
+}
+
+export interface RouterState {
+  userInfo?: db.UserInfo;
+  loadingAuth: boolean;
+}
+
+// The root of all pages of the propel website.
+// Handles auth.
+export class Router extends Component<any, RouterState> {
+  constructor(props)  {
+    super(props);
+    this.state = {
+      userInfo: null,
+      loadingAuth: true,
+    };
+  }
+
+  unsubscribe: db.UnsubscribeCb;
+  componentWillMount() {
+    this.unsubscribe = db.active.subscribeAuthChange((userInfo) => {
+      this.setState({ loadingAuth: false, userInfo });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const page = route(document.location.pathname);
+    return h(page.root, { userInfo: this.state.userInfo });
+  }
 }
 
 export function route(pathname: string): Page {
