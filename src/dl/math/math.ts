@@ -24,7 +24,7 @@ import * as broadcast_util from "./broadcast_util";
 import * as concat_util from "./concat_util";
 import * as conv_util from "./conv_util";
 // tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar } from "./ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, NDArrayBackendData, Rank, RankMap, Scalar } from "./ndarray";
 import * as slice_util from "./slice_util";
 import { MatrixOrientation, SumTypes } from "./types";
 
@@ -39,7 +39,6 @@ export interface NDArrayManager {
 
 export class NDArrayMath implements NDArrayManager {
   protected backendEngine: BackendEngine;
-  private registeredArrays = new WeakMap<DataId, number>();
   private registeredArrayCount = 0;
   private backend: MathBackend;
   private customBackend = false;
@@ -52,33 +51,37 @@ export class NDArrayMath implements NDArrayManager {
     return this.registeredArrayCount;
   }
 
+  create(shape: number[], dtype: DataType): NDArrayBackendData {
+    const data = this.backend.create(shape, dtype);
+    data.refCount = 0;
+    return data;
+  }
+
   register(a: NDArray): void {
-    const refCount = this.registeredArrays.has(a.dataId) ?
-        this.registeredArrays.get(a.dataId) :
-        0;
-    if (refCount === 0) {
-      this.backend.register(a.dataId, a.shape, a.dtype);
+    const data = a.backendData;
+    if (++data.refCount === 1) {
       this.registeredArrayCount++;
     }
-    this.registeredArrays.set(a.dataId, refCount + 1);
     this.backendEngine.track(a);
   }
 
   writePixels(
-      dataId: DataId,
+      data: NDArrayBackendData,
       pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
               HTMLVideoElement,
       numChannels: number): void {
-    this.backend.writePixels(dataId, pixels, numChannels);
+    this.backend.writePixels(data, pixels, numChannels);
   }
-  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void {
-    this.backend.write(dataId, values);
+  write<D extends DataType>(
+      data: NDArrayBackendData, values: DataTypeMap[D]): void {
+    this.backend.write(data, values);
   }
-  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D] {
-    return this.backend.readSync(dataId);
+  readSync<D extends DataType>(data: NDArrayBackendData): DataTypeMap[D] {
+    return this.backend.readSync(data);
   }
-  read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]> {
-    return this.backend.read(dataId);
+  read<D extends DataType>(
+      data: NDArrayBackendData): Promise<DataTypeMap[D]> {
+    return this.backend.read(data);
   }
 
   /**
@@ -264,7 +267,7 @@ export class NDArrayMath implements NDArrayManager {
         x.size === util.sizeFromShape(newShape),
         "new shape and old shape must have the same number of elements.");
 
-    return NDArray.make(newShape, {dataId: x.dataId}, x.dtype) as T;
+    return NDArray.make(newShape, {backendData: x.backendData}, x.dtype) as T;
   }
 
   /**
@@ -275,7 +278,7 @@ export class NDArrayMath implements NDArrayManager {
       x: NDArray<DataType, R>, newDType: D): RankMap<D>[R] {
     if (!util.hasEncodingLoss(x.dtype, newDType)) {
       // We don't change the underlying data, since we cast to higher precision.
-      return NDArray.make(x.shape, {dataId: x.dataId}, newDType);
+      return NDArray.make(x.shape, {backendData: x.backendData}, newDType);
     }
     if (newDType === "int32") {
       return this.backend.int(x) as NDArray as RankMap<D>[R];
@@ -2351,17 +2354,10 @@ export class NDArrayMath implements NDArrayManager {
     throw new Error(`Error in norm: invalid axis: ${axis}`);
   }
 
-  disposeData(dataId: DataId): void {
-    if (!this.registeredArrays.has(dataId)) {
-      return;
-    }
-    const refCount = this.registeredArrays.get(dataId);
-    if (refCount <= 1) {
-      this.registeredArrays.delete(dataId);
-      this.backend.disposeData(dataId);
+  disposeData(data: NDArrayBackendData): void {
+    if (--data.refCount === 0) {
+      this.backend.disposeData(data);
       this.registeredArrayCount--;
-    } else {
-      this.registeredArrays.set(dataId, refCount - 1);
     }
     // TODO(nsthorat): Construct an error and save the stack trace for
     // debugging when in debug mode. Creating a stack trace is too expensive
