@@ -2,8 +2,9 @@
 
 A Machine Learning Framework for JavaScript.
 
-[![Build Status](https://travis-ci.com/propelml/propel.svg?token=eWz4oGVxypBGsz78gdKp&branch=master)](https://travis-ci.com/propelml/propel)
-
+| **Linux & Mac** | **Windows** |
+|:---------------:|:-----------:|
+| [![][Travis CI badge]][Travis CI link] | [![][AppVeyor badge]][AppVeyor link] |
 
 ## Packages
 
@@ -77,7 +78,8 @@ ops. Here is a rough outline of how to add an op
      and the test can be run by doing `ts-node api_test.ts MyTest`.
      The DL test can be run by setting an environmental variable:
      `PROPEL=dl ts-node api_test.ts MyTest`
-     
-     
 
-
+[AppVeyor badge]:  https://ci.appveyor.com/api/projects/status/github/propelml/propel?branch=master&svg=true
+[AppVeyor link]:   https://ci.appveyor.com/project/piscisaureus/propel/branch/master
+[Travis CI badge]: https://travis-ci.org/propelml/propel.svg?branch=master
+[Travis CI link]:  https://travis-ci.org/propelml/propel/builds
