@@ -1,0 +1,14 @@
+<svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title> deleteButtonFill</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(-3280 0)">
+<g id="NOTEBOOK / CELL / deleteButtonFill">
+<g id="Combined Shape">
+<use xlink:href="#path0_fill" transform="translate(3284 4)" fill="#DC322F"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 8 16C 12.4182 16 16 12.4183 16 8C 16 3.58172 12.4182 0 8 0C 3.58179 0 0 3.58172 0 8C 0 12.4183 3.58179 16 8 16ZM 11.0854 3.88592L 12.114 4.91444L 9.02832 8L 12.114 11.0856L 11.0854 12.1141L 7.99976 9.02854L 4.91431 12.1141L 3.88574 11.0856L 6.97144 8L 3.88574 4.91444L 4.91431 3.88592L 7.99976 6.97146L 11.0854 3.88592Z"/>
+</defs>
+</svg>

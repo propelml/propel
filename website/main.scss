@@ -1,12 +1,22 @@
 @import './normalize.scss';
 @import './codemirror.scss';
-@import './syntax_dark.scss';
-// @import './syntax_light.scss';
+//@import './theme_dark.scss';
+@import './theme_light.scss';
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
 $githubGreen: #39aa56;
-$small: 5px;
+$size0: 8px;
+$size1: 16px;
+$size2: 32px;
+
+$borderColor: #eee;
+$accentColor: #589def;  // blue
+$shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
+
+$cellButtonSize: 24px;
+$cellButtonMargin: 2px;
+$nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
 
 /* NOTE html is set to 62.5% so that all the REM measurements
 throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
@@ -18,44 +28,43 @@ body {
   background-color: $bodyBackground;
   color: $textColor;
   font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'avenir next',
-    avenir,
     helvetica,
     'helvetica neue',
-    ubuntu,
-    roboto,
-    noto,
-    'segoe ui',
     arial,
     sans-serif;
   font-size: 1.5em;
   line-height: 1.6;
 }
 
-body p {
-  font-size: 16px;
-  line-height: 32px;
-  color: $textColor;
-  margin: 16px 12px;
+/* Centers and gives max-width to index, references, notebook pages */
+.splash,
+.use-it-inner,
+.flex-row,
+.references,
+.notebook {
+  max-width: 960px;
+  margin: 0 auto;
 }
 
-h1 {
-  font-size: 4rem;
+p {
+  font-size: $size1;
+  line-height: $size2;
+  color: $textColor;
+  margin: $size1;
+}
+
+h1,
+h2 {
   letter-spacing: -0.1rem;
   line-height: 1.2;
 }
 
-@media (min-width: 550px) {
-  h1 {
-    font-size: 5rem;
-  }
+h1 {
+  font-size: 4rem;
 }
 
-/* Used in docs */
 h2 {
-  line-height: 1.25;
+  font-size: 2.5rem;
 }
 
 a {
@@ -67,39 +76,24 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Don't allow SVGs to get wider than the screen. */
+svg {
+  max-width: 100%;
+}
+
 .button,
 button,
 input[type=button] {
   border: 1px solid #1163c2;
   border-radius: 4px;
   color: #1163c2;
-  height: 38px;
-  font-size: 13px;
-  line-height: 38px;
+  height: $size2;
+  font-size: $size1;
+  line-height: $size2;
   letter-spacing: 0.1rem;
   padding: 0 30px;
   text-align: center;
   text-transform: uppercase;
-}
-
-li {
-  margin-bottom: 1rem;
-}
-
-.sans-serif {
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'avenir next',
-    avenir,
-    helvetica,
-    'helvetica neue',
-    ubuntu,
-    roboto,
-    noto,
-    'segoe ui',
-    arial,
-    sans-serif;
 }
 
 .name,
@@ -113,70 +107,201 @@ code {
   font-family: 'Roboto Mono', monospace;
 }
 
-pre,
-.output {
-  white-space: pre-wrap;
-  word-break: keep-all;
+header {
+  background-color: $bodyBackground;
+  border-bottom: 1px solid $textColor;
+  color: $textColor;
+  padding: $size0 0;
+
+  p {
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 100;
+    margin-top: -2px;
+    margin-bottom: 0;
+  }
+}
+
+.use-it {
+  background: #fafafa;
+
+  .use-it-inner {
+    padding: $size2 0;
+  }
+
+  p {
+    margin: $size1 0 0 0;
+  }
+
+  pre {
+    background: $bodyBackground;
+  }
+}
+
+.notebook-cell {
+  transition: border-left-color 0.2s;
+  border-left: 1px solid $borderColor;
+
+  button {
+    z-index: 1000;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    width: $cellButtonSize;
+    height: $cellButtonSize;
+    margin: $cellButtonMargin;
+    opacity: 0; // Only display buttons when focused.
+  }
+
+  &.notebook-cell-focus {
+    border-left: 1px solid $accentColor;
+
+    button {
+      opacity: 1;
+    }
+  }
+
+  /* Margins for CodeMirror, pre and output should be same. */
+  .CodeMirror,
+  .input > pre,
+  .output {
+    margin: 0;
+    padding: $size0;
+    white-space: pre-wrap;
+    word-break: keep-all;
+
+    /* Spans the whole grid */
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+  }
+
+  // Both input and output have a grid for buttons in the top and bottom right
+  // hand corners.
+  .input,
+  .output-container {
+    display: grid;
+    grid-template-columns: 1fr $nbGridSquare;
+    grid-template-rows:
+      fit-content($nbGridSquare)
+      1fr
+      fit-content($nbGridSquare);
+  }
+
+  .input {
+    border: 1px solid $borderColor;
+    border-left: 0; // because the border is on notebook-cell.
+
+    button.delete-button {
+      /* Top right corner */
+      grid-column: 2 / -1;
+      grid-row: 1 / 2;
+      background-image: url(/static/img/deleteButtonOutline.svg);
+
+      &:hover {
+        background-image: url(/static/img/deleteButtonFill.svg);
+      }
+    }
+
+    button.run-button {
+      /* Bottom right corner */
+      grid-column: 2 / -1;
+      grid-row: 3 / -1;
+      background-image: url(/static/img/runButton.svg);
+    }
+
+    /* Auto-resizing cells. */
+    .CodeMirror {
+      height: auto;
+    }
+  }
+
+  .output-container {
+    .insert-button {
+      /* Bottom right corner */
+      grid-column: 2 / -1;
+      grid-row: 3 / -1;
+      background-image: url(/static/img/insertButton.svg);
+    }
+  }
+
+  .notebook-cell-updating svg,
+  .notebook-cell-updating .output {
+    background-color: #cbcbd0;
+  }
+}
+
+.flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+
+  .flex-cell {
+    flex-basis: 100%;
+    flex-grow: 1;
+    padding: $size0;
+  }
+
+  .flex-cell.intro-notebook {
+    padding: 0;
+
+    .notebook-cell {
+      border-left: 0;
+      border-right: 0;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
 }
 
 .splash {
-  padding-bottom: 32px;
+  padding-bottom: $size2;
   background-color: $bodyBackground;
 }
 
-.explainer-container {
-  background-color: #f0f0f7;
-  border-top: 1px solid #cbcbd0;
-  border-bottom: 1px solid #cbcbd0;
+.intro h2 {
+  margin-top: $size0;
 }
 
-.explainer {
-  padding: 4em 0;
+.perks {
+  h2 {
+    min-height: 32px;
+    padding-left: 40px;
+    background-position: center left;
+    background-repeat: no-repeat;
+
+    &.world {
+      background-image: url("/static/img/world.svg");
+    }
+
+    &.upward {
+      background-image: url("/static/img/upward.svg");
+    }
+
+    &.chip {
+      background-image: url("/static/img/chip.svg");
+    }
+
+    &.lightning {
+      background-image: url("/static/img/lightning.svg");
+    }
+  }
 }
 
 .footer {
   width: 100%;
-  padding: 48px 0;
+  margin-top: $size2;
+  padding: $size1 0;
+  background-color: #589def;
   text-align: center;
-  background-color: #fff;
-}
 
-/* Centers and gives max-width to index, references, notebook pages */
-.splash,
-.explainer,
-.references,
-.notebook {
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-/* Column layout for screens wider than 550px, below that they stack. */
-@media (min-width: 550px) {
-  .explainer {
-    display: flex;
+  a {
+    color: $bodyBackground;
+    font-weight: bold;
+    text-transform: uppercase;
   }
-
-  .explainer-text,
-  .explainer-notebook {
-    flex-basis: 50%;
-  }
-
-  /* Right column has a left-margin only for min-width: 550px.
-  At 550 the columns stack, so that margin then defaults to 0. */
-  .explainer-notebook {
-    margin-left: 4%;
-  }
-}
-
-/* Don't allow SVGs to get wider than the screen. */
-svg {
-  max-width: 100%;
-}
-
-h1,
-.doxindex {
-  margin: 0;
-  font-weight: 500;
 }
 
 .doc-entries {
@@ -185,31 +310,69 @@ h1,
 }
 
 .doc-entry {
-  padding: 16px 0 16px 0;
+  padding: 0;
   height: auto;
   padding-left: 0;
   border-top: 1px solid $bodyBackground;
   border-bottom: 1px solid $bodyBackground;
-  margin-bottom: 16px;
-  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
+  margin-bottom: $size1;
+  margin-top: $size1;
+  box-shadow: $shadow;
   background-color: #fff;
+  max-width: 60rem;
+
+  .source-link {
+    float: right;
+    font-size: 10px;
+    color: #666;
+  }
+
+  h2 {
+    font-size: 20px;
+    color: $linkColor;
+    font-weight: 300;
+  }
+
+  h2,
+  .source-link,
+  .typestr {
+    margin: $size0;
+  }
+
+  & .arg-global-header-title {
+    font-weight: bold;
+  }
+
+  ol {
+    margin: 0 $size1;
+  }
+
+  &:target {
+    background-color: #fafaff;
+    border-top: 1px solid $borderColor;
+    border-bottom: 1px solid $borderColor;
+    border-left: 2px solid $linkColor;
+    box-shadow: $shadow;
+  }
 }
 
-.doc-entry:target {
-  background-color: #fafaff;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  border-left: 2px solid $linkColor;
-  -webkit-box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
-  -moz-box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
-  box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
+.panel {
+  background-color: $bodyBackground;
+
+  ol.docindex {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    margin: 0 4px;
+  }
 }
 
-.snippet-title {
+.snippet-global-header-title {
   font-weight: 500;
-  margin-bottom: -8px;
+  margin-bottom: -$size0;
 }
 
 .header-button {
@@ -217,319 +380,193 @@ h1,
   margin: 0 10px 10px 0;
 }
 
-.button:hover {
-  text-decoration: none;
-}
-
-header {
-  background-color: $bodyBackground;
-  border-bottom: 1px solid $textColor;
-  color: $textColor;
-  padding: 8px 0;
-}
-
-header p {
-  font-size: 18px;
-  line-height: 28px;
-  font-weight: 100;
-  margin-top: -2px;
-  margin-bottom: 0;
-}
-
-header h1 {
-  margin: 16px 0 0 12px;
-}
-
-.panel {
-  bottom: 0;
-  height: auto;
-  left: 0;
-  top: 0;
-  width: auto;
-  padding: 8px 12px 32px 8px;
-  background-color: $bodyBackground;
-}
-
-.panel h1 {
-  font-size: 24px;
-  line-height: 32px;
-  border-bottom: 1px solid $textColor;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
-  letter-spacing: 0.1px;
-}
-
-.doc-entry > .typestr {
-  font-size: 14px;
-  line-height: 20px;
-  color: #777;
-  letter-spacing: 0.2px;
-  font-weight: 200;
-  margin-bottom: 16px;
-  padding: 0 0 12px 12px;
-}
-
-@media (max-width: 960px) {
-  .splash {
-    padding-top: 0;
-  }
-}
-
-@media (min-width: 600px) {
-  .nav-buttons {
-    text-align: left;
-    padding-left: 12px;
-  }
-
-  .panel {
-    bottom: 0;
-    height: auto;
-    left: 0;
-    overflow-y: auto;
-    position: fixed;
-    top: 0;
-    width: 240px;
-    padding: 16px 12px 32px 8px;
-    background-color: $bodyBackground;
-  }
-
-  .panel h1 {
-    font-size: 24px;
-    line-height: 32px;
-    border-bottom: 1px solid $cellBackground;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-  }
-
-  .doc-entries {
-    margin-left: 244px;
-    padding-left: 16px;
-    max-width: auto;
-  }
-
-  .doc-entry {
-    margin-left: 16px;
-    margin-right: 16px;
-  }
-
-  .arg-title,
-  .args {
-    padding-left: 16px;
-  }
-
-  .doc-entry > .typestr {
-    font-size: 14px;
-    line-height: 24px;
-    color: #666;
-    letter-spacing: 0.2px;
-    font-weight: 200;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  .args {
+.most-recent {
+  ol {
+    display: flex;
     list-style-type: none;
-    padding-left: 16px;
+    flex-wrap: wrap;
+
+    li {
+      background-color: $cellBackground;
+      border: 1px solid $borderColor;
+      margin: $size0;
+      min-height: 200px;
+      width: 200px;
+
+      p {
+        color: $base03;
+      }
+
+      &:hover {
+        background-color: $linkColor;
+      }
+    }
   }
 }
 
-.docindex {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
+.propel-logo {
+  display: flex;
+  flex-direction: row;
+  margin-right: $size0;
+  margin-left: $size0;
 
-.docindex a {
-  display: block;
-  width: 100%;
-  height: 28px;
-}
+  h1 {
+    display: inline;
+    font-size: 32pt;
+    font-weight: bold;
+  }
 
-.doc-entry > .name {
-  font-size: 20px;
-  color: $linkColor;
-  letter-spacing: 0.2px;
-  font-weight: 300;
-  margin: 0;
-  padding: 8px 0 4px 12px;
-}
+  h2 {
+    display: inline;
+    color: $accentColor;
+    font-size: 16pt;
+    font-weight: normal;
+  }
 
-.doc-entry > .name > .source-link {
-  font-size: 10px;
-  color: #666;
-}
+  a,
+  a:hover,
+  a:visited,
+  a:active {
+    text-decoration: none;
+    color: inherit;
+  }
 
-.doc-entry .arg-title {
-  font-weight: bold;
-}
-
-.doc-entry ol {
-  margin: 0 16px;
-}
-
-.doc-entry .args .name::after {
-  content: ": ";
-}
-
-/* notebook */
-
-.nb-footer {
-  text-align: center;
-  padding: 0 16px;
+  * {
+    margin: auto 0;
+    margin-right: $size0;
+  }
 }
 
 .global-header {
   width: 100%;
   background-color: inherit;
+
+  .global-header-inner {
+    display: flex;
+    max-width: 930px;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .global-header-right {
+    display: flex;
+    flex-direction: row;
+
+    > * {
+      display: block;
+      margin: auto 0 auto 36px;
+    }
+
+    a {
+      font-size: 14pt;
+      font-variant: all-small-caps;
+      text-decoration: none;
+      color: $accentColor;
+    }
+  }
 }
 
-.global-header-inner {
-  display: flex;
-  max-width: 930px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  height: 32px;
-  margin: 0 auto;
-}
-
-::selection,
-::-moz-selection {
+::selection {
   background: #00f;
   color: #fff;
 }
 
-.notebook-cell {
-  margin: 24px 0;
-}
-
-.notebook-cell .input {
-  white-space: pre;
-}
-
-.output {
-  background-color: inherit;
-}
-
-.CodeMirror,
-.notebook-cell .output,
-.notebook-cell .input > pre {
-  border: 0;
-  margin: 0;
-  padding: 10px;
-  white-space: pre-wrap;
-}
-
-/* Auto-resizing cells. */
-.CodeMirror {
-  height: auto;
-  transition: border-left-color 1s;
-}
-
-.CodeMirror-focused {
-  /* Color matches D3 lines. */
-  border-left-color: $base03;
-  transition: border-left-color 0s;
-}
-
-.CodeMirror,
-.notebook-cell .output,
-svg {
-  transition: border-left-color 0.5s;
-  transition: background-color 0.5s ease;
-}
-
-.notebook-cell-running .CodeMirror {
-  border-left-color: #dadaeb;
-}
-
-.notebook-cell-updating svg,
-.notebook-cell-updating .output {
-  background-color: #cbcbd0;
-}
-
-.buttons {
-  text-align: right;
-  border: 0;
-  height: 0;
-  transition: height 0.2s ease-in-out;
-  transition-delay: 0.1s;
-  overflow: hidden;
-}
-
-// When either the cell is in focus, or the button is in focus show the
-// buttons. Note the transition above.
-.buttons:focus,
-.input.focus + .buttons {
-  height: 50px;
-}
-
-.buttons button {
-  background: #fff;
-  z-index: 1;
-  margin: 5px;
+.cells {
+  margin-top: 50px;
 }
 
 .clone {
   background: $githubGreen;
   color: #fff;
   border: none;
+
+  &:hover {
+    color: #fff;
+    background: darken($githubGreen, 10%);
+  }
 }
 
-.clone:hover {
-  color: #fff;
-  background: darken($githubGreen, 10%);
-}
-
-.most-recent ol {
-  display: flex;
-  list-style-type: none;
-  flex-wrap: wrap;
-}
-
-.most-recent li {
-  min-height: 200px;
-  background: transparent;
-  margin: 5px;
-  box-shadow: -3px 2px 17px $base00;
-  width: 100%;
-  padding: 5px;
-  border-radius: 5px;
-  transition: background-color 0.5s ease;
-}
-
-.most-recent li:hover {
-  background-color: $base2;
-}
-
-.most-recent .blurb {
+.blurb {
   display: flex;
   height: 55px;
-  border-bottom: 2px solid $base01;
-  margin-bottom: 5px;
+  margin-bottom: $size0;
+
+  img {
+    margin-right: $size0;
+  }
 }
 
-.most-recent .blurb img {
+img.avatar {
+  display: block;
   border-radius: 90px;
-  height: 50px;
-  width: 50px;
-  margin-right: 5px;
 }
 
-.most-recent li a,
-.most-recent li p {
-  color: $base03;
+.dropdown {
+  position: relative;
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    width: auto;
+    box-shadow: $shadow;
+    background: $bodyBackground;
+    z-index: 1;
+
+    > * {
+      display: block;
+      white-space: nowrap;
+      padding: $size0;
+
+      &:hover {
+        background-color: $accentColor;
+      }
+    }
+  }
+
+  &:hover .dropdown-content {
+    display: block;
+  }
 }
 
-.docindex a:hover,
-.docindex a:focus,
-.docindex a:active {
-  color: rgb(31, 119, 180);
-  text-decoration: underline;
-  background-color: $base1;
+// Mobile first. No desktop related things above this line.
+
+@media (min-width: 600px) {
+  h1 {
+    font-size: 5rem;
+  }
+
+  .nav-buttons {
+    text-align: left;
+    padding-left: 12px;
+  }
+
+  $desktopPanelSize: 250px;
+
+  .panel {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    position: fixed;
+    overflow-y: auto;
+    width: $desktopPanelSize;
+    background-color: $bodyBackground;
+  }
+
+  .doc-entries {
+    margin-left: $desktopPanelSize;
+    padding-left: $size1;
+    max-width: auto;
+  }
+
+  .flex-row {
+    flex-wrap: nowrap;
+    width: 100%;
+
+    .flex-cell {
+      flex-basis: 0;
+    }
+  }
 }
 
-.most-recent li a:hover {
-  text-decoration: none;
-}

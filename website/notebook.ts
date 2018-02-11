@@ -26,6 +26,7 @@ import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
 import { assert, delay, IS_WEB } from "../src/util";
+import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
 import { transpile } from "./nb_transpiler";
 
@@ -152,7 +153,12 @@ export class Cell extends Component<CellProps, CellState> {
       // tslint:disable:variable-name
       const CodeMirror = require("codemirror");
       require("codemirror/mode/javascript/javascript.js");
-      this.input.innerHTML = "" ; // Delete the <pre>
+
+      // Delete existing pre.
+      const pres = this.input.getElementsByTagName("pre");
+      assert(pres.length === 1);
+      this.input.removeChild(pres[0]);
+
       this.editor = CodeMirror(this.input, options);
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  {
@@ -247,25 +253,25 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
-    const buttons = [
-      h("button", {
-        "class": "run-button",
-        "onClick": this.run.bind(this),
-      }, "Run")
-    ];
+    const runButton = h("button", {
+      "class": "run-button",
+      "onClick": this.run.bind(this),
+    }, "");
 
+    let deleteButton = null;
     if (this.props.onDelete) {
-      buttons.unshift(h("button", {
+      deleteButton = h("button", {
           "class": "delete-button",
           "onClick": this.clickedDelete.bind(this),
-      }, "Delete"));
+      }, "");
     }
 
+    let insertButton = null;
     if (this.props.onInsertCell) {
-      buttons.unshift(h("button", {
-          "class": "delete-button",
+      insertButton = h("button", {
+          "class": "insert-button",
           "onClick": this.clickedInsertCell.bind(this),
-      }, "Insert Cell"));
+      }, "");
     }
 
     return h("div", {
@@ -278,14 +284,18 @@ export class Cell extends Component<CellProps, CellState> {
         "ref": (ref => { this.input = ref; }),
       },
         // This pre is replaced by CodeMirror if users have JavaScript enabled.
-        h("pre", { }, this.code)
+        h("pre", { }, this.code),
+        deleteButton,
+        runButton,
       ),
-      h("div", { "class": "buttons" }, ...buttons),
-      h("div", {
-        "class": "output",
-        "id": "output" + this.id,
-        "ref": (ref => { this.output = ref; }),
-      }),
+      h("div", { "class": "output-container" },
+        h("div", {
+          "class": "output",
+          "id": "output" + this.id,
+          "ref": (ref => { this.output = ref; }),
+        }),
+        insertButton,
+      )
     );
   }
 }
@@ -384,13 +394,17 @@ async function importModule(target) {
   throw new Error("Unknown module: " + target);
 }
 
-interface NotebookRootState {
-  loadingAuth: boolean;
-  nbId?: string;
+export interface NotebookRootProps {
   userInfo?: db.UserInfo;
+  nbId?: string;
 }
 
-export class NotebookRoot extends Component<any, NotebookRootState> {
+export interface NotebookRootState {
+  nbId?: string;
+}
+
+export class NotebookRoot extends Component<NotebookRootProps,
+                                            NotebookRootState> {
   constructor(props) {
     super(props);
 
@@ -402,62 +416,31 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
       nbId = matches ? matches[1] : null;
     }
 
-    this.state = {
-      loadingAuth: true,
-      nbId,
-      userInfo: null,
-    };
-  }
-
-  unsubscribe: db.UnsubscribeCb;
-  componentWillMount() {
-    this.unsubscribe = db.active.subscribeAuthChange((userInfo) => {
-      this.setState({ loadingAuth: false, userInfo });
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
+    this.state = { nbId };
   }
 
   render() {
-    let menuItems;
-    if (this.state.userInfo) {
-      menuItems = [
-        h(Avatar, { userInfo: this.state.userInfo }),
-        h("button", {
-          "onclick": db.active.signOut,
-        }, "Sign out"),
-      ];
-
-    } else {
-      menuItems = [
-        h("button", {
-          "class": "clone",
-          "onclick": db.active.signIn,
-        }, "Sign in"),
-      ];
-    }
-
     let body;
     if (this.state.nbId) {
       body = h(Notebook, {
         nbId: this.state.nbId,
-        userInfo: this.state.userInfo,
+        userInfo: this.props.userInfo,
       });
     } else {
       body = h(MostRecent, null);
     }
 
     return h("div", { "class": "notebook" },
-      h(GlobalHeader, null, ...menuItems),
+      h(GlobalHeader, {
+        subtitle: "Notebook",
+        subtitleLink: "/notebook",
+      }, h(UserMenu, { userInfo: this.props.userInfo })),
       body,
-      h("div", { "class": "container nb-footer" }),
     );
   }
 }
 
-interface MostRecentState {
+export interface MostRecentState {
   latest: db.NbInfo[];
 }
 
@@ -480,6 +463,13 @@ export class MostRecent extends Component<any, MostRecentState> {
     }
   }
 
+  async onCreate() {
+    console.log("Click new");
+    const nbId = await db.active.create();
+    // Redirect to new notebook.
+    window.location.href = nbUrl(nbId);
+  }
+
   render() {
     if (!this.state.latest) {
       return h(Loading, null);
@@ -497,20 +487,23 @@ export class MostRecent extends Component<any, MostRecentState> {
       );
     });
     return h("div", { "class": "most-recent" },
-      h("h1", null, "Propel Notebooks"),
+      h("button", {
+        "class": "create-notebook",
+        "onClick": () => this.onCreate(),
+      }, "Create Empty Notebook"),
       h("h2", null, "Recently Updated"),
       h("ol", null, ...notebookList),
     );
   }
 }
 
-interface NotebookProps {
+export interface NotebookProps {
   nbId: string;
   onReady?: () => void;
   userInfo?: db.UserInfo;  // Info about the currently logged in user.
 }
 
-interface NotebookState {
+export interface NotebookState {
   doc?: db.NotebookDoc;
   errorMsg?: string;
 }
@@ -639,28 +632,8 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
   ]);
 }
 
-const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
-  const size = props.size || 50;
-  return h("img", {
-    src: props.userInfo.photoURL + "&size=" + size,
-  });
-};
-
 function fmtDate(d: Date): string {
   return d.toISOString();
-}
-
-function Loading(props) {
-  return h("h1", null, "Loading");
-}
-
-export function GlobalHeader(props) {
-  return h("div", { "class": "global-header" },
-    h("div", { "class": "global-header-inner" },
-      h("a", { "class": "button", href: "/" }, "← Propel"),
-      ...props.children,
-    ),
-  );
 }
 
 // Trims whitespace.
