@@ -382,24 +382,6 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
   }
 
   render() {
-    let menuItems;
-    if (this.state.userInfo) {
-      menuItems = [
-        h(Avatar, { userInfo: this.state.userInfo }),
-        h("button", {
-          "onclick": db.active.signOut,
-        }, "Sign out"),
-      ];
-
-    } else {
-      menuItems = [
-        h("button", {
-          "class": "clone",
-          "onclick": db.active.signIn,
-        }, "Sign in"),
-      ];
-    }
-
     let body;
     if (this.state.nbId) {
       body = h(Notebook, {
@@ -411,10 +393,30 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
     }
 
     return h("div", { "class": "notebook" },
-      h(GlobalHeader, null, ...menuItems),
+      h(GlobalHeader, null,
+        h(UserMenu, { userInfo: this.state.userInfo })),
       body,
       h("div", { "class": "container nb-footer" }),
     );
+  }
+}
+
+function UserMenu(props) {
+  if (props.userInfo) {
+    return h("div", { "class": "dropdown" },
+      h(Avatar, { size: 32, userInfo: props.userInfo }),
+      h("div", { "class": "dropdown-content" },
+        h("a", {
+          "href": "#",
+          "onclick": db.active.signOut,
+        }, "Sign out"),
+      )
+    );
+  } else {
+    return h("button", {
+      "class": "clone",
+      "onclick": db.active.signIn,
+    }, "Sign in");
   }
 }
 
@@ -603,6 +605,7 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
 const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
   const size = props.size || 50;
   return h("img", {
+    "class": "avatar",
     src: props.userInfo.photoURL + "&size=" + size,
   });
 };
@@ -618,8 +621,17 @@ function Loading(props) {
 export function GlobalHeader(props) {
   return h("div", { "class": "global-header" },
     h("div", { "class": "global-header-inner" },
-      h("a", { "class": "button", href: "/" }, "← Propel"),
-      ...props.children,
+      h("div", { "class": "global-header-title" },
+        h("svg", {
+          width: 24,
+          height: 24,
+          viewBox: "0 0 24 24",
+          xmlns: "http://www.w3.org/2000/svg"
+        }, h("circle", { cx: 12, cy: 12, r: 12 })),
+        h("h1", null, "Propel"),
+        h("h2", null, "Notebook"),
+      ),
+      h("div", { "class": "global-header-right" }, ...props.children)
     ),
   );
 }

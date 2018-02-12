@@ -207,7 +207,7 @@ h1,
   box-shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
 }
 
-.snippet-title {
+.snippet-global-header-title {
   font-weight: 500;
   margin-bottom: -8px;
 }
@@ -312,7 +312,7 @@ header h1 {
     margin-right: 16px;
   }
 
-  .arg-title,
+  .arg-global-header-title,
   .args {
     padding-left: 16px;
   }
@@ -359,7 +359,7 @@ header h1 {
   color: #666;
 }
 
-.doc-entry .arg-title {
+.doc-entry .arg-global-header-title {
   font-weight: bold;
 }
 
@@ -388,10 +388,34 @@ header h1 {
   max-width: 930px;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  height: 32px;
-  margin: 0 auto;
+  height: 64px;
+}
+
+.global-header h1 {
+  display: inline;
+  font-size: 32pt;
+  font-weight: bold;
+}
+
+.global-header h2 {
+  display: inline;
+  color: #589def;
+  font-size: 16pt;
+  font-weight: normal;
+}
+
+.global-header-title * {
+  margin: auto 0;
+  margin-right: 8px;
+}
+
+.global-header-title {
+  display: flex;
+  flex-direction: row;
+}
+
+.global-header-right {
+  margin: auto 0;
 }
 
 ::selection,
@@ -572,4 +596,28 @@ buttons button.delete-button {
 
 .most-recent li a:hover {
   text-decoration: none;
+}
+
+img.avatar {
+  display: block;
+  border-radius: 90px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  width: 150px;
+  margin-left: -100px;
+  padding: 8px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
 }
