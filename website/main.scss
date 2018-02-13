@@ -32,6 +32,15 @@ body {
   line-height: 1.6;
 }
 
+/* Centers and gives max-width to index, references, notebook pages */
+.splash,
+.explainer,
+.references,
+.notebook {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 p {
   font-size: $size1;
   line-height: $size2;
@@ -95,10 +104,14 @@ code {
   background-color: $cellBackground;
   border-top: 1px solid #cbcbd0;
   border-bottom: 1px solid #cbcbd0;
-}
 
-.explainer {
-  padding: $size2 0;
+  .explainer {
+    padding: $size2 0;
+  }
+
+  .explainer-text {
+    padding-bottom: $size2;
+  }
 }
 
 .footer {
@@ -106,15 +119,6 @@ code {
   padding: $size2 0;
   text-align: center;
   background-color: #fff;
-}
-
-/* Centers and gives max-width to index, references, notebook pages */
-.splash,
-.explainer,
-.references,
-.notebook {
-  max-width: 960px;
-  margin: 0 auto;
 }
 
 /* Column layout for screens wider than 550px, below that they stack. */
@@ -152,6 +156,7 @@ svg {
   border-top: 1px solid $bodyBackground;
   border-bottom: 1px solid $bodyBackground;
   margin-bottom: $size1;
+  margin-top: $size1;
   box-shadow: $shadow;
   background-color: #fff;
   max-width: 60rem;

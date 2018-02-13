@@ -25,3 +25,11 @@ export function GlobalHeader(props) {
     ),
   );
 }
+
+export function div(className, ...children) {
+  return h("div", { "class": className }, ...children);
+}
+
+export function p(...children) {
+  return h("p", null, ...children);
+}
