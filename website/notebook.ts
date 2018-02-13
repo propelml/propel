@@ -39,11 +39,21 @@ let lastExecutedCellId = null;
 // local variables within the scope where it's being called.
 const globalEval = eval;
 
-export function lookupCell(id: number) {
-  return cellTable.get(id);
+// Given a cell's id, which can either be an integer or
+// a string of the form "cell5" (where 5 is the id), look up
+// the component in the global table.
+export function lookupCell(id: string | number) {
+  let numId;
+  if (typeof id === "string") {
+    numId = Number(id.replace("cell", ""));
+  } else {
+    numId = id;
+  }
+  return cellTable.get(numId);
 }
 
 // Convenience function to create Notebook JSX element.
+// TODO This function is badly named. It should be called notebookCell()
 export function notebook(code: string, props: CellProps = {}): JSX.Element {
   props.code = code;
   return h(Cell, props);
@@ -80,6 +90,7 @@ export interface CellProps {
 export interface CellState { }
 
 export class Cell extends Component<CellProps, CellState> {
+  parentDiv: Element;
   input: Element;
   output: Element;
   editor: CodeMirror.Editor;
@@ -112,6 +123,8 @@ export class Cell extends Component<CellProps, CellState> {
     this.output.innerHTML = "";
   }
 
+  // Because CodeMirror has a lot of state that is not managed through
+  // React, manually apply prop changes.
   componentWillReceiveProps(nextProps: CellProps) {
     const nextCode = normalizeCode(nextProps.code);
     if (nextCode !== this.code) {
@@ -141,13 +154,52 @@ export class Cell extends Component<CellProps, CellState> {
       require("codemirror/mode/javascript/javascript.js");
       this.input.innerHTML = "" ; // Delete the <pre>
       this.editor = CodeMirror(this.input, options);
-      this.editor.on("focus", this.focus.bind(this));
-      this.editor.on("blur", this.blur.bind(this));
       this.editor.setOption("extraKeys", {
-        "Ctrl-Enter": () =>  { this.run(); return true; },
-        "Shift-Enter": () => { this.run(); this.nextCell(); return true; }
+        "Ctrl-Enter": () =>  {
+          this.run();
+          return true;
+        },
+        "Shift-Enter": () => {
+          this.run();
+          this.editor.getInputField().blur();
+          this.focusNext();
+          return true;
+        },
+      });
+
+      this.editor.on("focus", () => {
+        this.parentDiv.classList.add("notebook-cell-focus");
+      });
+
+      this.editor.on("blur", () => {
+        this.parentDiv.classList.remove("notebook-cell-focus");
       });
     }
+  }
+
+  focusNext() {
+    const cellsEl = this.parentDiv.parentElement;
+    // Don't focus next if we're in the docs.
+    if (cellsEl.className !== "cells") return;
+
+    const nbCells = cellsEl.getElementsByClassName("notebook-cell");
+    assert(nbCells.length > 0);
+
+    // NodeListOf<Element> doesn't have indexOf. We loop instead.
+    for (let i = 0; i < nbCells.length - 1; i++) {
+      if (nbCells[i] === this.parentDiv) {
+        const nextCellElement = nbCells[i + 1];
+        const next = lookupCell(nextCellElement.id);
+        assert(next != null);
+        next.focus();
+        return;
+      }
+    }
+  }
+
+  focus() {
+    this.editor.focus();
+    this.parentDiv.scrollIntoView();
   }
 
   // This method executes the code in the cell, and updates the output div with
@@ -184,10 +236,6 @@ export class Cell extends Component<CellProps, CellState> {
     if (this.props.onRun) this.props.onRun(this.code);
   }
 
-  nextCell() {
-    // TODO
-  }
-
   clickedDelete() {
     console.log("Delete was clicked.");
     if (this.props.onDelete) this.props.onDelete();
@@ -196,14 +244,6 @@ export class Cell extends Component<CellProps, CellState> {
   clickedInsertCell() {
     console.log("NewCell was clicked.");
     if (this.props.onInsertCell) this.props.onInsertCell();
-  }
-
-  blur() {
-    this.input.classList.remove("focus");
-  }
-
-  focus() {
-    this.input.classList.add("focus");
   }
 
   render() {
@@ -230,7 +270,8 @@ export class Cell extends Component<CellProps, CellState> {
 
     return h("div", {
         "class": "notebook-cell",
-        "id": `cell${this.id}`
+        "id": `cell${this.id}`,
+        "ref": (ref => { this.parentDiv = ref; }),
       },
       h("div", {
         "class": "input",
