@@ -3,6 +3,7 @@
 // client-side for generating HTML.
 import { readFileSync } from "fs";
 import { h, render } from "preact";
+import { GlobalHeader, PropelLogo } from "./common";
 import * as nb from "./notebook";
 const { version } = require("../package.json");
 
@@ -168,7 +169,7 @@ const Docs = (props) => {
 
   return div("docs",
     div("panel",
-      h("h1", null, "Propel"),
+      h(PropelLogo, { subtitle: "Docs" }),
       h(DocIndex, { docs }),
     ),
     h(DocEntries, { docs }),
@@ -178,11 +179,8 @@ const Docs = (props) => {
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/references.html", "utf8");
   return div("references",
-    h(nb.GlobalHeader, null),
-    h("header", null,
-      h("h1", null, "References"),
-      p("This work is inspired by and built upon great technologies."),
-    ),
+    h(GlobalHeader, { subtitle: "References" }),
+    p("This work is inspired by and built upon great technologies."),
     h("div", {
       dangerouslySetInnerHTML: { __html: refhtml },
     }),

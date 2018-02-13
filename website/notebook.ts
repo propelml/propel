@@ -26,6 +26,7 @@ import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
 import { assert, delay, IS_WEB } from "../src/util";
+import { GlobalHeader, Loading } from "./common";
 import * as db from "./db";
 import { transpile } from "./nb_transpiler";
 
@@ -441,10 +442,10 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
     }
 
     return h("div", { "class": "notebook" },
-      h(GlobalHeader, null,
-        h(UserMenu, { userInfo: this.state.userInfo })),
+      h(GlobalHeader, { subtitle: "Notebook" },
+        h(UserMenu, { userInfo: this.state.userInfo })
+      ),
       body,
-      h("div", { "class": "container nb-footer" }),
     );
   }
 }
@@ -659,28 +660,6 @@ const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
 
 function fmtDate(d: Date): string {
   return d.toISOString();
-}
-
-function Loading(props) {
-  return h("h1", null, "Loading");
-}
-
-export function GlobalHeader(props) {
-  return h("div", { "class": "global-header" },
-    h("div", { "class": "global-header-inner" },
-      h("div", { "class": "global-header-title" },
-        h("svg", {
-          height: 24,
-          viewBox: "0 0 24 24",
-          width: 24,
-          xmlns: "http://www.w3.org/2000/svg",
-        }, h("circle", { cx: 12, cy: 12, r: 12 })),
-        h("h1", null, "Propel"),
-        h("h2", null, "Notebook"),
-      ),
-      h("div", { "class": "global-header-right" }, ...props.children)
-    ),
-  );
 }
 
 // Trims whitespace.
