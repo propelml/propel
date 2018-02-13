@@ -154,7 +154,7 @@ export class Cell extends Component<CellProps, CellState> {
       require("codemirror/mode/javascript/javascript.js");
 
       // Delete existing pre.
-      let pres = this.input.getElementsByTagName("pre");
+      const pres = this.input.getElementsByTagName("pre");
       assert(pres.length === 1);
       this.input.removeChild(pres[0]);
 
@@ -252,8 +252,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
-    const buttons = [];
-    let runButton = h("button", {
+    const runButton = h("button", {
       "class": "run-button",
       "onClick": this.run.bind(this),
     }, "");
@@ -266,11 +265,12 @@ export class Cell extends Component<CellProps, CellState> {
       }, "");
     }
 
+    let insertButton = null;
     if (this.props.onInsertCell) {
-      buttons.unshift(h("button", {
+      insertButton = h("button", {
           "class": "insert-button",
           "onClick": this.clickedInsertCell.bind(this),
-      }, "Insert Cell"));
+      }, "");
     }
 
     return h("div", {
@@ -278,7 +278,6 @@ export class Cell extends Component<CellProps, CellState> {
         "id": `cell${this.id}`,
         "ref": (ref => { this.parentDiv = ref; }),
       },
-      //h("div", { "class": "delete-row" }, deleteButton),
       h("div", {
         "class": "input",
         "ref": (ref => { this.input = ref; }),
@@ -293,7 +292,7 @@ export class Cell extends Component<CellProps, CellState> {
         "id": "output" + this.id,
         "ref": (ref => { this.output = ref; }),
       }),
-      h("div", { "class": "buttons" }, ...buttons),
+      insertButton,
     );
   }
 }
@@ -669,10 +668,10 @@ export function GlobalHeader(props) {
     h("div", { "class": "global-header-inner" },
       h("div", { "class": "global-header-title" },
         h("svg", {
-          width: 24,
           height: 24,
           viewBox: "0 0 24 24",
-          xmlns: "http://www.w3.org/2000/svg"
+          width: 24,
+          xmlns: "http://www.w3.org/2000/svg",
         }, h("circle", { cx: 12, cy: 12, r: 12 })),
         h("h1", null, "Propel"),
         h("h2", null, "Notebook"),

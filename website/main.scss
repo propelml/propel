@@ -111,7 +111,7 @@ code {
 }
 
 .explainer-container {
-  background-color: #f0f0f7;
+  background-color: $cellBackground;
   border-top: 1px solid #cbcbd0;
   border-bottom: 1px solid #cbcbd0;
 }
@@ -406,8 +406,6 @@ header h1 {
 }
 
 .notebook-cell {
-  margin: 24px 0;
-
   .CodeMirror,
   .output,
   svg {
@@ -417,7 +415,7 @@ header h1 {
 
   /* Margins for CodeMirror, pre and output should be same. */
   .CodeMirror,
-  > pre,
+  .input > pre,
   .output {
     margin: 0;
     padding: 10px;
@@ -433,21 +431,24 @@ header h1 {
   $cellButtonMargin: 2px;
   $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
 
+  button {
+    z-index: 1000;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    width: $cellButtonSize;
+    height: $cellButtonSize;
+    margin: $cellButtonMargin;
+  }
+
   .input {
     display: grid;
     grid-template-columns: 1fr $nbGridSquare;
-    grid-template-rows: $nbGridSquare 1fr $nbGridSquare;
-
-    button {
-      z-index: 1000;
-      padding: 0;
-      border: 0;
-      background-color: transparent;
-      background-repeat: no-repeat;
-      width: $cellButtonSize;
-      height: $cellButtonSize;
-      margin: $cellButtonMargin;
-    }
+    grid-template-rows:
+      fit-content($nbGridSquare)
+      1fr
+      fit-content($nbGridSquare);
 
     button.delete-button {
       /* Top right corner */
@@ -502,17 +503,12 @@ header h1 {
     background-color: #cbcbd0;
   }
 
-  .buttons {
-    text-align: right;
+  .insert-button {
+    background-image: url(/static/img/insertButton.svg);
+    opacity: 0.1;
 
-    button {
-      opacity: 0.5;
-    }
-
-    // When either the cell is in focus, or the button is in focus show the
-    // buttons. Note the transition above.
-    &:focus {
-      opacity: 1;
+    &:hover {
+      opacity: 0.8;
     }
   }
 }
