@@ -1,7 +1,7 @@
 @import './normalize.scss';
 @import './codemirror.scss';
-//@import './syntax_dark.scss';
-@import './syntax_light.scss';
+//@import './theme_dark.scss';
+@import './theme_light.scss';
 @import './syntax.scss';
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
 
@@ -217,10 +217,6 @@ h1,
   margin: 0 10px 10px 0;
 }
 
-.button:hover {
-  text-decoration: none;
-}
-
 header {
   background-color: $bodyBackground;
   border-bottom: 1px solid $textColor;
@@ -418,8 +414,7 @@ header h1 {
   margin: auto 0;
 }
 
-::selection,
-::-moz-selection {
+::selection {
   background: #00f;
   color: #fff;
 }
@@ -429,15 +424,17 @@ header h1 {
   flex-direction: row-reverse;
   margin-bottom: 4px;
   z-index: 100;
+
   button {
     border-radius: 100px;
-    border: 0px;
+    border: 0;
     padding: 12px;
     color: $base6;
     background-color: transparent;
     background-image: url(/static/img/deleteButtonOutline.svg);
     height: auto;
     line-height: 8px;
+
     &:hover {
       background-image: url(/static/img/deleteButtonFill.svg);
     }
@@ -446,94 +443,71 @@ header h1 {
 
 .notebook-cell {
   margin: 24px 0;
-}
 
-.notebook-cell .input {
-  white-space: pre;
-}
+  .CodeMirror,
+  .output,
+  svg {
+    transition: border-left-color 0.5s;
+    transition: background-color 0.5s ease;
+  }
 
-.output {
-  background-color: inherit;
-}
+  .input {
+    white-space: pre;
 
-.CodeMirror,
-.notebook-cell .input > pre {
-  border: 1px solid #eee;
-  margin: 0;
-  padding: 10px;
-  white-space: pre-wrap;
-}
-
-/* Auto-resizing cells. */
-.CodeMirror {
-  height: auto;
-  transition: border-left-color 1s;
-}
-
-.CodeMirror-focused {
-  /* Color matches D3 lines. */
-  border-left-color: $base0;
-  transition: border-left-color 0s;
-  background-color: rgba(88, 157, 239, 0.03);
-  border-radius: 4px 4px 0 0;
-}
-
-.CodeMirror,
-.notebook-cell .output,
-svg {
-  transition: border-left-color 0.5s;
-  transition: background-color 0.5s ease;
-}
-
-.notebook-cell-running .CodeMirror {
-  border-left-color: #dadaeb;
-}
-
-.notebook-cell-updating svg,
-.notebook-cell-updating .output {
-  background-color: #cbcbd0;
-}
-
-.buttons {
-  text-align: right;
-  border: 0;
-  height: 32px;
-  transition: height 0.2s ease-in-out;
-  transition-delay: 0.1s;
-  background-color: #f4f4f5;
-  opacity: 0.5;
-}
-
-// When either the cell is in focus, or the button is in focus show the
-// buttons. Note the transition above.
-.buttons:focus,
-.input.focus + .buttons, {
-  opacity: 1;
-}
-
-.buttons button {
-  z-index: 1;
-  font-weight: 500;
-  height: 32px;
-  border: 0px;
-  padding: 0 8px;
-  margin: auto 0px;
-  border-radius: 0px;
-  letter-spacing: .15em;
-  line-height: 32px;
-  color: #9B9B9B;
-  background: #f4f4f5;
-    &:hover {
-      color: $linkColor;
+    .CodeMirror,
+    > pre {
+      border: 1px solid #eee;
+      margin: 0;
+      padding: 10px;
+      white-space: pre-wrap;
     }
-}
 
-buttons button.delete-button {
-    color: inherit;
-    &:hover {
-      color: $base6;
+    /* Auto-resizing cells. */
+    .CodeMirror {
+      height: auto;
+      transition: border-left-color 1s;
     }
- }
+
+    .CodeMirror-focused {
+      /* Color matches D3 lines. */
+      border-left-color: $base0;
+      transition: border-left-color 0s;
+      background-color: rgba(88, 157, 239, 0.03);
+      border-radius: 4px 4px 0 0;
+    }
+  }
+
+  .output {
+    background-color: inherit;
+  }
+
+  .notebook-cell-running .CodeMirror {
+    border-left-color: #dadaeb;
+  }
+
+  .notebook-cell-updating svg,
+  .notebook-cell-updating .output {
+    background-color: #cbcbd0;
+  }
+
+  .buttons {
+    text-align: right;
+    background-color: #f4f4f5;
+
+    button {
+      background-color: transparent;
+      border: 0;
+      height: 32px;
+      opacity: 0.5;
+    }
+
+    // When either the cell is in focus, or the button is in focus show the
+    // buttons. Note the transition above.
+    &:focus {
+      opacity: 1;
+    }
+  }
+}
 
 .clone {
   background: $githubGreen;
@@ -614,7 +588,7 @@ img.avatar {
   width: 150px;
   margin-left: -100px;
   padding: 8px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
