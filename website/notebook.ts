@@ -507,7 +507,6 @@ export class MostRecent extends Component<any, MostRecentState> {
       );
     });
     return h("div", { "class": "most-recent" },
-      h("h1", null, "Propel Notebooks"),
       h("h2", null, "Recently Updated"),
       h("ol", null, ...notebookList),
     );
