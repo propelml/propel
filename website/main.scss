@@ -18,16 +18,8 @@ body {
   background-color: $bodyBackground;
   color: $textColor;
   font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'avenir next',
-    avenir,
     helvetica,
     'helvetica neue',
-    ubuntu,
-    roboto,
-    noto,
-    'segoe ui',
     arial,
     sans-serif;
   font-size: 1.5em;
@@ -111,12 +103,6 @@ pre,
 .output,
 code {
   font-family: 'Roboto Mono', monospace;
-}
-
-pre,
-.output {
-  white-space: pre-wrap;
-  word-break: keep-all;
 }
 
 .splash {
@@ -419,28 +405,6 @@ header h1 {
   color: #fff;
 }
 
-.delete-row {
-  display: flex;
-  flex-direction: row-reverse;
-  margin-bottom: 4px;
-  z-index: 100;
-
-  button {
-    border-radius: 100px;
-    border: 0;
-    padding: 12px;
-    color: $base6;
-    background-color: transparent;
-    background-image: url(/static/img/deleteButtonOutline.svg);
-    height: auto;
-    line-height: 8px;
-
-    &:hover {
-      background-image: url(/static/img/deleteButtonFill.svg);
-    }
-  }
-}
-
 .notebook-cell {
   margin: 24px 0;
 
@@ -451,34 +415,82 @@ header h1 {
     transition: background-color 0.5s ease;
   }
 
+  /* Margins for CodeMirror, pre and output should be same. */
+  .CodeMirror,
+  > pre,
+  .output {
+    margin: 0;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: keep-all;
+  }
+
+  .output {
+    border-left: 1px solid #eee;
+  }
+
+  $cellButtonSize: 24px;
+  $cellButtonMargin: 2px;
+  $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
+
   .input {
-    white-space: pre;
+    display: grid;
+    grid-template-columns: 1fr $nbGridSquare;
+    grid-template-rows: $nbGridSquare 1fr $nbGridSquare;
+
+    button {
+      z-index: 1000;
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+      background-repeat: no-repeat;
+      width: $cellButtonSize;
+      height: $cellButtonSize;
+      margin: $cellButtonMargin;
+    }
+
+    button.delete-button {
+      /* Top right corner */
+      grid-column: 2 / -1;
+      grid-row: 1 / 2;
+      background-image: url(/static/img/deleteButtonOutline.svg);
+
+      &:hover {
+        background-image: url(/static/img/deleteButtonFill.svg);
+      }
+    }
+
+    button.run-button {
+      /* Bottom right corner */
+      grid-column: 2 / -1;
+      grid-row: 3 / -1;
+      opacity: 0.1;
+      background-image: url(/static/img/runButton.svg);
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
 
     .CodeMirror,
     > pre {
+      /* Spans the whole grid */
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
       border: 1px solid #eee;
-      margin: 0;
-      padding: 10px;
-      white-space: pre-wrap;
     }
 
     /* Auto-resizing cells. */
     .CodeMirror {
       height: auto;
-      transition: border-left-color 1s;
     }
 
     .CodeMirror-focused {
       /* Color matches D3 lines. */
       border-left-color: $base0;
       transition: border-left-color 0s;
-      background-color: rgba(88, 157, 239, 0.03);
       border-radius: 4px 4px 0 0;
     }
-  }
-
-  .output {
-    background-color: inherit;
   }
 
   .notebook-cell-running .CodeMirror {
@@ -492,12 +504,8 @@ header h1 {
 
   .buttons {
     text-align: right;
-    background-color: #f4f4f5;
 
     button {
-      background-color: transparent;
-      border: 0;
-      height: 32px;
       opacity: 0.5;
     }
 

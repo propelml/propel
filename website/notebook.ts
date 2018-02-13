@@ -152,7 +152,12 @@ export class Cell extends Component<CellProps, CellState> {
       // tslint:disable:variable-name
       const CodeMirror = require("codemirror");
       require("codemirror/mode/javascript/javascript.js");
-      this.input.innerHTML = "" ; // Delete the <pre>
+
+      // Delete existing pre.
+      let pres = this.input.getElementsByTagName("pre");
+      assert(pres.length === 1);
+      this.input.removeChild(pres[0]);
+
       this.editor = CodeMirror(this.input, options);
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  {
@@ -247,12 +252,11 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
-    const buttons = [
-      h("button", {
-        "class": "run-button",
-        "onClick": this.run.bind(this),
-      }, "Run ►")
-    ];
+    const buttons = [];
+    let runButton = h("button", {
+      "class": "run-button",
+      "onClick": this.run.bind(this),
+    }, "");
 
     let deleteButton = null;
     if (this.props.onDelete) {
@@ -264,7 +268,7 @@ export class Cell extends Component<CellProps, CellState> {
 
     if (this.props.onInsertCell) {
       buttons.unshift(h("button", {
-          "class": "delete-button",
+          "class": "insert-button",
           "onClick": this.clickedInsertCell.bind(this),
       }, "Insert Cell"));
     }
@@ -274,20 +278,22 @@ export class Cell extends Component<CellProps, CellState> {
         "id": `cell${this.id}`,
         "ref": (ref => { this.parentDiv = ref; }),
       },
-      h("div", { "class": "delete-row" }, deleteButton),
+      //h("div", { "class": "delete-row" }, deleteButton),
       h("div", {
         "class": "input",
         "ref": (ref => { this.input = ref; }),
       },
         // This pre is replaced by CodeMirror if users have JavaScript enabled.
-        h("pre", { }, this.code)
+        h("pre", { }, this.code),
+        deleteButton,
+        runButton,
       ),
-      h("div", { "class": "buttons" }, ...buttons),
       h("div", {
         "class": "output",
         "id": "output" + this.id,
         "ref": (ref => { this.output = ref; }),
       }),
+      h("div", { "class": "buttons" }, ...buttons),
     );
   }
 }
