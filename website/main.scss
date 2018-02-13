@@ -8,6 +8,9 @@
 $githubGreen: #39aa56;
 $small: 5px;
 
+$borderColor: #eee;
+$accentColor: #589def;  // blue
+
 /* NOTE html is set to 62.5% so that all the REM measurements
 throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
 html {
@@ -381,7 +384,7 @@ header h1 {
 
 .global-header h2 {
   display: inline;
-  color: #589def;
+  color: $accentColor;
   font-size: 16pt;
   font-weight: normal;
 }
@@ -406,11 +409,39 @@ header h1 {
 }
 
 .notebook-cell {
-  .CodeMirror,
-  .output,
-  svg {
-    transition: border-left-color 0.5s;
-    transition: background-color 0.5s ease;
+  $cellButtonSize: 24px;
+  $cellButtonMargin: 2px;
+  $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
+
+  // notebook borders
+  border-left: 1px solid $borderColor;
+  .input {
+    border: 1px solid $borderColor;
+    border-left: 0; // because the border is on notebook-cell.
+  }
+
+  &.notebook-cell-focus {
+    border-left: 1px solid $accentColor;
+  }
+
+  button {
+    z-index: 1000;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    width: $cellButtonSize;
+    height: $cellButtonSize;
+    margin: $cellButtonMargin;
+    opacity: 0; // Only display buttons when focused.
+  }
+
+  &.notebook-cell-focus {
+    transition: border-left-color 0.2s;
+
+    button {
+      opacity: 1;
+    }
   }
 
   /* Margins for CodeMirror, pre and output should be same. */
@@ -423,33 +454,28 @@ header h1 {
     word-break: keep-all;
   }
 
-  .output {
-    border-left: 1px solid #eee;
-  }
-
-  $cellButtonSize: 24px;
-  $cellButtonMargin: 2px;
-  $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
-
-  button {
-    z-index: 1000;
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    width: $cellButtonSize;
-    height: $cellButtonSize;
-    margin: $cellButtonMargin;
-  }
-
-  .input {
+  // Both input and output have a grid for buttons in the top and bottom right
+  // hand corners.
+  .input,
+  .output-container {
     display: grid;
     grid-template-columns: 1fr $nbGridSquare;
     grid-template-rows:
       fit-content($nbGridSquare)
       1fr
       fit-content($nbGridSquare);
+  }
 
+  // These elements fill their grids.
+  .CodeMirror,
+  .input > pre,
+  .output {
+    /* Spans the whole grid */
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+  }
+
+  .input {
     button.delete-button {
       /* Top right corner */
       grid-column: 2 / -1;
@@ -465,63 +491,43 @@ header h1 {
       /* Bottom right corner */
       grid-column: 2 / -1;
       grid-row: 3 / -1;
-      opacity: 0.1;
       background-image: url(/static/img/runButton.svg);
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-
-    .CodeMirror,
-    > pre {
-      /* Spans the whole grid */
-      grid-column: 1 / -1;
-      grid-row: 1 / -1;
-      border: 1px solid #eee;
     }
 
     /* Auto-resizing cells. */
     .CodeMirror {
       height: auto;
     }
-
-    .CodeMirror-focused {
-      /* Color matches D3 lines. */
-      border-left-color: $base0;
-      transition: border-left-color 0s;
-      border-radius: 4px 4px 0 0;
-    }
   }
 
-  .notebook-cell-running .CodeMirror {
-    border-left-color: #dadaeb;
+  .output-container {
+    .insert-button {
+      /* Bottom right corner */
+      grid-column: 2 / -1;
+      grid-row: 3 / -1;
+      background-image: url(/static/img/insertButton.svg);
+    }
   }
 
   .notebook-cell-updating svg,
   .notebook-cell-updating .output {
     background-color: #cbcbd0;
   }
+}
 
-  .insert-button {
-    background-image: url(/static/img/insertButton.svg);
-    opacity: 0.1;
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
+.cells {
+  margin-top: 50px;
 }
 
 .clone {
   background: $githubGreen;
   color: #fff;
   border: none;
-}
 
-.clone:hover {
-  color: #fff;
-  background: darken($githubGreen, 10%);
+  &:hover {
+    color: #fff;
+    background: darken($githubGreen, 10%);
+  }
 }
 
 .most-recent {
@@ -537,7 +543,6 @@ header h1 {
       margin: 5px;
       box-shadow: -3px 2px 17px $base00;
       padding: 5px;
-      border-radius: 5px;
 
       a,
       p {
@@ -557,9 +562,6 @@ header h1 {
   margin-bottom: 5px;
 
   img {
-    border-radius: 90px;
-    height: 50px;
-    width: 50px;
     margin-right: 5px;
   }
 }
@@ -589,16 +591,16 @@ img.avatar {
     display: none;
     position: absolute;
     width: auto;
-    padding: 8px;
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2);
     z-index: 1;
 
     > * {
       display: block;
       white-space: nowrap;
+      padding: 8px;
 
       &:hover {
-        background-color: $base1;
+        background-color: $accentColor;
       }
     }
   }

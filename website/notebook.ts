@@ -287,12 +287,14 @@ export class Cell extends Component<CellProps, CellState> {
         deleteButton,
         runButton,
       ),
-      h("div", {
-        "class": "output",
-        "id": "output" + this.id,
-        "ref": (ref => { this.output = ref; }),
-      }),
-      insertButton,
+      h("div", { "class": "output-container" },
+        h("div", {
+          "class": "output",
+          "id": "output" + this.id,
+          "ref": (ref => { this.output = ref; }),
+        }),
+        insertButton,
+      )
     );
   }
 }
