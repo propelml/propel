@@ -229,43 +229,13 @@ header {
   border-bottom: 1px solid $textColor;
   color: $textColor;
   padding: $size0 0;
-}
 
-header p {
-  font-size: 18px;
-  line-height: 28px;
-  font-weight: 100;
-  margin-top: -2px;
-  margin-bottom: 0;
-}
-
-header h1 {
-  margin: $size1 0 0 $size1;
-}
-
-@media (min-width: 600px) {
-  .nav-buttons {
-    text-align: left;
-    padding-left: 12px;
-  }
-
-  $desktopPanelSize: 250px;
-
-  .panel {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    height: auto;
-    position: fixed;
-    overflow-y: auto;
-    width: $desktopPanelSize;
-    background-color: $bodyBackground;
-  }
-
-  .doc-entries {
-    margin-left: $desktopPanelSize;
-    padding-left: $size1;
-    max-width: auto;
+  p {
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 100;
+    margin-top: -2px;
+    margin-bottom: 0;
   }
 }
 
@@ -499,3 +469,30 @@ img.avatar {
   }
 }
 
+// Mobile first. No desktop related things above this line.
+
+@media (min-width: 600px) {
+  .nav-buttons {
+    text-align: left;
+    padding-left: 12px;
+  }
+
+  $desktopPanelSize: 250px;
+
+  .panel {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    position: fixed;
+    overflow-y: auto;
+    width: $desktopPanelSize;
+    background-color: $bodyBackground;
+  }
+
+  .doc-entries {
+    margin-left: $desktopPanelSize;
+    padding-left: $size1;
+    max-width: auto;
+  }
+}
