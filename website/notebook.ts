@@ -492,6 +492,13 @@ export class MostRecent extends Component<any, MostRecentState> {
     }
   }
 
+  async onCreate() {
+    console.log("Click new");
+    const nbId = await db.active.create();
+    // Redirect to new notebook.
+    window.location.href = nbUrl(nbId);
+  }
+
   render() {
     if (!this.state.latest) {
       return h(Loading, null);
@@ -509,6 +516,10 @@ export class MostRecent extends Component<any, MostRecentState> {
       );
     });
     return h("div", { "class": "most-recent" },
+      h("button", {
+        "class": "create-notebook",
+        "onClick": () => this.onCreate(),
+      }, "Create Empty Notebook"),
       h("h2", null, "Recently Updated"),
       h("ol", null, ...notebookList),
     );
