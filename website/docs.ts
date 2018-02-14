@@ -100,19 +100,20 @@ const DocEntries = ({docs}) => {
     const tag = toTagName(entry.name);
     const out = [];
 
-    out.push(h("h2", { id: tag, "class": "name" }, entry.name,
-      entry.sourceUrl
-        ? h("a", { "class": "source-link", "href": entry.sourceUrl }, " source")
-        : null));
+    out.push(h("h2", { id: tag, "class": "name" },
+      h("a", { "href": "#" + tag }, entry.name)));
+
     if (entry.typestr) {
       out.push(div("typestr", entry.typestr));
     }
-
     if (entry.docstr) {
       out.push(markupDocStr(entry.docstr));
     }
 
-    return div("doc-entry", ...out);
+    const sourceLink = !entry.sourceUrl ? null
+      : h("a", { "class": "source-link", "href": entry.sourceUrl }, " source");
+
+    return div("doc-entry", sourceLink, ...out);
   });
   return div("doc-entries", ...entries);
 };

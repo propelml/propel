@@ -14,6 +14,10 @@ $borderColor: #eee;
 $accentColor: #589def;  // blue
 $shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
 
+$cellButtonSize: 24px;
+$cellButtonMargin: 2px;
+$nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
+
 /* NOTE html is set to 62.5% so that all the REM measurements
 throughout Skeleton are based on 10px sizing. So 1.5rem = 15px :) */
 html {
@@ -161,6 +165,12 @@ svg {
   background-color: #fff;
   max-width: 60rem;
 
+  .source-link {
+    float: right;
+    font-size: 10px;
+    color: #666;
+  }
+
   h2 {
     font-size: 20px;
     color: $linkColor;
@@ -168,13 +178,9 @@ svg {
   }
 
   h2,
+  .source-link,
   .typestr {
     margin: $size0;
-  }
-
-  .source-link {
-    font-size: 10px;
-    color: #666;
   }
 
   & .arg-global-header-title {
@@ -311,10 +317,6 @@ header h1 {
 }
 
 .notebook-cell {
-  $cellButtonSize: 24px;
-  $cellButtonMargin: 2px;
-  $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
-
   transition: border-left-color 0.2s;
   border-left: 1px solid $borderColor;
 
