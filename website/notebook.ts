@@ -506,6 +506,7 @@ export interface NotebookProps {
 export interface NotebookState {
   doc?: db.NotebookDoc;
   errorMsg?: string;
+  isCloningInProgress: boolean;
 }
 
 // This defines the Notebook cells component.
@@ -515,6 +516,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.state = {
       doc: null,
       errorMsg: null,
+      isCloningInProgress: false,
     };
   }
 
@@ -559,8 +561,13 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   async onClone() {
+    if (this.state.isCloningInProgress) {
+      return;
+    }
     console.log("Click clone");
+    this.setState({ isCloningInProgress: true });
     const clonedId = await db.active.clone(this.state.doc);
+    this.setState({ isCloningInProgress: false });
     // Redirect to new cloned notebook.
     window.location.href = nbUrl(clonedId);
   }
