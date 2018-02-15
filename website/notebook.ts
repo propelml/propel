@@ -87,6 +87,7 @@ export interface CellProps {
   // If onDelete or onInsertCell is null, it hides the button.
   onDelete?: () => void;
   onInsertCell?: () => void;
+  cellId?: number;
 }
 export interface CellState { }
 
@@ -131,6 +132,7 @@ export class Cell extends Component<CellProps, CellState> {
     if (nextCode !== this.code) {
       this.editor.setValue(nextCode);
       this.clearOutput();
+      this.run();
     }
   }
 
