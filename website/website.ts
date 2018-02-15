@@ -72,13 +72,11 @@ export const PropelIndex = (props) => {
   );
 };
 
-const ReferencesFooter = (props) => {
-  return h("section", { "class": "footer" }, link("references.html",
-    "References"));
-};
+const ReferencesFooter = () =>
+  div("footer", link("references.html", "References"));
 
-const Splash = (props) => {
-  return h("section", { "class": "splash" },
+const Splash = () =>
+  div("splash",
     h("header", null,
       h(PropelLogo, null),
       h("p", null, "Differential Programming in JavaScript")
