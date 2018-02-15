@@ -67,7 +67,9 @@ export const References = (props) => {
 export const PropelIndex = (props) => {
   return div("index",
     h(Splash, null),
-    h(Explainer, null),
+    h(Intro, null),
+    h(UseIt, null),
+    h(Perks, null),
     h(ReferencesFooter, null),
   );
 };
@@ -78,48 +80,79 @@ const ReferencesFooter = () =>
 const Splash = () =>
   div("splash",
     h("header", null,
-      h(PropelLogo, null),
-      h("p", null, "Differential Programming in JavaScript")
+      h(PropelLogo, null)
     ),
-    p(
-      headerButton("/docs", "API Ref"),
-      // Hide notebook link until more developed.
-      // headerButton("/notebook", "Notebook"),
-      headerButton("http://github.com/propelml/propel", "Github")
-    ),
-    h("p", { "class": "snippet-title" }, "Use it in Node:"),
-    fixed("npm install propel\nimport { grad } from \"propel\";"),
-    h("p", { "class": "snippet-title" }, "Use it in a browser:"),
-    fixed(`<script src="https://unpkg.com/propel@${version}"></script>`),
   );
-};
 
-const Explainer = (props) => {
-  return div("explainer-container",
-    div("explainer",
-      div("explainer-text",
-        p(b("Propel"), ` provides a GPU-backed numpy-like infrastructure
-          for scientific computing in JavaScript.  JavaScript is a fast,
-          dynamic language which, we think, could act as an ideal workflow
-          for scientific programmers of all sorts.`),
-        p(`Propel runs both in the browser and natively from Node. In
+const Intro = () =>
+  div("flex-row",
+    div("flex-cell",
+      h("h2", {}, "Machine learning for Javascript"),
+      p(
+        b("Propel"), ` provides a GPU-backed numpy-like infrastructure
+        for scientific computing in JavaScript.  JavaScript is a fast,
+        dynamic language which, we think, could act as an ideal workflow
+        for scientific programmers of all sorts.`),
+      p(
+        headerButton("/docs", "API Ref"),
+        // Hide notebook link until more developed.
+        // headerButton("/notebook", "Notebook"),
+        headerButton("http://github.com/propelml/propel", "Github")
+      )
+    ),
+    div("explainer-notebook flex-cell", nb.notebook(tanhGrads))
+  );
+
+const UseIt = () =>
+  div("use-it",
+    div("use-it-inner",
+      h("p", { "class": "snippet-title" }, "Use it in Node:"),
+      fixed("npm install propel\nimport { grad } from \"propel\";"),
+      h("p", { "class": "snippet-title" }, "Use it in a browser:"),
+      fixed(`<script src="https://unpkg.com/propel@${version}"></script>`)
+    )
+  );
+
+const Perks = () =>
+  div("perks",
+    div("flex-row",
+      div("flex-cell",
+        h("h2", { "class": "world" }, "Run anywhere."),
+        p(
+          `Propel runs both in the browser and natively from Node. In
           both environments Propel is able to use GPU hardware for
           computations.  In the browser it utilizes WebGL through `,
           link("https://deeplearnjs.org/", "deeplearn.js"),
           " and on Node it uses TensorFlow's ",
           link("https://www.tensorflow.org/install/install_c", "C API"),
-          "."),
-        p("Propel has an imperative ",
+          "."
+        ),
+      ),
+      div("flex-cell",
+        h("h2", { "class": "upward" }, "Phd optional."),
+        p(
+          "Propel has an imperative ",
           link("https://github.com/HIPS/autograd", "autograd"),
           `-style API, unlike TensorFlow.  Computation graphs are traced as
           you run them -- a general purpose `,
           i("gradient function"),
-          ` provides an elegant interface to backpropagation. `),
-        p(`Browsers are great for demos, but they are not a great numerics
+          ` provides an elegant interface to backpropagation.`
+        ),
+      ),
+    ),
+    div("flex-row",
+      div("flex-cell",
+        h("h2", { "class": "chip" }, "Did somebody say GPUs?"),
+        p(
+          `Browsers are great for demos, but they are not a great numerics
           platform. WebGL is a far cry from CUDA. By running Propel outside
           of the browser, users will be able to target multiple GPUs and
           make TCP connections. The models developed server-side will be
-          much easier to deploy as HTML demos.`),
+          much easier to deploy as HTML demos.`
+        ),
+      ),
+      div("flex-cell",
+        h("h2", { "class": "lightning" }, "Let's do this."),
         p(`The basic propel npm package is javascript only,
           without TensorFlow bindings. To upgrade your speed dramatically
           install`),
@@ -128,12 +161,10 @@ const Explainer = (props) => {
           "npm install propel_windows",
           "npm install propel_linux",
           "npm install propel_linux_gpu",
-        ].join("\n")),
+        ].join("\n"))
       ),
-      div("explainer-notebook", nb.notebook(tanhGrads))
     )
   );
-};
 
 const tanhGrads = `
 import { grad, linspace, plot } from "propel";
