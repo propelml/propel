@@ -16,8 +16,9 @@
 // This is the propelml.org website. It is used both server-side and
 // client-side for generating HTML.
 import { readFileSync } from "fs";
-import { h, render } from "preact";
-import { div, GlobalHeader, p, PropelLogo } from "./common";
+import { Component, h, render } from "preact";
+import { div, GlobalHeader, p, UserMenu } from "./common";
+import * as db from "./db";
 import { Docs } from "./docs";
 import * as nb from "./notebook";
 const { version } = require("../package.json");
@@ -66,7 +67,7 @@ export const References = (props) => {
 
 export const PropelIndex = (props) => {
   return div("index",
-    h(Splash, null),
+    h(Splash, props),
     h(Intro, null),
     h(UseIt, null),
     h(Perks, null),
@@ -77,11 +78,15 @@ export const PropelIndex = (props) => {
 const ReferencesFooter = () =>
   div("footer", link("references.html", "References"));
 
-const Splash = () =>
+const Splash = (props) =>
   div("splash",
+    // TODO "header" should be inside GlobalHeader.
     h("header", null,
-      h(PropelLogo, null)
-    ),
+      h(GlobalHeader, null,
+        h("a", { href: "/notebook" }, "Notebook"),
+        h(UserMenu, props)
+      ),
+    )
   );
 
 const Intro = () =>
@@ -211,6 +216,39 @@ export function getHTML(title, markup) {
   </script>
   </body>
 </html>`;
+}
+
+interface RouterState {
+  userInfo?: db.UserInfo;
+  loadingAuth: boolean;
+}
+
+// The root of all pages of the propel website.
+// Handles auth.
+export class Router extends Component<any, RouterState> {
+  constructor(props)  {
+    super(props);
+    this.state = {
+      userInfo: null,
+      loadingAuth: true,
+    };
+  }
+
+  unsubscribe: db.UnsubscribeCb;
+  componentWillMount() {
+    this.unsubscribe = db.active.subscribeAuthChange((userInfo) => {
+      this.setState({ loadingAuth: false, userInfo });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const page = route(document.location.pathname);
+    return h(page.root, { userInfo: this.state.userInfo });
+  }
 }
 
 export function route(pathname: string): Page {

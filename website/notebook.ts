@@ -26,7 +26,7 @@ import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
 import { assert, delay, IS_WEB } from "../src/util";
-import { GlobalHeader, Loading } from "./common";
+import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
 import { transpile } from "./nb_transpiler";
 
@@ -396,13 +396,17 @@ async function importModule(target) {
   throw new Error("Unknown module: " + target);
 }
 
-interface NotebookRootState {
-  loadingAuth: boolean;
-  nbId?: string;
+interface NotebookRootProps {
   userInfo?: db.UserInfo;
+  nbId?: string;
 }
 
-export class NotebookRoot extends Component<any, NotebookRootState> {
+interface NotebookRootState {
+  nbId?: string;
+}
+
+export class NotebookRoot extends Component<NotebookRootProps,
+                                            NotebookRootState> {
   constructor(props) {
     super(props);
 
@@ -414,22 +418,7 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
       nbId = matches ? matches[1] : null;
     }
 
-    this.state = {
-      loadingAuth: true,
-      nbId,
-      userInfo: null,
-    };
-  }
-
-  unsubscribe: db.UnsubscribeCb;
-  componentWillMount() {
-    this.unsubscribe = db.active.subscribeAuthChange((userInfo) => {
-      this.setState({ loadingAuth: false, userInfo });
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
+    this.state = { nbId };
   }
 
   render() {
@@ -437,7 +426,7 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
     if (this.state.nbId) {
       body = h(Notebook, {
         nbId: this.state.nbId,
-        userInfo: this.state.userInfo,
+        userInfo: this.props.userInfo,
       });
     } else {
       body = h(MostRecent, null);
@@ -447,28 +436,9 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
       h(GlobalHeader, {
         subtitle: "Notebook",
         subtitleLink: "/notebook",
-      }, h(UserMenu, { userInfo: this.state.userInfo })),
+      }, h(UserMenu, { userInfo: this.props.userInfo })),
       body,
     );
-  }
-}
-
-function UserMenu(props) {
-  if (props.userInfo) {
-    return h("div", { "class": "dropdown" },
-      h(Avatar, { size: 32, userInfo: props.userInfo }),
-      h("div", { "class": "dropdown-content" },
-        h("a", {
-          "href": "#",
-          "onclick": db.active.signOut,
-        }, "Sign out"),
-      )
-    );
-  } else {
-    return h("button", {
-      "class": "clone",
-      "onclick": db.active.signIn,
-    }, "Sign in");
   }
 }
 
@@ -663,14 +633,6 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
     ...dates
   ]);
 }
-
-const Avatar = (props: { size?: number, userInfo: db.UserInfo }) => {
-  const size = props.size || 50;
-  return h("img", {
-    "class": "avatar",
-    src: props.userInfo.photoURL + "&size=" + size,
-  });
-};
 
 function fmtDate(d: Date): string {
   return d.toISOString();

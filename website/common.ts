@@ -1,4 +1,5 @@
 import { h } from "preact";
+import * as db from "./db";
 
 export function Loading(props) {
   return h("h1", null, "Loading");
@@ -40,4 +41,30 @@ export function div(className, ...children) {
 
 export function p(...children) {
   return h("p", null, ...children);
+}
+
+export function UserMenu(props) {
+  if (props.userInfo) {
+    return h("div", { "class": "dropdown" },
+      h(Avatar, { size: 32, userInfo: props.userInfo }),
+      h("div", { "class": "dropdown-content" },
+        h("a", {
+          "href": "#",
+          "onclick": db.active.signOut,
+        }, "Sign out"),
+      )
+    );
+  } else {
+    return h("a", {
+      "onclick": db.active.signIn,
+    }, "Sign in");
+  }
+}
+
+export function Avatar(props: { size?: number, userInfo: db.UserInfo }) {
+  const size = props.size || 50;
+  return h("img", {
+    "class": "avatar",
+    src: props.userInfo.photoURL + "&size=" + size,
+  });
 }

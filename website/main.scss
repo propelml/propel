@@ -275,7 +275,20 @@ header {
   }
 
   .global-header-right {
-    margin: auto 0;
+    display: flex;
+    flex-direction: row;
+
+    > * {
+      display: block;
+      margin: auto 0 auto 36px;
+    }
+
+    a {
+      font-size: 14pt;
+      font-variant: all-small-caps;
+      text-decoration: none;
+      color: $accentColor;
+    }
   }
 }
 
@@ -475,13 +488,13 @@ img.avatar {
 
 .dropdown {
   position: relative;
-  display: inline-block;
 
   .dropdown-content {
     display: none;
     position: absolute;
     width: auto;
     box-shadow: $shadow;
+    background: $bodyBackground;
     z-index: 1;
 
     > * {
