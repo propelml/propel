@@ -298,6 +298,14 @@ header {
     font-weight: normal;
   }
 
+  a,
+  a:hover,
+  a:visited,
+  a:active {
+    text-decoration: none;
+    color: inherit;
+  }
+
   * {
     margin: auto 0;
     margin-right: $size0;

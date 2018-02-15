@@ -444,9 +444,10 @@ export class NotebookRoot extends Component<any, NotebookRootState> {
     }
 
     return h("div", { "class": "notebook" },
-      h(GlobalHeader, { subtitle: "Notebook" },
-        h(UserMenu, { userInfo: this.state.userInfo })
-      ),
+      h(GlobalHeader, {
+        subtitle: "Notebook",
+        subtitleLink: "/notebook",
+      }, h(UserMenu, { userInfo: this.state.userInfo })),
       body,
     );
   }
