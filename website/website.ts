@@ -90,7 +90,7 @@ const Splash = (props) =>
   );
 
 const Intro = () =>
-  div("flex-row",
+  div("intro flex-row",
     div("flex-cell",
       h("h2", {}, "Machine learning for Javascript"),
       p(

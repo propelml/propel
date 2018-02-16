@@ -53,10 +53,17 @@ p {
   margin: $size1;
 }
 
-h1 {
-  font-size: 4rem;
+h1, h2 {
   letter-spacing: -0.1rem;
   line-height: 1.2;
+}
+
+h1 {
+  font-size: 4rem;
+}
+
+h2 {
+  font-size: 2.5rem;
 }
 
 @media (min-width: 550px) {
@@ -123,9 +130,13 @@ code {
   background-color: $bodyBackground;
 }
 
+.intro h2 {
+  margin-top: $size0;
+}
+
 .use-it {
   background: #fafafa;
-  padding: $size2;
+  padding: $size2 $size0;
 
   p {
     margin: $size1 0 0 0;
@@ -359,7 +370,7 @@ header {
   .input > pre,
   .output {
     margin: 0;
-    padding: 10px;
+    padding: $size0;
     white-space: pre-wrap;
     word-break: keep-all;
 
