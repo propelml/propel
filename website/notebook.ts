@@ -396,12 +396,12 @@ async function importModule(target) {
   throw new Error("Unknown module: " + target);
 }
 
-interface NotebookRootProps {
+export interface NotebookRootProps {
   userInfo?: db.UserInfo;
   nbId?: string;
 }
 
-interface NotebookRootState {
+export interface NotebookRootState {
   nbId?: string;
 }
 
@@ -442,7 +442,7 @@ export class NotebookRoot extends Component<NotebookRootProps,
   }
 }
 
-interface MostRecentState {
+export interface MostRecentState {
   latest: db.NbInfo[];
 }
 
@@ -499,13 +499,13 @@ export class MostRecent extends Component<any, MostRecentState> {
   }
 }
 
-interface NotebookProps {
+export interface NotebookProps {
   nbId: string;
   onReady?: () => void;
   userInfo?: db.UserInfo;  // Info about the currently logged in user.
 }
 
-interface NotebookState {
+export interface NotebookState {
   doc?: db.NotebookDoc;
   errorMsg?: string;
 }

@@ -218,7 +218,7 @@ export function getHTML(title, markup) {
 </html>`;
 }
 
-interface RouterState {
+export interface RouterState {
   userInfo?: db.UserInfo;
   loadingAuth: boolean;
 }
