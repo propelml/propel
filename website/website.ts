@@ -105,7 +105,7 @@ const Intro = () =>
         headerButton("http://github.com/propelml/propel", "Github")
       )
     ),
-    div("explainer-notebook flex-cell", nb.notebook(tanhGrads))
+    div("intro-notebook flex-cell", nb.notebook(tanhGrads))
   );
 
 const UseIt = () =>

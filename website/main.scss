@@ -109,18 +109,34 @@ code {
 
 .flex-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
 
   .flex-cell {
     flex-basis: 0;
     flex-grow: 1;
     padding: $size2 0;
-    min-width: 300px;
     padding: $size0;
 
     p {
       margin: 0;
+    }
+  }
+
+  @media (max-width: 550px) {
+    flex-wrap: wrap;
+
+    .flex-cell {
+      flex-basis: 100%;
+    }
+
+    .flex-cell.intro-notebook {
+      padding: 0;
+
+      .notebook-cell {
+        border-left: 0;
+        border-right: 0;
+      }
     }
   }
 }
@@ -551,3 +567,4 @@ img.avatar {
     max-width: auto;
   }
 }
+
