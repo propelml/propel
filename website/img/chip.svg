@@ -1,0 +1,8 @@
+<svg width="32" height="32" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<use xlink:href="#path0_fill" fill="#1E2937"/>
+<use xlink:href="#path1_fill" transform="translate(7 7)" fill="#FFFFFF"/>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 16 32C 24.8366 32 32 24.8366 32 16C 32 7.16344 24.8366 0 16 0C 7.16344 0 0 7.16344 0 16C 0 24.8366 7.16344 32 16 32Z"/>
+<path id="path1_fill" fill-rule="evenodd" d="M 18 8L 18 6L 16 6L 16 4C 16 2.8999 15.1001 2 14 2L 12 2L 12 0L 10 0L 10 2L 8 2L 8 0L 6 0L 6 2L 4 2C 2.8999 2 2 2.8999 2 4L 2 6L 0 6L 0 8L 2 8L 2 10L 0 10L 0 12L 2 12L 2 14C 2 15.1001 2.8999 16 4 16L 6 16L 6 18L 8 18L 8 16L 10 16L 10 18L 12 18L 12 16L 14 16C 15.1001 16 16 15.1001 16 14L 16 12L 18 12L 18 10L 16 10L 16 8L 18 8ZM 6 6L 12 6L 12 12L 6 12L 6 6ZM 8 10L 10 10L 10 8L 8 8L 8 10ZM 4 14L 14 14L 14 4L 4 4L 4 14Z"/>
+</defs>
+</svg>
