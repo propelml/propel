@@ -56,6 +56,7 @@ export function UserMenu(props) {
     );
   } else {
     return h("a", {
+      "href": "#",
       "onclick": db.active.signIn,
     }, "Sign in");
   }
