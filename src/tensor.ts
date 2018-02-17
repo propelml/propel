@@ -550,6 +550,25 @@ export class Tensor implements types.BasicTensor {
   setDiag(diag: types.TensorLike): Tensor {
     return ops.setDiag(this, this.colocate(diag, this.dtype));
   }
+
+  /** To rescale a tensor from inScale to outScale.
+   * This is often used rescale images from [0, 255] integer
+   * range to [-1, 1] range. This function will automatically cast tensors to
+   * float32.
+   *
+   *    import { T } from "propel";
+   *    let pretendImage = T([0, 127, 255], "int32");
+   *    pretendImage.rescale([0, 255], [-1, 1]);
+   */
+  rescale(inScale: [number, number], outScale: [number, number]): Tensor {
+    assert(inScale[0] < inScale[1]);
+    assert(outScale[0] < outScale[1]);
+    return this.cast("float32")
+               .sub(inScale[0])
+               .div(inScale[1] - inScale[0])
+               .mul(outScale[1] - outScale[0])
+               .add(outScale[0]);
+  }
 }
 
 /** Like range() but outputs a javascript array of numbers. */

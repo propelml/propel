@@ -1069,3 +1069,9 @@ test(async function api_rangeIterable() {
   }
   assertAllEqual(items, [0, 1, 2]);
 });
+
+test(async function api_rescale() {
+  const t = T([0, 50, 255]);
+  const r = t.rescale([0, 255], [-1, 1]);
+  assertAllClose(r, [-1, -0.607843137254902, 1]);
+});
