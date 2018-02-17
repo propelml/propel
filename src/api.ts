@@ -19,8 +19,8 @@ import { convert, gc, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
-export { Params } from "./params";
-import { Params } from "./params";
+export { params, Params } from "./params";
+import { params, Params } from "./params";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
@@ -159,18 +159,6 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, opts);
 }
 
-/** Constructs a new params object.
- * Same as `new Params()`. See the documentation for in the Params class for
- * more info.
- *
- *    import * as pr from "propel";
- *    let params = pr.params();
- *    params.randn("Weights", [2, 5]);
- */
-export function params(): Params {
-  return new Params();
-}
-
 /** Stochastic gradient descent with momentum. */
 export class OptimizerSGD {
   steps: number;
@@ -187,8 +175,8 @@ export class OptimizerSGD {
 
   constructor() {
     this.steps = 0;
-    this.params = new Params();
-    this.velocity = new Params();
+    this.params = params();
+    this.velocity = params();
   }
 
   step(learningRate: number, momentum: number, lossFn: ParamsFn): number {
@@ -204,13 +192,13 @@ export class OptimizerSGD {
       // Forward/Backward pass
       const [grads, loss] = gradFn(this.params);
       assert(loss.rank === 0);
-      assert(grads instanceof Params);
 
       // TODO allow access to grads.
       // this.grads = grads;
 
       // Update each param tensor.
-      grads.forEach((g, name) => {
+      for (const name of Object.keys(grads)) {
+        const g = grads[name];
         const p = this.params.get(name);
         const v = this.velocity.zeros(name, p.shape);
         if (this.steps > 0) {
@@ -227,7 +215,7 @@ export class OptimizerSGD {
         // p += v * lr
         p.assign(p.add(v.mul(learningRate)));
         keep(p);
-      });
+      }
 
       this.steps++;
       lossValue = loss.cpu().getData()[0];

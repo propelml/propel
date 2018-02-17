@@ -89,8 +89,10 @@ export interface ParamsFn {
   (params: Params): Tensor;
 }
 
+export interface NamedGrads { [name: string]: Tensor; }
+
 export function gradParams(f: ParamsFn, names?: string[]) {
-  return function(params: Params): [Params, Tensor] {
+  return function(params: Params): [NamedGrads, Tensor] {
     pushNewTape();
     // Watch the specified tensors..
     if (names) {
@@ -114,10 +116,10 @@ export function gradParams(f: ParamsFn, names?: string[]) {
     const grads = imperativeGrad(result, targs);
     // Now grads is an array, which we want to turn back into a params object.
     assert(grads.length === order.length);
-    const out = new Params();
+    const out = {};
     for (let i = 0; i < order.length; ++i) {
       const n = order[i];
-      out.set(n, grads[i]);
+      out[n] = grads[i];
     }
     return [out, result];
   };
