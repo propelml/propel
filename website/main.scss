@@ -525,6 +525,7 @@ img.avatar {
       padding: $size0;
 
       &:hover {
+        color: $bodyBackground;
         background-color: $accentColor;
       }
     }
