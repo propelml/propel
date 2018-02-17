@@ -1,6 +1,4 @@
-import { randn, Tensor, zeros } from "./api";
-import { bo } from "./backend";
-import * as types from "./types";
+import { Tensor } from "./api";
 
 /** Constructs a new params object.
  * Same as `new Params()`. See the documentation for in the Params class for
@@ -25,7 +23,7 @@ export function params(): Params {
  * 2) the shape and dtype of the tensor
  * 3) the initial value.
  *
- * The way this is done is by methods randn() and zeros()
+ * The way this is done is with the init() method
  * on the params object. They are each given a name, shape, and dtype,
  * if the name doesn't already exist in the params object, it is initialized.
  * Otherwise it is returned without modification.
@@ -43,8 +41,8 @@ export interface Params {
    *
    *    import * as pr from "propel";
    *    let params = pr.params();
-   *    params.randn("A", [2]);
-   *    params.zeros("B", [2, 2]);
+   *    params.init("A", () => pr.randn([2]));
+   *    params.init("B", () => pr.zeros([2, 2]));
    *    params.forEach((tensor, name) => {
    *      console.log(name);
    *      console.log(tensor);
@@ -57,21 +55,10 @@ export interface Params {
    */
   scope(prefix: string): Params;
 
-  // TODO The following  should have the same interface as top-level ones in
-  // api.
-
-  /** If the given name does not exist in the parameters object, this
-   * initializes a new random normal tensor. If the name does exist
-   * in the parameters object, this just returns that stored tensor.
+  /** Initializes a new tensor if it doesn't already exist in the
+   * params object, otherwise returns the existing param of the given name.
    */
-  randn(name: string, shape: types.Shape, opts?): Tensor;
-
-  /** If the given name does not exist in the parameters object, this
-   * initializes a new tensor with zero values. If the name does exist
-   * in the parameters object, this just returns that stored tensor.
-   */
-  zeros(name: string, shape: types.Shape, dtype?: types.DType,
-        device?: string): Tensor;
+  init(name: string, initFn: () => Tensor): Tensor;
 }
 
 class RootParams implements Params {
@@ -103,41 +90,12 @@ class RootParams implements Params {
     return new ScopedParams(this, prefix);
   }
 
-  randn(name: string, shape: types.Shape,
-        { device = "CPU:0", scale = 0.1 } = {}): Tensor {
-    if (!(shape instanceof Array)) {
-      throw new Error("Randn takes a shape as an argument");
+  init(name: string, initFn: () => Tensor): Tensor {
+    let t = this.get(name);
+    if (!t) {
+      t = initFn();
+      this.set(name, t);
     }
-    if (this.has(name)) {
-      return this.get(name);
-    }
-    // Initialize.
-    let t = randn(shape).mul(scale);
-    if (device && device !== "CPU:0") {
-      t = new Tensor(bo.copyToDevice(t.basic, device));
-    }
-    this.set(name, t);
-    return t;
-  }
-
-  /** If the given name does not exist in the parameters object, this
-   * initializes a new tensor with zero values. If the name does exist
-   * in the parameters object, this just returns that stored tensor.
-   */
-  zeros(name: string, shape: types.Shape, dtype: types.DType = "float32",
-        device = "CPU:0"): Tensor {
-    if (!(shape instanceof Array)) {
-      throw new Error("Zeros takes a shape as an argument");
-    }
-    if (this.has(name)) {
-      return this.get(name);
-    }
-    // Initialize.
-    let t = zeros(shape);
-    if (device && device !== "CPU:0") {
-      t = new Tensor(bo.copyToDevice(t.basic, device));
-    }
-    this.set(name, t);
     return t;
   }
 }
@@ -173,13 +131,7 @@ class ScopedParams implements Params {
     return this.parent.scope(this.resolve(prefix));
   }
 
-  randn(name: string, shape: types.Shape,
-        { device = "CPU:0", scale = 0.1 } = {}): Tensor {
-    return this.parent.randn(this.resolve(name), shape, {device, scale});
-  }
-
-  zeros(name: string, shape: types.Shape, dtype: types.DType = "float32",
-        device = "CPU:0"): Tensor {
-    return this.parent.zeros(this.resolve(name), shape, dtype, device);
+  init(name: string, initFn: () => Tensor): Tensor {
+    return this.parent.init(this.resolve(name), initFn);
   }
 }

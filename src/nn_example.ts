@@ -15,7 +15,7 @@
 // Simple MNIST classifier.
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
-import { OptimizerSGD, Params, T, Tensor } from "./api";
+import { OptimizerSGD, Params, randn, T, Tensor } from "./api";
 import * as plt from "./matplotlib";
 import * as mnist from "./mnist";
 import { assert, IS_WEB } from "./util";
@@ -40,8 +40,10 @@ function inference(params: Params, images: Tensor) {
     const m = layerSizes[i];
     const n = layerSizes[i + 1];
     // Initialize or get weights and biases.
-    const w = params.randn(`w${i}`, [m, n], {device});
-    const b = params.randn(`b${i}`, [n], {device});
+    const w = params.init(`w${i}`, () =>
+      randn([m, n], { dtype: "float32", device }));
+    const b = params.init(`b${i}`, () =>
+      randn([n], { dtype: "float32", device }));
     assert(w.device === device);
     assert(b.device === device);
     outputs = inputs.matmul(w).add(b);

@@ -969,8 +969,10 @@ testDevices(async function api_neuralNet(T, device) {
       const m = layerSizes[i];
       const n = layerSizes[i + 1];
       // Initialize or get weights and biases.
-      const w = params.randn(`w${i}`, [m, n], {device});
-      const b = params.zeros(`b${i}`, [n], "float32", device);
+      const w = params.init(`w${i}`, () =>
+        randn([m, n], { dtype: "float32", device }));
+      const b = params.init(`b${i}`, () =>
+        zeros([n], { dtype: "float32", device }));
       outputs = inputs.matmul(w).add(b);
       inputs = outputs.relu();
     }
