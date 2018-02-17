@@ -163,7 +163,31 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, opts);
 }
 
-/** Stochastic gradient descent with momentum. */
+interface SGDOpts {
+  lr: number;
+  momentum?: number; // TODO currently unused.
+}
+
+import { gradParams2 } from "./backprop";
+
+export function sgd(loss: Tensor, params: Params, opts: SGDOpts): void {
+  // In sgd() we assume the loss is a function of the params already.
+  assert(loss.rank === 0);
+  gc((keep) => {
+    const grads = gradParams2(loss, params);
+
+    for (const name of Object.keys(grads)) {
+      const g = grads[name];
+      const p = params.get(name);
+      // p -= g * lr
+      p.assign(p.sub(g.mul(opts.lr)));
+    }
+  });
+}
+
+/** Stochastic gradient descent with momentum.
+ * This class is deprecated. Please use sgd() instead.
+ */
 export class OptimizerSGD {
   steps: number;
   params: Params;

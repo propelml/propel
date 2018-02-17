@@ -1,4 +1,5 @@
 import { Tensor } from "./api";
+import { watch } from "./backprop";
 
 /** Constructs a new params object.
  * Same as `new Params()`. See the documentation for in the Params class for
@@ -57,6 +58,7 @@ export interface Params {
 
   /** Initializes a new tensor if it doesn't already exist in the
    * params object, otherwise returns the existing param of the given name.
+   * All tensors in the params object get automatically traced for backprop.
    */
   init(name: string, initFn: () => Tensor): Tensor;
 }
@@ -95,6 +97,7 @@ class RootParams implements Params {
     if (!t) {
       t = initFn();
       this.set(name, t);
+      watch(t);
     }
     return t;
   }
