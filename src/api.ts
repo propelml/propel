@@ -115,8 +115,12 @@ export function range(...args: number[]): Tensor {
  *    n = 1000
  *    plot(range(n), randn([n]))
  */
-export function randn(shape: number[]): Tensor {
-  const t = bo.randn(shape);
+export function randn(shape: number[],
+                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  let t = bo.randn(shape);
+  if (opts.device && opts.device !== "CPU:0") {
+    t = bo.copyToDevice(t, opts.device);
+  }
   return new Tensor(t);
 }
 
@@ -200,7 +204,7 @@ export class OptimizerSGD {
       for (const name of Object.keys(grads)) {
         const g = grads[name];
         const p = this.params.get(name);
-        const v = this.velocity.zeros(name, p.shape);
+        const v = this.velocity.init(name, () => zeros(p.shape));
         if (this.steps > 0) {
           assertShapesEqual(p.shape, g.shape);
           assertShapesEqual(p.shape, v.shape);
