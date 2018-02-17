@@ -73,7 +73,7 @@ of tests which currently must be run manually:
 
 ### Adding An Op
 
-Propel is under heavy development and is missing implementaions for many common
+Propel is under heavy development and is missing implementations for many common
 ops. Here is a rough outline of how to add an op
 
   1. Add the frontend implementation to `api.ts` or `tensor.ts` (depending on
