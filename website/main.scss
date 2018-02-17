@@ -458,11 +458,16 @@ header {
       margin: auto 0 auto 36px;
     }
 
+    > :first-child {
+      margin-left: 0;
+    }
+
     a {
       font-size: 14pt;
       font-variant: all-small-caps;
       text-decoration: none;
       color: $accentColor;
+      white-space: nowrap;
     }
   }
 }
