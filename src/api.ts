@@ -19,6 +19,8 @@ import { convert, gc, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
+export { Params } from "./params";
+import { Params } from "./params";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
@@ -157,81 +159,16 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, opts);
 }
 
-/** A collection of named Tensors. Used with OptimizerSGD.
- * Iterate over it like this:
+/** Constructs a new params object.
+ * Same as `new Params()`. See the documentation for in the Params class for
+ * more info.
  *
- *    import { Params } from "propel";
- *    let params = new Params()
- *    params.randn("A", [2]);
- *    params.zeros("B", [2, 2]);
- *    params.forEach((tensor, name) => {
- *      console.log(name);
- *      console.log(tensor);
- *    });
+ *    import * as pr from "propel";
+ *    let params = pr.params();
+ *    params.randn("Weights", [2, 5]);
  */
-export class Params {
-  // Note TS doesn't allow extending Map:
-  // https://github.com/Microsoft/TypeScript/issues/10853
-  private store = new Map<string, Tensor>();
-
-  has(name: string): boolean {
-    return this.store.has(name);
-  }
-
-  get(name: string): Tensor {
-    return this.store.get(name);
-  }
-
-  set(name: string, t: Tensor): Tensor {
-    this.store.set(name, t);
-    return t;
-  }
-
-  forEach(cb): void {
-    this.store.forEach(cb);
-  }
-
-  /** If the given name does not exist in the parameters object, this
-   * initializes a new random normal tensor. If the name does exist
-   * in the parameters object, this just returns that stored tensor.
-   */
-  randn(name: string, shape: types.Shape,
-        { device = "CPU:0", scale = 0.1 } = {}): Tensor {
-    if (!(shape instanceof Array)) {
-      throw new Error("Randn takes a shape as an argument");
-    }
-    if (this.has(name)) {
-      return this.get(name);
-    }
-    // Initialize.
-    let t = randn(shape).mul(scale);
-    if (device && device !== "CPU:0") {
-      t = new Tensor(bo.copyToDevice(t.basic, device));
-    }
-    this.set(name, t);
-    return t;
-  }
-
-  /** If the given name does not exist in the parameters object, this
-   * initializes a new tensor with zero values. If the name does exist
-   * in the parameters object, this just returns that stored tensor.
-   */
-  zeros(name: string, shape: types.Shape, dtype: types.DType = "float32",
-        device = "CPU:0"): Tensor {
-    if (!(shape instanceof Array)) {
-      throw new Error("Zeros takes a shape as an argument");
-    }
-    if (this.has(name)) {
-      return this.get(name);
-    }
-    // Initialize.
-    let t = zeros(shape);
-    if (device && device !== "CPU:0") {
-      t = new Tensor(bo.copyToDevice(t.basic, device));
-    }
-    this.set(name, t);
-    return t;
-  }
+export function params(): Params {
+  return new Params();
 }
 
 /** Stochastic gradient descent with momentum. */

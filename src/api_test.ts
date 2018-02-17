@@ -945,7 +945,7 @@ test(async function api_softmaxCE() {
 });
 
 test(async function api_params() {
-  const params = new Params();
+  const params = api.params();
   // randn
   const a = params.randn("a", [2, 3]);
   assert(a.getData()[0] !== 0);
@@ -1003,7 +1003,7 @@ testDevices(async function api_neuralNet(T, device) {
   // Just zero data.
   const images = T(zeros([16, 28, 28], {dtype: "int32"}));
   const labels = T(zeros([16], {dtype: "int32"}));
-  let params = new Params();
+  let params = api.params();
   const gradFn = api.gradParams((params: Params): Tensor => {
     return loss(images, labels, params);
   });
@@ -1011,7 +1011,7 @@ testDevices(async function api_neuralNet(T, device) {
   const learningRate = 0.001;
   for (let i = 0; i < steps; i++) {
     const [grads] = gradFn(params);
-    const updated = new Params();
+    const updated = api.params();
     grads.forEach((g, name) => {
       const p = params.get(name);
       if (i > 0) {
