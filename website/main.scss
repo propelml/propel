@@ -513,6 +513,7 @@ img.avatar {
   .dropdown-content {
     display: none;
     position: absolute;
+    right: 0;
     width: auto;
     box-shadow: $shadow;
     background: $bodyBackground;
