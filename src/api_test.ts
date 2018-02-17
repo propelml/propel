@@ -944,21 +944,6 @@ test(async function api_softmaxCE() {
   ]);
 });
 
-test(async function api_params() {
-  const params = api.params();
-  // randn
-  const a = params.randn("a", [2, 3]);
-  assert(a.getData()[0] !== 0);
-  assertShapesEqual(a.shape, [2, 3]);
-  const aa = params.randn("a", [2, 3]);
-  assertAllEqual(a, aa);
-  // zeros
-  const b = params.zeros("b", [2, 3]);
-  assertAllEqual(b, [[0, 0, 0], [0, 0, 0]]);
-  const bb = params.zeros("b", [2, 3]);
-  assertAllEqual(b, bb);
-});
-
 test(async function api_devicePlacement() {
   if (!gpuAvail()) {
     console.log("GPU not available. Skipping testDevicePlacement.");
@@ -1012,13 +997,14 @@ testDevices(async function api_neuralNet(T, device) {
   for (let i = 0; i < steps; i++) {
     const [grads] = gradFn(params);
     const updated = api.params();
-    grads.forEach((g, name) => {
+    for (const name of Object.keys(grads)) {
+      const g = grads[name];
       const p = params.get(name);
       if (i > 0) {
         assertShapesEqual(p.shape, g.shape);
       }
       updated.set(name, p.sub(g.mul(learningRate)));
-    });
+    }
     params = updated;
   }
 });

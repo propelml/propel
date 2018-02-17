@@ -60,8 +60,8 @@ function loss(images, labels, params: Params): Tensor {
 
 // Regularization loss. Computes L2 norm of all the params scaled by reg.
 function regLoss(params: Params): Tensor {
-  let s = 0;
-  params.forEach((p) => {
+  let s: number | Tensor = 0;
+  params.forEach(p => {
     s = p.square().reduceSum().add(s);
   });
   return T(s).mul(reg);
