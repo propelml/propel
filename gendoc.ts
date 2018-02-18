@@ -6,13 +6,14 @@
    full control.
 */
 // tslint:disable:object-literal-sort-keys
-import { spawnSync, execSync } from "child_process";
+import * as assert from "assert";
+import { execSync, spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
-import { assert } from "../util";
-import { DocEntry, ArgEntry } from "../website";
+import { ArgEntry, DocEntry } from "../website/docs";
 
+const repoBasePath = path.resolve(__dirname, "..");
 const repoBaseUrl = "https://github.com/propelml/propel";
 
 const fileGithubUrls = new Map<string, string>();
@@ -22,7 +23,7 @@ function getGithubUrlForFile(fileName: string) {
     return fileGithubUrls.get(fileName);
   }
 
-  const baseName = path.basename(fileName);
+  const relName = path.relative(repoBasePath, fileName).replace(/\\/g, "/");
 
   // Sanity check: verify that the file in it's current form has been
   // committed.
@@ -31,7 +32,7 @@ function getGithubUrlForFile(fileName: string) {
     encoding: "utf8"
   });
   if (/\S/.test(stdout)) {
-    throw new Error(`File has been modified since last commit: ${baseName}.`);
+    throw new Error(`File has been modified since last commit: ${relName}.`);
   }
 
   // Get the commit hash for that most recent commit that updated a file.
@@ -43,7 +44,7 @@ function getGithubUrlForFile(fileName: string) {
     encoding: "utf8"
   });
   const commitSha = stdout.match(/^\s*([0-9a-fA-F]{40})\s*$/)[1];
-  const githubUrl = `${repoBaseUrl}/blob/${commitSha}/${baseName}`;
+  const githubUrl = `${repoBaseUrl}/blob/${commitSha}/${relName}`;
 
   // Sanity check: verify that the inferred github url can actually be
   // loaded.
@@ -54,7 +55,7 @@ function getGithubUrlForFile(fileName: string) {
   );
   if (status !== 0) {
     const msg =
-      `File committed but not available on github: ${baseName}\n` +
+      `File committed but not available on github: ${relName}\n` +
       `You probably need to push your branch to github.\n` +
       stderr;
     console.warn(msg);
@@ -108,9 +109,8 @@ export function genJSON(): DocEntry[] {
 
     // Find the SourceFile object corresponding to our rootFile.
     let rootSourceFile = null;
-    let rootBaseName = path.basename(rootFile);
     for (const sourceFile of program.getSourceFiles()) {
-      if (sourceFile.fileName.endsWith(rootBaseName)) {
+      if (path.resolve(sourceFile.fileName) === path.resolve(rootFile)) {
         rootSourceFile = sourceFile;
         break;
       }
@@ -191,7 +191,7 @@ export function genJSON(): DocEntry[] {
     const sigStr = checker.signatureToString(sig);
     let name;
     if (!className) {
-      name = methodName
+      name = methodName;
     } else if (methodName.startsWith("[")) {
       // EG [Symbol.iterator]
       name = className + methodName;
@@ -327,7 +327,7 @@ export function genJSON(): DocEntry[] {
   }
 
   // TODO use tsconfig.json instead of supplying config.
-  gen(__dirname + "/../api.ts", {
+  gen(repoBasePath + "/src/api.ts", {
     target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS
   });
 
@@ -339,7 +339,7 @@ function writeJSON() {
   const target = process.argv[2];
   if (!target) {
     console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs.json");
-    process.exit(1)
+    process.exit(1);
   }
   const docs = genJSON();
   const j = JSON.stringify(docs, null, 2);
