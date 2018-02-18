@@ -163,7 +163,7 @@ export function ones(shape: types.Shape,
   return ops.ones(shape, opts);
 }
 
-interface SGDOpts {
+export interface SGDOpts {
   lr: number;
   momentum?: number; // TODO currently unused.
 }

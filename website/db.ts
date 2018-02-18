@@ -177,7 +177,7 @@ class DatabaseFB implements Database {
   }
 }
 
-class DatabaseMock implements Database {
+export class DatabaseMock implements Database {
   counts = {};
   inc(method) {
     if (method in this.counts) {

@@ -606,7 +606,7 @@ export class Tensor implements types.BasicTensor {
   }
 }
 
-interface LinearOpts {
+export interface LinearOpts {
   useBias?: boolean;
   scale?: number;
   // TODO custom initializers.
