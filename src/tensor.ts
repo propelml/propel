@@ -443,8 +443,8 @@ export class Tensor implements types.BasicTensor {
 
   /** Return a copy of the tensor collapsed into one dimension.
    *
-   *    import { T } from "propel";
-   *    T([[1, 2], [3, 4]]).flatten();
+   *    import { tensor } from "propel";
+   *    tensor([[1, 2], [3, 4]]).flatten();
    */
   flatten(): Tensor {
     return this.reshape([-1]);
@@ -452,8 +452,8 @@ export class Tensor implements types.BasicTensor {
 
   /** Remove single-dimensional axes from the shape of a tensor.
    *
-   *    import { T } from "propel";
-   *    T([[[2, 3, 4]]]).squeeze();
+   *    import { tensor } from "propel";
+   *    tensor([[[2, 3, 4]]]).squeeze();
    */
   squeeze(): Tensor {
     const newShape = this.shape.filter((d) => d > 1);
@@ -516,8 +516,8 @@ export class Tensor implements types.BasicTensor {
 
   /** Build a one-hot tensor from labels.
    *
-   *    import { T } from "propel";
-   *    let labels = T([1, 3, 0], {dtype: "int32"});
+   *    import { tensor } from "propel";
+   *    let labels = tensor([1, 3, 0], {dtype: "int32"});
    *    labels.oneHot(5);
    */
   oneHot(depth: number, onValue = 1.0, offValue = 0.0): Tensor {
@@ -557,8 +557,8 @@ export class Tensor implements types.BasicTensor {
    * range to [-1, 1] range. This function will automatically cast tensors to
    * float32.
    *
-   *    import { T } from "propel";
-   *    let pretendImage = T([0, 127, 255], "int32");
+   *    import { tensor } from "propel";
+   *    let pretendImage = tensor([0, 127, 255], "int32");
    *    pretendImage.rescale([0, 255], [-1, 1]);
    */
   rescale(inScale: [number, number], outScale: [number, number]): Tensor {

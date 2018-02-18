@@ -16,37 +16,37 @@ import { test } from "../tools/tester";
 import { bo, convertBasic } from "./backend";
 import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
 
-const T = convertBasic;
+const tensor = convertBasic;
 
 test(async function backend_shapes() {
-  const a = T([[1, 2], [3, 4]]);
+  const a = tensor([[1, 2], [3, 4]]);
   assertShapesEqual(a.shape, [2, 2]);
 
-  const b = T([[[1, 2]]]);
+  const b = tensor([[[1, 2]]]);
   assertShapesEqual(b.shape, [1, 1, 2]);
 
-  assertShapesEqual(T(42).shape, []);
-  assertShapesEqual(T([42]).shape, [1]);
+  assertShapesEqual(tensor(42).shape, []);
+  assertShapesEqual(tensor([42]).shape, [1]);
 });
 
 test(async function backend_mul() {
-  const a = T([[1, 2], [3, 4]]);
-  const expected = T([[1, 4], [9, 16]]);
+  const a = tensor([[1, 2], [3, 4]]);
+  const expected = tensor([[1, 4], [9, 16]]);
   const actual = bo.mul(a, a);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllEqual(actual, expected);
 });
 
 test(async function backend_square() {
-  const a = T([[1, 2], [3, 4]]);
-  const expected = T([[1, 4], [9, 16]]);
+  const a = tensor([[1, 2], [3, 4]]);
+  const expected = tensor([[1, 4], [9, 16]]);
   const actual = bo.square(a);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllEqual(actual, expected);
 });
 
 test(async function backend_cosh() {
-  const a = T([[1, 2], [3, 4]]);
+  const a = tensor([[1, 2], [3, 4]]);
   const actual = bo.cosh(a);
   assertAllEqual(actual.shape, [2, 2]);
   const expected = [
@@ -57,8 +57,8 @@ test(async function backend_cosh() {
 });
 
 test(async function backend_reluGrad() {
-  const grad = T([[-1, 42], [-3, 4]]);
-  const ans = T([[-7, 4], [ 0.1, -9 ]]);
+  const grad = tensor([[-1, 42], [-3, 4]]);
+  const ans = tensor([[-7, 4], [ 0.1, -9 ]]);
   const actual = bo.reluGrad(grad, ans);
   assertAllEqual(actual.shape, [2, 2]);
   assertAllClose(actual, [[0, 42], [-3,  0]]);

@@ -130,8 +130,8 @@ async function buildAndTest() {
   fs.writeFileSync("test.js", `
     let propel = require('propel');
     console.log("propel", propel);
-    let T = require('propel').T;
-    console.log(T([1, 2, 3]).mul(42));
+    let tensor = require('propel').tensor;
+    console.log(tensor([1, 2, 3]).mul(42));
     console.log("Using backend: %s", propel.backend);
     if (propel.backend !== "tf") throw Error("Bad backend");
   `);

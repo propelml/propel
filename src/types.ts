@@ -102,7 +102,7 @@ export interface TapeEntry {
   savedForBackward: any[];
 }
 
-/** TensorOpts are used to build Tensors in functions like T() and zeros().
+/** TensorOpts are used to build Tensors in functions like tensor() and zeros().
  * Note that Tensors themselves implement the TensorOpts interface, so existing
  * tensors can be used to construct similiarly typed and located tensors.
  */

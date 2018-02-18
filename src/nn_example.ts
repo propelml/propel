@@ -15,7 +15,7 @@
 // Simple MNIST classifier.
 // Adapted from
 // https://github.com/HIPS/autograd/blob/master/examples/neural_net.py
-import { OptimizerSGD, Params, randn, T, Tensor } from "./api";
+import { OptimizerSGD, Params, randn, tensor, Tensor } from "./api";
 import * as plt from "./matplotlib";
 import * as mnist from "./mnist";
 import { assert, IS_WEB } from "./util";
@@ -66,12 +66,12 @@ function regLoss(params: Params): Tensor {
   params.forEach(p => {
     s = p.square().reduceSum().add(s);
   });
-  return T(s).mul(reg);
+  return tensor(s).mul(reg);
 }
 
 async function accuracy(params: Params, dataset,
                         nExamples = 500): Promise<number> {
-  let totalCorrect = T(0);
+  let totalCorrect = tensor(0);
   let seen = 0;
   while (seen < nExamples) {
     const {images, labels} = await dataset.next();
@@ -135,8 +135,8 @@ export class Trainer {
       this.lossSum = this.lossCount = 0;
       this.lossSteps.push(this.opt.steps);
       this.lossValues.push(lossAvg);
-      const x = T(this.lossSteps);
-      const y = T(this.lossValues);
+      const x = tensor(this.lossSteps);
+      const y = tensor(this.lossValues);
       plt.plot(x, y);
     }
 

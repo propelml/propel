@@ -267,13 +267,13 @@ const defaultOwner: UserInfo = {
 
 const defaultDocCells: string[] = [
 `
-import { T } from "propel";
-t = T([[2, 3], [30, 20]])
+import { tensor } from "propel";
+t = tensor([[2, 3], [30, 20]])
 t.mul(5)
 `,
 `
 import { grad, linspace, plot } from "propel";
-f = (x) => T(x).mul(x);
+f = (x) => tensor(x).mul(x);
 x = linspace(-4, 4, 200);
 plot(x, f(x),
      x, grad(f)(x));
@@ -284,10 +284,10 @@ t = await f.text();
 t;
 `,
 `
-import { T } from "propel";
+import { tensor } from "propel";
 function f(x) {
   let y = x.sub(1);
-  let z = T(-1).sub(x);
+  let z = tensor(-1).sub(x);
   return x.greater(0).select(y,z).relu();
 }
 x = linspace(-5, 5, 100)

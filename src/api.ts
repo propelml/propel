@@ -24,18 +24,22 @@ import { params, Params } from "./params";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
- *    import { T } from "propel";
- *    T([[1, 2, 3], [4, 5, 6]]).square();
+ *    import { tensor } from "propel";
+ *    tensor([[1, 2, 3], [4, 5, 6]]).square();
  *
- * If a tensor is given to T, it simply returns it.
+ * If a tensor is given to tensor, it simply returns it.
  *
  * @arg t - An array of numbers, representing a Tensor. Or a Tensor in which
- *          case T() acts as the identity function.
+ *          case tensor() acts as the identity function.
  * @arg args - An object like this { dtype: "int32", device: "GPU:0" }
  */
-export function T(t: types.TensorLike, args?: types.TensorOpts): Tensor {
+export function tensor(t: types.TensorLike, args?: types.TensorOpts): Tensor {
   return convert(t, args);
 }
+
+// For backwards compatibility with the old API.
+// TODO: remove this after re-running gendoc and updating the default notebook.
+export const T = tensor;
 
 /** Returns a list of available device names.
  *
@@ -134,7 +138,7 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
   if (!(shape instanceof Array)) {
     throw new Error("Fill takes a shape as an argument");
   }
-  return ops.fill(T(value), shape);
+  return ops.fill(tensor(value), shape);
 }
 
 /** Return a new tensor of given shape and dtype, filled with zeros.
