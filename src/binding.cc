@@ -76,6 +76,27 @@ class JSRef {
   napi_ref ref_;
 };
 
+static int64_t TFTensorHandleSize(TFE_TensorHandle* h) {
+  int64_t size = TF_DataTypeSize(TFE_TensorHandleDataType(h));
+  int num_dims = TFE_TensorHandleNumDims(h);
+  for (int i = 0; i < num_dims; i++) {
+    size *= TFE_TensorHandleDim(h, i);
+  }
+  return size;
+}
+
+static void TFTensorHandleRegister(napi_env env, TFE_TensorHandle* h) {
+  int64_t size = TFTensorHandleSize(h);
+  int64_t total;
+  napi_adjust_external_memory(env, size, &total);
+}
+
+static void TFTensorHandleUnregister(napi_env env, TFE_TensorHandle* h) {
+  int64_t size = TFTensorHandleSize(h);
+  int64_t total;
+  napi_adjust_external_memory(env, -size, &total);
+}
+
 static void ReleaseTypedArray(void* data, size_t len, void* js_ref_ptr) {
   auto js_ref = static_cast<JSRef*>(js_ref_ptr);
   delete js_ref;
@@ -85,6 +106,7 @@ static void DeleteHandle(napi_env env, void* handle_wrap_ptr, void* hint) {
   auto handle_wrap = static_cast<HandleWrap*>(handle_wrap_ptr);
 
   if (handle_wrap->tf_tensor_handle != NULL) {
+    TFTensorHandleUnregister(env, handle_wrap->tf_tensor_handle);
     TFE_DeleteTensorHandle(handle_wrap->tf_tensor_handle);
     handle_wrap->tf_tensor_handle = NULL;
   }
@@ -382,7 +404,9 @@ static napi_value Execute(napi_env env, napi_callback_info info) {
 
   // For each retval, wrap the TensorHandle.
   for (int i = 0; i < num_retvals; ++i) {
-    napi_value js_retval = WrapHandle(env, retvals[i]);
+    TFE_TensorHandle* h = retvals[i];
+    TFTensorHandleRegister(env, h);
+    napi_value js_retval = WrapHandle(env, h);
     // Set created js object in output array.
     nstatus = napi_set_element(env, js_retvals, (uint32_t) i, js_retval);
     check(nstatus == napi_ok);
@@ -619,6 +643,7 @@ static napi_value NewHandle(napi_env env, napi_callback_info info) {
     return NULL;
   }
   TF_DeleteStatus(tf_status);
+  TFTensorHandleRegister(env, tf_tensor_handle);
   handle_wrap->tf_tensor_handle = tf_tensor_handle;
 
   return js_this;
@@ -815,6 +840,7 @@ static napi_value CreateSmallHandle(napi_env env, napi_callback_info info) {
   TF_Status* tf_status = TF_NewStatus();
   auto cpu_handle = TFE_NewTensorHandle(tensor, tf_status);
   check(TF_GetCode(tf_status) == TF_OK);
+  TFTensorHandleRegister(env, cpu_handle);
 
   if (strcmp(device, "CPU:0") == 0) {
     TF_DeleteStatus(tf_status);
@@ -823,6 +849,7 @@ static napi_value CreateSmallHandle(napi_env env, napi_callback_info info) {
     auto gpu_handle = TFE_TensorHandleCopyToDevice(
         cpu_handle, context_wrap->tf_context, device, tf_status);
     check(TF_GetCode(tf_status) == TF_OK);
+    TFTensorHandleUnregister(env, cpu_handle);
     TFE_DeleteTensorHandle(cpu_handle);
     TF_DeleteTensor(tensor);
     TF_DeleteStatus(tf_status);
@@ -903,6 +930,7 @@ napi_value Dispose(napi_env env, napi_callback_info info) {
   if (handle_wrap == NULL) return NULL;
 
   if (handle_wrap->tf_tensor_handle != NULL) {
+    TFTensorHandleUnregister(env, handle_wrap->tf_tensor_handle);
     TFE_DeleteTensorHandle(handle_wrap->tf_tensor_handle);
     handle_wrap->tf_tensor_handle = NULL;
   }
