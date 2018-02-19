@@ -117,6 +117,47 @@ async function loadFile(href, split: string, isImages: boolean,
   return t.reshape(shape).copy(device);
 }
 
+export async function loadSplit(split: string):
+    Promise<{images: Tensor, labels: Tensor}> {
+  const [hrefLabels, hrefImages] = filenames(split);
+  const imagesPromise = loadFile2(hrefImages);
+  const labelsPromise = loadFile2(hrefLabels);
+  const [images, labels] = await Promise.all([imagesPromise, labelsPromise]);
+  return { images, labels };
+}
+
+async function loadFile2(href: string) {
+  const ab = await fetch2(href);
+  const i32 = new Int32Array(ab);
+  const ui8 = new Uint8Array(ab);
+
+  let i = 0;
+  const magicValue = littleEndianToBig(i32[i++]);
+  let isImages;
+  if (magicValue === 2051) {
+    isImages = true;
+  } else if (magicValue === 2049) {
+    isImages = false;
+  } else {
+    throw Error("Bad magic value.");
+  }
+  const numExamples = littleEndianToBig(i32[i++]);
+
+  let t;
+  if (isImages) {
+    assertEqual(littleEndianToBig(i32[i++]), 28);
+    assertEqual(littleEndianToBig(i32[i++]), 28);
+    const tensorData = new Int32Array(ui8.slice(4 * i));
+    t = tensor(tensorData, {dtype: "int32"});
+  } else {
+    const tensorData = new Int32Array(ui8.slice(4 * i));
+    t = tensor(tensorData, {dtype: "int32"});
+  }
+  const shape = isImages ? [numExamples, 28, 28] : [numExamples];
+
+  return t.reshape(shape);
+}
+
 export function load(split: string, batchSize: number, useGPU = true) {
   const [labelFn, imageFn] = filenames(split);
   const device = useGPU ? "GPU:0" : "CPU:0";
