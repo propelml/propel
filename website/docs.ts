@@ -123,7 +123,7 @@ function startsWithUpperCase(s: string): boolean {
 }
 
 export function Docs(props) {
-  let docs: DocEntry[] = require("./docs.json");
+  let docs: DocEntry[] = require("../build/website/docs.json");
   docs = docs.sort((a, b) => {
     // Special case "T" to be at the top of the docs.
     if (a.name === "T") return -1;

@@ -26,18 +26,11 @@
 /build/
 /CMakeFiles/
 /CMakeScripts/
-/Debug/
-/dist/
 /ipch/
 /MinSizeRel/
-/out/
-/Release/
 /RelWithDebInfo/
 /x64/
-/website/index.html
-/website/notebook/index.html
 /Win32/
-/gendoc
 /.cache
 
 /CMakeCache.txt
