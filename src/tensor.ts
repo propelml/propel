@@ -595,11 +595,11 @@ export class Tensor implements types.BasicTensor {
     // Partially flatten tensor if needed.
     let t = this.rank === 2 ? this : this.reshape([this.shape[0], -1]);
     const inDim = t.shape[t.rank - 1];
-    const w = params.init("weights", () =>
+    const w = params.define("weights", () =>
       randn([inDim, outDim]).mul(scale));
     t = t.matmul(w);
     if (useBias) {
-      const b = params.init("bias", () => zeros([outDim]));
+      const b = params.define("bias", () => zeros([outDim]));
       t = t.add(b);
     }
     return t;

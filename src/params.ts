@@ -7,7 +7,7 @@ import { watch } from "./backprop";
  *
  *    import * as pr from "propel";
  *    let params = pr.params();
- *    params.init("Weights", () => pr.randn([2, 5]));
+ *    params.define("Weights", () => pr.randn([2, 5]));
  */
 export function params(): Params {
   return new RootParams();
@@ -21,10 +21,9 @@ export function params(): Params {
  *
  * To define a new parameter tensor, you must define
  * 1) a unique name
- * 2) the shape and dtype of the tensor
- * 3) the initial value.
+ * 2) the initial value.
  *
- * The way this is done is with the init() method
+ * The way this is done is with the define() method
  * on the params object. They are each given a name, shape, and dtype,
  * if the name doesn't already exist in the params object, it is initialized.
  * Otherwise it is returned without modification.
@@ -42,8 +41,8 @@ export interface Params {
    *
    *    import * as pr from "propel";
    *    let params = pr.params();
-   *    params.init("A", () => pr.randn([2]));
-   *    params.init("B", () => pr.zeros([2, 2]));
+   *    params.define("A", () => pr.randn([2]));
+   *    params.define("B", () => pr.zeros([2, 2]));
    *    params.forEach((tensor, name) => {
    *      console.log(name);
    *      console.log(tensor);
@@ -60,7 +59,7 @@ export interface Params {
    * params object, otherwise returns the existing param of the given name.
    * All tensors in the params object get automatically traced for backprop.
    */
-  init(name: string, initFn: () => Tensor): Tensor;
+  define(name: string, initFn: () => Tensor): Tensor;
 }
 
 class RootParams implements Params {
@@ -92,7 +91,7 @@ class RootParams implements Params {
     return new ScopedParams(this, prefix);
   }
 
-  init(name: string, initFn: () => Tensor): Tensor {
+  define(name: string, initFn: () => Tensor): Tensor {
     let t = this.get(name);
     if (!t) {
       t = initFn();
@@ -134,7 +133,7 @@ class ScopedParams implements Params {
     return this.parent.scope(this.resolve(prefix));
   }
 
-  init(name: string, initFn: () => Tensor): Tensor {
-    return this.parent.init(this.resolve(name), initFn);
+  define(name: string, initFn: () => Tensor): Tensor {
+    return this.parent.define(this.resolve(name), initFn);
   }
 }
