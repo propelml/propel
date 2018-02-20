@@ -12,9 +12,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import * as gendoc from "./gendoc";
 import { test } from "../test";
 import { assert } from "../util";
+import * as gendoc from "./gendoc";
 
 test(async function gendoc_smoke() {
   const docs = gendoc.genJSON();
@@ -26,4 +26,3 @@ test(async function gendoc_smoke() {
   assert(names.indexOf("Tensor.add") >= 0);
   assert(names.indexOf("Tensor[Symbol.iterator]") >= 0);
 });
-
