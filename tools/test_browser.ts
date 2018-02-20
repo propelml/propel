@@ -30,29 +30,48 @@ const debug = !!process.env.PP_TEST_DEBUG;
 // causes Chromium to run in interactive mode.
 const testdl = !!process.env.PP_TEST_DL;
 
-const TESTS = [
+interface Test {
+  path: string;
+  doneMsg: RegExp;
+  timeout: number;
+}
+
+const TESTS: Test[] = [
   // This page loads and runs all the webpack'ed unit tests.
   // The test harness logs "DONE bla bla" to the console when done.
   // If this message doesn't appear, or an unhandled error is thrown on the
   // page, the test fails.
   {
+    path: "static/test.html#script=/test_website.js",
     doneMsg: /^DONE.*failed: 0/,
-    href: "static/test.html#script=/test_website.js",
     timeout: 60 * 1000
   },
-
-  // These web pages are simply loaded; the test passes if no unhandled
-  // exceptions are thrown on the page.
-  { href: "index.html" },
-  { href: "notebook/" },
-  { href: "notebook/?nbId=default" },
-  { href: "docs/index.html" },
+  {
+    path: "index.html",
+    doneMsg: /Propel onload/,
+    timeout: 10 * 1000,
+  },
+  {
+    path: "notebook/",
+    doneMsg: /Propel onload/,
+    timeout: 10 * 1000,
+  },
+  {
+    path: "notebook/?nbId=default",
+    doneMsg: /Propel onload/,
+    timeout: 10 * 1000,
+  },
+  {
+    path: "docs/index.html",
+    doneMsg: /Propel onload/,
+    timeout: 10 * 1000,
+  },
 ];
 
 if (testdl) {
   TESTS.unshift({
+    path: "static/test.html#script=/test_dl.js",
     doneMsg: /^DONE.*failed: 0/,
-    href: "static/test.html#script=/test_dl.js",
     timeout: 2 * 60 * 1000
   });
 }
@@ -71,8 +90,7 @@ if (testdl) {
 
   for (let i = 0; i < TESTS.length; i++) {
     const test = TESTS[i];
-    const url = `http://localhost:${port}/${test.href}`;
-    if (await runTest(browser, url, test as any)) {
+    if (await runTest(browser, port, test)) {
       passed++;
     } else {
       failed++;
@@ -101,28 +119,28 @@ function prefix(s: string, prefix: string): string {
 // is considered to have failed. If doneMsg is set to null, the test
 // will be considered to have passed if no errors are thrown before the
 // time-out expires.
-async function runTest(browser, url, { href, doneMsg = null, timeout = 1000 }) {
+async function runTest(browser, port, { path, doneMsg, timeout }: Test) {
   let pass, fail;
   const promise = new Promise((res, rej) => { pass = res; fail = rej; });
   let timer = null;
-  const timeoutIsFailure = doneMsg != null;
 
-  console.log(`TEST: ${href}`);
+  const url = `http://localhost:${port}/${path}`;
+  console.log("TEST", url);
 
   const page = await browser.newPage();
   page.on("load", onLoad);
   page.on("console", onMessage);
   page.on("response", onResponse);
   page.on("pageerror", onError);
-  page.goto(url);
+  page.goto(url, { timeout: 0 });
 
   try {
     await promise;
-    console.log(`PASS: ${href}\n`);
+    console.log(`PASS: ${url}\n`);
     return true;
   } catch (err) {
     console.log(err.message); // Stack trace is useless here.
-    console.log(`FAIL: ${href}\n`);
+    console.log(`FAIL: ${url}\n`);
     return false;
   } finally {
     if (!debug) await page.close();
@@ -147,11 +165,7 @@ async function runTest(browser, url, { href, doneMsg = null, timeout = 1000 }) {
   }
 
   function onTimeOut() {
-    if (timeoutIsFailure) {
-      fail(new Error(`Timeout (${timeout}ms)`));
-    } else {
-      pass();
-    }
+    fail(new Error(`Timeout (${timeout}ms)`));
   }
 
   function onMessage(msg) {
@@ -165,7 +179,7 @@ async function runTest(browser, url, { href, doneMsg = null, timeout = 1000 }) {
 
     console.log(prefix(text, "> "));
 
-    if (doneMsg != null && text.match(doneMsg)) {
+    if (text.match(doneMsg)) {
       pass();
     } else {
       restartTimer();
