@@ -4,6 +4,7 @@ import { join } from "path";
 import { renderSync } from "sass";
 import { drainExecuteQueue } from "../website/notebook";
 import * as website from "../website/website";
+import * as gendoc from "./gendoc";
 import * as run from "./run";
 
 // tslint:disable:no-reference
@@ -67,6 +68,8 @@ process.on("unhandledRejection", e => { throw e; });
   run.mkdir("build/website/notebook");
 
   run.symlink(run.root + "/website/", "build/website/static");
+
+  gendoc.writeJSON("build/website/docs.json");
 
   scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
