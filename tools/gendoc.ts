@@ -326,21 +326,12 @@ export function genJSON(): DocEntry[] {
     return "<unknown>";
   }
 
-  // TODO use tsconfig.json instead of supplying config.
-  gen(repoBasePath + "/src/api.ts", {
-    target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS
-  });
+  gen(repoBasePath + "/src/api.ts", require("../tsconfig.json"));
 
-  // console.log(JSON.stringify(output, null, 2));
   return output;
 }
 
-function writeJSON() {
-  const target = process.argv[2];
-  if (!target) {
-    console.log("Usage: ts-node tools/gendoc.ts ./website/docs.json");
-    process.exit(1);
-  }
+export function writeJSON(target = repoBasePath + "/build/website") {
   const docs = genJSON();
   const j = JSON.stringify(docs, null, 2);
   fs.writeFileSync(target, j);
@@ -348,5 +339,10 @@ function writeJSON() {
 }
 
 if (require.main === module) {
-  writeJSON();
+  const target = process.argv[2];
+  if (!target) {
+    console.log("Usage: ts-node tools/gendoc.ts ./website/docs.json");
+    process.exit(1);
+  }
+  writeJSON(target);
 }
