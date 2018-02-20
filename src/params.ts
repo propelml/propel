@@ -7,7 +7,7 @@ import { watch } from "./backprop";
  *
  *    import * as pr from "propel";
  *    let params = pr.params();
- *    params.randn("Weights", [2, 5]);
+ *    params.init("Weights", () => pr.randn([2, 5]));
  */
 export function params(): Params {
   return new RootParams();
