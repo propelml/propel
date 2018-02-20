@@ -449,7 +449,6 @@ function nbUrl(nbId: string): string {
   // /notebook?nbId=blah  will get redirect to /notebook/
   // because it is a directory with an index.html in it.
   const u = window.location.origin + "/notebook/?nbId=" + nbId;
-  console.log("nbUrl", u);
   return u;
 }
 
