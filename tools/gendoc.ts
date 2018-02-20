@@ -338,7 +338,7 @@ export function genJSON(): DocEntry[] {
 function writeJSON() {
   const target = process.argv[2];
   if (!target) {
-    console.log("Usage: ts-node gendoc/gendoc.ts ./website/docs.json");
+    console.log("Usage: ts-node tools/gendoc.ts ./website/docs.json");
     process.exit(1);
   }
   const docs = genJSON();
