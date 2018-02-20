@@ -44,7 +44,7 @@ const TESTS: Test[] = [
   {
     path: "static/test.html#script=/test_website.js",
     doneMsg: /^DONE.*failed: 0/,
-    timeout: 60 * 1000
+    timeout: 2 * 60 * 1000,
   },
   {
     path: "index.html",
