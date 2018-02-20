@@ -232,7 +232,7 @@ export class OptimizerSGD {
       for (const name of Object.keys(grads)) {
         const g = grads[name];
         const p = this.params.get(name);
-        const v = this.velocity.init(name, () => zeros(p.shape));
+        const v = this.velocity.define(name, () => zeros(p.shape));
         if (this.steps > 0) {
           assertShapesEqual(p.shape, g.shape);
           assertShapesEqual(p.shape, v.shape);

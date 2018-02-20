@@ -40,9 +40,9 @@ function inference(params: Params, images: Tensor) {
     const m = layerSizes[i];
     const n = layerSizes[i + 1];
     // Initialize or get weights and biases.
-    const w = params.init(`w${i}`, () =>
+    const w = params.define(`w${i}`, () =>
       randn([m, n], { dtype: "float32", device }));
-    const b = params.init(`b${i}`, () =>
+    const b = params.define(`b${i}`, () =>
       randn([n], { dtype: "float32", device }));
     assert(w.device === device);
     assert(b.device === device);

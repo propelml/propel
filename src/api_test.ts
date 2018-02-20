@@ -977,9 +977,9 @@ testDevices(async function api_neuralNet(tensor, device) {
       const m = layerSizes[i];
       const n = layerSizes[i + 1];
       // Initialize or get weights and biases.
-      const w = params.init(`w${i}`, () =>
+      const w = params.define(`w${i}`, () =>
         randn([m, n], { dtype: "float32", device }));
-      const b = params.init(`b${i}`, () =>
+      const b = params.define(`b${i}`, () =>
         zeros([n], { dtype: "float32", device }));
       outputs = inputs.matmul(w).add(b);
       inputs = outputs.relu();
@@ -1074,8 +1074,8 @@ test(async function api_rescale() {
 
 test(async function api_sgd() {
   const params = api.params();
-  const w = params.init("weights", () => zeros([5, 6]).add(1));
-  const b = params.init("biases", () => zeros([6]));
+  const w = params.define("weights", () => zeros([5, 6]).add(1));
+  const b = params.define("biases", () => zeros([6]));
   const inputs = api.zeros([2, 5]);
   const labels = tensor([[1, 0, 0, 0, 0, 0],
                   [0, 1, 0, 0, 0, 0]], {dtype: "int32"});
