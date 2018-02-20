@@ -1,3 +1,17 @@
+/*!
+   Copyright 2018 Propel http://propel.site/.  All rights reserved.
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 /* A custom AST walker for documentation. This was written because
  - TypeDoc is unable to generate documentation for a single exported module, as
    we have with api.ts,
@@ -11,6 +25,7 @@ import { execSync, spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
+import { log } from "../src/util";
 import { ArgEntry, DocEntry } from "../website/docs";
 
 const repoBasePath = path.resolve(__dirname, "..");
@@ -77,7 +92,7 @@ export function genJSON(): DocEntry[] {
     if (!visitHistory.has(s)) {
       // Find original symbol (might not be in api.ts).
       s = skipAlias(s, checker);
-      console.error("requestVisit", s.getName());
+      log("requestVisit", s.getName());
       const decls = s.getDeclarations();
       // What does it mean tot have multiple declarations?
       // assert(decls.length === 1);
@@ -143,40 +158,38 @@ export function genJSON(): DocEntry[] {
       // console.error("- type alias", checker.typeToString(node.type));
       // console.error(""); // New Line.
     } else if (ts.isStringLiteral(node)) {
-      console.error("- string literal");
-      console.error(""); // New Line.
+      log("- string literal");
     } else if (ts.isVariableDeclaration(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       const name = symbol.getName();
       if (ts.isFunctionLike(node.initializer)) {
         visitMethod(node.initializer, name);
       } else {
-        console.error("- var", name);
-        console.error(""); // New Line.
+        log("- var", name);
       }
     } else if (ts.isFunctionDeclaration(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       visitMethod(node, symbol.getName());
 
     } else if (ts.isFunctionTypeNode(node)) {
-      console.error("- FunctionTypeNode.. ?");
+      log("- FunctionTypeNode.. ?");
 
     } else if (ts.isFunctionExpression(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       const name = symbol ? symbol.getName() : "<unknown>";
-      console.error("- FunctionExpression", name);
+      log("- FunctionExpression", name);
 
     } else if (ts.isInterfaceDeclaration(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       const name = symbol.getName();
-      console.error("- Interface", name);
+      log("- Interface", name);
 
     } else if (ts.isObjectLiteralExpression(node)) {
       // TODO Ignoring for now.
-      console.error("- ObjectLiteralExpression");
+      log("- ObjectLiteralExpression");
 
     } else {
-      console.log("Unknown node", node.kind);
+      log("Unknown node", node.kind);
       assert(false);
     }
   }
@@ -268,7 +281,7 @@ export function genJSON(): DocEntry[] {
 
       // Skip private members.
       if (ts.getCombinedModifierFlags(m) & ts.ModifierFlags.Private) {
-        console.error("private. skipping", name);
+        log("private. skipping", name);
         continue;
       }
 
@@ -288,8 +301,7 @@ export function genJSON(): DocEntry[] {
         visitProp(m, name, className);
 
       } else {
-        console.log("member", className, name);
-        console.log(""); // New Line.
+        log("member", className, name);
       }
     }
   }
