@@ -29,16 +29,26 @@ export function datasetFromSlices(tensors: NamedTensors): Dataset {
 const datasets = {
   "breast_cancer": () => new SliceDataset(loadBreastCancer()),
   "iris": () => new SliceDataset(loadIris()),
-  "mnist": (split) => new SliceDataset(mnist.loadSplit(split)),
+  "mnist/test": () => new SliceDataset(mnist.loadSplit("test")),
+  "mnist/train": () => new SliceDataset(mnist.loadSplit("train")),
   "wine": () => new SliceDataset(loadWine()),
 };
 
-export function dataset(name: string, split = "train"): Dataset {
+/** Loads a dataset. The available datasets are:
+ * breast_cancer, iris, mnist/test, mnist/train, wine.
+ * Example:
+ *
+ *    import * as pr from "propel";
+ *    let ds = pr.dataset("mnist/train").batch(16).repeat(2);
+ *    let { labels } = await ds.next();
+ *    labels;
+ */
+export function dataset(name: string): Dataset {
   const loader = datasets[name];
   if (!loader) {
     throw Error("Bad dataset " + name);
   }
-  return loader(split);
+  return loader();
 }
 
 abstract class Dataset {

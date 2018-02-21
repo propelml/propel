@@ -52,7 +52,7 @@ test(async function dataset_datasetFromSlices() {
 });
 
 test(async function dataset_mnist() {
-  const ds = dataset.dataset("mnist").batch(5);
+  const ds = dataset.dataset("mnist/train").batch(5);
   const { images, labels } = await ds.next();
   assertAllEqual(labels, [ 5, 0, 4, 1, 9 ]);
   assertShapesEqual(images.shape, [5, 28, 28]);

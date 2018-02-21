@@ -21,6 +21,7 @@ export { DType, TensorLike } from "./types";
 import { assert, assertShapesEqual } from "./util";
 export { params, Params } from "./params";
 import { params, Params } from "./params";
+export { dataset } from "./dataset";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
