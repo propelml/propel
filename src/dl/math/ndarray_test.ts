@@ -65,7 +65,7 @@ const tests: MathTests = it => {
 
     expect(() => Array4D.new([1, 2, 3, 5], [
       1, 2
-    ])).toThrowError("Shape should be of length 3");
+    ])).toThrowError();
 
     const t4 = Array4D.new([1, 2, 1, 2], [1, 2, 3, 4]);
     test_util.expectNumbersClose(t4.get(0, 0, 0, 0), 1);
