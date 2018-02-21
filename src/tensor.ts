@@ -543,6 +543,29 @@ export class Tensor implements types.BasicTensor {
     return pLogQ.reduceSum([1]).neg();
   }
 
+  /** Computes the average softmax cross entropy on logits.
+   * This is very similiar to softmaxCE() except it averages the results
+   * and allows label indicies instead of just one-hot labels.
+   * Normally the logits, the input to this function, comes out of a
+   * linear layer which has not activation function performed on it.
+   * Ideally the inputs to this function are zero centered.
+   *
+   *    import * as pr from "propel";
+   *    let logits = pr.randn([3, 10]);
+   *    logits.softmaxLoss([9, 0, 1]);
+   */
+  softmaxLoss(labels: types.TensorLike): Tensor {
+    const logits = this;
+    assert(logits.rank === 2);
+    const numLabels = logits.shape[1];
+    let labelsT = this.colocate(labels);
+    if (labelsT.rank === 1) {
+      // Assume labels represent indicies.
+      labelsT = labelsT.cast("int32").oneHot(numLabels);
+    }
+    return this.softmaxCE(labelsT).reduceMean();
+  }
+
   /** Sets the diagonal part of a matrix.
    *
    *    import { zeros } from "propel";

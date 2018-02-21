@@ -952,6 +952,15 @@ test(async function api_softmaxCE() {
   ]);
 });
 
+test(async function api_softmaxLoss() {
+  const logits = tensor([
+    [-2, 2, 10],
+    [-3, 2, 10],
+  ], {dtype: "float32"});
+  const loss = logits.softmaxLoss([0, 2]);
+  assertAllClose(loss, 6.0);
+});
+
 test(async function api_devicePlacement() {
   if (!gpuAvail()) {
     console.log("GPU not available. Skipping testDevicePlacement.");
