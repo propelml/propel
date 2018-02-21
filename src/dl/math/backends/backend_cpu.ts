@@ -337,30 +337,39 @@ export class MathBackendCPU implements MathBackend {
     const rightDim =
         (bOrientation === MatrixOrientation.REGULAR) ? b.shape[1] : b.shape[0];
 
-    const normalGetter = (matrix: Array2D, i: number, j: number) =>
-        matrix.get(i, j);
-    const transposedGetter = (matrix: Array2D, i: number, j: number) =>
-        matrix.get(j, i);
+    const aValues = a.dataSync();
+    const bValues = b.dataSync();
 
-    const aGetter = (aOrientation === MatrixOrientation.REGULAR) ?
-        normalGetter :
-        transposedGetter;
-    const bGetter = (bOrientation === MatrixOrientation.REGULAR) ?
-        normalGetter :
-        transposedGetter;
-    const values = new Float32Array(leftDim * rightDim);
-    let index = 0;
-    for (let i = 0; i < leftDim; ++i) {
-      for (let j = 0; j < rightDim; ++j) {
+    const [aOuterStep, aInnerStep] =
+        (aOrientation === MatrixOrientation.REGULAR)
+          ? [a.strides[0], 1]
+          : [1, a.strides[0]];
+    const [bInnerStep, bOuterStep] =
+        (bOrientation === MatrixOrientation.REGULAR)
+          ? [b.strides[0], 1]
+          : [1, b.strides[0]];
+
+    const aOuterEnd = leftDim * aOuterStep;
+    const bOuterEnd = rightDim * bOuterStep;
+
+    const result = new Float32Array(leftDim * rightDim);
+    let resultIndex = 0;
+
+    for (let aOuter = 0; aOuter < aOuterEnd; aOuter += aOuterStep) {
+      for (let bOuter = 0; bOuter < bOuterEnd; bOuter += bOuterStep) {
+        let aInner = aOuter;
+        let bInner = bOuter;
         let sum = 0;
         for (let k = 0; k < sharedDim; ++k) {
-          // TODO: optimize CPU matmul.
-          sum += aGetter(a, i, k) * bGetter(b, k, j);
+          sum += aValues[aInner] * bValues[bInner];
+          aInner += aInnerStep;
+          bInner += bInnerStep;
         }
-        values[index++] = sum;
+        result[resultIndex++] = sum;
       }
     }
-    return Array2D.new([leftDim, rightDim], values);
+
+    return Array2D.new([leftDim, rightDim], result);
   }
 
   multiply<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D> {
