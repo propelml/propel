@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { join as pathJoin } from "path";
 import { Tensor } from "./tensor";
 import { BasicTensor, DType, FlatVector, RegularArray, Shape,
   TensorLike, TypedArray } from "./types";
@@ -291,4 +292,54 @@ export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
     default:
       throw new Error("Not implemented");
   }
+}
+
+const propelHosts = new Set(["127.0.0.1", "localhost", "propelml.org"]);
+
+// This is to confuse parcel.
+// TODO There may be a more elegant workaround in future versions.
+// https://github.com/parcel-bundler/parcel/pull/448
+const nodeRequire = IS_WEB ? null : require;
+
+// Takes either a fully qualified url or a path to a file in the propel
+// website directory. Examples
+//
+//    fetch("//tinyclouds.org/index.html");
+//    fetch("deps/data/iris.csv");
+//
+// Propel files will use propelml.org if not being run in the project
+// directory.
+async function fetch2(path: string,
+    encoding: "binary" | "utf8" = "binary"): Promise<string | ArrayBuffer> {
+  if (IS_WEB) {
+    const host = document.location.host.split(":")[0];
+    if (propelHosts.has(host)) {
+      path = path.replace("deps/", "/");
+    } else {
+      path = path.replace("deps/", "http://propelml.org/");
+    }
+    const res = await fetch(path, { mode: "no-cors" });
+    if (encoding === "binary") {
+      return res.arrayBuffer();
+    } else {
+      return res.text();
+    }
+  } else {
+    path = pathJoin(__dirname, "..", path);
+    const { readFileSync } = nodeRequire("fs");
+    if (encoding === "binary") {
+      const b = readFileSync(path, null);
+      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+    } else {
+      return readFileSync(path, "utf8");
+    }
+  }
+}
+
+export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
+  return fetch2(path, "binary") as any;
+}
+
+export async function fetchStr(path: string): Promise<string> {
+  return fetch2(path, "utf8") as any;
 }

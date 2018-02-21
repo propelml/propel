@@ -279,7 +279,7 @@ plot(x, f(x),
      x, grad(f)(x));
 `,
 `
-f = await fetch('/static/mnist/README');
+f = await fetch('/data/mnist/README');
 t = await f.text();
 t;
 `,

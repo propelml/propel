@@ -13,12 +13,7 @@
    limitations under the License.
  */
 import { tensor, Tensor } from "./api";
-import { assert, assertEqual, IS_WEB } from "./util";
-
-// This is to confuse parcel.
-// TODO There may be a more elegant workaround in future versions.
-// https://github.com/parcel-bundler/parcel/pull/448
-const nodeRequire = IS_WEB ? null : require;
+import { assert, assertEqual, fetchArrayBuffer, IS_WEB } from "./util";
 
 export interface Elements {
   images: Tensor;
@@ -39,13 +34,13 @@ export function makeHref(fn) {
 export function filenames(split: string): [string, string] {
   if (split === "train") {
     return [
-      makeHref("train-labels-idx1-ubyte"),
-      makeHref("train-images-idx3-ubyte"),
+      "deps/data/mnist/train-labels-idx1-ubyte",
+      "deps/data/mnist/train-images-idx3-ubyte",
     ];
   } else if (split === "test") {
     return [
-      makeHref("t10k-labels-idx1-ubyte"),
-      makeHref("t10k-images-idx3-ubyte"),
+      "deps/data/mnist/t10k-labels-idx1-ubyte",
+      "deps/data/mnist/t10k-images-idx3-ubyte",
     ];
   } else {
     throw new Error(`Bad split: ${split}`);
@@ -72,19 +67,9 @@ export function inspectImg(t, idx) {
   console.log(s);
 }
 
-async function fetch2(href): Promise<ArrayBuffer> {
-  if (IS_WEB) {
-    const res = await fetch(href, { mode: "no-cors" });
-    return res.arrayBuffer();
-  } else {
-    const b = nodeRequire("fs").readFileSync(href, null);
-    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-  }
-}
-
 async function loadFile(href, split: string, isImages: boolean,
                         device: string) {
-  const ab = await fetch2(href);
+  const ab = await fetchArrayBuffer(href);
   const i32 = new Int32Array(ab);
   const ui8 = new Uint8Array(ab);
 
@@ -125,7 +110,7 @@ export async function loadSplit(split: string):
 }
 
 async function loadFile2(href: string) {
-  const ab = await fetch2(href);
+  const ab = await fetchArrayBuffer(href);
   const i32 = new Int32Array(ab);
   const ui8 = new Uint8Array(ab);
 

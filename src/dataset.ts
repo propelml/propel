@@ -16,8 +16,9 @@
 // This module is inspired by TensorFlow's tf.data.Dataset.
 // https://www.tensorflow.org/api_docs/python/tf/data/Dataset
 import { isUndefined } from "util";
+import { tensor, Tensor } from "./api";
 import * as mnist from "./mnist";
-import { Tensor } from "./tensor";
+import { assert, fetchStr } from "./util";
 
 type NamedTensors = { [name: string]: Tensor };
 
@@ -25,10 +26,19 @@ export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);
 }
 
-export function dataset(name: string, split = "train"): Dataset {
-  if (name !== "mnist") throw Error("Bad dataset " + name);
+const datasets = {
+  "breast_cancer": () => new SliceDataset(loadBreastCancer()),
+  "iris": () => new SliceDataset(loadIris()),
+  "mnist": (split) => new SliceDataset(mnist.loadSplit(split)),
+  "wine": () => new SliceDataset(loadWine()),
+};
 
-  return new SliceDataset(mnist.loadSplit(split));
+export function dataset(name: string, split = "train"): Dataset {
+  const loader = datasets[name];
+  if (!loader) {
+    throw Error("Bad dataset " + name);
+  }
+  return loader(split);
 }
 
 abstract class Dataset {
@@ -101,8 +111,8 @@ class SliceDataset extends Dataset {
       const t = this.tensors[name];
       // TODO This is ugly. slice() should take truncated begin and size
       // arguments.
-      const begin = [this.pos, ...Array(t.rank - 1).fill(0)];
-      const size = [sliceSize, ...Array(t.rank - 1).fill(-1)];
+      const begin = [this.pos, ...new Array(t.rank - 1).fill(0)];
+      const size = [sliceSize, ...new Array(t.rank - 1).fill(-1)];
       out[name] = t.slice(begin, size);
     }
     this.pos += batchSize;
@@ -183,3 +193,56 @@ class ShuffleDataset extends Dataset {
     throw Error("not implemented.");
   }
 }
+
+async function loadData(fn: string):
+    Promise<{ features: Tensor, labels: Tensor }> {
+  const csv = await fetchStr(fn);
+  const lines = csv.trim().split("\n").map(line => line.split(","));
+  const header = lines.shift();
+  const nSamples = Number(header.shift());
+  const nFeatures = Number(header.shift());
+  // let labelNames = header;
+  assert(lines.length === nSamples);
+  const features: number[][] = [];
+  const labels: number[] = [];
+  for (const line of lines) {
+    const row = line.map(Number);
+    features.push(row.slice(0, nFeatures));
+    labels.push(row[row.length - 1]);
+  }
+
+  const tensors = {
+    features: tensor(features, { dtype: "float32" }),
+    labels: tensor(labels, { dtype: "bool" }),
+  };
+  return tensors;
+}
+
+/**
+ * Features are
+ * 0 sepal length (cm)
+ * 1 sepal width (cm)
+ * 2 petal length (cm)
+ * 3 petal width (cm)
+ */
+export async function loadIris():
+    Promise<{ features: Tensor, labels: Tensor }> {
+  return loadData("deps/data/iris.csv");
+}
+
+export async function loadBreastCancer():
+    Promise<{ features: Tensor, labels: Tensor }> {
+  return loadData("deps/data/breast_cancer.csv");
+}
+
+export async function loadWine():
+    Promise<{ features: Tensor, labels: Tensor }> {
+  return loadData("deps/data/wine_data.csv");
+}
+
+// TODO
+// boston_house_prices.csv
+// diabetes_data.csv.gz diabetes_target.csv.gz
+// digits.csv.gz
+// iris.csv
+// linnerud_exercise.csv linnerud_physiological.csv
