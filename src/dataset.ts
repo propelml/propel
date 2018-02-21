@@ -39,9 +39,9 @@ const datasets = {
  * Example:
  *
  *    import * as pr from "propel";
- *    let ds = pr.dataset("mnist/train").batch(16).repeat(2);
- *    let { labels } = await ds.next();
- *    labels;
+ *    let ds = pr.dataset("iris").batch(10);
+ *    let { features } = await ds.next();
+ *    features;
  */
 export function dataset(name: string): Dataset {
   const loader = datasets[name];
