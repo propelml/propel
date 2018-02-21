@@ -34,23 +34,23 @@ const t = (src, out) => test(
 t("",
   "(async (__global, __import, console) => {\n\n})");
 t("import defaultExport from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport}} = {_:await __import('module-name')}));\n})");
 t("import * as name from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:__global.name} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:__global.name} = {_:await __import('module-name')}));\n})");
 t("import { export1 } from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1}} = {_:await __import('module-name')}));\n})");
 t("import { export1 as alias1 } from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.alias1}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.alias1}} = {_:await __import('module-name')}));\n})");
 t("import { export1, export2 } from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1},_:{export2:__global.export2}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1},_:{export2:__global.export2}} = {_:await __import('module-name')}));\n})");
 t("import { export1, export2 as alias2 } from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1},_:{export2:__global.alias2}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{export1:__global.export1},_:{export2:__global.alias2}} = {_:await __import('module-name')}));\n})");
 t("import defaultExport, { export1 } from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport},_:{export1:__global.export1}} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport},_:{export1:__global.export1}} = {_:await __import('module-name')}));\n})");
 t("import defaultExport, * as name from 'module-name';",
-  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport},_:__global.name} = {_:await __import('module-name')}))\n})");
+  "(async (__global, __import, console) => {\nvoid (({_:{default:__global.defaultExport},_:__global.name} = {_:await __import('module-name')}));\n})");
 t("import 'module-name';",
-  "(async (__global, __import, console) => {\nreturn (await __import('module-name'))\n})");
+  "(async (__global, __import, console) => {\nreturn (await __import('module-name'));\n})");
 t("var x = y;",
   "(async (__global, __import, console) => {\nvoid ((__global.x = y));\n})");
 t("const x = y;",
