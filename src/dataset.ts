@@ -169,6 +169,9 @@ class RepeatDataset extends Dataset {
 
   constructor(parent: Dataset, readonly count?: number) {
     super(parent);
+    if (count != null && count <= 0) {
+      throw Error("Bad value for repeat count.");
+    }
   }
 
   reset() {
