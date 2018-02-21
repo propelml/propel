@@ -4,11 +4,7 @@ const run = require("./run");
 process.on("unhandledRejection", e => { throw e; });
 
 (async() => {
-  // Build the project.
-  run.sh("node ./tools/build_binding.js");
-  run.sh("node ./tools/build_website.js");
-  await run.parcel("src/test_dl.ts", "build/website", true);
-  await run.parcel("website/test_website.ts", "build/website", true);
+  run.sh("node tools/build.js");
 
   // Node.js tests
   run.tsnode("src/test_node.ts", {"PROPEL": "dl"});     // DL backend
