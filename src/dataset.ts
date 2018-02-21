@@ -61,15 +61,15 @@ abstract class Dataset {
     if (this.parent) this.parent.reset();
   }
 
-  batch(batchSize: number) {
+  batch(batchSize: number): Dataset {
     return new BatchDataset(this, batchSize);
   }
 
-  repeat(count?: number) {
+  repeat(count?: number): Dataset {
     return new RepeatDataset(this, count);
   }
 
-  shuffle(bufSize?: number) {
+  shuffle(bufSize?: number): Dataset {
     return new ShuffleDataset(this, bufSize);
   }
 }
