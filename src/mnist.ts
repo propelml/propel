@@ -31,9 +31,7 @@ export function makeHref(fn) {
   } else {
     // If compiled to JS, this might be in a different directory.
     const path = require("path");
-    const dirname = path.basename(__dirname) === "build" ?
-      path.resolve(__dirname, "../deps/mnist") :
-      path.resolve(__dirname, "../deps/mnist");
+    const dirname = path.resolve(__dirname, "../deps/data/mnist");
     return path.resolve(dirname, fn);
   }
 }
