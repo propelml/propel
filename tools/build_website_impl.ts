@@ -68,6 +68,7 @@ process.on("unhandledRejection", e => { throw e; });
   run.mkdir("build/website/notebook");
 
   run.symlink(run.root + "/website/", "build/website/static");
+  run.symlink(run.root + "/deps/data/", "build/website/data");
 
   gendoc.writeJSON("build/website/docs.json");
 

@@ -15,7 +15,8 @@
 import { test } from "../tools/tester";
 import * as pr from "./api";
 import * as dataset from "./dataset";
-import { assert, assertAllEqual, assertShapesEqual } from "./util";
+import { assert, assertAllClose, assertAllEqual, assertShapesEqual }
+  from "./util";
 
 test(async function dataset_datasetFromSlices() {
   const labels = pr.T([
@@ -79,4 +80,39 @@ test(async function dataset_repeatSlices() {
   assertAllEqual(el.labels, [[ 0, 0, 1 ]]);
   el = await ds.next();
   assert(el == null);
+});
+
+test(async function dataset_loadIris() {
+  const { features, labels } = await dataset.loadIris();
+  assertShapesEqual(features.shape, [150, 4]);
+  assertShapesEqual(labels.shape, [150]);
+});
+
+// Test accessing the iris dataset through the dataset API.
+test(async function dataset_iris() {
+  const ds = dataset.dataset("iris").batch(2);
+  const { features, labels } = await ds.next();
+  assertAllClose(features.slice([0, 0], [2, -1]),
+                 [[ 5.1,  3.5,  1.4,  0.2], [ 4.9,  3. ,  1.4,  0.2]]);
+  assertAllEqual(labels.slice([0], [2]), [0, 0]);
+});
+
+test(async function dataset_breastCancer() {
+  const ds = dataset.dataset("breast_cancer").batch(2);
+  const { features, labels } = await ds.next();
+  const firstFeatures = features.slice([0, 0], [2, 4]);
+  assertAllClose(firstFeatures,
+    [[   17.99,    10.38,   122.8 ,  1001.  ],
+     [   20.57,    17.77,   132.9 ,  1326.  ]]);
+  assertAllEqual(labels.slice([0], [2]), [0, 0]);
+});
+
+test(async function dataset_wine() {
+  const ds = dataset.dataset("wine").batch(2);
+  const { features, labels } = await ds.next();
+  const firstFeatures = features.slice([0, 0], [2, 4]);
+  assertAllClose(firstFeatures,
+    [[ 14.23,   1.71,   2.43,  15.6 ],
+     [ 13.2 ,   1.78,   2.14,  11.2 ]]);
+  assertAllEqual(labels.slice([0], [2]), [0, 0]);
 });
