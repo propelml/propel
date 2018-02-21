@@ -96,10 +96,10 @@ const importVisitors = {
         cur = spec[i];
       }
       state.edit.replace(cur.end, src.start, `} = {_:await ${importFn}(`);
-      state.edit.replace(src.end, node.end, ")}");
+      state.edit.replace(src.end, node.end, ")};");
     } else {
       state.edit.replace(node.start, src.start, `await ${importFn}(`);
-      state.edit.replace(src.end, node.end, ")");
+      state.edit.replace(src.end, node.end, ");");
     }
 
     walk.base.ImportDeclaration(node, state, c);
