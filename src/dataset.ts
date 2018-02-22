@@ -19,8 +19,7 @@ import { isUndefined } from "util";
 import { tensor, Tensor } from "./api";
 import * as mnist from "./mnist";
 import { assert, fetchStr } from "./util";
-
-type NamedTensors = { [name: string]: Tensor };
+import { NamedTensors } from "./tensor";
 
 export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);

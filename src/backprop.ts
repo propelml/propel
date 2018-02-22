@@ -18,7 +18,7 @@
 
 import { fill, Params } from "./api";
 import { BWFunc, getBackwardFuncs } from "./ops";
-import { convert, Tensor } from "./tensor";
+import { convert, NamedTensors, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
 
@@ -89,11 +89,9 @@ export interface ParamsFn {
   (params: Params): Tensor;
 }
 
-export interface NamedGrads { [name: string]: Tensor; }
-
 // TODO remove or replace this in favor of gradParams2 once unused.
 export function gradParams(f: ParamsFn, names?: string[]) {
-  return function(params: Params): [NamedGrads, Tensor] {
+  return function(params: Params): [NamedTensors, Tensor] {
     pushNewTape();
     // Watch the specified tensors..
     if (names) {
@@ -131,7 +129,7 @@ export function gradParams(f: ParamsFn, names?: string[]) {
  * parameters. The user is responsible for calling trace on each of the params
  * before calculating x.
  */
-export function gradParams2(x: Tensor, params: Params): NamedGrads {
+export function gradParams2(x: Tensor, params: Params): NamedTensors {
   // Turn params into an array, so it can be
   // processed by imperativeGrad.
   const order: string[] = [];
@@ -148,7 +146,7 @@ export function gradParams2(x: Tensor, params: Params): NamedGrads {
   // Now grads is an array, which we want to turn back into a params object.
   // TODO share this with gradParams
   assert(grads.length === order.length);
-  const out: NamedGrads = {};
+  const out: NamedTensors = {};
   for (let i = 0; i < order.length; ++i) {
     const n = order[i];
     out[n] = grads[i];
