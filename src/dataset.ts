@@ -18,8 +18,8 @@
 import { isUndefined } from "util";
 import { tensor, Tensor } from "./api";
 import * as mnist from "./mnist";
-import { assert, fetchStr } from "./util";
 import { NamedTensors } from "./tensor";
+import { assert, fetchStr } from "./util";
 
 export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);
@@ -55,10 +55,25 @@ abstract class Dataset {
 
   abstract async next(): Promise<NamedTensors>;
 
+  // TODO really this should be asyncIterator, but it's not well supported yet.
+  [Symbol.iterator]() {
+    return {
+      next: () => {
+        if (this.done) {
+          return { value: null, done: true };
+        } else {
+          return { value: this.next(), done: false };
+        }
+      }
+    };
+  }
+
   // Most of the datasets just pass their reset calls upward.
   reset(): void {
     if (this.parent) this.parent.reset();
   }
+
+  abstract get done(): boolean;
 
   batch(batchSize: number): Dataset {
     return new BatchDataset(this, batchSize);
@@ -104,6 +119,7 @@ class SliceDataset extends Dataset {
 
   reset() {
     this.pos = 0;
+    this._done = false;
   }
 
   async next(): Promise<NamedTensors> {
@@ -114,7 +130,9 @@ class SliceDataset extends Dataset {
     if (this.promise) await this.promise;
     const out: NamedTensors = {};
     // End condition.
-    if (this.pos >= this.batchDim) return null;
+    if (this.pos >= this.batchDim) {
+      return null;
+    }
     const sliceSize = Math.min(batchSize, this.batchDim - this.pos);
     for (const name of Object.keys(this.tensors)) {
       const t = this.tensors[name];
@@ -124,8 +142,18 @@ class SliceDataset extends Dataset {
       const size = [sliceSize, ...new Array(t.rank - 1).fill(-1)];
       out[name] = t.slice(begin, size);
     }
-    this.pos += batchSize;
+    this.pos += sliceSize;
+
+    if (this.pos >= this.batchDim) {
+      this._done = true;
+    }
+
     return out;
+  }
+
+  private _done = false;
+  get done() {
+    return this._done;
   }
 }
 
@@ -137,6 +165,10 @@ function stack(tensors: Tensor[], axis = 0): Tensor {
 class BatchDataset extends Dataset {
   constructor(parent: Dataset, readonly batchSize: number) {
     super(parent);
+  }
+
+  get done(): boolean {
+    return this.parent.done;
   }
 
   async next(): Promise<NamedTensors> {
@@ -184,12 +216,21 @@ class RepeatDataset extends Dataset {
       if (r != null) {
         return r;
       } else {
-        this.epoch++;
-        if (this.count && this.epoch >= this.count) {
+        if (this.done) {
           return null;
+        } else {
+          this.epoch++;
+          this.parent.reset();
         }
-        this.parent.reset();
       }
+    }
+  }
+
+  get done(): boolean {
+    if (this.count == null || this.epoch < this.count - 1) {
+      return false;
+    } else {
+      return this.parent.done;
     }
   }
 }
@@ -199,6 +240,10 @@ class ShuffleDataset extends Dataset {
 
   constructor(parent: Dataset, readonly bufSize?: number) {
     super(parent);
+  }
+
+  get done(): boolean {
+    return this.parent.done;
   }
 
   async next(): Promise<NamedTensors> {
@@ -225,7 +270,7 @@ async function loadData(fn: string):
 
   const tensors = {
     features: tensor(features, { dtype: "float32" }),
-    labels: tensor(labels, { dtype: "bool" }),
+    labels: tensor(labels, { dtype: "int32" }),
   };
   return tensors;
 }
