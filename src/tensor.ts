@@ -603,26 +603,23 @@ export class Tensor implements types.BasicTensor {
    * to [d0, d1 * d2 * ...] before applying the matmul. That means you can use
    * 4D image tensors with this function without having to reshape it.
    *
-   * If users are calling this function multiple times, they should use
-   * params.scope("myLayerName") to not conflict with other params.
-   *
    *    import { params, zeros } from "propel";
    *    params = params();
    *    inputs = zeros([2, 5]);
-   *    outputs = inputs.linear(params.scope("L1"), 10);
+   *    outputs = inputs.linear("L1", params, 10);
    *    params.has("L1/weights") && params.has("L1/bias");
    */
-  linear(params: Params, outDim: number,
+  linear(scopeName: string, params: Params, outDim: number,
          { useBias = true, scale = 0.01 }: LinearOpts = {}): Tensor {
     assert(this.rank >= 2);
+    const p = params.scope(scopeName);
     // Partially flatten tensor if needed.
     let t = this.rank === 2 ? this : this.reshape([this.shape[0], -1]);
     const inDim = t.shape[t.rank - 1];
-    const w = params.define("weights", () =>
-      randn([inDim, outDim]).mul(scale));
+    const w = p.define("weights", () => randn([inDim, outDim]).mul(scale));
     t = t.matmul(w);
     if (useBias) {
-      const b = params.define("bias", () => zeros([outDim]));
+      const b = p.define("bias", () => zeros([outDim]));
       t = t.add(b);
     }
     return t;

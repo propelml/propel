@@ -1096,8 +1096,8 @@ test(async function api_sgd() {
 test(async function api_linear() {
   const params = api.params();
   const inputs = api.zeros([2, 5]);
-  const outputs = inputs.linear(params, 10);
-  assert(params.has("weights"));
-  assert(params.has("bias"));
+  const outputs = inputs.linear("L1", params, 10);
+  assert(params.has("L1/weights"));
+  assert(params.has("L1/bias"));
   assertShapesEqual(outputs.shape, [2, 10]);
 });
