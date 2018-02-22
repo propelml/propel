@@ -626,6 +626,8 @@ export class Tensor implements types.BasicTensor {
   }
 }
 
+export type NamedTensors = { [name: string]: Tensor };
+
 export interface LinearOpts {
   useBias?: boolean;
   scale?: number;
