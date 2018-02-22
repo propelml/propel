@@ -19,7 +19,7 @@ import { assert, assertAllClose, assertAllEqual, assertShapesEqual }
   from "./util";
 
 test(async function dataset_datasetFromSlices() {
-  const labels = pr.T([
+  const labels = pr.tensor([
     [ 0, 1, 0 ],
     [ 1, 0, 0 ],
     [ 0, 0, 1 ],
@@ -59,7 +59,7 @@ test(async function dataset_mnist() {
 });
 
 test(async function dataset_repeatSlices() {
-  const labels = pr.T([
+  const labels = pr.tensor([
     [ 0, 1, 0 ],
     [ 1, 0, 0 ],
     [ 0, 0, 1 ],
@@ -115,4 +115,32 @@ test(async function dataset_wine() {
     [[ 14.23,   1.71,   2.43,  15.6 ],
      [ 13.2 ,   1.78,   2.14,  11.2 ]]);
   assertAllEqual(labels.slice([0], [2]), [0, 0]);
+});
+
+test(async function dataset_iterable() {
+  const ds = dataset.dataset("iris").batch(2);
+  const labelCounts = [0, 0, 0];
+  for (const p of ds) {
+    const { labels } = await p;
+    const labelsD = labels.getData();
+    labelCounts[labelsD[0]]++;
+    labelCounts[labelsD[1]]++;
+  }
+  assertAllEqual(labelCounts, [50, 50, 50]);
+});
+
+test(async function dataset_iterableEndCondition() {
+  const features = pr.tensor([
+    [ 0, 1, 0 ],
+    [ 1, 0, 0 ],
+    [ 0, 0, 1 ],
+  ]);
+  const ds = dataset.datasetFromSlices({ features }).batch(2).repeat(4);
+  let count = 0;
+  for (const p of ds) {
+    const { features } = await p;
+    count += features.shape[0];
+  }
+  console.log("count", count);
+  assert(count === 12);
 });
