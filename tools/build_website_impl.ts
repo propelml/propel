@@ -66,9 +66,12 @@ process.on("unhandledRejection", e => { throw e; });
   run.mkdir("build/website");
   run.mkdir("build/website/docs");
   run.mkdir("build/website/notebook");
+  run.mkdir("build/website/src"); // Needed for npy_test
 
   run.symlink(run.root + "/website/", "build/website/static");
   run.symlink(run.root + "/deps/data/", "build/website/data");
+  // Needed for npy_test
+  run.symlink(run.root + "/src/testdata/", "build/website/src/testdata");
 
   gendoc.writeJSON("build/website/docs.json");
 
