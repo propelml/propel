@@ -30,7 +30,8 @@ export type DeviceType = "CPU" | "GPU";
 export interface BasicTensor {
   readonly shape: Shape;
   readonly dtype: DType;
-  getData(): TypedArray;
+  dataSync(): TypedArray;
+  data(): Promise<TypedArray>;
   dispose(): void;
 }
 

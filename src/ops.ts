@@ -119,7 +119,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
 function convertSavedBasicsTos(saved: any[], cTensors: Tensor[]) {
   if (!saved) return null;
   return saved.map((t) => {
-    if ((t as types.BasicTensor).getData) {
+    if ((t as types.BasicTensor).dataSync) {
       const b = t as types.BasicTensor;
       for (const ct of cTensors) {
         if (ct.basic === b) return ct;

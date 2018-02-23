@@ -174,8 +174,8 @@ export function plot(...args) {
   const data = [];
   for (let i = 0; i < xs.length; ++i) {
     // TODO line = $.stack([xs[i], ys[i]], 1)
-    const xv = xs[i].getData();
-    const yv = ys[i].getData();
+    const xv = xs[i].dataSync();
+    const yv = ys[i].dataSync();
     assertEqual(xv.length, yv.length);
     const line = [];
     for (let j = 0; j < xv.length; ++j) {
@@ -194,7 +194,7 @@ export function imshow(image: Tensor): void {
   // Assuming image shape is [3, height, width] for RGB.
   // [height, width] for monochrome.
   assertEqual(image.shape.length, 2, "Assuming monochrome for now");
-  const tensorData = image.getData();
+  const tensorData = image.dataSync();
   const h = canvas.height = image.shape[0];
   const w = canvas.width = image.shape[1];
   const ctx = canvas.getContext("2d");

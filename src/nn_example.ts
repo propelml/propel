@@ -82,7 +82,7 @@ async function accuracy(params: Params, dataset,
     seen += images.shape[0];
   }
   const acc = totalCorrect.div(seen);
-  return acc.getData()[0];
+  return acc.dataSync()[0];
 }
 
 export class Trainer {

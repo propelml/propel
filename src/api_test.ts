@@ -71,7 +71,7 @@ test(async function api_range() {
 test(async function api_randn() {
   const t = randn([2, 3]);
   assertAllEqual(t.shape, [2, 3]);
-  const d = t.getData();
+  const d = t.dataSync();
   console.log("randn", d);
   // TODO this isn't the best test...
   assert(d[0] !== d[1]);
@@ -81,13 +81,13 @@ test(async function api_randn() {
 test(async function api_convertWithType() {
   const t = tensor([1, 2, 3], {dtype: "int32"});
   assert(t.dtype === "int32");
-  const ta = t.getData();
+  const ta = t.dataSync();
   assert(ta instanceof Int32Array);
 
   const ta2 = new Int32Array([1, 2, 3]);
   const t2 = tensor(ta2);
   assert(t2.dtype === "int32");
-  assert(t2.getData() instanceof Int32Array);
+  assert(t2.dataSync() instanceof Int32Array);
 });
 
 // Backprop Tests
@@ -1100,4 +1100,10 @@ test(async function api_linear() {
   assert(params.has("L1/weights"));
   assert(params.has("L1/bias"));
   assertShapesEqual(outputs.shape, [2, 10]);
+});
+
+test(async function api_data() {
+  const t = api.range(3);
+  assertAllEqual(await t.data(), [0, 1, 2]);
+  assertAllEqual(t.dataSync(), [0, 1, 2]);
 });

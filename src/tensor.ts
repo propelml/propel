@@ -85,7 +85,7 @@ export class Tensor implements types.BasicTensor {
    *    }
    */
   [Symbol.iterator]() {
-    const d = this.basic.getData();
+    const d = this.basic.dataSync();
     let i = 0;
     return {
       next: () => {
@@ -112,8 +112,26 @@ export class Tensor implements types.BasicTensor {
     return new Tensor(convertBasic(t, {dtype, device: this.device}));
   }
 
-  getData(): types.TypedArray {
-    return this.basic.getData();
+  /** Returns a TypedArray containing the actual data of the tensor.
+   * This function is often a bottleneck in the browser, prefer to use
+   * `Tensor.data()` instead.
+   *
+   *    import * as pr from "propel";
+   *    const t = pr.range(10).reshape([2, 5]);
+   *    t.dataSync();
+   */
+  dataSync(): types.TypedArray {
+    return this.basic.dataSync();
+  }
+
+  /** Returns a promise to a TypedArray of the actual data.
+   *
+   *    import * as pr from "propel";
+   *    const t = pr.range(10).reshape([2, 5]);
+   *    await t.data();
+   */
+  data(): Promise<types.TypedArray> {
+    return this.basic.data();
   }
 
   get rank(): number {
@@ -133,7 +151,7 @@ export class Tensor implements types.BasicTensor {
   }
 
   toString(): string {
-    return format.toString(this.shape, this.getData());
+    return format.toString(this.shape, this.dataSync());
   }
 
   /** Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").

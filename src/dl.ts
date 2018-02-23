@@ -93,9 +93,14 @@ export class TensorDL implements types.BasicTensor {
     assert((this.ndarray as any).isDisposed === false);
   }
 
-  getData(): types.TypedArray {
+  dataSync(): types.TypedArray {
     assert(!this.isDisposed);
     return this.ndarray.getValues();
+  }
+
+  data(): Promise<types.TypedArray> {
+    assert(!this.isDisposed);
+    return this.ndarray.data();
   }
 
   dispose(): void {
@@ -301,9 +306,10 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  // TODO dims should not be a tensor.
   reverse(x: TensorDL, dims: TensorDL): TensorDL {
     const a = x.ndarray;
-    const dims_ = dims.getData();
+    const dims_ = dims.dataSync();
     // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
     const resultValues = makeTypedArray(a.size, x.dtype);
     const values = a.getValues();
