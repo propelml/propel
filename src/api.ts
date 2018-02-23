@@ -16,10 +16,17 @@ import { bo } from "./backend";
 import * as ops from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
+
 export { DType, TensorLike } from "./types";
 export { params, Params } from "./params";
 export { dataset } from "./dataset";
 export { experiment } from "./experiment";
+export { load } from "./npy";
+export { backend } from "./backend";
+export { plot, imshow } from "./matplotlib";
+export { Tensor } from "./tensor";
+export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
+  from "./backprop";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
@@ -48,11 +55,6 @@ export const T = tensor;
 export function listDevices(): string[] {
   return bo.listDevices();
 }
-
-export { Tensor } from "./tensor";
-
-export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
-  from "./backprop";
 
 /** Returns the identity matrix of a given size.
  *
@@ -165,7 +167,3 @@ export function ones(shape: types.Shape,
   }
   return ops.ones(shape, opts);
 }
-
-export { backend } from "./backend";
-
-export { plot, imshow } from "./matplotlib";
