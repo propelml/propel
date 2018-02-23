@@ -58,7 +58,7 @@ function littleEndianToBig(val) {
 export function inspectImg(t, idx) {
   const img = t.slice([idx, 0, 0], [1, -1, -1]);
   console.log("img");
-  const imgData = img.getData();
+  const imgData = img.dataSync();
   let s = "";
   for (let j = 0; j < 28 * 28; j++) {
     s += imgData[j].toString() + " ";

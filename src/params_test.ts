@@ -7,7 +7,7 @@ test(async function params_smoke() {
   const p = params();
   // randn
   const a = p.define("a", () => randn([2, 3]));
-  assert(a.getData()[0] !== 0);
+  assert(a.dataSync()[0] !== 0);
   assertShapesEqual(a.shape, [2, 3]);
   const aa = p.define("a", () => randn([2, 3]));
   assertAllEqual(a, aa);

@@ -251,7 +251,7 @@ export class OptimizerSGD {
       }
 
       this.steps++;
-      lossValue = loss.cpu().getData()[0];
+      lossValue = loss.cpu().dataSync()[0];
     });
 
     return lossValue;

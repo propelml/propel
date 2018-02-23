@@ -48,9 +48,9 @@ function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   if ((t as Tensor).cpu) {
     t = (t as Tensor).cpu(); // Copy to CPU if necessary.
   }
-  if ((t as BasicTensor).getData) {
+  if ((t as BasicTensor).dataSync) {
     t = t as BasicTensor;
-    return [t.shape, t.getData()];
+    return [t.shape, t.dataSync()];
   } else if (isTypedArray(t)) {
     return [[t.length], t];
   } else if (t instanceof Array) {

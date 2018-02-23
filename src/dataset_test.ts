@@ -122,7 +122,7 @@ test(async function dataset_iterable() {
   const labelCounts = [0, 0, 0];
   for (const p of ds) {
     const { labels } = await p;
-    const labelsD = labels.getData();
+    const labelsD = labels.dataSync();
     labelCounts[labelsD[0]]++;
     labelCounts[labelsD[1]]++;
   }

@@ -98,7 +98,7 @@ function floatSmall(v: number | number[], colocateWith?: TensorTF): TensorTF {
 
 export class TensorTF implements types.BasicTensor {
   handle: null | Handle;
-  private data?: types.TypedArray;
+  private data_?: types.TypedArray;
 
   static fromTypedArray(data: types.TypedArray, shape: types.Shape,
                         dtype?: types.DType, device?: string): TensorTF {
@@ -129,25 +129,31 @@ export class TensorTF implements types.BasicTensor {
     return simplifyDeviceName(binding.getDevice(this.handle));
   }
 
-  getData(): types.TypedArray {
-    if (!this.data) {
+  async data(): Promise<types.TypedArray> {
+    // TODO maybe we can do better than this in TF. But TF is already pretty
+    // fast, unlike webgl.
+    return this.dataSync();
+  }
+
+  dataSync(): types.TypedArray {
+    if (!this.data_) {
       const ab = binding.asArrayBuffer(this.handle);
       switch (this.dtype) {
         case "float32":
-          this.data = new Float32Array(ab);
+          this.data_ = new Float32Array(ab);
           break;
         case "int32":
-          this.data = new Int32Array(ab);
+          this.data_ = new Int32Array(ab);
           break;
         case "uint8":
-          this.data = new Uint8Array(ab);
+          this.data_ = new Uint8Array(ab);
           break;
         case "bool":
-          this.data = new Uint8Array(ab);
+          this.data_ = new Uint8Array(ab);
           break;
       }
     }
-    return this.data;
+    return this.data_;
   }
 
   dispose(): void {
