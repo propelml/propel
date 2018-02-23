@@ -33,6 +33,7 @@
     "stylelint-config-recommended": "^2.0.1",
     "stylelint-config-standard": "^18.0.0",
     "tar": "^4.3.2",
+    "text-encoding": "^0.6.4",
     "ts-loader": "^3.4.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",
