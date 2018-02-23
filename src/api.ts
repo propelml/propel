@@ -22,6 +22,7 @@ import { assert, assertShapesEqual } from "./util";
 export { params, Params } from "./params";
 import { params, Params } from "./params";
 export { dataset } from "./dataset";
+export { print, experiment } from "./experiment";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
