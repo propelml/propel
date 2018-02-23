@@ -40,7 +40,7 @@ export async function train(maxSteps = 0) {
         .linear("L3", params, 10)
         // Using the logits, calculate a classification loss between the
         // labels. Labels's shape is [128]. This value is returned, and will be
-        // backpropagated though.
+        // backpropagated thru.
         .softmaxLoss(labels);
     });
     // Stop after maxSteps.

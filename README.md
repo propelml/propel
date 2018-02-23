@@ -9,16 +9,16 @@ A Machine Learning Framework for JavaScript.
 ## How to run TF examples
 
 ```
-$ ./tools/build_binding.js
-$ ts-node src/nn_example_main.ts
+$ ./tools/build.js
+$ node ./example.js
 ```
 
 If you're on Linux and would like to build a CUDA version of
 Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
 
 ```
-$ PROPEL_BUILD_GPU=1 ./tools/build_binding.js
-$ ts-node src/nn_example_main.ts
+$ PROPEL_BUILD_GPU=1 ./tools/build.js
+$ node example.js
 ```
 
 

@@ -1081,18 +1081,6 @@ test(async function api_rescale() {
   assertAllClose(r, [-1, -0.607843137254902, 1]);
 });
 
-test(async function api_sgd() {
-  const params = api.params();
-  const w = params.define("weights", () => zeros([5, 6]).add(1));
-  const b = params.define("biases", () => zeros([6]));
-  const inputs = api.zeros([2, 5]);
-  const labels = tensor([[1, 0, 0, 0, 0, 0],
-                  [0, 1, 0, 0, 0, 0]], {dtype: "int32"});
-  const loss = inputs.matmul(w).add(b).softmaxCE(labels).reduceMean();
-  api.sgd(loss, params, { lr: 0.1 });
-  assertAllClose(b, [0.033,  0.033, -0.017, -0.017, -0.017, -0.017]);
-});
-
 test(async function api_linear() {
   const params = api.params();
   const inputs = api.zeros([2, 5]);

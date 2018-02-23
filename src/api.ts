@@ -13,14 +13,11 @@
    limitations under the License.
  */
 import { bo } from "./backend";
-import { gradParams, ParamsFn } from "./backprop";
 import * as ops from "./ops";
-import { convert, gc, Tensor } from "./tensor";
+import { convert, Tensor } from "./tensor";
 import * as types from "./types";
 export { DType, TensorLike } from "./types";
-import { assert, assertShapesEqual } from "./util";
 export { params, Params } from "./params";
-import { params, Params } from "./params";
 export { dataset } from "./dataset";
 export { print, experiment } from "./experiment";
 
@@ -167,96 +164,6 @@ export function ones(shape: types.Shape,
     throw new Error("Ones takes a shape as an argument");
   }
   return ops.ones(shape, opts);
-}
-
-export interface SGDOpts {
-  lr: number;
-  momentum?: number; // TODO currently unused.
-}
-
-import { gradParams2 } from "./backprop";
-
-export function sgd(loss: Tensor, params: Params, opts: SGDOpts): void {
-  // In sgd() we assume the loss is a function of the params already.
-  assert(loss.rank === 0);
-  gc((keep) => {
-    const grads = gradParams2(loss, params);
-
-    for (const name of Object.keys(grads)) {
-      const g = grads[name];
-      const p = params.get(name);
-      // p -= g * lr
-      p.assign(p.sub(g.mul(opts.lr)));
-    }
-  });
-}
-
-/** Stochastic gradient descent with momentum.
- * This class is deprecated. Please use sgd() instead.
- */
-export class OptimizerSGD {
-  steps: number;
-  params: Params;
-
-  // TODO access to grads.
-  // grads?: Params;
-
-  // TODO Design note. The name "Params" doesn't fit well with what velocity
-  // is. Maybe "Params" should be named more generically, like
-  // "NamedTensors".  But I prefer to have a more nuanced name than
-  // "NamedTensors".  "Params" works for now.
-  velocity: Params;
-
-  constructor() {
-    this.steps = 0;
-    this.params = params();
-    this.velocity = params();
-  }
-
-  step(learningRate: number, momentum: number, lossFn: ParamsFn): number {
-    const m = momentum;
-    assert(0 <= m && m <= 1.0);
-    let lossValue;
-
-    gc((keep) => {
-      // Get gradient of objective using autograd.
-      // TODO it's possible that calling gradParams every step is killing the
-      // possibility of a good optimization in backprop. Re-evaluate later.
-      const gradFn = gradParams(lossFn);
-      // Forward/Backward pass
-      const [grads, loss] = gradFn(this.params);
-      assert(loss.rank === 0);
-
-      // TODO allow access to grads.
-      // this.grads = grads;
-
-      // Update each param tensor.
-      for (const name of Object.keys(grads)) {
-        const g = grads[name];
-        const p = this.params.get(name);
-        const v = this.velocity.define(name, () => zeros(p.shape));
-        if (this.steps > 0) {
-          assertShapesEqual(p.shape, g.shape);
-          assertShapesEqual(p.shape, v.shape);
-        }
-
-        // v = m * v - (1 - m) * g
-        // m (momentum) is usually 0.9, so we're saying use 90% v (velocity) and
-        // 10% from g (grad).
-        v.assign(g.mul(1 - m).sub(v.mul(m)).neg());
-        keep(v);
-        assert(g.device === v.device);
-        // p += v * lr
-        p.assign(p.add(v.mul(learningRate)));
-        keep(p);
-      }
-
-      this.steps++;
-      lossValue = loss.cpu().dataSync()[0];
-    });
-
-    return lossValue;
-  }
 }
 
 export { backend } from "./backend";
