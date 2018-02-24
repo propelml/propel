@@ -98,7 +98,9 @@ export function gradParams(f: ParamsFn, names?: string[]) {
         watch(params.get(name));
       }
     } else {
-      params.forEach((t, name) => watch(t));
+      for (const [_, t] of params) {
+        watch(t);
+      }
     }
     let result = f(params); // Do the forward pass.
     result = convert(result);
@@ -106,10 +108,10 @@ export function gradParams(f: ParamsFn, names?: string[]) {
     // processed by imperativeGrad.
     const order: string[] = [];
     const targs: Tensor[] = [];
-    params.forEach((t, name) => {
+    for (const [name, t] of params) {
       order.push(name);
       targs.push(t);
-    });
+    }
 
     const tape = popTape();
     const grads = imperativeGrad(result, targs, tape);
