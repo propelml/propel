@@ -27,19 +27,31 @@ import { gradParams } from "./backprop";
 import * as format from "./format";
 import { Params, params as createParams } from "./params";
 import { gc, NamedTensors, Tensor } from "./tensor";
-import { assert } from "./util";
+import { assert, IS_NODE } from "./util";
 
-interface ExperimentOpts {
-  printStepSecs: number;
+export interface ExperimentOpts {
+  checkpointsToKeep?: number;
+  printStepSecs?: number;
+  saveOnExit?: boolean;
+  saveSecs?: number;
 }
 
-const expOptDefaults: ExperimentOpts = {
+const defaultOpts: ExperimentOpts = {
+  checkpointsToKeep: 3,
   printStepSecs: 1,
+  saveOnExit: true,
+  saveSecs: 60,
 };
 
 export async function experiment(name: string,
     opts?: ExperimentOpts): Promise<Experiment> {
-  const exp = new Experiment(name, opts);
+  let exp: Experiment;
+  if (IS_NODE) {
+    const { DiskExperiment } = require("./disk_experiment");
+    exp = new DiskExperiment(name, opts);
+  } else {
+    exp = new BrowserExperiment(name, opts);
+  }
   await exp.createOrRestore();
   return exp;
 }
@@ -96,31 +108,58 @@ interface RateInfo {
   time: Date;
 }
 
-class Experiment {
-  private currentParams: Params;
-  private step_?: number;
-  readonly opts: ExperimentOpts;
+export abstract class Experiment {
   private lastPrint?: Date;
   private rateHistory: RateInfo[] = [];
+  protected currentParams: Params;
+  protected lastSave?: Date;
+  protected step_?: number;
+  readonly opts: ExperimentOpts;
 
-  constructor(readonly name: string, opts: ExperimentOpts) {
-    this.opts = Object.assign(expOptDefaults, opts);
-  }
-
-  /** Loads from disk */
-  async createOrRestore(): Promise<void> {
-    // Faking it now.
-    this.currentParams = createParams();
-    this.step_ = 0;
+  constructor(readonly name: string, opts?: ExperimentOpts) {
+    this.opts = Object.assign(defaultOpts, opts);
   }
 
   get step() {
     return this.step_;
   }
 
+  get params() {
+    return this.currentParams;
+  }
+
   /** Performs SGD given the loss and current parameters. */
   sgd(opts: SGDOpts, lossFn: LossFn) {
     return this.minimize(sgd, opts, lossFn);
+  }
+
+  abstract createOrRestore(): Promise<void>;
+
+  /** Saves a new checkpoint. */
+  abstract async save(): Promise<void>;
+
+  /** Gets a list of checkpoints. Most recent first. */
+  abstract async checkpoints(): Promise<number[]>;
+
+  abstract async deleteCheckpoint(step: number): Promise<void>;
+
+  private async maybeSave(): Promise<void> {
+    if (this.lastSave) {
+      if (secsSince(this.lastSave) < this.opts.saveSecs) {
+        // Bail out if we've saved less than saveSecs seconds ago.
+        return;
+      }
+    }
+    await this.save();
+    this.lastSave = new Date();
+
+    // Delete old checkpoints.
+    const checkpoints = await this.checkpoints();
+    for (let i = 0; i < checkpoints.length; i++) {
+      if (i >= this.opts.checkpointsToKeep) {
+        this.deleteCheckpoint(checkpoints[i]);
+      }
+    }
   }
 
   /** Modifies the current parameters given the loss and optimizer. */
@@ -146,6 +185,7 @@ class Experiment {
     }
 
     this.printProgress(...printArgs).then(() => loss.dispose());
+    this.maybeSave();
   }
 
   private getRate(): number {
@@ -186,4 +226,20 @@ class Experiment {
 
 function secsSince(t: Date): number {
   return (new Date().valueOf() - t.valueOf()) / 1000;
+}
+
+// The browser doesn't save checkpoints at all right now.
+class BrowserExperiment extends Experiment {
+  async createOrRestore(): Promise<void> {
+    this.currentParams = createParams();
+    this.step_ = 0;
+  }
+
+  async save(): Promise<void> { }
+
+  async checkpoints(): Promise<number[]> {
+    return [];
+  }
+
+  async deleteCheckpoint(step: number): Promise<void> { }
 }
