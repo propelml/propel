@@ -12,7 +12,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { join as pathJoin } from "path";
 import { Tensor } from "./tensor";
 import { BasicTensor, DType, FlatVector, RegularArray, Shape,
   TensorLike, TypedArray } from "./types";
@@ -309,29 +308,32 @@ const nodeRequire = IS_WEB ? null : require;
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(path: string,
+async function fetch2(p: string,
     encoding: "binary" | "utf8" = "binary"): Promise<string | ArrayBuffer> {
   if (IS_WEB) {
     const host = document.location.host.split(":")[0];
     if (propelHosts.has(host)) {
-      path = path.replace("deps/", "/");
+      p = p.replace("deps/", "/");
     } else {
-      path = path.replace("deps/", "http://propelml.org/");
+      p = p.replace("deps/", "http://propelml.org/");
     }
-    const res = await fetch(path, { mode: "no-cors" });
+    const res = await fetch(p, { mode: "no-cors" });
     if (encoding === "binary") {
       return res.arrayBuffer();
     } else {
       return res.text();
     }
   } else {
-    path = pathJoin(__dirname, "..", path);
     const { readFileSync } = nodeRequire("fs");
+    const path = nodeRequire("path");
+    if (!path.isAbsolute(p)) {
+      p = path.join(__dirname, "..", p);
+    }
     if (encoding === "binary") {
-      const b = readFileSync(path, null);
+      const b = readFileSync(p, null);
       return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
     } else {
-      return readFileSync(path, "utf8");
+      return readFileSync(p, "utf8");
     }
   }
 }
