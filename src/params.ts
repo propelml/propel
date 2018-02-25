@@ -1,5 +1,6 @@
-import { Tensor } from "./api";
 import { watch } from "./backprop";
+import { convert, Tensor } from "./tensor";
+import * as types from "./types";
 
 /** Constructs a new params object.
  * Same as `new Params()`. See the documentation for in the Params class for
@@ -22,17 +23,15 @@ export function params(): Params {
  * To define a new parameter tensor, you must define
  * 1) a unique name
  * 2) the initial value.
- *
- * The way this is done is with the define() method
- * on the params object. They are each given a name, shape, and dtype,
- * if the name doesn't already exist in the params object, it is initialized.
+ * This is done with the define() method
+ * If the name doesn't already exist in the params object, it is initialized.
  * Otherwise it is returned without modification.
  *
- * The params object is often used with optimizers to do gradient decent.
- *
- * If using saver(), the params object wont need to be constructed manually.
+ * Params are saved, restored, and otherwise acted upon by the Experiment
+ * interface. See Experiment.sgd() and Experiment.minimize().
  */
 export interface Params {
+  length: number;
   has(name: string): boolean;
   get(name: string): Tensor;
   set(name: string, t: Tensor): Tensor;
@@ -59,7 +58,7 @@ export interface Params {
    * params object, otherwise returns the existing param of the given name.
    * All tensors in the params object get automatically traced for backprop.
    */
-  define(name: string, initFn: () => Tensor): Tensor;
+  define(name: string, initFn: () => types.TensorLike): Tensor;
 }
 
 class RootParams implements Params {
@@ -71,13 +70,18 @@ class RootParams implements Params {
     return this.store.has(name);
   }
 
+  get length(): number {
+    return this.store.size;
+  }
+
   get(name: string): Tensor {
     return this.store.get(name);
   }
 
-  set(name: string, t: Tensor): Tensor {
-    this.store.set(name, t);
-    return t;
+  set(name: string, t: types.TensorLike): Tensor {
+    const tensor = convert(t);
+    this.store.set(name, tensor);
+    return tensor;
   }
 
   [Symbol.iterator]() {
@@ -91,10 +95,10 @@ class RootParams implements Params {
     return new ScopedParams(this, prefix);
   }
 
-  define(name: string, initFn: () => Tensor): Tensor {
+  define(name: string, initFn: () => types.TensorLike): Tensor {
     let t = this.get(name);
     if (!t) {
-      t = initFn();
+      t = convert(initFn());
       this.set(name, t);
       watch(t);
     }
@@ -107,6 +111,16 @@ class ScopedParams implements Params {
 
   private resolve(name: string): string {
     return this.prefix + "/" + name;
+  }
+
+  get length(): number {
+    // TODO This is not constant time but it could be. Each scoped params
+    // should have its own store.
+    let c = 0;
+    for (const [name, _] of this.parent) {
+      if (name.startsWith(this.prefix)) c++;
+    }
+    return c;
   }
 
   has(name: string): boolean {
@@ -129,7 +143,7 @@ class ScopedParams implements Params {
     return this.parent.scope(this.resolve(prefix));
   }
 
-  define(name: string, initFn: () => Tensor): Tensor {
+  define(name: string, initFn: () => types.TensorLike): Tensor {
     return this.parent.define(this.resolve(name), initFn);
   }
 }
