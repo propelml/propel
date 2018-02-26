@@ -135,12 +135,7 @@ class SliceDataset extends Dataset {
     }
     const sliceSize = Math.min(batchSize, this.batchDim - this.pos);
     for (const name of Object.keys(this.tensors)) {
-      const t = this.tensors[name];
-      // TODO This is ugly. slice() should take truncated begin and size
-      // arguments.
-      const begin = [this.pos, ...new Array(t.rank - 1).fill(0)];
-      const size = [sliceSize, ...new Array(t.rank - 1).fill(-1)];
-      out[name] = t.slice(begin, size);
+      out[name] = this.tensors[name].slice(this.pos, sliceSize);
     }
     this.pos += sliceSize;
 

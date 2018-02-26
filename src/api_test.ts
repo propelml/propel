@@ -881,8 +881,8 @@ test(async function api_bcastDiv() {
 
 testDevices(async function api_slice(tensor, device) {
   const a = tensor([[[1, 1, 1], [2, 2, 2]],
-               [[3, 3, 3], [4, 4, 4]],
-               [[5, 5, 5], [6, 6, 6]]]);
+                    [[3, 3, 3], [4, 4, 4]],
+                    [[5, 5, 5], [6, 6, 6]]]);
   const s1 = a.slice([1, 0, 0], [1, 1, 3]);
   // FIXME
   // assert(s1.dtype === "uint8");
@@ -895,6 +895,22 @@ testDevices(async function api_slice(tensor, device) {
                   [[5, 5, 5]]]);
   assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
                  [[[3, 3, 3], [4, 4, 4]]]);
+
+  // Convenience APIs.
+  const t = tensor([
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+  ]);
+  assertAllEqual(t.slice(1), [
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+  ]);
+  assertAllEqual(a.slice(1), [
+    [[3, 3, 3], [4, 4, 4]],
+    [[5, 5, 5], [6, 6, 6]],
+  ]);
+  assertAllEqual(a.slice(1, 1), [[[3, 3, 3], [4, 4, 4]]]);
 
   const s2 = tensor([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
   assert(s2.dtype === "int32");

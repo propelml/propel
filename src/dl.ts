@@ -424,7 +424,7 @@ export class OpsDL implements types.BackendOps {
         return d;
       } else {
         assert(d === -1, "Bad value in size");
-        return x.shape[i];
+        return x.shape[i] - begin[i];
       }
     });
     switch (x.shape.length) {
