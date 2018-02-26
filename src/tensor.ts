@@ -439,11 +439,54 @@ export class Tensor implements types.BasicTensor {
    * 'input' to slice. If size[i] is -1, all remaining elements in dimension
    * are included in the slice -- this is equivalent to setting
    *   size[i] = input.shape[i] - begin[i]
+   *
+   * If the first argument is a number instead of an array of numbers, slice
+   * operates on the first axis only:
+   *
+   *    import * as pr from "propel";
+   *    t = pr.tensor([
+   *      [1, 2, 3, 4],
+   *      [5, 6, 7, 8],
+   *      [9, 10, 11, 12],
+   *    ]);
+   *    t.slice(1);
+   *
+   * The second argument says how long the slice should be. So if you wanted
+   * just the first element of the first axis:
+   *
+   *    t.slice(0, 1);
+   *
+   * The most general form takes two arrays as arguments, where the first
+   * argument says where to start, and the second say how large the slice
+   * should be:
+   *
+   *    t.slice([0, 1], [2, 3]);
+   *
    */
-  slice(begin: number[], size: number[]): Tensor {
-    assert(allFinite(begin));
-    assert(allFinite(size));
-    return ops.slice(this, begin, size);
+  slice(begin: number | number[], size?: number | number[]): Tensor {
+    let begin_: number[];
+    if (typeof begin === "number") {
+      begin_ = [begin, ...new Array(this.rank - 1).fill(0)];
+    } else if (begin.length < this.rank) {
+      begin_ = begin.concat(new Array(this.rank - begin.length).fill(0));
+    } else {
+      begin_ = begin;
+    }
+
+    let size_: number[];
+    if (size == null) {
+      size_ = new Array(this.rank).fill(-1);
+    } else if (typeof size === "number") {
+      size_ = [size, ...new Array(this.rank - 1).fill(-1)];
+    } else if (size.length < this.rank) {
+      size_ = size.concat(new Array(this.rank - size.length).fill(-1));
+    } else {
+      size_ = size;
+    }
+
+    assert(allFinite(begin_));
+    assert(allFinite(size_));
+    return ops.slice(this, begin_, size_);
   }
 
   /** Reshapes the tensor without changing its data. O(1).
