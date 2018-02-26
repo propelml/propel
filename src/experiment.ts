@@ -105,7 +105,7 @@ export abstract class Experiment {
   protected opts: ExperimentOpts;
   protected lastSave?: Date;
 
-  constructor(public name: string, opts: ExperimentOpts) {
+  constructor(public name: string, opts?: ExperimentOpts) {
     this.opts = Object.assign(defaultOpts, opts);
   }
 
