@@ -31,7 +31,8 @@ type FWFunc = (...args) => types.BasicTensor;
 // objects passed to saveForBackward(). Backwards pass functions are defined
 // alongside their foward pass counterparts in ops.ts. Unlike FWFunc, BWFunc
 // should use Tensors.
-export type BWFunc = (grad: Tensor, ...savedArgs) => Tensor;
+type BWFunc = (grad: Tensor, ...savedArgs) => Tensor;
+type BWArgFunc = (argIndex: number, grad: Tensor, ...savedArgs) => Tensor;
 
 // OpFunc is returned from defFW and is what is the external interface to
 // backprop ops. These are called a lot in api.ts and tensor.ts
@@ -44,7 +45,7 @@ let nextOpId = 1;
 interface OpInfo {
   name: string;
   opFunc: OpFunc;
-  bwFuncs: BWFunc[];
+  bwArgFunc: BWArgFunc;
 }
 
 const ops: { [name: string]: OpInfo } = {};
@@ -111,7 +112,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
   ops[name] = {
     name,
     opFunc,
-    bwFuncs: null,
+    bwArgFunc: null,
   };
   return opFunc;
 }
@@ -132,8 +133,17 @@ function convertSavedBasicsTos(saved: any[], cTensors: Tensor[]) {
   });
 }
 
-function defBW(name: string, ...bwFuncs: Array<null | BWFunc>) {
-  ops[name].bwFuncs = bwFuncs;
+function defBW(name: string, ...bwFuncs: Array<null | BWFunc>): void {
+  defBWArgs(name, (argIndex, g, ...rest) => {
+    const f = bwFuncs[argIndex];
+    return f == null ? null : f(g, ...rest);
+  });
+}
+
+// The more general version of defBW. Used for ops who
+// take a variable number of tensor arguments, like concat.
+function defBWArgs(name: string, f: BWArgFunc): void {
+  ops[name].bwArgFunc = f;
 }
 
 let globalSavedForBackward = null;
@@ -144,8 +154,8 @@ function saveForBackward(...args) {
   globalSavedForBackward = args;
 }
 
-export function getBackwardFuncs(name: string): BWFunc[] {
-  return ops[name].bwFuncs;
+export function getBackwardFunc(name: string): BWArgFunc {
+  return ops[name].bwArgFunc;
 }
 
 export function ones(shape: types.Shape, opts: types.TensorOpts) {
@@ -413,10 +423,25 @@ defBW("slice", (g, sx, begin, size) => {
 
 export const concat = defFW("concat",
   (axis: number, ...inputs: types.BasicTensor[]) => {
+    const shapes = inputs.map(t => t.shape);
+    saveForBackward(axis, shapes);
     return bo.concat(axis, inputs);
   });
-defBW("concat", (g) => {
-  throw new Error("Not Implemented.");
+defBWArgs("concat", (argIndex, g, axis, shapes) => {
+  // We cannot take the gradient with respect to axis.
+  if (argIndex === 0) return null;
+  const tensorIndex = argIndex - 1;
+  let sliceStart = 0;
+  for (let i = 0; i < tensorIndex; ++i) {
+    sliceStart += shapes[i][axis];
+  }
+  const sliceSize = shapes[tensorIndex][axis];
+  const rank = shapes[0].length;
+  const begin = new Array(rank).fill(0);
+  const size = new Array(rank).fill(-1);
+  begin[axis] = sliceStart;
+  size[axis] = sliceSize;
+  return g.slice(begin, size);
 });
 
 export let reshape = defFW("reshape", (x, newShape) => {
