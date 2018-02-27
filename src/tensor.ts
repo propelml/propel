@@ -185,6 +185,10 @@ export class Tensor implements types.BasicTensor {
     return ops.add(this, this.colocate(x));
   }
 
+  add_(x: types.TensorLike): Tensor {
+    return ops.add_(this, this.colocate(x));
+  }
+
   sub(x: types.TensorLike): Tensor {
     return ops.sub(this, this.colocate(x));
   }

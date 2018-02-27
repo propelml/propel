@@ -41,6 +41,7 @@ export interface BackendOps {
   getDevice(x: BasicTensor): string;
   listDevices(): string[];
   add(x: BasicTensor, y: BasicTensor): BasicTensor;
+  add_(x: BasicTensor, y: BasicTensor): BasicTensor;
   sub(x: BasicTensor, y: BasicTensor): BasicTensor;
   mul(x: BasicTensor, y: BasicTensor): BasicTensor;
   div(x: BasicTensor, y: BasicTensor): BasicTensor;

@@ -145,6 +145,12 @@ export class OpsDL implements types.BackendOps {
     return new TensorDL(ndarray, x.math);
   }
 
+  add_(x: TensorDL, y: TensorDL): TensorDL {
+    ENV.setMath(x.math);
+    const ndarray = x.math.add(x.ndarray, y.ndarray);
+    return new TensorDL(ndarray, x.math);
+  }
+
   sub(x: TensorDL, y: TensorDL): TensorDL {
     ENV.setMath(x.math);
     const ndarray = x.math.sub(x.ndarray, y.ndarray);
