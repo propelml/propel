@@ -1,5 +1,3 @@
-import { DataType, DataTypeMap } from "../../ndarray";
-
 /**
  * @license
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -17,13 +15,15 @@ import { DataType, DataTypeMap } from "../../ndarray";
  * =============================================================================
  */
 
+import { DataType, DataTypeMap, NDArrayBackendData } from "../../ndarray";
+
 export enum TextureType {
   DEFAULT,
   // When using a standard RGBA-packed color image.
   RGBA_COLOR
 }
 
-export interface TextureData {
+export interface TextureData extends NDArrayBackendData {
   shape: number[];
   dtype: DataType;
   values: DataTypeMap[DataType];

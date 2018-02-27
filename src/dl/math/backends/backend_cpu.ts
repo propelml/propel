@@ -23,15 +23,18 @@ import * as broadcast_util from "../broadcast_util";
 import * as concat_util from "../concat_util";
 import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar } from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, NDArrayBackendData, Rank, Scalar } from "../ndarray";
 import * as types from "../types";
 import { MatrixOrientation, SumTypes, SumTypesMap } from "../types";
 
 import * as axis_util from "./../axis_util";
 import { MathBackend } from "./backend";
 
+export interface CPUData extends NDArrayBackendData {
+  values: DataTypeMap[DataType];
+}
+
 export class MathBackendCPU implements MathBackend {
-  private data = new WeakMap<DataId, DataTypeMap[DataType]>();
   private canvas: HTMLCanvasElement;
 
   constructor() {
@@ -40,25 +43,26 @@ export class MathBackendCPU implements MathBackend {
     }
   }
 
-  register(dataId: DataId, shape: number[], dtype: DataType): void {
-    this.data.set(dataId, null);
+  create(shape: number[], dtype: DataType): CPUData {
+    return {
+      values: null
+    };
   }
-  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void {
+  write<D extends DataType>(
+      data: CPUData, values: DataTypeMap[D]): void {
     if (values == null) {
       throw new Error("MathBackendCPU.write(): values can not be null");
     }
-    this.throwIfNoData(dataId);
-    this.data.set(dataId, values);
+    data.values = values;
   }
   writePixels(
-      dataId: DataId,
+      data: CPUData,
       pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
               HTMLVideoElement,
       numChannels: number): void {
     if (pixels == null) {
       throw new Error("MathBackendCPU.writePixels(): pixels can not be null");
     }
-    this.throwIfNoData(dataId);
     let vals: Uint8ClampedArray;
     if (pixels instanceof ImageData) {
       vals = pixels.data;
@@ -97,32 +101,22 @@ export class MathBackendCPU implements MathBackend {
         }
       }
     }
-    this.data.set(dataId, values);
+    data.values = values;
   }
-  async read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]> {
-    this.throwIfNoData(dataId);
-    return this.data.get(dataId);
+  async read<D extends DataType>(
+      data: CPUData): Promise<DataTypeMap[D]> {
+    return data.values;
   }
-  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D] {
-    this.throwIfNoData(dataId);
-    return this.data.get(dataId);
+  readSync<D extends DataType>(data: CPUData): DataTypeMap[D] {
+    return data.values;
   }
-  disposeData(dataId: DataId): void {
-    this.data.delete(dataId);
+  disposeData(data: CPUData): void {
+    data.values = null;
   }
   async time(query: () => NDArray): Promise<number> {
     const start = performance.now();
     query();
     return performance.now() - start;
-  }
-  private throwIfNoData(dataId: DataId) {
-    if (!this.data.has(dataId)) {
-      throw new Error(
-          `No data found for NDArray with data id ${dataId}. ` +
-          `Use dl.ENV.math instead of constructing your own NDArrayMath. ` +
-          `If you need to construct your own math, make sure this array is ` +
-          `allocated after the math construction`);
-    }
   }
 
   clone<T extends NDArray>(x: T): T {

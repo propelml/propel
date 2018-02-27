@@ -17,21 +17,24 @@
 
 import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataType, DataTypeMap, NDArray, NDArrayBackendData, Rank } from "../ndarray";
 import { MatrixOrientation, SumTypes } from "../types";
 
+export interface NDArrayData {}
+
 export interface NDArrayStorage {
-  read<D extends DataType>(dataId: DataId): Promise<DataTypeMap[D]>;
-  readSync<D extends DataType>(dataId: DataId): DataTypeMap[D];
-  disposeData(dataId: DataId): void;
-  write<D extends DataType>(dataId: DataId, values: DataTypeMap[D]): void;
+  create(shape: number[], dtype: DataType): NDArrayBackendData;
+  read<D extends DataType>(data: NDArrayBackendData): Promise<DataTypeMap[D]>;
+  readSync<D extends DataType>(data: NDArrayBackendData): DataTypeMap[D];
+  disposeData(data: NDArrayBackendData): void;
+  write<D extends DataType>(
+      data: NDArrayBackendData, values: DataTypeMap[D]): void;
   writePixels(
-      dataId: DataId,
+      data: NDArrayBackendData,
       pixels: ImageData | HTMLImageElement | HTMLCanvasElement |
               HTMLVideoElement,
       numChannels: number): void;
   time(query: () => NDArray): Promise<number>;
-  register(dataId: DataId, shape: number[], dtype: DataType): void;
 }
 
 /**
@@ -40,6 +43,7 @@ export interface NDArrayStorage {
  * methods, this can be done gradually (throw an error for unimplemented
  * methods).
  */
+
 export interface MathBackend extends NDArrayStorage {
   matMul(
       a: Array2D, b: Array2D, aOrientation: MatrixOrientation,
