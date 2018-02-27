@@ -19,7 +19,7 @@ import * as types from "./types";
 export { DType, TensorLike } from "./types";
 export { params, Params } from "./params";
 export { dataset } from "./dataset";
-export { print, experiment } from "./experiment";
+export { experiment } from "./experiment";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *

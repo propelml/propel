@@ -29,8 +29,17 @@ import { Params, params as createParams } from "./params";
 import { gc, NamedTensors, Tensor } from "./tensor";
 import { assert } from "./util";
 
-export async function experiment(name: string, opts = {}): Promise<Experiment> {
-  const exp = new Experiment(name);
+interface ExperimentOpts {
+  printStepSecs: number;
+}
+
+const expOptDefaults: ExperimentOpts = {
+  printStepSecs: 1,
+};
+
+export async function experiment(name: string,
+    opts?: ExperimentOpts): Promise<Experiment> {
+  const exp = new Experiment(name, opts);
   await exp.createOrRestore();
   return exp;
 }
@@ -82,11 +91,21 @@ function sgd(opts, params: Params, grads: NamedTensors): void {
   }
 }
 
+interface RateInfo {
+  step: number;
+  time: Date;
+}
+
 class Experiment {
   private currentParams: Params;
   private step_?: number;
+  readonly opts: ExperimentOpts;
+  private lastPrint?: Date;
+  private rateHistory: RateInfo[] = [];
 
-  constructor(public name: string) { }
+  constructor(readonly name: string, opts: ExperimentOpts) {
+    this.opts = Object.assign(expOptDefaults, opts);
+  }
 
   /** Loads from disk */
   async createOrRestore(): Promise<void> {
@@ -97,6 +116,11 @@ class Experiment {
 
   get step() {
     return this.step_;
+  }
+
+  /** Performs SGD given the loss and current parameters. */
+  sgd(opts: SGDOpts, lossFn: LossFn) {
+    return this.minimize(sgd, opts, lossFn);
   }
 
   /** Modifies the current parameters given the loss and optimizer. */
@@ -114,11 +138,52 @@ class Experiment {
       optimizer(opts, this.currentParams, grads);
     });
 
-    print("step", this.step, "loss", loss).then(() => loss.dispose());
+    const printArgs = ["step", this.step, "loss", loss];
+    const rate = this.getRate();
+    if (rate) {
+      printArgs.push("steps/sec");
+      printArgs.push(rate.toFixed(1));
+    }
+
+    this.printProgress(...printArgs).then(() => loss.dispose());
   }
 
-  /** Performs SGD given the loss and current parameters. */
-  sgd(opts: SGDOpts, lossFn: LossFn) {
-    return this.minimize(sgd, opts, lossFn);
+  private getRate(): number {
+    this.updateRateHistory();
+    const first = this.rateHistory[0];
+    const last = this.rateHistory[this.rateHistory.length - 1];
+    const timeDiff = (last.time.valueOf() - first.time.valueOf()) / 1000;
+    const stepDiff = last.step - first.step;
+    return stepDiff / timeDiff;
   }
+
+  private updateRateHistory() {
+    const last = this.rateHistory[this.rateHistory.length - 1];
+    if (!last || (secsSince(last.time) > 0.5 && this.step !== last.step)) {
+      this.rateHistory.push({
+        step: this.step,
+        time: new Date(),
+      });
+      // We don't need too many elements.
+      if (this.rateHistory.length > 3) {
+        this.rateHistory.shift();
+      }
+    }
+  }
+
+  private async printProgress(...args: PrintArgs): Promise<void> {
+    // Drop print if it's been less than 1 second (or whatever
+    // this.opts.printStepSecs is set to).
+    if (this.lastPrint) {
+      if (secsSince(this.lastPrint) < this.opts.printStepSecs) {
+        return;
+      }
+    }
+    this.lastPrint = new Date();
+    await print(...args);
+  }
+}
+
+function secsSince(t: Date): number {
+  return (new Date().valueOf() - t.valueOf()) / 1000;
 }
