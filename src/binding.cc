@@ -137,6 +137,7 @@ void AssertConstructorCall(napi_env env, napi_callback_info info) {
 const std::map<std::string, int> attrNameMap = {
     {"DstT", 0},
     {"Index", 0},
+    {"N", 0},
     {"SrcT", 0},
     {"T", 0},
     {"TI", 0},

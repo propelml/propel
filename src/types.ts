@@ -77,6 +77,7 @@ export interface BackendOps {
   reduceMean(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
   slice(x: BasicTensor, begin: number[], size: number[]): BasicTensor;
+  concat(axis: number, inputs: BasicTensor[]): BasicTensor;
   reshape(x: BasicTensor, newShape: Shape): BasicTensor;
   equal(x: BasicTensor, y: BasicTensor): BasicTensor;
   greater(x: BasicTensor, y: BasicTensor): BasicTensor;

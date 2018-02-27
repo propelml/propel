@@ -411,6 +411,14 @@ defBW("slice", (g, sx, begin, size) => {
   throw new Error("Not Implemented.");
 });
 
+export const concat = defFW("concat",
+  (axis: number, ...inputs: types.BasicTensor[]) => {
+    return bo.concat(axis, inputs);
+  });
+defBW("concat", (g) => {
+  throw new Error("Not Implemented.");
+});
+
 export let reshape = defFW("reshape", (x, newShape) => {
   saveForBackward(x.shape);
   return bo.reshape(x, newShape);
