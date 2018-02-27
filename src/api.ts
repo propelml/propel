@@ -169,3 +169,5 @@ export function ones(shape: types.Shape,
 export { backend } from "./backend";
 
 export { plot, imshow } from "./matplotlib";
+
+export { imread } from "./image";
