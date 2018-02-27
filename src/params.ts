@@ -43,12 +43,12 @@ export interface Params {
    *    let params = pr.params();
    *    params.define("A", () => pr.randn([2]));
    *    params.define("B", () => pr.zeros([2, 2]));
-   *    params.forEach((tensor, name) => {
+   *    for (let [name, tensor] of params) {
    *      console.log(name);
    *      console.log(tensor);
-   *    });
+   *    }
    */
-  forEach(cb: (t: Tensor, name: string) => void): void;
+  [Symbol.iterator]();
 
   /** Returns a subset of the Params with only the tensors that have the given
    * prefix.
@@ -80,8 +80,8 @@ class RootParams implements Params {
     return t;
   }
 
-  forEach(cb): void {
-    this.store.forEach(cb);
+  [Symbol.iterator]() {
+    return this.store[Symbol.iterator]();
   }
 
   /** Returns a subset of the Params with only the tensors that have the given
@@ -121,12 +121,8 @@ class ScopedParams implements Params {
     return this.parent.set(this.resolve(name), t);
   }
 
-  forEach(cb): void {
-    this.parent.forEach((t: Tensor, name: string) => {
-      if (name.startsWith(this.prefix)) {
-        cb(t, name);
-      }
-    });
+  [Symbol.iterator]() {
+    throw Error("implement me");
   }
 
   scope(prefix: string): Params {

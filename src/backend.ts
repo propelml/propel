@@ -24,7 +24,7 @@ import { deepCloneArray, flatten, inferShape, IS_WEB, isTypedArray,
   makeTypedArray } from "./util";
 
 // These globals will be set by onLoad
-let tensorClass: any;
+export let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
 
