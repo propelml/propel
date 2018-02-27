@@ -17,7 +17,7 @@
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
 import { fill, Params } from "./api";
-import { BWFunc, getBackwardFuncs } from "./ops";
+import { getBackwardFunc } from "./ops";
 import { convert, NamedTensors, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
@@ -209,19 +209,22 @@ function imperativeGrad(target: Tensor,
     log("backprop", tapeEntryToString(op));
     log("- outGrad %s", outGrad.shape, outGrad.device);
 
-    const inGrads = getBackwardFuncs(op.name).map(
-      (bwFunc: null | BWFunc, i): Tensor => {
-        if (bwFunc) {
-          return bwFunc(outGrad, ...op.savedForBackward || []);
-        } else {
-          // Null backwards function, return a zero tensor of the same shape and
-          // dtype as the input.
-          const shapeDType = op.inputShapeDTypes[i];
-          const zero = convert(0,
-            {dtype: shapeDType[1], device: outGrad.device});
-          return fill(zero, shapeDType[0]);
-        }
-      });
+    const bwFunc = getBackwardFunc(op.name);
+    const inGrads = op.inputShapeDTypes.map((shapeDType, i) => {
+      // Non-tensor inputs have null shapeDType.
+      if (shapeDType == null) return null;
+      // Actually do the backward pass.
+      const t = bwFunc(i, outGrad, ...op.savedForBackward || []);
+      if (t != null) {
+        return t;
+      } else {
+        // Null backwards function, return a zero tensor of the same shape and
+        // dtype as the input.
+        const [shape, dtype] = shapeDType;
+        const zero = convert(0, {dtype, device: outGrad.device});
+        return fill(zero, shape);
+      }
+    });
 
     log("- inGrad", inGrads.map((g) => {
       return g ? [g.device, g.shape] : null;
