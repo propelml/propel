@@ -92,7 +92,7 @@ const Splash = (props) =>
 const Intro = () =>
   div("intro flex-row",
     div("flex-cell",
-      h("h2", {}, "Machine learning for Javascript"),
+      h("h2", {}, "Differential Programming in JavaScript"),
       p(
         b("Propel"), ` provides a GPU-backed numpy-like infrastructure
         for scientific computing in JavaScript.  JavaScript is a fast,
