@@ -920,6 +920,34 @@ testDevices(async function api_slice(tensor, device) {
   // TODO figure out backwards pass.
 });
 
+testDevices(async function api_concat(tensor, device) {
+  const a = tensor([[[1, 1, 1], [2, 2, 2]],
+                    [[3, 3, 3], [4, 4, 4]]]);
+  const b = tensor([[[5, 5, 5], [6, 6, 6]],
+                    [[7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(0, b),
+      [[[1, 1, 1], [2, 2, 2]],
+       [[3, 3, 3], [4, 4, 4]],
+       [[5, 5, 5], [6, 6, 6]],
+       [[7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(1, b),
+      [[[1, 1, 1], [2, 2, 2], [5, 5, 5], [6, 6, 6]],
+       [[3, 3, 3], [4, 4, 4], [7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(2, b),
+      [[[1, 1, 1, 5, 5, 5],
+        [2, 2, 2, 6, 6, 6]],
+       [[3, 3, 3, 7, 7, 7],
+        [4, 4, 4, 8, 8, 8]]]);
+  assertAllEqual(a.concat(2, b, b),
+      [[[1, 1, 1, 5, 5, 5, 5, 5, 5],
+        [2, 2, 2, 6, 6, 6, 6, 6, 6]],
+       [[3, 3, 3, 7, 7, 7, 7, 7, 7],
+        [4, 4, 4, 8, 8, 8, 8, 8, 8]]]);
+  const t = tensor([[1, 2], [3, 4]]);
+  const s = t.concat(0, [[5, 6]]);
+  assertAllEqual(s, [[1, 2], [3, 4], [5, 6]]);
+});
+
 test(async function api_cast() {
   const a = tensor([255, 127, 0], {dtype: "uint8"});
   assert(a.dtype === "uint8");
