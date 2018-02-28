@@ -91,10 +91,9 @@ Due to the notebook and documentation, the website is fairly non-trivial. It
 is written in React (actually Preact), but does not use JSX.
 
 When working on the website, it's often nice to only run the website tests,
-and not worry about the framework. To do this run `http-server` on the
-`build/website` directory, so you can view it locally:
+and not worry about the framework. To do this run a local website:
 
-     node ./node_modules/http-server/bin/http-server build/website
+    ./tools/http_server.js
 
 Then to automatically build the website tests on changes, run
 
