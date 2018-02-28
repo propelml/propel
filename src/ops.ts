@@ -178,14 +178,11 @@ defBW("add",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
   (g, sx, sy) => addGrad(false)(g, sx, sy));
 
-export const add_ = defFW("add_", (x, y) => {
-  saveForBackward(x.shape, y.shape);
-  x = bo.add(x, y);
+export const add_ = (x: Tensor, y: Tensor) => {
+  const result = add(x, y);
+  x.assign(result);
   return x;
-});
-defBW("add_",
-  (g, sx, sy) => addGrad(true)(g, sx, sy),
-  (g, sx, sy) => addGrad(false)(g, sx, sy));
+};
 
 export const sub = defFW("sub", (x, y) => {
   saveForBackward(x.shape, y.shape);

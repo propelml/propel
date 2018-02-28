@@ -13,20 +13,18 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
-import { linspace } from "./api";
+import { tensor } from "./api";
 import * as ops from "./ops";
-import { assertAllClose } from "./util";
+import { assertAllEqual } from "./util";
 
 // Basic Tests
 
-test(async function api_linspace() {
-  const x = linspace(-4, 4, 6);
-  const y = linspace(-7, 3, 6);
+test(async function ops_add_() {
+  const x = tensor([1, 1, 1]);
+  const y = tensor([1, 1, 1]);
 
   const result = ops.add_(x, y);
-  console.log("...............................................");
-  console.log(x);
-  console.log(result);
-  console.log("...............................................");
-  assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
+
+  assertAllEqual(x, [2, 2, 2]);
+  assertAllEqual(result, [2, 2, 2]);
 });
