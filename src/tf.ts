@@ -191,10 +191,6 @@ export class OpsTF implements types.BackendOps {
     return execute1("Add", [x, y]);
   }
 
-  add_(x: TensorTF, y: TensorTF): TensorTF {
-    return execute1("Add", [x, y]);
-  }
-
   sub(x: TensorTF, y: TensorTF): TensorTF {
     return execute1("Sub", [x, y]);
   }

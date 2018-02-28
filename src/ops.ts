@@ -178,7 +178,7 @@ defBW("add",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
   (g, sx, sy) => addGrad(false)(g, sx, sy));
 
-export const add_ = (x: Tensor, y: Tensor) => {
+export const add_ = (x: Tensor, y: Tensor): Tensor => {
   const result = add(x, y);
   x.assign(result);
   return x;
