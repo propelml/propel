@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import { JSDOM } from "jsdom";
-import { join } from "path";
+import { join, resolve } from "path";
 import { renderSync } from "sass";
-import { drainExecuteQueue } from "../website/notebook";
+import { URL } from "url";
+import { drainExecuteQueue, initSandbox } from "../website/notebook";
 import * as website from "../website/website";
 import * as gendoc from "./gendoc";
 import * as run from "./run";
@@ -12,9 +13,25 @@ import * as run from "./run";
 
 const websiteRoot = run.root + "/build/website/";
 
+// A minimal polyfill for fetch() that is used in the notebook sandbox while
+// rendering pages to static HTML.
+async function fetchFromSandbox(
+    input: RequestInfo, init?: RequestInit): Promise<Response> {
+  if (typeof input !== "string" || /^\[a-z]+:|^[\\\/]{2}/.test(input)) {
+    throw new Error("fetch() only supports relative URLs");
+  }
+  const path = resolve(`${websiteRoot}/${input}`);
+  console.log(`fetch: ${path}`);
+  const data = fs.readFileSync(path);
+
+  return {
+    async arrayBuffer() { return data; },
+    async text() { return data.toString("utf8"); }
+  } as any as Response;
+}
+
 async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
-  const jsdomConfig = { };
-  const window = new JSDOM("", jsdomConfig).window;
+  const window = new JSDOM("", {}).window;
 
   global["window"] = window;
   global["self"] = window;
@@ -23,29 +40,44 @@ async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
   global["Node"] = window.Node;
   global["getComputedStyle"] = window.getComputedStyle;
 
-  website.renderPage(page);
-
-  const p = new Promise<string>((resolve, reject) => {
-    window.addEventListener("load", async() => {
-      try {
-        await drainExecuteQueue();
-        const bodyHtml = document.body.innerHTML;
-        const html =  website.getHTML(page.title, bodyHtml);
-        resolve(html);
-      } catch (e) {
-        reject(e);
-      }
-    });
+  // The notebook normally uses an iframe to create a sandbox to run notebook
+  // cells in. Although it is possible to make this work in JSDOM, it requires
+  // some workarounds in the notebook code, and the iframe ends up in the
+  // static rendered HTML. Instead, create a separate JSDOM context and tell
+  // the sandbox to use that instead.
+  const { window: sbWindow } = new JSDOM("", {
+    resources: "usable",
+    runScripts: "dangerously",
+    url: new URL(`file:///${__dirname}/../build/website/sandbox`).href,
+    beforeParse(sbWindow: any) {
+      // Add a fake parent window reference - the sandbox needs to be able
+      // to call window.parent.postMessage() to communicate with the host.
+      // In JSDOM window.parent is a getter, but setting _parent works.
+      sbWindow._parent = window;
+      // Inject a minimal fetch() shim.
+      sbWindow.fetch = fetchFromSandbox;
+    }
   });
-  return p;
+  const sandboxScript =
+    fs.readFileSync(`${__dirname}/../build/website/sandbox.js`, "utf8");
+  sbWindow.eval(sandboxScript);
+  initSandbox(sbWindow);
+
+  website.renderPage(page);
+  await new Promise(res => window.addEventListener("load", res));
+  await drainExecuteQueue();
+
+  const bodyHtml = document.body.innerHTML;
+  const html = website.getHTML(page.title, bodyHtml);
+  return html;
 }
 
 async function writePages() {
   for (const page of website.pages) {
+    console.log(`rendering: ${page.path}`);
     const html = await renderToHtmlWithJsdom(page);
     const fn = join(run.root, "build", page.path);
     fs.writeFileSync(fn, html);
-    console.log("Wrote", fn);
   }
 }
 
@@ -77,8 +109,15 @@ process.on("unhandledRejection", e => { throw e; });
 
   scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
-  await writePages();
+  // Bundle all scripts that are used on the website (except the sandbox).
   await run.parcel("website/website_main.ts", "build/website");
+  // Bundle all scripts that run in the notebook sandbox iframe.
+  await run.parcel("website/sandbox.ts", "build/website");
+
+  // Render all pages to static HTML. This needs to be run *after* parcel,
+  // because sandbox.js is used to render notebook cells.
+  await writePages();
+
   console.log("Website built in", websiteRoot);
 
   // Firebase keeps network connections open, so we have force exit the process.

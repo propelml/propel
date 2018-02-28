@@ -15,10 +15,28 @@
 import { RegularArray } from "./types";
 
 const debug = false;
-const globalEval = eval;
-export const IS_WEB = typeof window !== "undefined";
+
+// If you use the eval function indirectly, by invoking it via a reference
+// other than eval, as of ECMAScript 5 it works in the global scope rather than
+// the local scope. This means, for instance, that function declarations create
+// global functions, and that the code being evaluated doesn't have access to
+// local variables within the scope where it's being called.
+export const globalEval = eval;
+
+// A reference to the global object.
+export const global = globalEval("this");
+
+export const IS_WEB = global.window !== undefined;
 export const IS_NODE = !IS_WEB;
-export const global = globalEval(IS_WEB ? "window" : "global");
+
+// This is to confuse parcel and prevent it from including node-only modules
+// in a browser-targeted bundle.
+// TODO: There may be a more elegant workaround in future versions.
+// https://github.com/parcel-bundler/parcel/pull/448
+export const nodeRequire = IS_WEB ? null : require;
+
+// WHATWG-standard URL class.
+export const URL = IS_WEB ? window.URL : nodeRequire("url").URL;
 
 export function log(...args: any[]) {
   if (debug) {
@@ -70,6 +88,30 @@ export function delay(t: number): Promise<void> {
   });
 }
 
+// A `Resolvable` is a Promise with the `reject` and `resolve` functions
+// placed as methods on the promise object itself. It allows you to do:
+//
+//   const p = createResolvable<number>();
+//   ...
+//   p.resolve(42);
+//
+// It'd be prettier to make Resolvable a class that inherits from Promise,
+// rather than an interface. This is possible in ES2016, however typescript
+// produces broken code when targeting ES5 code.
+// See https://github.com/Microsoft/TypeScript/issues/15202
+// At the time of writing, the github issue is closed but the problem remains.
+export interface Resolvable<T> extends Promise<T> {
+  resolve: (value?: T | PromiseLike<T>) => void;
+  reject: (reason?: any) => void;
+}
+export function createResolvable<T>(): Resolvable<T> {
+  let methods;
+  const promise = new Promise<T>((resolve, reject) => {
+    methods = { resolve, reject };
+  });
+  return Object.assign(promise, methods) as Resolvable<T>;
+}
+
 export function objectsEqual(a, b) {
   const aProps = Object.getOwnPropertyNames(a);
   const bProps = Object.getOwnPropertyNames(b);
@@ -83,12 +125,7 @@ export function objectsEqual(a, b) {
   return true;
 }
 
-const propelHosts = new Set(["127.0.0.1", "localhost", "propelml.org"]);
-
-// This is to confuse parcel.
-// TODO There may be a more elegant workaround in future versions.
-// https://github.com/parcel-bundler/parcel/pull/448
-export const nodeRequire = IS_WEB ? null : require;
+const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
@@ -104,7 +141,7 @@ async function fetch2(p: string,
   // cleaned up.
   p = fetch2ArgManipulation(p);
   if (IS_WEB) {
-    const res = await fetch(p, { mode: "no-cors" });
+    const res = await fetch(p, { mode: "cors" });
     if (encoding === "binary") {
       return res.arrayBuffer();
     } else {

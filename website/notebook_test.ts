@@ -4,22 +4,27 @@ import { testBrowser } from "../tools/tester";
 import { enableMock } from "./db";
 import * as nb from "./notebook";
 
+function resetPage() {
+  document.body.innerHTML = "";
+  nb.initSandbox();
+}
+
 testBrowser(function notebook_NotebookRoot() {
   const mdb = enableMock();
-  document.body.innerHTML = "";
+  resetPage();
   const el = h(nb.NotebookRoot, { });
   render(el, document.body);
   console.log("mdb.counts", mdb.counts);
   assert(objectsEqual(mdb.counts, {
     queryLatest: 1,
   }));
-  const c = document.body.children[0];
+  const c = document.body.getElementsByTagName("div")[0];
   assert(c.className === "notebook");
 });
 
 testBrowser(async function notebook_Notebook() {
   const mdb = enableMock();
-  document.body.innerHTML = "";
+  resetPage();
 
   const readyPromise = new Promise((resolve) => {
     const el = h(nb.Notebook, {
@@ -45,7 +50,7 @@ testBrowser(async function notebook_Notebook() {
 
 testBrowser(async function notebook_focusNextCell() {
   const mdb = enableMock();
-  document.body.innerHTML = "";
+  resetPage();
 
   const readyPromise = new Promise((resolve) => {
     const el = h(nb.Notebook, {
