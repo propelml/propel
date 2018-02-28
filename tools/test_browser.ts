@@ -100,7 +100,7 @@ if (testdl) {
 (async() => {
   let passed = 0, failed = 0;
 
-  const server = createServer({ root: "./build/website" });
+  const server = createServer({ cors: true, root: "./build/website" });
   server.listen();
   const port = server.server.address().port;
 

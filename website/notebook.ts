@@ -21,24 +21,16 @@
 // tslint:disable:no-reference
 /// <reference path="../node_modules/@types/codemirror/index.d.ts" />
 
+import { escape } from "he";
 import { Component, h } from "preact";
-import * as propel from "../src/api";
-import * as matplotlib from "../src/matplotlib";
-import * as mnist from "../src/mnist";
-import { assert, delay, IS_WEB } from "../src/util";
+import { OutputHandlerDOM } from "../src/output_handler";
+import { assert, delay, IS_WEB, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
-import { transpile } from "./nb_transpiler";
+import { SandboxRPC } from "./sandbox_rpc";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
-let lastExecutedCellId = null;
-// If you use the eval function indirectly, by invoking it via a reference
-// other than eval, as of ECMAScript 5 it works in the global scope rather than
-// the local scope. This means, for instance, that function declarations create
-// global functions, and that the code being evaluated doesn't have access to
-// local variables within the scope where it's being called.
-const globalEval = eval;
 
 // Given a cell's id, which can either be an integer or
 // a string of the form "cell5" (where 5 is the id), look up
@@ -51,6 +43,66 @@ export function lookupCell(id: string | number) {
     numId = id;
   }
   return cellTable.get(numId);
+}
+
+function createIframe(): Window {
+  const base = new URL("/sandbox", window.document.baseURI).href;
+  const html = `<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <base href="${escape(base, { isAttributeValue: true })}">
+        <script async type="text/javascript" src="sandbox.js">
+        </script>
+      </head>
+      <body>
+      </body>
+    </html>`;
+
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("sandbox", "allow-scripts");
+  iframe.setAttribute("srcdoc", `${html}`);
+  iframe.style.display = "none";
+  document.body.appendChild(iframe);
+
+  return iframe.contentWindow;
+}
+
+function createSandbox(context: Window): SandboxRPC {
+  const sandbox = new SandboxRPC(context, {
+    console(cellId: number, ...args: string[]): void {
+      const cell = lookupCell(cellId);
+      cell.console(...args);
+    },
+
+    plot(cellId: number, data: any): void {
+      const cell = lookupCell(cellId);
+      cell.plot(data);
+    },
+
+    imshow(cellId: number, data: any): void {
+      const cell = lookupCell(cellId);
+      cell.plot(data);
+    }
+  });
+
+  return sandbox;
+}
+
+let sandbox_: SandboxRPC = null;
+
+export function initSandbox(context?: Window): void {
+  if (context == null) {
+    context = createIframe();
+  }
+  sandbox_ = createSandbox(context);
+}
+
+function sandbox(): SandboxRPC {
+  if (sandbox_ === null) {
+    initSandbox();
+  }
+  return sandbox_;
 }
 
 // Convenience function to create Notebook JSX element.
@@ -107,17 +159,28 @@ export class Cell extends Component<CellProps, CellState> {
     cellExecuteQueue.push(this);
   }
 
-  _console: Console;
-  get console(): Console {
-    if (!this._console) {
-      this._console = new Console(this);
-    }
-    return this._console;
-  }
-
   get code(): string {
     return normalizeCode(this.editor ? this.editor.getValue()
                                      : this.props.code);
+  }
+
+  console(...args: string[]) {
+    const output = this.output;
+    const last = output.lastChild;
+    let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
+    s += args.join(" ") + "\n";
+    const el = document.createTextNode(s);
+    output.appendChild(el);
+  }
+
+  plot(data) {
+    const o = new OutputHandlerDOM(this.output);
+    o.plot(data);
+  }
+
+  imshow(data) {
+    const o = new OutputHandlerDOM(this.output);
+    o.plot(data);
   }
 
   clearOutput() {
@@ -216,24 +279,7 @@ export class Cell extends Component<CellProps, CellState> {
     const classList = (this.input.parentNode as HTMLElement).classList;
     classList.add("notebook-cell-running");
 
-    lastExecutedCellId = this.id;
-    let rval, error;
-    try {
-      rval = await evalCell(this.code, this);
-    } catch (e) {
-      error = e instanceof Error ? e : new Error(e);
-    }
-
-    if (error) {
-      this.console.error(error.stack);
-    } else if (rval !== undefined) {
-      this.console.log(rval);
-    }
-    // When running tests, rethrow any errors. This ensures that errors
-    // occurring during notebook cell evaluation result in test failure.
-    if (error && window.navigator.webdriver) {
-      throw error;
-    }
+    await sandbox().call("runCell", this.code, this.id);
 
     classList.add("notebook-cell-updating");
     await delay(100);
@@ -317,82 +363,6 @@ export class FixedCell extends Component<FixedProps, CellState> {
       )
     );
   }
-}
-
-export class Console {
-  constructor(private cell: Cell) { }
-
-  private common(...args) {
-    const output = this.cell.output;
-    // .toString() will fail if any of the arguments is null or undefined. Using
-    // ("" + a) instead.
-    let s = args.map((a) => "" + a).join(" ");
-    const last = output.lastChild;
-    if (last && last.nodeType !== Node.TEXT_NODE) {
-      s = "\n" + s;
-    }
-    const t = document.createTextNode(s + "\n");
-    output.appendChild(t);
-  }
-
-  log(...args) {
-    return this.common(...args);
-  }
-
-  warn(...args) {
-    return this.common(...args);
-  }
-
-  error(...args) {
-    return this.common(...args);
-  }
-}
-
-export async function evalCell(source: string, cell: Cell): Promise<any> {
-  source = transpile(source);
-  source += `\n//# sourceURL=__cell${cell.id}__.js`;
-  const fn = globalEval(source);
-  const g = IS_WEB ? window : global;
-  assert(cell != null);
-  return await fn(g, importModule, cell.console);
-}
-
-// This is to handle asynchronous output situations.
-// Try to guess which cell we are executing in by looking at the stack trace.
-// If there isn't a cell in there, then default to the lastExecutedCellId.
-export function guessCellId(): number {
-  const stacktrace = (new Error()).stack.split("\n");
-  for (let i = stacktrace.length - 1; i >= 0; --i) {
-    const line = stacktrace[i];
-    const m = line.match(/__cell(\d+)__/);
-    if (m) return Number(m[1]);
-  }
-  return lastExecutedCellId;
-}
-
-export function outputEl(): Element {
-  const id = guessCellId();
-  const cell = lookupCell(id);
-  if (cell) {
-    return cell.output;
-  } else {
-    return null;
-  }
-}
-
-matplotlib.register(outputEl);
-
-async function importModule(target) {
-  // console.log("require", target);
-  const m = {
-    matplotlib,
-    mnist,
-    propel,
-  }[target];
-  if (m) {
-    return m;
-  }
-  throw new Error("Unknown module: " + target);
 }
 
 export interface NotebookRootProps {

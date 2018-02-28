@@ -154,5 +154,10 @@ export async function imread(filename: string, mode: Mode = "RGBA")
   if (IS_NODE) {
     return await nodeImageDecoder(filename, mode);
   }
+  // Neither image decoder works in JSDOM while building the website.
+  // TODO: fix this - https://github.com/propelml/propel/issues/309
+  if (/jsdom/.test(window.navigator.userAgent)) {
+    return null;
+  }
   return await webImageDecoder(filename, mode);
 }
