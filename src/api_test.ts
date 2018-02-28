@@ -103,6 +103,17 @@ test(async function api_inc() {
   checkGrad(f, g, 1.0);
 });
 
+test(async function api_add_() {
+  function f(x) {
+    return tensor(x).add_(1);
+  }
+  assertClose(f(1), 2);
+  assertClose(f(-1), 0);
+  const g = grad(f);
+  assertClose(g(1.0), 1.);
+  checkGrad(f, g, 1.0);
+});
+
 test(async function api_mul() {
   const f = (x) => tensor(42).mul(x);
   assertClose(f(1), 42);
