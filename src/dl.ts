@@ -26,8 +26,8 @@ import { NDArrayMath } from "./dl/math/math";
 import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./dl/math/ndarray";
 import { MatrixOrientation } from "./dl/math/types";
+import { assert, getDType, makeTypedArray } from "./tensor_util";
 import * as types from "./types";
-import { assert, getDType, makeTypedArray } from "./util";
 
 const deviceRegistry = new Map<string, NDArrayMath>();
 function lookupMath(device: string): NDArrayMath {

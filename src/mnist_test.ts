@@ -14,7 +14,7 @@
  */
 import { test } from "../tools/tester";
 import * as mnist from "./mnist";
-import { assertAllEqual, assertShapesEqual } from "./util";
+import { assertAllEqual, assertShapesEqual } from "./tensor_util";
 
 test(async function mnist_trainSplit() {
   const { images, labels } = await mnist.loadSplit("train");

@@ -13,7 +13,7 @@
    limitations under the License.
  */
 import { tensor, Tensor } from "./api";
-import { assertEqual, fetchArrayBuffer } from "./util";
+import { assert, fetchArrayBuffer } from "./util";
 
 export function filenames(split: string): [string, string] {
   if (split === "train") {
@@ -66,8 +66,8 @@ async function loadFile2(href: string) {
 
   let t;
   if (isImages) {
-    assertEqual(littleEndianToBig(i32[i++]), 28);
-    assertEqual(littleEndianToBig(i32[i++]), 28);
+    assert(littleEndianToBig(i32[i++]) === 28);
+    assert(littleEndianToBig(i32[i++]) === 28);
     const tensorData = new Int32Array(ui8.slice(4 * i));
     t = tensor(tensorData, {dtype: "int32"});
   } else {
