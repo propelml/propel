@@ -14,7 +14,8 @@
  */
 import { test } from "../tools/tester";
 import { bo, convertBasic } from "./backend";
-import { assertAllClose, assertAllEqual, assertShapesEqual } from "./util";
+import { assertAllClose, assertAllEqual, assertShapesEqual }
+  from "./tensor_util";
 
 const tensor = convertBasic;
 

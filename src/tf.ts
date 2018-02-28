@@ -14,8 +14,8 @@
  */
 // TensorFlow backend.
 import { Handle } from "./binding";
+import { assert, assertEqual, getDType } from "./tensor_util";
 import * as types from "./types";
-import { assert, assertEqual, getDType } from "./util";
 
 export let binding;
 export let ctx;

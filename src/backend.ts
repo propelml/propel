@@ -18,10 +18,11 @@
 // public API.
 
 import * as dl from "./dl";
+import { flatten, inferShape, isTypedArray, makeTypedArray }
+  from "./tensor_util";
 import * as tf from "./tf";
 import * as types from "./types";
-import { deepCloneArray, flatten, inferShape, IS_WEB, isTypedArray,
-  makeTypedArray } from "./util";
+import { deepCloneArray, IS_WEB } from "./util";
 
 // These globals will be set by onLoad
 export let tensorClass: any;

@@ -16,7 +16,7 @@ import { test } from "../tools/tester";
 import * as pr from "./api";
 import * as dataset from "./dataset";
 import { assert, assertAllClose, assertAllEqual, assertShapesEqual }
-  from "./util";
+  from "./tensor_util";
 
 test(async function dataset_datasetFromSlices() {
   const labels = pr.tensor([

@@ -13,8 +13,9 @@
    limitations under the License.
  */
 // This module is just to implement tensor.toString.
+import { getDType } from "./tensor_util";
 import * as types from "./types";
-import { getDType } from "./util";
+
 interface FormatOptions {
   precision: number;
   dtype: types.DType;

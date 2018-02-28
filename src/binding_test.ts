@@ -13,8 +13,8 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
+import { assert, assertAllEqual } from "./tensor_util";
 import * as tf from "./tf";
-import { assert, assertAllEqual } from "./util";
 
 assert(tf.loadBinding());
 const binding = tf.binding;

@@ -17,8 +17,9 @@ import { bo, convertBasic } from "./backend";
 import * as format from "./format";
 import * as ops from "./ops";
 import { Params } from "./params";
+import { allFinite, assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
-import { allFinite, assert, assertShapesEqual } from "./util";
+import { assert, IS_NODE } from "./util";
 
 export function convert(t: types.TensorLike,
                         opts?: types.TensorOpts): Tensor {
@@ -706,6 +707,18 @@ export class Tensor implements types.BasicTensor {
     }
     return t;
   }
+}
+
+if (IS_NODE) {
+  // This is currently node.js specific.
+  const s = require("util").inspect.custom;
+  Tensor.prototype[s] = function(depth: number, opts: {}) {
+    return this.toString();
+  };
+
+  process.on("unhandledRejection", (error) => {
+    throw error;
+  });
 }
 
 export type NamedTensors = { [name: string]: Tensor };

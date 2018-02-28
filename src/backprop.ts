@@ -20,7 +20,7 @@ import { fill, Params } from "./api";
 import { getBackwardFunc } from "./ops";
 import { convert, NamedTensors, Tensor } from "./tensor";
 import * as types from "./types";
-import { assert, assertEqual, CounterMap, log } from "./util";
+import { assert, CounterMap, log } from "./util";
 
 // Hacky. How does one define methods on interfaces?
 function tapeEntryToString(e: types.TapeEntry): string {
@@ -203,7 +203,7 @@ function imperativeGrad(target: Tensor,
     const op = oidLookup.get(oid);
 
     // TODO(scalar) Currently assuming ops have single output.
-    assertEqual(op.outputIds.length, 1);
+    assert(op.outputIds.length === 1);
     const outGrad = gradients.aggregate(op.outputIds[0]);
 
     log("backprop", tapeEntryToString(op));

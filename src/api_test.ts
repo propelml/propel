@@ -16,9 +16,10 @@ import { test } from "../tools/tester";
 import { fill, grad, linspace, listDevices, multigrad, ones,
   Params, randn, range, tensor, Tensor, TensorLike, zeros } from "./api";
 import * as api from "./api";
+import { assertAllClose, assertAllEqual, assertClose,
+  assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
-import { assert, assertAllClose, assertAllEqual, assertClose,
-  assertShapesEqual, IS_NODE } from "./util";
+import { assert, IS_NODE } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;

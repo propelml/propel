@@ -14,7 +14,7 @@
  */
 import * as d3 from "d3";
 import { Tensor } from "./api";
-import { assertEqual } from "./util";
+import { assertEqual } from "./tensor_util";
 
 export interface OutputHandler {
   (): Element;

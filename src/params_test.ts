@@ -1,7 +1,7 @@
 import { test } from "../tools/tester";
 import { randn, zeros } from "./api";
 import { params } from "./params";
-import { assert, assertAllEqual, assertShapesEqual } from "./util";
+import { assert, assertAllEqual, assertShapesEqual } from "./tensor_util";
 
 test(async function params_smoke() {
   const p = params();

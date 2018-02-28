@@ -15,8 +15,8 @@
 
 import { test } from "../tools/tester";
 import { imread } from "./im";
-import { assert, assertShapesEqual, fetch2ArgManipulation,
-  IS_NODE } from "./util";
+import { assert, assertShapesEqual } from "./tensor_util";
+import { fetch2ArgManipulation, IS_NODE } from "./util";
 
 // The tests use these files:
 // fa57d083e48e999ed3f210aefd92e5f7  testdata/sample.png
