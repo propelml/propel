@@ -69,6 +69,7 @@ testBrowser(async function notebook_focusNextCell() {
   assert(cellEls[0].classList.contains("notebook-cell-focus"));
   assert(!cellEls[1].classList.contains("notebook-cell-focus"));
 
+  /* TODO The follow test has a race condition. Disabling for now.
   // Simulate Shift+Enter
   first.editor.triggerOnKeyDown({
     keyCode: 13,  // Enter
@@ -79,4 +80,5 @@ testBrowser(async function notebook_focusNextCell() {
 
   assert(!cellEls[0].classList.contains("notebook-cell-focus"));
   assert(cellEls[1].classList.contains("notebook-cell-focus"));
+  */
 });
