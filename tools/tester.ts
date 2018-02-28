@@ -22,6 +22,8 @@ export interface TestDefinition {
   name: string;
 }
 
+export const exitOnFail = true;
+
 /* A subset of the tests can be ran by providing a filter expression.
  * In Node.js the filter is specified on the command line:
  *
@@ -71,32 +73,47 @@ function filter(name: string): boolean {
   }
 }
 
+const readline = IS_NODE ? require("readline") : null;
+const format = IS_NODE ? require("util").format : null;
+function log(...args) {
+  if (IS_NODE) {
+    if (process.stdout.isTTY) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0, null);
+    }
+    process.stdout.write(format(...args));
+  } else {
+    console.log(...args);
+  }
+}
+
 async function runTests() {
   let passed = 0;
   let failed = 0;
 
   for (let i = 0; i < tests.length; i++) {
     const { fn, name } = tests[i];
-
-    console.warn(
-      "%d/%d +%d -%d: %s",
-      i + 1,
-      tests.length,
-      passed,
-      failed,
-      name
-    );
-
+    log("%d/%d +%d -%d: %s",
+        i + 1,
+        tests.length,
+        passed,
+        failed,
+        name);
     try {
       await fn();
       passed++;
     } catch (e) {
+      console.error("\n\nTest FAIL", name);
       console.error((e && e.stack) || e);
       failed++;
+      if (exitOnFail) {
+        if (IS_NODE) process.exit(1);
+        break;
+      }
     }
   }
 
-  console.warn(`DONE. passed: ${passed}, failed: ${failed}`);
+  console.log(`\n\nDONE. Test passed: ${passed}, failed: ${failed}`);
 
   if (failed === 0) {
     // All good.
