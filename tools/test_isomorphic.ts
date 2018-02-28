@@ -1,0 +1,10 @@
+import "../src/api_test";
+import "../src/backend_test";
+import "../src/dataset_test";
+import "../src/format_test";
+import "../src/im_test";
+import "../src/mnist_test";
+import "../src/nn_example_test";
+import "../src/npy_test";
+import "../src/params_test";
+import "../src/util_test";
