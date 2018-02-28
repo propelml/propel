@@ -186,7 +186,7 @@ export class Tensor implements types.BasicTensor {
   }
 
   add_(x: types.TensorLike): Tensor {
-    const result = ops.add(x, this.colocate(x));
+    const result = ops.add(this, this.colocate(x));
     this.assign(result);
     return this;
   }
