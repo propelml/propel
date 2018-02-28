@@ -230,6 +230,11 @@ function imperativeGrad(target: Tensor,
     const oid = readyOps.pop();
     const op = oidLookup.get(oid);
 
+    if (!op.outputIds) {
+      console.log(".........................................");
+      console.log(Object.keys(op));
+    }
+
     // TODO(scalar) Currently assuming ops have single output.
     assertEqual(op.outputIds.length, 1);
     const outGrad = gradients.aggregate(op.outputIds[0]);
