@@ -33,7 +33,6 @@ If you're on Linux and would like to build a CUDA version of
 Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
 
     PROPEL_BUILD_GPU=1 ./tools/build.js
-    ts-node example.ts
 
 
 ## Packages
@@ -73,10 +72,10 @@ of tests which currently must be run manually:
 
  2. Check that the WebGL backend works. (Puppeteer headless doesn't support
     WebGL.)
-    Run this command: `PP_TEST_DEBUG=1 ts-node test_browser`
+    Run this command: `PP_TEST_DEBUG=1 ts-node tools/test_browser.ts`
 
  3. Check that the DeepLearn tests run. (These tests also require WebGL)
-    Run this command:  `PP_TEST_DL=1 ts-node test_browser`
+    Run this command:  `PP_TEST_DL=1 ts-node tools/test_browser.ts`
 
 
 ### Working on the website
@@ -97,7 +96,7 @@ and not worry about the framework. To do this run a local website:
 
 Then to automatically build the website tests on changes, run
 
-    ./tools/parcel.js website/test_website.ts -d build/website/
+    ./tools/parcel.js tools/test_website.ts -d build/website/
 
 To run the website tests, point your browser to
 http://localhost:8080/static/test.html#script=/test_website.js

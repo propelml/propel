@@ -7,9 +7,10 @@ process.on("unhandledRejection", e => { throw e; });
   run.sh("node tools/build.js");
 
   // Node.js tests
-  run.tsnode("src/test_node.ts", {"PROPEL": "dl"});     // DL backend
-  run.tsnode("src/test_node.ts", {"PROPEL": "tf"});     // TF backend
-  run.tsnode("src/binding_test.ts", {"PROPEL": "tf"});  // TF-only test.
+  run.tsnode("tools/test_node.ts", {"PROPEL": "dl"});   // DL backend
+  run.tsnode("tools/test_node.ts", {"PROPEL": "tf"});   // TF backend
+  // This one doesn't need to be run for different backends.
+  run.tsnode("./tools/gendoc_test.ts");
 
   // Web browser tests
   run.tsnode("tools/test_browser.ts");
