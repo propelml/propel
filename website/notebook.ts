@@ -205,6 +205,7 @@ export class Cell extends Component<CellProps, CellState> {
 
   focus() {
     this.editor.focus();
+    this.parentDiv.classList.add("notebook-cell-focus");
     this.parentDiv.scrollIntoView();
   }
 
