@@ -43,11 +43,11 @@ export class Tensor implements types.BasicTensor {
   basic: null | types.BasicTensor;
 
   private static nextId = 1;
-  readonly id: number;
+  private _id: number;
 
   constructor(t: types.BasicTensor) {
     this.basic = t;
-    this.id = Tensor.nextId++;
+    this._id = Tensor.nextId++;
     track(this);
   }
 
@@ -134,6 +134,10 @@ export class Tensor implements types.BasicTensor {
     return this.basic.data();
   }
 
+  get id(): number {
+    return this._id;
+  }
+
   get rank(): number {
     return this.shape.length;
   }
@@ -187,7 +191,11 @@ export class Tensor implements types.BasicTensor {
 
   add_(x: types.TensorLike): Tensor {
     const result = ops.add(this, this.colocate(x));
-    // this.assign(result);
+
+    this.assign(result);
+    // Should the id setting be moved into .assign() ?
+    this._id = result.id;
+
     return result;
   }
 
