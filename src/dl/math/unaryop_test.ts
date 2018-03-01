@@ -92,6 +92,14 @@ import { Array1D, Array2D, Scalar } from "./ndarray";
       const result = math.abs(a);
       test_util.expectArraysClose(result, [1, 2, 0, 3, 0.1, NaN]);
     });
+
+    it("abs dtype", math => {
+      const a = Array1D.new([1, -2, 0, 3], "int32");
+      const result = math.abs(a);
+      expect(result.dtype).toEqual("int32");
+      test_util.expectArraysClose(result, [1, 2, 0, 3]);
+    });
+
   };
 
   test_util.describeMathCPU("abs", [tests]);
