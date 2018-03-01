@@ -188,8 +188,8 @@ export class Tensor implements types.BasicTensor {
   /** Adds two tensors and returns the resulting tensor.
    *
    *    import { tensor } from "propel";
-   *    const x = tensor(1);
-   *    const y = tensor(2);
+   *    const x = tensor([1, 2, 3]);
+   *    const y = tensor([4, 5, 6]);
    *    const result = x.add(y);
    */
   add(x: types.TensorLike): Tensor {
@@ -199,8 +199,8 @@ export class Tensor implements types.BasicTensor {
   /** In-place version of add().
    *
    *    import { tensor } from "propel";
-   *    const x = tensor(1);
-   *    x.add_(1);
+   *    const x = tensor([1, 2, 3]);
+   *    x.add_(100);
    */
   add_(x: types.TensorLike): Tensor {
     const result = ops.add(this, this.colocate(x));
