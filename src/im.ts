@@ -135,13 +135,14 @@ async function nodeImageDecoder(filename: string, mode: Mode)
 }
 
 /** Read an image from given file to a 3D tensor in the following
- *  format: img[channel][height][width]
- * Note: The JPEG decoder is just working in Node.js and we don't guarantee it.
- * Use JPEG files at your own risk.
+ * The tensor will have the shape [channel, height, width].
+ * The second argument specifies if you want "RGBA", "RGB", or "L" (for
+ * luminosity/greyscale).
  *
- *    import { imread } from "propel";
- *    const tensor = await imread( "/src/testdata/sample.png", "RGB");
- *    tensor.shape
+ *    import { imread } from "propel"
+ *    img = await imread("/src/testdata/sample.png")
+ *    // Average RGBA values
+ *    img.reduceMean([1, 2])
  */
 export async function imread(filename: string, mode: Mode = "RGBA")
     : Promise<Tensor> {
