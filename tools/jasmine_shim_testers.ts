@@ -59,7 +59,8 @@ export const matchTesters: MatchTesters = {
       if (a === b) {
         return true;
       }
-      if (isNaN(a) && isNaN(b)) {
+      if (typeof a === "number" && typeof b === "number" &&
+          isNaN(a) && isNaN(b)) {
         return true;
       }
       if (a && typeof a === "object" && b && typeof b === "object") {

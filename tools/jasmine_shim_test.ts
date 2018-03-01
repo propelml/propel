@@ -21,8 +21,8 @@ import { test } from "./tester";
 
 test(async function test_matchTesters() {
   assert(matchTesters.toEqual("world", "world"));
+  assert(!matchTesters.toEqual("hello", "world"));
   assert(matchTesters.toEqual(5, 5));
   assert(!matchTesters.toEqual(5, 6));
   assert(matchTesters.toEqual(NaN, NaN));
-  // FIXME assert(!matchTesters.toEqual("hello", "world"));
 });
