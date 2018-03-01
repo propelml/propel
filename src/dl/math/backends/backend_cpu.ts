@@ -1140,9 +1140,9 @@ export class MathBackendCPU implements MathBackend {
     for (let i = 0; i < newShape.length; i++) {
       newShape[i] = x.shape[perm[i]];
     }
-    const resultValues = new Float32Array(x.size);
+    const resultValues = util.getTypedArrayFromDType(x.dtype, x.size);
     const values = x.dataSync();
-    const result = NDArray.make(newShape, {values: resultValues}) as T;
+    const result = NDArray.make(newShape, {values: resultValues}, x.dtype) as T;
     for (let i = 0; i < x.size; ++i) {
       const loc = x.indexToLoc(i);
 

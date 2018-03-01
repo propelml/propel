@@ -39,6 +39,15 @@ import { Array2D, Array3D } from "./ndarray";
       test_util.expectArraysClose(t2, [1, 3, 11, 33, 2, 4, 22, 44]);
     });
 
+    it("2D int32 (transpose)", math => {
+      const t = Array2D.new([1, 2], [1, 11], "int32");
+      expect(t.dtype).toEqual("int32");
+      const t2 = math.transpose(t, [1, 0]);
+      expect(t2.dtype).toEqual("int32");
+      expect(t2.shape).toEqual([2, 1]);
+      test_util.expectArraysClose(t2, [1, 11]);
+    });
+
     it("3D [r, c, d] => [d, r, c]", math => {
       const t = Array3D.new([2, 2, 2], [1, 11, 2, 22, 3, 33, 4, 44]);
       const t2 = math.transpose(t, [2, 0, 1]);
