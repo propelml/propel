@@ -46,6 +46,14 @@ import { Array1D, Array2D, Array3D, Array4D } from "./ndarray";
       expect(result.shape).toEqual([3]);
       test_util.expectArraysClose(result, [2, 3, 4]);
     });
+
+    it("int32 dtype", math => {
+      const a = Array1D.new([1, 2, 3, 4, 5], "int32");
+      const result = math.slice1D(a, 3, 2);
+      expect(result.dtype).toEqual("int32");
+      expect(result.shape).toEqual([2]);
+      test_util.expectArraysClose(result, [4, 5]);
+    });
   };
 
   test_util.describeMathCPU("slice1D", [tests]);
@@ -91,6 +99,12 @@ import { Array1D, Array2D, Array3D, Array4D } from "./ndarray";
       const a = Array2D.new([4, 3], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       expect(() => math.slice2D(a, [1, 1], [10, 10])).toThrowError();
     });
+
+    it("int32 dtype", math => {
+      const a = Array2D.new([1, 1], [0], "int32");
+      const b = math.slice2D(a, [0, 0], [1, 1]);
+      expect(b.dtype).toEqual("int32");
+    });
   };
 
   test_util.describeMathCPU("slice2D", [tests]);
@@ -126,6 +140,12 @@ import { Array1D, Array2D, Array3D, Array4D } from "./ndarray";
 
       expect(result.shape).toEqual([2, 1, 1]);
       test_util.expectArraysClose(result, [4, 8]);
+    });
+
+    it("int32 dtype", math => {
+      const a = Array3D.new([1, 1, 1], [0], "int32");
+      const b = math.slice3D(a, [0, 0, 0], [1, 1, 1]);
+      expect(b.dtype).toEqual("int32");
     });
   };
 
@@ -166,6 +186,12 @@ import { Array1D, Array2D, Array3D, Array4D } from "./ndarray";
 
       expect(result.shape).toEqual([2, 1, 1, 1]);
       test_util.expectArraysClose(result, [8, 88]);
+    });
+
+    it("int32 dtype", math => {
+      const a = Array4D.new([1, 1, 1, 1], [0], "int32");
+      const b = math.slice4D(a, [0, 0, 0, 0], [1, 1, 1, 1]);
+      expect(b.dtype).toEqual("int32");
     });
   };
 

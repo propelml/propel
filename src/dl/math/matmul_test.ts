@@ -31,6 +31,15 @@ const commonTests: MathTests = it => {
     test_util.expectArraysClose(c, [0, 8, -3, 20]);
   });
 
+  it("matmul dtype", math => {
+    const a = Array2D.new([1, 2], [1, 2], "int32");
+    const b = Array2D.new([2, 1], [0, 1], "int32");
+    const c = math.matMul(a, b);
+    expect(c.dtype).toEqual("int32");
+    expect(c.shape).toEqual([1, 1]);
+    test_util.expectArraysClose(c, [2]);
+  });
+
   it("A x B^t", math => {
     const a = Array2D.new([2, 3], [1, 2, 3, 4, 5, 6]);
     const b = Array2D.new([2, 3], [1, 0, 2, 4, 3, 0]);

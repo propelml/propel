@@ -27,6 +27,13 @@ const commonTests: MathTests = it => {
     expect(aPrime.shape).toEqual(a.shape);
     test_util.expectArraysClose(aPrime, a);
   });
+
+  it("clone dtype", math => {
+    const a = Array2D.new([2, 2], [1, 2, 3, 4], "int32");
+    const aPrime = math.clone(a);
+    expect(aPrime.dtype).toEqual(a.dtype);
+    test_util.expectArraysClose(aPrime, a);
+  });
 };
 
 test_util.describeMathCPU("clone", [commonTests]);

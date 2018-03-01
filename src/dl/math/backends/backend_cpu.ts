@@ -126,17 +126,18 @@ export class MathBackendCPU implements MathBackend {
   }
 
   clone<T extends NDArray>(x: T): T {
-    return NDArray.make(x.shape, {values: new Float32Array(x.dataSync())}) as T;
+    const values = x.dataSync().slice();
+    return NDArray.make(x.shape, {values}, x.dtype) as T;
   }
 
   slice1D(x: Array1D, begin: number, size: number): Array1D {
     const newVals = x.dataSync().slice(begin, begin + size);
-    return Array1D.new(newVals);
+    return Array1D.new(newVals, x.dtype);
   }
 
   slice2D(x: Array2D, begin: [number, number], size: [number, number]):
       Array2D {
-    const result = Array2D.zeros(size);
+    const result = Array2D.zeros(size, x.dtype);
     const [startI, startJ] = begin;
 
     for (let i = 0; i < size[0]; ++i) {
@@ -151,7 +152,7 @@ export class MathBackendCPU implements MathBackend {
   slice3D(x: Array3D, begin: [number, number, number], size: [
     number, number, number
   ]): Array3D {
-    const result = Array3D.zeros(size);
+    const result = Array3D.zeros(size, x.dtype);
     const [startI, startJ, startK] = begin;
 
     for (let i = 0; i < size[0]; ++i) {
@@ -167,7 +168,7 @@ export class MathBackendCPU implements MathBackend {
   slice4D(x: Array4D, begin: [number, number, number, number], size: [
     number, number, number, number
   ]): Array4D {
-    const result = Array4D.zeros(size);
+    const result = Array4D.zeros(size, x.dtype);
     const [startI, startJ, startK, startL] = begin;
 
     for (let i = 0; i < size[0]; ++i) {
@@ -352,7 +353,7 @@ export class MathBackendCPU implements MathBackend {
     const aOuterEnd = leftDim * aOuterStep;
     const bOuterEnd = rightDim * bOuterStep;
 
-    const result = new Float32Array(leftDim * rightDim);
+    const result = util.getTypedArrayFromDType(a.dtype, leftDim * rightDim);
     let resultIndex = 0;
 
     for (let aOuter = 0; aOuter < aOuterEnd; aOuter += aOuterStep) {
@@ -369,7 +370,7 @@ export class MathBackendCPU implements MathBackend {
       }
     }
 
-    return Array2D.new([leftDim, rightDim], result);
+    return Array2D.new([leftDim, rightDim], result, a.dtype);
   }
 
   multiply<D extends DataType>(a: NDArray<D>, b: NDArray<D>): NDArray<D> {
@@ -800,12 +801,12 @@ export class MathBackendCPU implements MathBackend {
   }
 
   abs<T extends NDArray>(x: T): T {
-    const resultValues = new Float32Array(x.size);
+    const resultValues = util.getTypedArrayFromDType(x.dtype, x.size);
     const values = x.dataSync();
     for (let i = 0; i < values.length; ++i) {
       resultValues[i] = Math.abs(values[i]);
     }
-    return NDArray.make(x.shape, {values: resultValues}) as T;
+    return NDArray.make(x.shape, {values: resultValues}, x.dtype) as T;
   }
 
   int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R> {
@@ -1107,17 +1108,8 @@ export class MathBackendCPU implements MathBackend {
     for (let i = 0; i < newShape.length; i++) {
       newShape[i] = x.shape[i] * reps[i];
     }
-    let dtype;
-    if (x.dtype === "float32") {
-      dtype = Float32Array;
-    } else if (x.dtype === "int32") {
-      dtype = Int32Array;
-    } else if (x.dtype === "bool") {
-      dtype = Uint8Array;
-    } else {
-      throw new Error(`Dtype ${x.dtype} not supported for tile`);
-    }
-    const resultValues = new dtype(util.sizeFromShape(newShape));
+    const size = util.sizeFromShape(newShape);
+    const resultValues = util.getTypedArrayFromDType(x.dtype, size);
     const result = NDArray.make(newShape, {values: resultValues}, x.dtype) as T;
     const values = x.dataSync();
     for (let i = 0; i < result.size; ++i) {
