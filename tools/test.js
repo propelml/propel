@@ -13,4 +13,6 @@ process.on("unhandledRejection", e => { throw e; });
 
   // Web browser tests
   run.tsnode("tools/test_browser.ts");
+
+  run.tsnode("tools/jasmine_shim_test.ts");
 })();
