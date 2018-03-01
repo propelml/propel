@@ -43,11 +43,11 @@ export class Tensor implements types.BasicTensor {
   basic: null | types.BasicTensor;
 
   private static nextId = 1;
-  readonly id: number;
+  private _id: number;
 
   constructor(t: types.BasicTensor) {
     this.basic = t;
-    this.id = Tensor.nextId++;
+    this._id = Tensor.nextId++;
     track(this);
   }
 
@@ -72,6 +72,7 @@ export class Tensor implements types.BasicTensor {
 
     this.dispose();
     this.basic = t.basic;
+    this._id = t.id;
     // It would be nice to not forcably destroy the argument here, but
     // that would require reference counting basic.
     t.basic = null;
@@ -132,6 +133,10 @@ export class Tensor implements types.BasicTensor {
    */
   data(): Promise<types.TypedArray> {
     return this.basic.data();
+  }
+
+  get id(): number {
+    return this._id;
   }
 
   get rank(): number {
