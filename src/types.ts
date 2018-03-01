@@ -112,3 +112,5 @@ export interface TensorOpts {
   dtype: DType;
   device?: string;
 }
+
+export type Mode = "RGBA" | "RGB" | "L";

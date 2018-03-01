@@ -2,6 +2,7 @@ import "./api_test";
 import "./backend_test";
 import "./dataset_test";
 import "./format_test";
+import "./im_test";
 import "./mnist_test";
 import "./nn_example_test";
 import "./npy_test";
