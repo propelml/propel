@@ -185,14 +185,6 @@ export class Tensor implements types.BasicTensor {
     return ops.cast(this, dtype);
   }
 
-  /** Adds two tensors and returns the resulting tensor.
-   *
-   *    import { tensor } from "propel";
-   *    const x = tensor(1);
-   *    const y = tensor(2);
-
-   *    const result = x.add(y);
-   */
   add(x: types.TensorLike): Tensor {
     return ops.add(this, this.colocate(x));
   }

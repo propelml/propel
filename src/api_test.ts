@@ -105,7 +105,7 @@ test(async function api_inc() {
 
 test(async function api_add_() {
   function f(x) {
-    return tensor(x).add(1);
+    return tensor(x).add_(1);
   }
   assertClose(f(1), 2);
   assertClose(f(-1), 0);
