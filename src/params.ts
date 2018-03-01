@@ -1,5 +1,6 @@
-import { Tensor } from "./api";
 import { watch } from "./backprop";
+import { convert, Tensor } from "./tensor";
+import * as types from "./types";
 
 /** Constructs a new params object.
  * Same as `new Params()`. See the documentation for in the Params class for
@@ -22,17 +23,15 @@ export function params(): Params {
  * To define a new parameter tensor, you must define
  * 1) a unique name
  * 2) the initial value.
- *
- * The way this is done is with the define() method
- * on the params object. They are each given a name, shape, and dtype,
- * if the name doesn't already exist in the params object, it is initialized.
+ * This is done with the define() method
+ * If the name doesn't already exist in the params object, it is initialized.
  * Otherwise it is returned without modification.
  *
- * The params object is often used with optimizers to do gradient decent.
- *
- * If using saver(), the params object wont need to be constructed manually.
+ * Params are saved, restored, and otherwise acted upon by the Experiment
+ * interface. See Experiment.sgd() and Experiment.minimize().
  */
 export interface Params {
+  length: number;
   has(name: string): boolean;
   get(name: string): Tensor;
   set(name: string, t: Tensor): Tensor;
@@ -43,12 +42,12 @@ export interface Params {
    *    let params = pr.params();
    *    params.define("A", () => pr.randn([2]));
    *    params.define("B", () => pr.zeros([2, 2]));
-   *    params.forEach((tensor, name) => {
+   *    for (let [name, tensor] of params) {
    *      console.log(name);
    *      console.log(tensor);
-   *    });
+   *    }
    */
-  forEach(cb: (t: Tensor, name: string) => void): void;
+  [Symbol.iterator]();
 
   /** Returns a subset of the Params with only the tensors that have the given
    * prefix.
@@ -59,7 +58,7 @@ export interface Params {
    * params object, otherwise returns the existing param of the given name.
    * All tensors in the params object get automatically traced for backprop.
    */
-  define(name: string, initFn: () => Tensor): Tensor;
+  define(name: string, initFn: () => types.TensorLike): Tensor;
 }
 
 class RootParams implements Params {
@@ -71,17 +70,22 @@ class RootParams implements Params {
     return this.store.has(name);
   }
 
+  get length(): number {
+    return this.store.size;
+  }
+
   get(name: string): Tensor {
     return this.store.get(name);
   }
 
-  set(name: string, t: Tensor): Tensor {
-    this.store.set(name, t);
-    return t;
+  set(name: string, t: types.TensorLike): Tensor {
+    const tensor = convert(t);
+    this.store.set(name, tensor);
+    return tensor;
   }
 
-  forEach(cb): void {
-    this.store.forEach(cb);
+  [Symbol.iterator]() {
+    return this.store[Symbol.iterator]();
   }
 
   /** Returns a subset of the Params with only the tensors that have the given
@@ -91,10 +95,10 @@ class RootParams implements Params {
     return new ScopedParams(this, prefix);
   }
 
-  define(name: string, initFn: () => Tensor): Tensor {
+  define(name: string, initFn: () => types.TensorLike): Tensor {
     let t = this.get(name);
     if (!t) {
-      t = initFn();
+      t = convert(initFn());
       this.set(name, t);
       watch(t);
     }
@@ -109,6 +113,16 @@ class ScopedParams implements Params {
     return this.prefix + "/" + name;
   }
 
+  get length(): number {
+    // TODO This is not constant time but it could be. Each scoped params
+    // should have its own store.
+    let c = 0;
+    for (const [name, _] of this.parent) {
+      if (name.startsWith(this.prefix)) c++;
+    }
+    return c;
+  }
+
   has(name: string): boolean {
     return this.parent.has(this.resolve(name));
   }
@@ -121,19 +135,15 @@ class ScopedParams implements Params {
     return this.parent.set(this.resolve(name), t);
   }
 
-  forEach(cb): void {
-    this.parent.forEach((t: Tensor, name: string) => {
-      if (name.startsWith(this.prefix)) {
-        cb(t, name);
-      }
-    });
+  [Symbol.iterator]() {
+    throw Error("implement me");
   }
 
   scope(prefix: string): Params {
     return this.parent.scope(this.resolve(prefix));
   }
 
-  define(name: string, initFn: () => Tensor): Tensor {
+  define(name: string, initFn: () => types.TensorLike): Tensor {
     return this.parent.define(this.resolve(name), initFn);
   }
 }

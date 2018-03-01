@@ -12,7 +12,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { join as pathJoin } from "path";
 import { Tensor } from "./tensor";
 import { BasicTensor, DType, FlatVector, RegularArray, Shape,
   TensorLike, TypedArray } from "./types";
@@ -299,7 +298,7 @@ const propelHosts = new Set(["127.0.0.1", "localhost", "propelml.org"]);
 // This is to confuse parcel.
 // TODO There may be a more elegant workaround in future versions.
 // https://github.com/parcel-bundler/parcel/pull/448
-const nodeRequire = IS_WEB ? null : require;
+export const nodeRequire = IS_WEB ? null : require;
 
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
@@ -309,29 +308,25 @@ const nodeRequire = IS_WEB ? null : require;
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(path: string,
+async function fetch2(p: string,
     encoding: "binary" | "utf8" = "binary"): Promise<string | ArrayBuffer> {
+  // TODO The path hacks in this function are quite messy and need to be
+  // cleaned up.
+  p = fetch2ArgManipulation(p);
   if (IS_WEB) {
-    const host = document.location.host.split(":")[0];
-    if (propelHosts.has(host)) {
-      path = path.replace("deps/", "/");
-    } else {
-      path = path.replace("deps/", "http://propelml.org/");
-    }
-    const res = await fetch(path, { mode: "no-cors" });
+    const res = await fetch(p, { mode: "no-cors" });
     if (encoding === "binary") {
       return res.arrayBuffer();
     } else {
       return res.text();
     }
   } else {
-    path = pathJoin(__dirname, "..", path);
     const { readFileSync } = nodeRequire("fs");
     if (encoding === "binary") {
-      const b = readFileSync(path, null);
+      const b = readFileSync(p, null);
       return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
     } else {
-      return readFileSync(path, "utf8");
+      return readFileSync(p, "utf8");
     }
   }
 }
@@ -342,4 +337,23 @@ export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
 
 export async function fetchStr(path: string): Promise<string> {
   return fetch2(path, "utf8") as any;
+}
+
+export function fetch2ArgManipulation(p: string): string {
+  if (IS_WEB) {
+    const host = document.location.host.split(":")[0];
+    if (propelHosts.has(host)) {
+      p = p.replace("deps/", "/");
+      p = p.replace(/^src\//, "/src/");
+    } else {
+      p = p.replace("deps/", "http://propelml.org/");
+      p = p.replace(/^src\//, "http://propelml.org/src/");
+    }
+  } else {
+    const path = nodeRequire("path");
+    if (!path.isAbsolute(p)) {
+      p = path.join(__dirname, "..", p);
+    }
+  }
+  return p;
 }

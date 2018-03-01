@@ -4,7 +4,7 @@
     "alwaysStrict": true,
     "declaration": true,
     "diagnostics": false,
-    "lib": ["es5", "dom", "es2015"],
+    "lib": ["es5", "dom", "es2017"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,

@@ -12,16 +12,17 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-// Use this to run nn_example on node.
-import { listDevices } from "./api";
-import { Trainer } from "./nn_example";
 
-const useGPU = (listDevices().length > 1);
-async function main() {
-  const trainer = new Trainer(useGPU);
-  while (trainer.opt.steps < 10000) {
-    await trainer.step();
-  }
-}
+// Test our jasmine_shim with our own test framework.
 
-main();
+import { assert } from "../src/util";
+import { matchTesters } from "./jasmine_shim_testers";
+import { test } from "./tester";
+
+test(async function test_matchTesters() {
+  assert(matchTesters.toEqual("world", "world"));
+  assert(!matchTesters.toEqual("hello", "world"));
+  assert(matchTesters.toEqual(5, 5));
+  assert(!matchTesters.toEqual(5, 6));
+  assert(matchTesters.toEqual(NaN, NaN));
+});

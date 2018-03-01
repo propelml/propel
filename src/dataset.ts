@@ -19,7 +19,7 @@ import { isUndefined } from "util";
 import { tensor, Tensor } from "./api";
 import * as mnist from "./mnist";
 import { NamedTensors } from "./tensor";
-import { assert, fetchStr } from "./util";
+import { assert, delay, fetchStr } from "./util";
 
 export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);
@@ -128,6 +128,10 @@ class SliceDataset extends Dataset {
 
   async nextBatch(batchSize: number): Promise<NamedTensors> {
     if (this.promise) await this.promise;
+
+    // Make this truly async to avoid busy loops.
+    await delay(0);
+
     const out: NamedTensors = {};
     // End condition.
     if (this.pos >= this.batchDim) {

@@ -17,7 +17,7 @@
 // https://github.com/tensorflow/tensorflow/blob/16b0bb095296fcfa17182aeae656a35faf70f36e/tensorflow/python/eager/backprop.py#L442
 
 import { fill, Params } from "./api";
-import { BWFunc, getBackwardFuncs } from "./ops";
+import { getBackwardFunc } from "./ops";
 import { convert, NamedTensors, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
@@ -70,7 +70,7 @@ export class Tape {
 
 // The global tape stack. The tape stack is used to support higher order
 // gradients. It always starts with a tape - to support top-level traces.
-const tapeStack: Tape[] = [new Tape()];
+const tapeStack: Tape[] = [];
 
 /** Returns a function which differentiates f with respect to the given
  * argnum indexes.
@@ -89,7 +89,6 @@ export interface ParamsFn {
   (params: Params): Tensor;
 }
 
-// TODO remove or replace this in favor of gradParams2 once unused.
 export function gradParams(f: ParamsFn, names?: string[]) {
   return function(params: Params): [NamedTensors, Tensor] {
     pushNewTape();
@@ -99,7 +98,9 @@ export function gradParams(f: ParamsFn, names?: string[]) {
         watch(params.get(name));
       }
     } else {
-      params.forEach((t, name) => watch(t));
+      for (const [_, t] of params) {
+        watch(t);
+      }
     }
     let result = f(params); // Do the forward pass.
     result = convert(result);
@@ -107,10 +108,10 @@ export function gradParams(f: ParamsFn, names?: string[]) {
     // processed by imperativeGrad.
     const order: string[] = [];
     const targs: Tensor[] = [];
-    params.forEach((t, name) => {
+    for (const [name, t] of params) {
       order.push(name);
       targs.push(t);
-    });
+    }
 
     const tape = popTape();
     const grads = imperativeGrad(result, targs, tape);
@@ -123,35 +124,6 @@ export function gradParams(f: ParamsFn, names?: string[]) {
     }
     return [out, result];
   };
-}
-
-/** Take the gradient of the specified tensor with respect to the provided
- * parameters. The user is responsible for calling trace on each of the params
- * before calculating x.
- */
-export function gradParams2(x: Tensor, params: Params): NamedTensors {
-  // Turn params into an array, so it can be
-  // processed by imperativeGrad.
-  const order: string[] = [];
-  const targs: Tensor[] = [];
-  params.forEach((t, name) => {
-    order.push(name);
-    targs.push(t);
-  });
-
-  assert(tapeStack.length > 0);
-  const tape = tapeStack[tapeStack.length - 1];
-  const grads = imperativeGrad(x, targs, tape);
-
-  // Now grads is an array, which we want to turn back into a params object.
-  // TODO share this with gradParams
-  assert(grads.length === order.length);
-  const out: NamedTensors = {};
-  for (let i = 0; i < order.length; ++i) {
-    const n = order[i];
-    out[n] = grads[i];
-  }
-  return out;
 }
 
 export function multigradAndVal(f, argnums?: number[]) {
@@ -237,19 +209,22 @@ function imperativeGrad(target: Tensor,
     log("backprop", tapeEntryToString(op));
     log("- outGrad %s", outGrad.shape, outGrad.device);
 
-    const inGrads = getBackwardFuncs(op.name).map(
-      (bwFunc: null | BWFunc, i): Tensor => {
-        if (bwFunc) {
-          return bwFunc(outGrad, ...op.savedForBackward || []);
-        } else {
-          // Null backwards function, return a zero tensor of the same shape and
-          // dtype as the input.
-          const shapeDType = op.inputShapeDTypes[i];
-          const zero = convert(0,
-            {dtype: shapeDType[1], device: outGrad.device});
-          return fill(zero, shapeDType[0]);
-        }
-      });
+    const bwFunc = getBackwardFunc(op.name);
+    const inGrads = op.inputShapeDTypes.map((shapeDType, i) => {
+      // Non-tensor inputs have null shapeDType.
+      if (shapeDType == null) return null;
+      // Actually do the backward pass.
+      const t = bwFunc(i, outGrad, ...op.savedForBackward || []);
+      if (t != null) {
+        return t;
+      } else {
+        // Null backwards function, return a zero tensor of the same shape and
+        // dtype as the input.
+        const [shape, dtype] = shapeDType;
+        const zero = convert(0, {dtype, device: outGrad.device});
+        return fill(zero, shape);
+      }
+    });
 
     log("- inGrad", inGrads.map((g) => {
       return g ? [g.device, g.shape] : null;

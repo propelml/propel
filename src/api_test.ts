@@ -931,6 +931,42 @@ testDevices(async function api_slice(tensor, device) {
   // TODO figure out backwards pass.
 });
 
+testDevices(async function api_concat(tensor, device) {
+  const a = tensor([[[1, 1, 1], [2, 2, 2]],
+                    [[3, 3, 3], [4, 4, 4]]]);
+  const b = tensor([[[5, 5, 5], [6, 6, 6]],
+                    [[7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(0, b),
+      [[[1, 1, 1], [2, 2, 2]],
+       [[3, 3, 3], [4, 4, 4]],
+       [[5, 5, 5], [6, 6, 6]],
+       [[7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(1, b),
+      [[[1, 1, 1], [2, 2, 2], [5, 5, 5], [6, 6, 6]],
+       [[3, 3, 3], [4, 4, 4], [7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(2, b),
+      [[[1, 1, 1, 5, 5, 5],
+        [2, 2, 2, 6, 6, 6]],
+       [[3, 3, 3, 7, 7, 7],
+        [4, 4, 4, 8, 8, 8]]]);
+  assertAllEqual(a.concat(2, b, b),
+      [[[1, 1, 1, 5, 5, 5, 5, 5, 5],
+        [2, 2, 2, 6, 6, 6, 6, 6, 6]],
+       [[3, 3, 3, 7, 7, 7, 7, 7, 7],
+        [4, 4, 4, 8, 8, 8, 8, 8, 8]]]);
+  const t = tensor([[1, 2], [3, 4]]);
+  const s = t.concat(0, [[5, 6]]);
+  assertAllEqual(s, [[1, 2], [3, 4], [5, 6]]);
+  // Backwards pass.
+  const f = (x, y) => x.concat(0, y.mul(2));
+  const g = multigrad(f, [0, 1]);
+  const gab = g(a, b);
+  assertAllEqual(gab[0], [[[1, 1, 1], [1, 1, 1]],
+                          [[1, 1, 1], [1, 1, 1]]]);
+  assertAllEqual(gab[1], [[[2, 2, 2], [2, 2, 2]],
+                          [[2, 2, 2], [2, 2, 2]]]);
+});
+
 test(async function api_cast() {
   const a = tensor([255, 127, 0], {dtype: "uint8"});
   assert(a.dtype === "uint8");
@@ -1106,18 +1142,6 @@ test(async function api_rescale() {
   const t = tensor([0, 50, 255]);
   const r = t.rescale([0, 255], [-1, 1]);
   assertAllClose(r, [-1, -0.607843137254902, 1]);
-});
-
-test(async function api_sgd() {
-  const params = api.params();
-  const w = params.define("weights", () => zeros([5, 6]).add(1));
-  const b = params.define("biases", () => zeros([6]));
-  const inputs = api.zeros([2, 5]);
-  const labels = tensor([[1, 0, 0, 0, 0, 0],
-                  [0, 1, 0, 0, 0, 0]], {dtype: "int32"});
-  const loss = inputs.matmul(w).add(b).softmaxCE(labels).reduceMean();
-  api.sgd(loss, params, { lr: 0.1 });
-  assertAllClose(b, [0.033,  0.033, -0.017, -0.017, -0.017, -0.017]);
 });
 
 test(async function api_linear() {

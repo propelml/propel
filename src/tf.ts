@@ -427,6 +427,19 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r[0]);
   }
 
+  concat(axis: number, inputs: TensorTF[]): TensorTF {
+    const dtype = dtypePropel2TF(inputs[0].dtype);
+    const handles = inputs.map(t => t.handle);
+    handles.unshift(int32Small(axis).handle);
+    const attrs = [
+      ["T", binding.ATTR_TYPE, dtype],
+      ["N", binding.ATTR_INT, inputs.length],
+    ];
+    const r = binding.execute(ctx, "Concat", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
+  }
+
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
     // Reshape, like Slice, does not have an int32 GPU implementation
     // https://git.io/vNTd5
