@@ -20,9 +20,13 @@ import { convert } from "./tensor";
 import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
 
-function toTensor(data: Int32Array, height: number, width: number,
+function toTensor(data: Uint8Array, height: number, width: number,
                   mode: Mode): Tensor {
-  let tensor = convert(data)
+  // Convert a potentially Uint8Array to int32 tensor.
+  // TODO Propel does not yet support uinti8 (#306). Ideally we'd return
+  // a uint8 tensor here.
+  const i32 = new Int32Array(data);
+  let tensor = convert(i32, { dtype: "int32" })
     .reshape([height, width, 4])
     .transpose([2, 0, 1]);
   if (mode === "RGBA") {
@@ -51,7 +55,7 @@ function webImageDecoder(filename: string, mode: Mode)
         ctx.drawImage(img, 0, 0);
         const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const image: Tensor = toTensor(
-          Int32Array.from(pixels.data),
+          Uint8Array.from(pixels.data),
           canvas.height,
           canvas.width,
           mode
@@ -103,7 +107,8 @@ function pngReadHandler(filename: string, mode: Mode): Promise<Tensor> {
     fs.createReadStream(filename)
       .pipe(new PNG())
       .on("parsed", function(this: any) {
-        resolve(toTensor(this.data, this.height, this.width, mode));
+        const data = new Uint8Array(this.data);
+        resolve(toTensor(data, this.height, this.width, mode));
       })
       .on("error", function() {
         resolve();
