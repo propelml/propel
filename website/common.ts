@@ -66,6 +66,8 @@ export function Avatar(props: { size?: number, userInfo: db.UserInfo }) {
   const size = props.size || 50;
   return h("img", {
     "class": "avatar",
-    src: props.userInfo.photoURL + "&size=" + size,
+    "height": size,
+    "src": props.userInfo.photoURL + "&size=" + size,
+    "width": size,
   });
 }
