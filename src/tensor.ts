@@ -190,7 +190,6 @@ export class Tensor implements types.BasicTensor {
    *    import { tensor } from "propel";
    *    const x = tensor(1);
    *    const y = tensor(2);
-
    *    const result = x.add(y);
    */
   add(x: types.TensorLike): Tensor {
