@@ -196,7 +196,7 @@ export class Tensor implements types.BasicTensor {
     // Should the id setting be moved into .assign() ?
     this._id = result.id;
 
-    return result;
+    return this;
   }
 
   sub(x: types.TensorLike): Tensor {
