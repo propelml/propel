@@ -312,15 +312,8 @@ async function fetch2(p: string,
     encoding: "binary" | "utf8" = "binary"): Promise<string | ArrayBuffer> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
+  p = fetch2ArgManipulation(p);
   if (IS_WEB) {
-    const host = document.location.host.split(":")[0];
-    if (propelHosts.has(host)) {
-      p = p.replace("deps/", "/");
-      p = p.replace(/^src\//, "/src/");
-    } else {
-      p = p.replace("deps/", "http://propelml.org/");
-      p = p.replace(/^src\//, "http://propelml.org/src/");
-    }
     const res = await fetch(p, { mode: "no-cors" });
     if (encoding === "binary") {
       return res.arrayBuffer();
@@ -329,10 +322,6 @@ async function fetch2(p: string,
     }
   } else {
     const { readFileSync } = nodeRequire("fs");
-    const path = nodeRequire("path");
-    if (!path.isAbsolute(p)) {
-      p = path.join(__dirname, "..", p);
-    }
     if (encoding === "binary") {
       const b = readFileSync(p, null);
       return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
@@ -348,4 +337,23 @@ export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
 
 export async function fetchStr(path: string): Promise<string> {
   return fetch2(path, "utf8") as any;
+}
+
+export function fetch2ArgManipulation(p: string): string {
+  if (IS_WEB) {
+    const host = document.location.host.split(":")[0];
+    if (propelHosts.has(host)) {
+      p = p.replace("deps/", "/");
+      p = p.replace(/^src\//, "/src/");
+    } else {
+      p = p.replace("deps/", "http://propelml.org/");
+      p = p.replace(/^src\//, "http://propelml.org/src/");
+    }
+  } else {
+    const path = nodeRequire("path");
+    if (!path.isAbsolute(p)) {
+      p = path.join(__dirname, "..", p);
+    }
+  }
+  return p;
 }
