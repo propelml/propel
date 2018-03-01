@@ -16,7 +16,7 @@
 // Test our jasmine_shim with our own test framework.
 
 import { assert } from "../src/util";
-import { matchTesters } from "./jasmine_shim_testers";
+import { matchTesters } from "./jasmine_shim";
 import { test } from "./tester";
 
 test(async function test_matchTesters() {
