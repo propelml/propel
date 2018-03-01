@@ -189,12 +189,6 @@ export class Tensor implements types.BasicTensor {
     return ops.add(this, this.colocate(x));
   }
 
-  /** In-place version of add().
-   *
-   *    import { tensor } from "propel";
-   *    const x = tensor(1);
-   *    x.add_(1);
-   */
   add_(x: types.TensorLike): Tensor {
     const result = ops.add(this, this.colocate(x));
 
