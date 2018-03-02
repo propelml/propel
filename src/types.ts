@@ -40,6 +40,8 @@ export interface BackendOps {
   copyToDevice(x: BasicTensor, device: string): BasicTensor;
   getDevice(x: BasicTensor): string;
   listDevices(): string[];
+  fromTypedArray(data: TypedArray, shape: Shape, dtype?: DType,
+                 device?: string): BasicTensor;
   add(x: BasicTensor, y: BasicTensor): BasicTensor;
   sub(x: BasicTensor, y: BasicTensor): BasicTensor;
   mul(x: BasicTensor, y: BasicTensor): BasicTensor;

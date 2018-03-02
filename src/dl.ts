@@ -71,19 +71,6 @@ export class TensorDL implements types.BasicTensor {
   readonly ndarray: NDArray;
   private isDisposed: boolean;
 
-  static fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                        dtype?: types.DType, device?: string): TensorDL {
-    if (dtype == null) {
-      dtype = getDType(data);
-    }
-    if (device == null) {
-      device = "CPU:0";
-    }
-    const math = lookupMath(device);
-    const ndarray = NDArray.make(shape, { values: data }, dtype as any, math);
-    return new TensorDL(ndarray, math);
-  }
-
   constructor(ndarray: NDArray, math: NDArrayMath = cpuMath) {
     this.dtype = ndarray.dtype;
     this.shape = ndarray.shape;
@@ -137,6 +124,19 @@ export class OpsDL implements types.BackendOps {
     const d = ["CPU:0"];
     if (webglBackend) d.push("GPU:0");
     return d;
+  }
+
+  fromTypedArray(values: types.TypedArray, shape: types.Shape,
+                 dtype?: types.DType, device?: string): TensorDL {
+    if (dtype == null) {
+      dtype = getDType(values);
+    }
+    if (device == null) {
+      device = "CPU:0";
+    }
+    const math = lookupMath(device);
+    const ndarray = NDArray.make(shape, { values }, dtype as any, math);
+    return new TensorDL(ndarray, math);
   }
 
   add(x: TensorDL, y: TensorDL): TensorDL {
@@ -288,7 +288,7 @@ export class OpsDL implements types.BackendOps {
     for (let i = 0; i <= num - 1; ++i) {
       ta[i] = start + i * d;
     }
-    return TensorDL.fromTypedArray(ta, [num]);
+    return this.fromTypedArray(ta, [num]);
   }
 
   range(start: number, limit: number, delta: number): TensorDL {
@@ -297,7 +297,7 @@ export class OpsDL implements types.BackendOps {
     for (let i = 0; i < num; ++i) {
       ta[i] = start + i * delta;
     }
-    return TensorDL.fromTypedArray(ta, [num]);
+    return this.fromTypedArray(ta, [num]);
   }
 
   transpose(x: TensorDL, perm: TensorDL): TensorDL {
