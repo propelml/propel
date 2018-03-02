@@ -807,7 +807,7 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.greater(a, b);
       expect(res.dtype).toBe("bool");
-      expect(res.getValues()).toEqual(
+      expect(res.dataSync()).toEqual(
         new Uint8Array([0, 1, 0, 0, util.NAN_BOOL]));
 
       a.dispose();
@@ -832,7 +832,7 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.greaterEqual(a, b);
       expect(res.dtype).toBe("bool");
-      expect(res.getValues()).toEqual(
+      expect(res.dataSync()).toEqual(
         new Uint8Array([0, 1, 0, 1, util.NAN_BOOL]));
 
       a.dispose();
@@ -857,7 +857,7 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.less(a, b);
       expect(res.dtype).toBe("bool");
-      expect(res.getValues()).toEqual(
+      expect(res.dataSync()).toEqual(
         new Uint8Array([1, 0, 1, 0, util.NAN_BOOL]));
 
       a.dispose();
@@ -882,7 +882,7 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.lessEqual(a, b);
       expect(res.dtype).toBe("bool");
-      expect(res.getValues()).toEqual(
+      expect(res.dataSync()).toEqual(
         new Uint8Array([1, 0, 1, 1, util.NAN_BOOL]));
 
       a.dispose();
@@ -909,7 +909,7 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.select(cond, a, b);
       expect(res.dtype).toBe("float32");
-      expect(res.getValues()).toEqual(
+      expect(res.dataSync()).toEqual(
         new Float32Array([4, 5, 1, 5, -1]));
 
       a.dispose();

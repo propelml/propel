@@ -220,15 +220,6 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
     return this.math.reshape(this, newShape);
   }
 
-  /** Flatten a NDArray to a 1D array. */
-  flatten(): Array1D<D> {
-    this.throwIfDisposed();
-    if (this instanceof Array1D) {
-      return this;
-    }
-    return this.as1D();
-  }
-
   asScalar(): Scalar<D> {
     this.throwIfDisposed();
     util.assert(this.size === 1, "The array must have only 1 element.");
@@ -271,10 +262,6 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
       index += this.strides[i] * locs[i];
     }
     return this.dataSync()[index];
-  }
-
-  add(value: number, ...locs: number[]) {
-    this.set(this.get(...locs) + value, ...locs);
   }
 
   set(value: number, ...locs: number[]) {
@@ -325,16 +312,6 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
     this.math.write(this.dataId, vals);
   }
 
-  /** @deprecated Use dataSync() instead. */
-  getValues(): DataTypeMap[D] {
-    return this.dataSync();
-  }
-
-  /** @deprecated Use data() instead. */
-  getValuesAsync(): Promise<DataTypeMap[D]> {
-    return this.data();
-  }
-
   /**
    * Asynchronously downloads the values from the NDArray. Returns a promise
    * that resolves when the data is ready.
@@ -359,12 +336,6 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
     }
     this.isDisposed = true;
     this.math.disposeData(this.dataId);
-  }
-
-  equals(t: NDArray<D, R>): boolean {
-    this.throwIfDisposed();
-    return this.dtype === t.dtype && util.arraysEqual(this.shape, t.shape) &&
-        util.arraysEqual(this.dataSync(), t.dataSync());
   }
 
   static rand<D extends DataType, R extends Rank>(
@@ -440,10 +411,6 @@ export class Scalar<D extends DataType = DataType> extends NDArray<D, "0"> {
     return this.get();
   }
 
-  add(value: number) {
-    this.dataSync()[0] += value;
-  }
-
   asType<D2 extends DataType>(dtype: D2): Scalar<D2> {
     return super.asType(dtype);
   }
@@ -477,10 +444,6 @@ export class Array1D<D extends DataType = DataType> extends NDArray<D, "1"> {
   async val(i: number): Promise<number> {
     await this.data();
     return this.get(i);
-  }
-
-  add(value: number, i: number) {
-    this.dataSync()[i] += value;
   }
 
   locToIndex(loc: [number]): number {
@@ -563,10 +526,6 @@ export class Array2D<D extends DataType = DataType> extends NDArray<D, "2"> {
 
   get(i: number, j: number) {
     return this.dataSync()[this.strides[0] * i + j];
-  }
-
-  add(value: number, i: number, j: number) {
-    this.dataSync()[this.strides[0] * i + j] += value;
   }
 
   async val(i: number, j: number): Promise<number> {
@@ -662,10 +621,6 @@ export class Array3D<D extends DataType = DataType> extends NDArray<D, "3"> {
     return this.get(i, j, k);
   }
 
-  add(value: number, i: number, j: number, k: number) {
-    this.dataSync()[this.strides[0] * i + this.strides[1] * j + k] += value;
-  }
-
   locToIndex(locs: [number, number, number]): number {
     return this.strides[0] * locs[0] + this.strides[1] * locs[1] + locs[2];
   }
@@ -755,12 +710,6 @@ export class Array4D<D extends DataType = DataType> extends NDArray<D, "4"> {
   async val(i: number, j: number, k: number, l: number): Promise<number> {
     await this.data();
     return this.get(i, j, k, l);
-  }
-
-  add(value: number, i: number, j: number, k: number, l: number) {
-    this.dataSync()
-        [this.strides[0] * i + this.strides[1] * j + this.strides[2] * k + l] +=
-        value;
   }
 
   locToIndex(locs: [number, number, number, number]): number {
