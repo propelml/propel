@@ -292,7 +292,7 @@ export function isValNaN(val: number, dtype: DataType): boolean {
   if (isNaN(val)) {
     return true;
   }
-  if (dtype === "float32") {
+  if (dtype === "float32" || dtype === "uint8") {
     return false;
   } else if (dtype === "int32") {
     return val === NAN_INT32;
@@ -325,6 +325,8 @@ export function getTypedArrayFromDType<D extends DataType>(
   } else if (dtype === "int32") {
     values = new Int32Array(size);
   } else if (dtype === "bool") {
+    values = new Uint8Array(size);
+  } else if (dtype === "uint8") {
     values = new Uint8Array(size);
   } else {
     throw new Error(`Unknown data type ${dtype}`);

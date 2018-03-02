@@ -23,8 +23,8 @@ import { BackendEngine, ScopeResult } from "./backends/backend_engine";
 import * as broadcast_util from "./broadcast_util";
 import * as concat_util from "./concat_util";
 import * as conv_util from "./conv_util";
-// tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, RankMap, Scalar } from "./ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap,
+  IntDType, NDArray, Rank, RankMap, Scalar } from "./ndarray";
 import * as slice_util from "./slice_util";
 import { MatrixOrientation, SumTypes } from "./types";
 
@@ -277,8 +277,9 @@ export class NDArrayMath implements NDArrayManager {
       // We don't change the underlying data, since we cast to higher precision.
       return NDArray.make(x.shape, {dataId: x.dataId}, newDType);
     }
-    if (newDType === "int32") {
-      return this.backend.int(x) as NDArray as RankMap<D>[R];
+    if (newDType === "int32" || newDType === "uint8") {
+      return this.backend.int(x, newDType as IntDType) as NDArray as
+        RankMap<D>[R];
     } else if (newDType === "bool") {
       return this.backend.notEqual(x, Scalar.new(0, x.dtype)) as RankMap<D>[R];
     } else {

@@ -16,8 +16,8 @@
  */
 
 import { Conv2DInfo } from "../conv_util";
-// tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap,
+  IntDType, NDArray, Rank } from "../ndarray";
 import { MatrixOrientation, SumTypes } from "../types";
 
 export interface NDArrayStorage {
@@ -108,7 +108,8 @@ export interface MathBackend extends NDArrayStorage {
   leakyRelu<T extends NDArray>(x: T, alpha: number): T;
   prelu<T extends NDArray>(x: T, alpha: T): T;
   preluDer<T extends NDArray>(x: T, alpha: T): T;
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R>;
+  int<D extends IntDType, R extends Rank>(
+      x: NDArray<DataType, R>, dtype: D): NDArray<D, R>;
 
   clip<T extends NDArray>(x: T, min: number, max: number): T;
 

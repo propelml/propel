@@ -193,6 +193,10 @@ describe("util.isValNaN", () => {
     expect(util.isValNaN(3, "float32")).toBe(false);
   });
 
+  it("2 for uint8", () => {
+    expect(util.isValNaN(2, "uint8")).toBe(false);
+  });
+
   it("255 for float32", () => {
     expect(util.isValNaN(255, "float32")).toBe(false);
   });

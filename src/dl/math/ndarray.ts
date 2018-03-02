@@ -25,14 +25,18 @@ import { MPRandGauss } from "./rand";
 export enum DType {
   float32 = "float32",
   int32 = "int32",
-  bool = "bool"
+  bool = "bool",
+  uint8 = "uint8",
 }
+
+export type IntDType = "int32" | "uint8";
 
 /** @hidden */
 export interface DataTypeMap {
   float32: Float32Array;
   int32: Int32Array;
   bool: Uint8Array;
+  uint8: Uint8Array;
 }
 export type DataType = keyof DataTypeMap;
 
@@ -878,6 +882,8 @@ function makeZerosTypedArray<D extends DataType>(
   } else if (dtype === "int32") {
     return new Int32Array(size);
   } else if (dtype === "bool") {
+    return new Uint8Array(size);
+  } else if (dtype === "uint8") {
     return new Uint8Array(size);
   } else {
     throw new Error(`Unknown data type ${dtype}`);

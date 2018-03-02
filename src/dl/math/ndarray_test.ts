@@ -270,6 +270,13 @@ const testsZeros: MathTests = it => {
     test_util.expectArraysEqual(a, [0, 0, 0]);
   });
 
+  it("1D uint8 dtype", () => {
+    const a = Array1D.zeros([3], "uint8");
+    expect(a.dtype).toBe("uint8");
+    expect(a.shape).toEqual([3]);
+    test_util.expectArraysEqual(a, [0, 0, 0]);
+  });
+
   it("2D default dtype", () => {
     const a = Array2D.zeros([3, 2]);
     expect(a.dtype).toBe("float32");
@@ -1310,6 +1317,13 @@ const testsAsType: MathTests = it => {
     const a = Scalar.new(true, "bool").asType("int32");
     expect(a.dtype).toBe("int32");
     expect(a.get()).toBe(1);
+  });
+
+  it("asType uint8", math => {
+    const a = Scalar.new(2.4);
+    const b = a.asType("uint8");
+    expect(b.dtype).toEqual("uint8");
+    test_util.expectArraysClose(b, [2]);
   });
 
   it("array1d float32 -> int32", () => {
