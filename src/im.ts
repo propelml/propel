@@ -22,11 +22,7 @@ import { IS_NODE, nodeRequire } from "./util";
 
 function toTensor(data: Uint8Array, height: number, width: number,
                   mode: Mode): Tensor {
-  // Convert a potentially Uint8Array to int32 tensor.
-  // TODO Propel does not yet support uinti8 (#306). Ideally we'd return
-  // a uint8 tensor here.
-  const i32 = new Int32Array(data);
-  let tensor = convert(i32, { dtype: "int32" })
+  let tensor = convert(data)
     .reshape([height, width, 4])
     .transpose([2, 0, 1]);
   if (mode === "RGBA") {
