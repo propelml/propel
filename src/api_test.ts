@@ -882,10 +882,9 @@ test(async function api_bcastDiv() {
 testDevices(async function api_slice(tensor, device) {
   const a = tensor([[[1, 1, 1], [2, 2, 2]],
                     [[3, 3, 3], [4, 4, 4]],
-                    [[5, 5, 5], [6, 6, 6]]]);
+                    [[5, 5, 5], [6, 6, 6]]], { dtype: "uint8" });
   const s1 = a.slice([1, 0, 0], [1, 1, 3]);
-  // FIXME
-  // assert(s1.dtype === "uint8");
+  assert(s1.dtype === "uint8");
   assertAllEqual(s1, [[[3, 3, 3]]]);
   assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]),
                  [[[3, 3, 3],
@@ -964,7 +963,6 @@ test(async function api_cast() {
 });
 
 testDevices(async function api_oneHot(tensor, device) {
-  // TODO dtype uint8
   const a = tensor([0, 1, 3, 4], {dtype: "int32"});
   assertAllEqual(a.oneHot(6), [
     [1, 0, 0, 0, 0, 0],
@@ -980,6 +978,9 @@ testDevices(async function api_oneHot(tensor, device) {
     [-0.5, -0.5, -0.5,  0.5, -0.5],
     [-0.5, -0.5, -0.5, -0.5,  0.5],
   ]);
+  // Make sure it works with uint8.
+  const c = tensor([0, 1], {dtype: "uint8"});
+  assertAllEqual(c.oneHot(3), [[1, 0, 0], [0, 1, 0]]);
 });
 
 test(async function api_softmaxCE() {
