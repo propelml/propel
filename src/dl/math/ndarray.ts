@@ -94,7 +94,7 @@ export class NDArray<D extends DataType = DataType, R extends Rank = Rank> {
    */
   strides: number[];
 
-  protected math: NDArrayMath;
+  readonly math: NDArrayMath;
 
   protected constructor(
       shape: number[], dtype: D, values?: DataTypeMap[D], dataId?: DataId,
