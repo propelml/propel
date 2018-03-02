@@ -17,6 +17,6 @@
     "sourceMap": true,
     "target": "es2017"
   },
-  "exclude": ["build", "deps", "node_modules", "gendoc"]
+  "exclude": ["build", "deps", "node_modules"]
 }
 
