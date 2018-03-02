@@ -20,16 +20,16 @@ import * as util from "../../util";
 import { TypedArray } from "../../util";
 import * as axis_util from "../axis_util";
 import { Conv2DInfo } from "../conv_util";
-// tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank } from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap,
+  IntDType, NDArray, Rank } from "../ndarray";
 import * as reduce_util from "../reduce_util";
 import * as types from "../types";
 import { SumTypes, SumTypesMap } from "../types";
 import { MathBackend } from "./backend";
 import { ArgMinMaxProgram } from "./webgl/argminmax_gpu";
 import { BatchNormProgram } from "./webgl/batchnorm_gpu";
-import * as binaryop_gpu from "./webgl/binaryop_gpu";
 import { BinaryOpProgram } from "./webgl/binaryop_gpu";
+import * as binaryop_gpu from "./webgl/binaryop_gpu";
 import { ClipProgram } from "./webgl/clip_gpu";
 import { ConcatProgram } from "./webgl/concat_gpu";
 // tslint:disable-next-line:max-line-length
@@ -38,8 +38,8 @@ import { Conv2DProgram } from "./webgl/conv_gpu";
 import { DepthwiseConv2DProgram } from "./webgl/conv_gpu_depthwise";
 import { Copy2DProgram } from "./webgl/copy_gpu";
 import { GPGPUContext } from "./webgl/gpgpu_context";
-import * as gpgpu_math from "./webgl/gpgpu_math";
 import { ArrayData, GPGPUBinary, GPGPUProgram } from "./webgl/gpgpu_math";
+import * as gpgpu_math from "./webgl/gpgpu_math";
 import * as gpgpu_util from "./webgl/gpgpu_util";
 import { MaxPool2DBackpropProgram } from "./webgl/max_pool_backprop_gpu";
 import { MatMulProgram } from "./webgl/mulmat_gpu";
@@ -657,10 +657,11 @@ export class MathBackendWebGL implements MathBackend {
     return this.compileAndRun(program, [a, b]) as T;
   }
 
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R> {
+  int<D extends IntDType, R extends Rank>(
+      x: NDArray<DataType, R>, dtype: D): NDArray<D, R> {
     const program = new UnaryOpProgram(x.shape, unary_op.TO_INT);
-    const output = this.makeOutputArray(program.outputShape, "int32");
-    return this.compileAndRun(program, [x], output) as NDArray<"int32", R>;
+    const output = this.makeOutputArray(program.outputShape, dtype);
+    return this.compileAndRun(program, [x], output) as NDArray<D, R>;
   }
 
   clip<T extends NDArray>(x: T, min: number, max: number): T {
@@ -923,7 +924,7 @@ function float32ToTypedArray<D extends DataType>(
     a: Float32Array, dtype: D): DataTypeMap[D] {
   if (dtype === "float32") {
     return a;
-  } else if (dtype === "int32" || dtype === "bool") {
+  } else if (dtype === "int32" || dtype === "uint8" || dtype === "bool") {
     const result = (dtype === "int32") ? new Int32Array(a.length) :
                                          new Uint8Array(a.length);
     for (let i = 0; i < result.length; ++i) {

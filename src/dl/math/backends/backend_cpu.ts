@@ -23,7 +23,8 @@ import * as broadcast_util from "../broadcast_util";
 import * as concat_util from "../concat_util";
 import { Conv2DInfo } from "../conv_util";
 // tslint:disable-next-line:max-line-length
-import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap, NDArray, Rank, Scalar } from "../ndarray";
+import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap,
+  IntDType, NDArray, Rank, Scalar } from "../ndarray";
 import * as types from "../types";
 import { MatrixOrientation, SumTypes, SumTypesMap } from "../types";
 
@@ -809,14 +810,15 @@ export class MathBackendCPU implements MathBackend {
     return NDArray.make(x.shape, {values: resultValues}, x.dtype) as T;
   }
 
-  int<R extends Rank>(x: NDArray<DataType, R>): NDArray<"int32", R> {
-    const resultValues = new Int32Array(x.size);
+  int<D extends IntDType, R extends Rank>(
+      x: NDArray<DataType, R>, dtype: D): NDArray<D, R> {
+    const resultValues = util.getTypedArrayFromDType(dtype, x.size);
     const values = x.dataSync();
     for (let i = 0; i < values.length; ++i) {
       resultValues[i] = values[i];
     }
-    return NDArray.make(x.shape, {values: resultValues}, "int32") as
-        NDArray<"int32", R>;
+    return NDArray.make(x.shape, {values: resultValues}, dtype) as
+        NDArray<D, R>;
   }
 
   sigmoid<T extends NDArray>(x: T): T {
