@@ -100,19 +100,6 @@ export class TensorTF implements types.BasicTensor {
   handle: null | Handle;
   private data_?: types.TypedArray;
 
-  static fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                        dtype?: types.DType, device?: string): TensorTF {
-    if (dtype == null) {
-      dtype = getDType(data);
-    }
-    const dtypeTF = dtypePropel2TF(dtype);
-    let h = new binding.Handle(data, shape, dtypeTF);
-    if (device && device !== "CPU:0") {
-      h = binding.copyToDevice(ctx, h, device);
-    }
-    return new TensorTF(h);
-  }
-
   constructor(handle: Handle) {
     this.handle = handle;
   }
@@ -185,6 +172,19 @@ export class OpsTF implements types.BackendOps {
     return binding.listDevices(ctx).map(deviceDesc => {
       return simplifyDeviceName(deviceDesc.name);
     });
+  }
+
+  fromTypedArray(data: types.TypedArray, shape: types.Shape,
+                 dtype?: types.DType, device?: string): TensorTF {
+    if (dtype == null) {
+      dtype = getDType(data);
+    }
+    const dtypeTF = dtypePropel2TF(dtype);
+    let h = new binding.Handle(data, shape, dtypeTF);
+    if (device && device !== "CPU:0") {
+      h = binding.copyToDevice(ctx, h, device);
+    }
+    return new TensorTF(h);
   }
 
   add(x: TensorTF, y: TensorTF): TensorTF {

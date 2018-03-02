@@ -18,7 +18,7 @@
 // https://docs.scipy.org/doc/numpy/neps/npy-format.html
 
 import { TextDecoder } from "text-encoding";
-import * as backend from "./backend";
+import { bo } from "./backend";
 import { Tensor } from "./tensor";
 import * as types from "./types";
 import * as util from "./util";
@@ -155,7 +155,7 @@ export async function load(filename: string): Promise<Tensor> {
 // TODO move to backend.ts.
 function fromTypedArrayAndShape(ta: types.TypedArray,
                                 shape: types.Shape): Tensor {
-  const basic = backend.tensorClass.fromTypedArray(ta, shape);
+  const basic = bo.fromTypedArray(ta, shape);
   return new Tensor(basic);
 }
 

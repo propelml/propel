@@ -25,7 +25,6 @@ import * as types from "./types";
 import { deepCloneArray, IS_WEB } from "./util";
 
 // These globals will be set by onLoad
-export let tensorClass: any;
 export let backend: string;
 export let bo: types.BackendOps;
 
@@ -39,12 +38,10 @@ let onLoadCalled = false;
 
   if (preferTF() && tf.loadBinding()) {
     console.log("Using TF backend.");
-    tensorClass = tf.TensorTF;
     bo = new tf.OpsTF();
     backend = "tf";
   } else {
     console.log("Using DL backend.");
-    tensorClass = dl.TensorDL;
     bo = new dl.OpsDL();
     backend = "dl";
   }
@@ -71,7 +68,7 @@ function preferTF(): boolean {
 export function convertBasic(x: types.TensorLike,
                              opts?: types.TensorOpts): types.BasicTensor {
   // Alias fromTypedArray for brevity.
-  const create = tensorClass.fromTypedArray;
+  const create = bo.fromTypedArray;
 
   const dtype = opts ? opts.dtype : undefined;
   const device = (opts ? opts.device : null) || "CPU:0";
