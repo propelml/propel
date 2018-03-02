@@ -1,5 +1,5 @@
 import { h, render, rerender } from "preact";
-import { assert, delay, IS_WEB } from "../src/util";
+import { assert, IS_WEB } from "../src/util";
 import { enableFirebase } from "./db";
 import { drainExecuteQueue } from "./notebook";
 import { Router } from "./website";

@@ -1,4 +1,4 @@
-import { h, render, rerender } from "preact";
+import { h, render } from "preact";
 import { assert, objectsEqual } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import { enableMock } from "./db";
@@ -62,7 +62,9 @@ testBrowser(async function notebook_focusNextCell() {
   const cellEls = document.getElementsByClassName("notebook-cell");
   assert(cellEls.length >= 2);
   const first = nb.lookupCell(cellEls[0].id);
+  assert(first != null);
   const second = nb.lookupCell(cellEls[1].id);
+  assert(second != null);
 
   first.focus();
 

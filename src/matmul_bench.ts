@@ -13,7 +13,7 @@ for (let i = 0; i < 20; i++) {
   const start = end;
 
   for (let i = 0; i < count; i++) {
-    const t3 = t1.matmul(t2);
+    t1.matmul(t2);
   }
 
   end = Date.now() / 1000;
