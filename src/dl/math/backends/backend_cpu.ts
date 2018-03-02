@@ -1512,10 +1512,10 @@ export class MathBackendCPU implements MathBackend {
     util.assertShapesMatch(b.shape, c.shape);
     const newShape = a.shape;
     const result = NDArray.zeros(newShape, dtype);
-    const newValues = result.getValues();
-    const aValues = a.getValues();
-    const bValues = b.getValues();
-    const cValues = c.getValues();
+    const newValues = result.dataSync();
+    const aValues = a.dataSync();
+    const bValues = b.dataSync();
+    const cValues = c.dataSync();
     for (let i = 0; i < newValues.length; ++i) {
       // This is probably overkill. We can probably just use i.
       const loc = result.indexToLoc(i);
