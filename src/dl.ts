@@ -95,7 +95,7 @@ export class TensorDL implements types.BasicTensor {
 
   dataSync(): types.TypedArray {
     assert(!this.isDisposed);
-    return this.ndarray.getValues();
+    return this.ndarray.dataSync();
   }
 
   data(): Promise<types.TypedArray> {
@@ -223,7 +223,7 @@ export class OpsDL implements types.BackendOps {
     }
     ENV.setMath(value.math);
     const out = NDArray.zeros(shape, value.ndarray.dtype);
-    out.fill(value.ndarray.getValues()[0]);
+    out.fill(value.ndarray.dataSync()[0]);
     return new TensorDL(out, value.math);
   }
 
@@ -301,7 +301,7 @@ export class OpsDL implements types.BackendOps {
   }
 
   transpose(x: TensorDL, perm: TensorDL): TensorDL {
-    const permArr = Array.from(perm.ndarray.getValues());
+    const permArr = Array.from(perm.ndarray.dataSync());
     const ndarray = x.math.transpose(x.ndarray, permArr);
     return new TensorDL(ndarray, x.math);
   }
@@ -312,7 +312,7 @@ export class OpsDL implements types.BackendOps {
     const dims_ = dims.dataSync();
     // TODO move to deeplearnjs/src/math/backends/backend_cpu.ts
     const resultValues = makeTypedArray(a.size, x.dtype);
-    const values = a.getValues();
+    const values = a.dataSync();
     const dtype = dtypeDL(x.dtype);
     const result = NDArray.make(a.shape, {values: resultValues},
                                 dtype) as typeof x.ndarray;
