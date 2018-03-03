@@ -477,6 +477,8 @@ export interface NotebookState {
   doc?: db.NotebookDoc;
   errorMsg?: string;
   isCloningInProgress: boolean;
+  editingTitle: boolean;
+  typedTitle: string;
 }
 
 // This defines the Notebook cells component.
@@ -487,6 +489,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       doc: null,
       errorMsg: null,
       isCloningInProgress: false,
+      editingTitle: false,
+      typedTitle: ""
     };
   }
 
@@ -517,6 +521,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       this.update(doc);
     }
   }
+
+  async onSaveTitle(doc) {
+    doc.title = this.state.typedTitle;
+    this.setState({ ...doc, editingTitle: false });
+    this.update(doc);
+   }
+
+   async onTypedTitle(event) {
+     this.setState({ typedTitle: event.target.value });
+   }
 
   async onDelete(i) {
     const doc = this.state.doc;
@@ -572,14 +586,46 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     } else {
       const doc = this.state.doc;
+
+      const titleEdit = h("div", { class: "title" },
+        h("input", {
+          class: "title-input",
+          onChange: event => this.onTypedTitle(event),
+          value: doc.title
+        }),
+        h("button", {
+          class: "edit-title green-button",
+          onClick: () => this.onSaveTitle(doc)
+        }, "Save"),
+        h("button", {
+          class: "edit-title",
+          onClick: () => this.setState({ editingTitle: false })
+        }, "Cancel")
+      );
+
+      const editButton = h("button", {
+        class: "edit-title",
+        onClick: () => this.setState({ editingTitle: true })
+      }, "Edit");
+
+      const titleDisplay = h("div", { class: "title" }, [
+        h("h2", {
+          class: doc.title != null ? "" : "untitled",
+          value: doc.title
+        }, doc.title || "Untitled Notebook"),
+        db.ownsDoc(this.props.userInfo, doc) ? editButton : null
+      ]);
+
+      const title = this.state.editingTitle ? titleEdit : titleDisplay;
+
       const cloneButton = this.props.userInfo == null ? ""
         : h("button", {
-            "class": "clone",
+            "class": "green-button",
             "onClick": () => this.onClone(),
           }, "Clone");
 
       body = [
-        h("header", null, notebookBlurb(doc), cloneButton),
+        h("header", null, notebookBlurb(doc), title, cloneButton),
         this.renderCells(doc),
       ];
     }

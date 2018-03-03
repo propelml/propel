@@ -113,12 +113,47 @@ header {
   color: $textColor;
   padding: $size0 0;
 
+  h2 {
+    flex: 1 0 auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: center;
+  }
+
   p {
     font-size: 18px;
     line-height: 28px;
     font-weight: 100;
     margin-top: -2px;
     margin-bottom: 0;
+  }
+
+  .title-input {
+    flex: 1 0 auto;
+  }
+
+  .untitled {
+    color: #aaa;
+  }
+
+  .title-form {
+    flex: 1 0 auto;
+  }
+
+  button {
+    margin-left: $size1;
+    align-self: center;
+  }
+
+  .title {
+    display: flex;
+    margin-bottom: 1em;
+  }
+
+  input {
+    flex: 1 0 auto;
+    align-self: center;
+    height: $size1;
   }
 }
 
@@ -481,7 +516,7 @@ header {
   margin-top: 50px;
 }
 
-.clone {
+.green-button {
   background: $githubGreen;
   color: #fff;
   border: none;
