@@ -270,14 +270,14 @@ function imperativeGrad(target: Tensor,
   return result;
 }
 
+type PrepInfo = [CounterMap, CounterMap, Map<number, types.TapeEntry>];
 // The purpose of this function is to pre-traverse the computation graph,
 // without performing the backwards pass operations, in order to gather
 // information about how many edges tensors have. This information is later
 // used imperativeGrad() to know when a tensor that is being used as input to
 // multiple operations has had all of its gradients calculated, and thus that
 // the algorithm can move on to the tensor's origin.
-function prepareBackprop(target, tape, sourceIds): [CounterMap, CounterMap,
-  Map<number, types.TapeEntry>] {
+function prepareBackprop(target, tape, sourceIds): PrepInfo {
   const tensorStack = [target.id];
   const oidLookup = new Map<number, types.TapeEntry>();
   const usageCounts = new CounterMap(); // tensor id -> count

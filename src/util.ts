@@ -136,7 +136,8 @@ const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 // Propel files will use propelml.org if not being run in the project
 // directory.
 async function fetch2(p: string,
-    encoding: "binary" | "utf8" = "binary"): Promise<string | ArrayBuffer> {
+                      encoding: "binary" | "utf8" = "binary")
+                      : Promise<string | ArrayBuffer> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
   p = fetch2ArgManipulation(p);

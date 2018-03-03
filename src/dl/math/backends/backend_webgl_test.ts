@@ -59,7 +59,7 @@ const tests: Tests = () => {
     expect(texManager.getNumUsedTextures()).toBe(0);
   });
 
-   it("disposal of backend disposes all textures", () => {
+  it("disposal of backend disposes all textures", () => {
     const backend = new MathBackendWebGL(null);
     const texManager = backend.getTextureManager();
     const id1 = new DataId();

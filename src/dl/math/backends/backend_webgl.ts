@@ -730,7 +730,7 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
-      convInfo: Conv2DInfo): Array4D {
+         convInfo: Conv2DInfo): Array4D {
     const program = new Conv2DProgram(convInfo, bias != null);
     const inputs = bias != null ? [x, filter, bias] : [x, filter];
     return this.compileAndRun(program, inputs);

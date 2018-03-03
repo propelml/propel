@@ -132,7 +132,7 @@ export interface MathBackend extends NDArrayStorage {
   step<T extends NDArray>(x: T, alpha: number): T;
 
   conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
-      convInfo: Conv2DInfo): Array4D;
+         convInfo: Conv2DInfo): Array4D;
   conv2dDerInput(dy: Array4D, filter: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerFilter(x: Array4D, dY: Array4D, convInfo: Conv2DInfo): Array4D;
   conv2dDerBias(dY: Array4D): Array1D;

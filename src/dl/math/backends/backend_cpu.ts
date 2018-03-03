@@ -926,7 +926,7 @@ export class MathBackendCPU implements MathBackend {
   }
 
   conv2d(x: Array4D, filter: Array4D, bias: Array1D | null,
-      convInfo: Conv2DInfo): Array4D {
+         convInfo: Conv2DInfo): Array4D {
     const filterHeight = convInfo.filterHeight;
     const filterWidth = convInfo.filterWidth;
     const padLeft = convInfo.padInfo.left;
@@ -1153,7 +1153,7 @@ export class MathBackendCPU implements MathBackend {
   }
 
   private pool(x: Array4D, convInfo: Conv2DInfo,
-      poolType: "max" | "min" | "avg") {
+               poolType: "max" | "min" | "avg") {
     const strideHeight = convInfo.strideHeight;
     const strideWidth = convInfo.strideWidth;
     const filterHeight = convInfo.filterHeight;
