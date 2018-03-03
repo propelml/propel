@@ -44,7 +44,7 @@ const defaultOpts: ExperimentOpts = {
 };
 
 export async function experiment(name: string,
-    opts?: ExperimentOpts): Promise<Experiment> {
+                                 opts?: ExperimentOpts): Promise<Experiment> {
   let exp: Experiment;
   if (IS_NODE) {
     const { DiskExperiment } = require("./disk_experiment");

@@ -528,7 +528,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.update(doc);
    }
 
-   async onTypedTitle(event) {
+  async onTypedTitle(event) {
      this.setState({ typedTitle: event.target.value });
    }
 

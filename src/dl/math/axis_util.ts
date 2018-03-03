@@ -34,7 +34,7 @@ export function combineLocations(
   const loc = [];
   let outIdx = 0;
   let reduceIdx = 0;
-    for (let dim = 0; dim < rank; dim++) {
+  for (let dim = 0; dim < rank; dim++) {
     if (axes.indexOf(dim) === -1) {
       loc.push(outputLoc[outIdx++]);
     } else {

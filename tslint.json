@@ -1,5 +1,13 @@
 {
   "rules": {
+    "align": [
+      true,
+      // TODO "arguments",
+      // TODO "elements",
+      "members",
+      "parameters",
+      "statements"
+    ],
     "array-type": [true, "array-simple"],
     "arrow-return-shorthand": true,
     "ban": [true,
