@@ -38,6 +38,15 @@ testBrowser(async function notebook_Notebook() {
   const blurbs = document.getElementsByClassName("blurb");
   assert(1 === blurbs.length);
 
+  // Check that we rendered the title.
+  const title = document.querySelectorAll("div.title > h2");
+  assert(1 === title.length);
+  assert("Sample Notebook" === title[0].innerHTML);
+
+  // Because we aren't logged in, we shouldn't see an edit button for the title.
+  const editButtons = document.getElementsByClassName("edit-title");
+  assert(0 === editButtons.length);
+
   // Because we aren't logged in, we shouldn't see any clone button.
   const clones = document.getElementsByClassName("clone");
   assert(0 === clones.length);
@@ -81,4 +90,54 @@ testBrowser(async function notebook_focusNextCell() {
 
   assert(!cellEls[0].classList.contains("notebook-cell-focus"));
   assert(cellEls[1].classList.contains("notebook-cell-focus"));
+});
+
+testBrowser(async function notebook_NotebookLoggedIn() {
+  resetPage();
+
+  await new Promise((resolve) => {
+    const el = h(nb.Notebook, {
+      nbId: "default",
+      onReady: resolve,
+      userInfo: {
+        displayName: "owner",
+        photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
+        uid: "abc",
+      },
+    });
+    render(el, document.body);
+  });
+
+  // Check that we rendered the title.
+  const title = document.querySelectorAll("div.title > h2");
+  assert(1 === title.length);
+  assert("Sample Notebook" === title[0].innerHTML);
+
+  /* TODO Test needs Firebase auth
+  // Because we are logged in, we should see an edit button for the title.
+  const editButton = document.getElementsByClassName("edit-title");
+  assert(1 === editButton.length);
+  */
+
+  // The edit button hasn't been clicked yet, so we shouldn't see the
+  // title-input.
+  const titleInput = document.getElementsByClassName("title-input");
+  assert(0 === titleInput.length);
+
+  /* TODO The follow test has a race condition. Disabling for now.
+  editButton[0].click();
+
+  // The edit button has been clicked, so we should see the title-input.
+  titleInput = document.getElementsByClassName("title-input");
+  assert(null !== titleInput);
+  assert("Sample Notebook" === titleInput[0].value);
+
+  titleInput[0].value = "New Title";
+  document.getElementsByClassName("edit-title")[0].click();
+
+  title = document.querySelectorAll("div.title > h2");
+  assert(1 === title.length);
+  assert("New Title" === title[0].innerHTML);
+  */
+
 });

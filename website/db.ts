@@ -42,6 +42,7 @@ export interface UserInfo {
 export interface NotebookDoc {
   cells: string[];
   owner: UserInfo;
+  title: string;
   updated: Date;
   created: Date;
 }
@@ -91,6 +92,7 @@ class DatabaseFB implements Database {
     const docRef = nbCollection.doc(nbId);
     await docRef.update({
       cells: doc.cells,
+      title: doc.title,
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
@@ -115,6 +117,7 @@ class DatabaseFB implements Database {
         photoURL: u.photoURL,
         uid: u.uid,
       },
+      title: "",
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     };
     console.log({newDoc});
@@ -248,6 +251,10 @@ export function enableMock(): DatabaseMock {
   return d;
 }
 
+export function ownsDoc(userInfo: UserInfo, doc: NotebookDoc): boolean {
+  return userInfo && userInfo.uid === doc.owner.uid;
+}
+
 function lazyInit() {
   if (db == null) {
     firebase.initializeApp(firebaseConfig);
@@ -300,6 +307,7 @@ grad(f)([-3, -0.5, 0.5, 3])
 const defaultDoc: NotebookDoc = {
   cells: defaultDocCells,
   owner: defaultOwner,
+  title: "Sample Notebook",
   updated: new Date(),
   created: new Date(),
 };
