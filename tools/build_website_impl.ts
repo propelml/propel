@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { JSDOM } from "jsdom";
+import { JSDOM, VirtualConsole } from "jsdom";
 import { join, resolve } from "path";
 import { renderSync } from "sass";
 import { URL } from "url";
@@ -45,10 +45,18 @@ async function renderToHtmlWithJsdom(page: website.Page): Promise<string> {
   // some workarounds in the notebook code, and the iframe ends up in the
   // static rendered HTML. Instead, create a separate JSDOM context and tell
   // the sandbox to use that instead.
+
+  // Create JSDOM console object and forward output to the node.js console.
+  // We do this explicitly in order to suppress "errors" (really just warnings)
+  // about JSDOM not supporting canvas.
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.sendTo(console, { omitJSDOMErrors: true });
+
   const { window: sbWindow } = new JSDOM("", {
     resources: "usable",
     runScripts: "dangerously",
     url: new URL(`file:///${__dirname}/../build/website/sandbox`).href,
+    virtualConsole,
     beforeParse(sbWindow: any) {
       // Add a fake parent window reference - the sandbox needs to be able
       // to call window.parent.postMessage() to communicate with the host.
