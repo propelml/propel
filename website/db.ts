@@ -92,7 +92,7 @@ class DatabaseFB implements Database {
     const docRef = nbCollection.doc(nbId);
     await docRef.update({
       cells: doc.cells,
-      title: doc.title,
+      title: doc.title || "",
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
@@ -138,6 +138,7 @@ class DatabaseFB implements Database {
         photoURL: u.photoURL,
         uid: u.uid,
       },
+      title: "",
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     };
     console.log({newDoc});
