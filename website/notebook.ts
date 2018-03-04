@@ -610,7 +610,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
       const titleDisplay = h("div", { class: "title" }, [
         h("h2", {
-          class: doc.title != null ? "" : "untitled",
+          class: doc.title && doc.title.length ? "" : "untitled",
           value: doc.title
         }, doc.title || "Untitled Notebook"),
         db.ownsDoc(this.props.userInfo, doc) ? editButton : null
