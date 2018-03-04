@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { JSDOM, VirtualConsole } from "jsdom";
 import { join, resolve } from "path";
 import { renderSync } from "sass";
+import * as toArrayBuffer from "to-arraybuffer";
 import { URL } from "url";
 import { drainExecuteQueue, initSandbox } from "../website/notebook";
 import * as website from "../website/website";
@@ -25,7 +26,7 @@ async function fetchFromSandbox(
   const data = fs.readFileSync(path);
 
   return {
-    async arrayBuffer() { return data; },
+    async arrayBuffer() { return toArrayBuffer(data); },
     async text() { return data.toString("utf8"); }
   } as any as Response;
 }
