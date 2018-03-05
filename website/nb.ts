@@ -463,19 +463,24 @@ export class MostRecent extends Component<any, MostRecentState> {
         .join("\n")
         .slice(0, 100);
       const href = nbUrl(info.nbId);
-      return h("li", null,
-        h("a", { href },
+      return h("a", { href },
+        h("li", null,
+          h("div", { "class": "code-snippit" }, snippit),
           notebookBlurb(info.doc, false),
-          snippit
         ),
       );
     });
     return h("div", { "class": "most-recent" },
-      h("button", {
-        "class": "create-notebook",
-        "onClick": () => this.onCreate(),
-      }, "Create Empty Notebook"),
-      h("h2", null, "Recently Updated"),
+      h("div", {"class": "most-recent-header"},
+        h("div", {"class": "most-recent-header-title"},
+          h("h2", null, "Recently Updated"),
+        ),
+        h("div", {"class": "most-recent-header-cta"},
+          h("button", { "class": "create-notebook",
+                        "onClick": () => this.onCreate(),
+          }, "+ New Notebook"),
+        ),
+      ),
       h("ol", null, ...notebookList),
     );
   }
@@ -642,8 +647,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           }, "Clone");
 
       body = [
-        h("header", null, notebookBlurb(doc), title, cloneButton),
-        this.renderCells(doc),
+        h("div", { "class": "notebook-container" },
+          h("header", null, notebookBlurb(doc), title, cloneButton),
+          this.renderCells(doc),
+        ),
       ];
     }
 
@@ -662,12 +669,20 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
 function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
   const dates = !showDates ? [] : [
-    h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
-    h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
+    h("div", { "class": "date-created" },
+      h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
+    ),
+    h("div", { "class": "date-updated" },
+      h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
+    ),
   ];
   return h("div", { "class": "blurb" }, null, [
-    h(Avatar, { userInfo: doc.owner }),
-    h("p", { "class": "displayName" }, doc.owner.displayName),
+    h("div", { "class": "blurb-avatar" },
+      h(Avatar, { userInfo: doc.owner }),
+    ),
+    h("div", { "class": "blurb-name" },
+      h("p", { "class": "displayName" }, doc.owner.displayName),
+    ),
     ...dates
   ]);
 }

@@ -14,6 +14,20 @@ $borderColor: #eee;
 $accentColor: #589def;  // blue
 $shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
 
+@mixin shadowHover {
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px transparent;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  -webkit-transition-property: box-shadow;
+  transition-property: box-shadow;
+
+  &:hover {
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
 $cellButtonSize: 24px;
 $cellButtonMargin: 2px;
 $nbGridSquare: $cellButtonSize + 2 * $cellButtonMargin;
@@ -40,8 +54,7 @@ body {
 .splash,
 .use-it-inner,
 .flex-row,
-.references,
-.notebook {
+.references {
   max-width: 960px;
   margin: 0 auto;
 }
@@ -55,7 +68,7 @@ p {
 
 h1,
 h2 {
-  letter-spacing: -0.1rem;
+  letter-spacing: 0.2px;
   line-height: 1.2;
 }
 
@@ -84,9 +97,9 @@ svg {
 .button,
 button,
 input[type=button] {
-  border: 1px solid #1163c2;
-  border-radius: 4px;
-  color: #1163c2;
+  border: none;
+  color: #fff;
+  background-color: $base0;
   height: $size2;
   font-size: $size1;
   line-height: $size2;
@@ -94,6 +107,8 @@ input[type=button] {
   padding: 0 30px;
   text-align: center;
   text-transform: uppercase;
+
+  @include shadowHover;
 }
 
 .name,
@@ -109,7 +124,6 @@ code {
 
 header {
   background-color: $bodyBackground;
-  border-bottom: 1px solid $textColor;
   color: $textColor;
   padding: $size0 0;
 
@@ -187,6 +201,10 @@ header {
     height: $cellButtonSize;
     margin: $cellButtonMargin;
     opacity: 0; // Only display buttons when focused.
+
+    &:hover {
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    }
   }
 
   &.notebook-cell-focus {
@@ -226,6 +244,7 @@ header {
   .input {
     border: 1px solid $borderColor;
     border-left: 0; // because the border is on notebook-cell.
+    margin-bottom: 8px;
 
     button.delete-button {
       /* Top right corner */
@@ -252,6 +271,10 @@ header {
   }
 
   .output-container {
+    margin-bottom: 24px;
+    border-bottom: $borderColor;
+    border-right: $borderColor;
+
     .insert-button {
       /* Bottom right corner */
       grid-column: 2 / -1;
@@ -379,7 +402,7 @@ header {
   }
 
   ol {
-    margin: 0 $size1;
+    margin: 0;
   }
 
   &:target {
@@ -391,8 +414,111 @@ header {
   }
 }
 
+.propel-logo {
+  display: flex;
+  flex-direction: row;
+  margin-right: $size0;
+  margin-left: $size0;
+
+  a,
+  a:hover,
+  a:visited,
+  a:active {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  * {
+    margin: auto 0;
+    margin-right: $size0;
+  }
+
+  .logo {
+    display: flex;
+    height: 64px;
+
+    svg {
+      margin: auto auto;
+    }
+  }
+
+  .global-title {
+    display: flex;
+    flex-direction: column;
+    margin: auto 0;
+
+    .global-main-title {
+      margin: auto 0;
+
+      h1 {
+        display: inline;
+        font-size: 20pt;
+        line-height: 24px;
+        font-weight: bold;
+        letter-spacing: 0.2px;
+      }
+    }
+
+    .global-sub-title {
+      margin: auto 0;
+
+      h2 {
+        display: inline;
+        color: $accentColor;
+        font-size: 14pt;
+        line-height: 16px;
+        letter-spacing: 0.2px;
+        font-weight: 200;
+      }
+    }
+  }
+}
+
+.global-header {
+  width: 100%;
+  background-color: inherit;
+  border-bottom: 1px solid $borderColor;
+
+  .global-header-right {
+    display: flex;
+    flex-direction: row;
+    margin-right: 16px;
+
+    > * {
+      display: block;
+      margin: auto 0 auto 36px;
+    }
+
+    > :first-child {
+      margin-left: 0;
+    }
+
+    a {
+      font-size: 14pt;
+      font-variant: all-small-caps;
+      text-decoration: none;
+      color: $accentColor;
+      white-space: nowrap;
+    }
+  }
+
+  .global-header-inner {
+    display: flex;
+    max-width: 960px;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 64px;
+    margin: 0 auto;
+  }
+}
+
 .panel {
   background-color: $bodyBackground;
+
+  & .propel-logo {
+    border-bottom: 1px solid $base01;
+    margin-bottom: 8px;
+  }
 
   ol.docindex {
     list-style-type: none;
@@ -413,97 +539,140 @@ header {
 .header-button {
   display: inline-block;
   margin: 0 10px 10px 0;
+
+  @include shadowHover;
 }
 
-.most-recent {
-  ol {
-    display: flex;
-    list-style-type: none;
-    flex-wrap: wrap;
-
-    li {
-      background-color: $cellBackground;
-      border: 1px solid $borderColor;
-      margin: $size0;
-      min-height: 200px;
-      width: 200px;
-
-      p {
-        color: $base03;
-      }
-
-      &:hover {
-        background-color: $linkColor;
-      }
-    }
-  }
-}
-
-.propel-logo {
+.blurb {
+  background-color: #fff;
+  box-shadow: inset 0 1px 0 #d8d8d8;
+  font-size: 13px;
+  letter-spacing: 0.5px;
   display: flex;
-  flex-direction: row;
-  margin-right: $size0;
-  margin-left: $size0;
+  margin-top: 8px;
 
-  h1 {
-    display: inline;
-    font-size: 32pt;
-    font-weight: bold;
-  }
-
-  h2 {
-    display: inline;
-    color: $accentColor;
-    font-size: 16pt;
-    font-weight: normal;
-  }
-
-  a,
-  a:hover,
-  a:visited,
-  a:active {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  * {
-    margin: auto 0;
+  img {
     margin-right: $size0;
   }
 }
 
-.global-header {
-  width: 100%;
-  background-color: inherit;
+.notebook-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 8px;
 
-  .global-header-inner {
-    display: flex;
-    max-width: 930px;
-    flex-direction: row;
+  .blurb {
+    box-shadow: inset 0 -1px 0 $borderColor;
+    background-color: #fff;
+    margin-bottom: 16px;
+  }
+}
+
+.most-recent {
+  margin: 0 auto;
+  padding: 0 8px;
+
+  .most-recent-header {
+    display: grid;
+    grid-template-columns: auto auto;
     justify-content: space-between;
-    height: 64px;
+    max-width: 960px;
+    margin: 0 auto;
+
+    .most-recent-header-title {
+      display: grid;
+      align-content: center;
+    }
+
+    .most-recent-header-cta {
+      display: grid;
+      align-content: center;
+
+      button {
+        @include shadowHover;
+      }
+    }
   }
 
-  .global-header-right {
-    display: flex;
-    flex-direction: row;
+  ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-column-gap: 16px;
+    grid-row-gap: 24px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 960px;
 
-    > * {
-      display: block;
-      margin: auto 0 auto 36px;
-    }
+    li {
+      grid-column-start: auto;
+      grid-column-end: auto;
+      grid-row-start: auto;
+      grid-row-end: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: $cellBackground;
+      border: 1px solid $borderColor;
+      min-height: 240px;
 
-    > :first-child {
-      margin-left: 0;
+      &:hover {
+        border: 1px solid $linkColor;
+        text-decoration: none;
+      }
+
+      &:hover .displayName {
+        color: $linkColor;
+        text-decoration: underline;
+      }
+
+      p {
+        margin: 8px;
+        color: $base03;
+      }
+
+      .code-snippit {
+        margin: 8px;
+        font-family: 'Roboto Mono', monospace;
+      }
+
+      .blurb {
+        background-color: #fff;
+        box-shadow: inset 0 1px 0 $borderColor;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        display: flex;
+        margin-top: 8px;
+
+        img {
+          margin-right: $size0;
+        }
+      }
     }
+  }
+}
+
+.dropdown {
+  position: relative;
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    width: auto;
+    box-shadow: $shadow;
+    background: $bodyBackground;
+    z-index: 1;
 
     a {
-      font-size: 14pt;
-      font-variant: all-small-caps;
-      text-decoration: none;
-      color: $accentColor;
+      display: block;
       white-space: nowrap;
+      padding: $size0;
     }
+  }
+
+  &:hover .dropdown-content {
+    display: block;
   }
 }
 
@@ -527,52 +696,23 @@ header {
   }
 }
 
-.blurb {
-  display: flex;
-  height: 55px;
-  margin-bottom: $size0;
-
-  img {
-    margin-right: $size0;
-  }
-}
-
 img.avatar {
   display: block;
 }
 
-.dropdown {
-  position: relative;
-
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    width: auto;
-    box-shadow: $shadow;
-    background: $bodyBackground;
-    z-index: 1;
-
-    > * {
-      display: block;
-      white-space: nowrap;
-      padding: $size0;
-
-      &:hover {
-        color: $bodyBackground;
-        background-color: $accentColor;
-      }
-    }
-  }
-
-  &:hover .dropdown-content {
-    display: block;
+// Mobile first. No desktop related things above this line.
+@media (max-width: 1100px) {
+  .most-recent {
+    max-width: 640px;
   }
 }
 
-// Mobile first. No desktop related things above this line.
-
 @media (min-width: 600px) {
+  .most-recent,
+  .notebook-container {
+    padding: 0 16px;
+  }
+
   h1 {
     font-size: 5rem;
   }
@@ -610,4 +750,3 @@ img.avatar {
     }
   }
 }
-
