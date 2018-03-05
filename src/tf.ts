@@ -353,6 +353,11 @@ export class OpsTF implements types.BackendOps {
 
   reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
   {
+    // reduceMean should always return float32 tensor but TF doesn't
+    // handled that conversion.
+    if (x.dtype !== "float32") {
+      x = this.cast(x, "float32");
+    }
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
     return execute0("Mean", [x, axesT], [

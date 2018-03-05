@@ -474,6 +474,7 @@ testDevices(async function api_reduceMean(tensor, device) {
     [t, t, t],
     [t, t, t],
   ]);
+  assertAllEqual(api.uint8([255, 255, 255]).reduceMean(), 255);
 });
 
 testDevices(async function api_reduceMax(tensor, device) {
