@@ -40,6 +40,7 @@ export interface UserInfo {
 
 // Defines the scheme of the notebooks collection.
 export interface NotebookDoc {
+  anonymous?: boolean;
   cells: string[];
   owner: UserInfo;
   title: string;
@@ -128,7 +129,7 @@ class DatabaseFB implements Database {
   async create(): Promise<string> {
     lazyInit();
     const u = auth.currentUser;
-    if (!u) throw Error("Cannot create. User must be logged in.");
+    if (!u) return "anonymous";
 
     const newDoc = {
       cells: [ "// New Notebook. Insert code here." ],
