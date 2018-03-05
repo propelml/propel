@@ -1149,3 +1149,15 @@ test(async function api_data() {
   assertAllEqual(await t.data(), [0, 1, 2]);
   assertAllEqual(t.dataSync(), [0, 1, 2]);
 });
+
+test(async function api_dtypeConstructors() {
+  const ui8 = api.uint8([254, 255, 256, 257]);
+  assert(ui8.dtype === "uint8");
+  assertAllEqual(ui8, [254, 255, 0, 1]);
+  const i32 = api.int32([1, 2, 3]);
+  assert(i32.dtype === "int32");
+  assertAllEqual(i32, [1, 2, 3]);
+  const f32 = api.float32([1.5, 3.5]);
+  assert(f32.dtype === "float32");
+  assertAllEqual(f32, [1.5, 3.5]);
+});
