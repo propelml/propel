@@ -32,6 +32,20 @@ import { SandboxRPC } from "./sandbox_rpc";
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
 
+// An anonymous notebook doc for when users aren't logged in
+const anonDoc = {
+  anonymous: true,
+  cells: [ "// New Notebook. Insert code here." ],
+  created: new Date(),
+  owner: {
+    displayName: "Anonymous",
+    photoURL: "/static/img/anon_profile.png?",
+    uid: "",
+  },
+  title: "Anonymous Notebook. Changes will not be saved.",
+  updated: new Date(),
+};
+
 // Given a cell's id, which can either be an integer or
 // a string of the form "cell5" (where 5 is the id), look up
 // the component in the global table.
@@ -496,7 +510,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   async componentWillMount() {
     try {
-      const doc = await db.active.getDoc(this.props.nbId);
+      const doc = this.props.nbId === "anonymous"
+        ? anonDoc
+        : await db.active.getDoc(this.props.nbId);
       this.setState({ doc });
     } catch (e) {
       this.setState({ errorMsg: e.message });
@@ -505,6 +521,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   private async update(doc): Promise<void> {
     this.setState({ doc });
+    if (doc.anonymous) return; // don't persist anonymous notebooks
     try {
       await db.active.updateDoc(this.props.nbId, doc);
     } catch (e) {
