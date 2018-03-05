@@ -168,3 +168,18 @@ export function ones(shape: types.Shape,
   }
   return ops.ones(shape, opts);
 }
+
+/** Constructs a uint8 tensor. */
+export function uint8(t: types.TensorLike): Tensor {
+  return tensor(t, { dtype: "uint8" });
+}
+
+/** Constructs a int32 tensor. */
+export function int32(t: types.TensorLike): Tensor {
+  return tensor(t, { dtype: "int32" });
+}
+
+/** Constructs a float32 tensor. */
+export function float32(t: types.TensorLike): Tensor {
+  return tensor(t, { dtype: "float32" });
+}
