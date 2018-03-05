@@ -26,36 +26,36 @@ const jpgPath = fetch2ArgManipulation("src/testdata/sample.jpg");
 
 test(async function im_pngEncoder() {
   const img = await imread(pngPath);
-  assertShapesEqual([4, 64, 64], img.shape);
+  assertShapesEqual([64, 64, 4], img.shape);
   const data = img.dataSync();
   assert(data[0] === 255);
-  assert(data[34] === 125);
-  assert(data[3254] === 123);
+  assert(data[4 * 34] === 125);
+  assert(data[4 * 3254] === 123);
 });
 
 test(async function im_jpegEncoder() {
   const img = await imread(jpgPath);
-  assertShapesEqual([4, 64, 64], img.shape);
+  assertShapesEqual([64, 64, 4], img.shape);
   const data = img.dataSync();
   // JPEG-js does not work properly on Node.js and we're aware of this bug
   // so skip these tests for Node.js
   assert(data[0] === 49 || IS_NODE);
-  assert(data[34] === 41 || IS_NODE);
-  assert(data[3254] === 192 || IS_NODE);
+  assert(data[4 * 34] === 41 || IS_NODE);
+  assert(data[4 * 3254] === 192 || IS_NODE);
 });
 
 test(async function im_toRGB() {
   const img = await imread(pngPath, "RGB");
-  assertShapesEqual([3, 64, 64], img.shape);
+  assertShapesEqual([64, 64, 3], img.shape);
   const data = img.dataSync();
   assert(data[0] === 255);
-  assert(data[34] === 125);
-  assert(data[3254] === 123);
+  assert(data[3 * 34] === 125);
+  assert(data[3 * 3254] === 123);
 });
 
 test(async function im_toGrayscale() {
   const img = await imread(pngPath, "L");
-  assertShapesEqual([1, 64, 64], img.shape);
+  assertShapesEqual([64, 64, 1], img.shape);
   const data = img.dataSync();
   assert(data.length === 64 * 64);
 });

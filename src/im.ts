@@ -22,18 +22,16 @@ import { IS_NODE, nodeRequire } from "./util";
 
 function toTensor(data: Uint8Array, height: number, width: number,
                   mode: Mode): Tensor {
-  let tensor = convert(data)
-    .reshape([height, width, 4])
-    .transpose([2, 0, 1]);
+  let tensor = convert(data).reshape([height, width, 4]);
   if (mode === "RGBA") {
     return tensor;
   }
-  tensor = tensor.slice(0, 3);
+  tensor = tensor.slice([0, 0, 0], [-1, -1, 3]);
   if (mode === "RGB") {
     return tensor;
   }
   if (mode === "L") {
-    return tensor.reduceMean([0], true);
+    return tensor.reduceMean([2], true);
   }
   throw new Error("Unsupported convertion mode.");
 }
@@ -113,8 +111,6 @@ function pngReadHandler(filename: string, mode: Mode): Promise<Tensor> {
 }
 
 function jpegReadHandler(filename: string, mode: Mode): Tensor {
-  console.warn("The JPEG decoder is just working and it may not return" +
-               " the exact data from image.\nUse it at your own risk.");
   const JPEG = require("jpeg-js");
   const fs = nodeRequire("fs");
   const jpegData = fs.readFileSync(filename);
@@ -136,14 +132,13 @@ async function nodeImageDecoder(filename: string, mode: Mode)
 }
 
 /** Read an image from given file to a 3D tensor in the following
- * The tensor will have the shape [channel, height, width].
+ * The tensor will have the shape [height, width, channel].
  * The second argument specifies if you want "RGBA", "RGB", or "L" (for
  * luminosity/greyscale).
  *
  *    import { imread } from "propel"
  *    img = await imread("/src/testdata/sample.png")
- *    // Average RGBA values
- *    img.reduceMean([1, 2])
+ *    img.reduceMean([0, 1])  // Average RGBA values
  */
 export async function imread(filename: string, mode: Mode = "RGBA")
     : Promise<Tensor> {
