@@ -24,7 +24,7 @@ export { experiment } from "./experiment";
 export { load } from "./npy";
 export { backend } from "./backend";
 export { plot, imshow } from "./matplotlib";
-export { imread } from "./im";
+export { imread, imsave } from "./im";
 export { Tensor } from "./tensor";
 export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
   from "./backprop";
