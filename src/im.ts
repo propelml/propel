@@ -15,25 +15,64 @@
 
 // This module allows Propel to read PNG and JPG images.
 
-import { Tensor } from "./api";
+import { fill, Tensor, tensor } from "./api";
 import { convert } from "./tensor";
 import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
 
+export interface Image {
+  width: number;
+  height: number;
+  data: Uint8ClampedArray;
+}
+
 function toTensor(data: Uint8Array, height: number, width: number,
                   mode: Mode): Tensor {
-  let tensor = convert(data).reshape([height, width, 4]);
+  let image = convert(data).reshape([height, width, 4]);
   if (mode === "RGBA") {
-    return tensor;
+    return image;
   }
-  tensor = tensor.slice([0, 0, 0], [-1, -1, 3]);
+  image = image.slice([0, 0, 0], [-1, -1, 3]);
   if (mode === "RGB") {
-    return tensor;
+    return image;
   }
   if (mode === "L") {
-    return tensor.reduceMean([2], true);
+    return image.reduceMean([2], true);
   }
   throw new Error("Unsupported convertion mode.");
+}
+
+export function toUint8Image(image: Tensor): Image {
+  const shape = image.shape;
+  const dtype = image.dtype;
+  const height = shape[0] as number;
+  const width = shape[1] as number;
+  let data;
+  if (shape.length === 2) {
+    // convert to a 3D tensor
+    image = image.reshape([height, width, 1]);
+  }
+  if (shape.length === 3) {
+    const channels = shape[2];
+    if (channels > 4 || channels === 2) {
+      throw new Error(`${shape} does not match any valid image mode.`);
+    }
+    if (channels === 1) {
+      // Grayscale to RGB
+      image = image.concat(2, image, image);
+    }
+    if (channels <= 3) {
+      // RGB to RGBA
+      image = image.concat(2, fill(tensor(255, {dtype}), [height, width, 1]));
+    }
+    // Convert to 1D array
+    data = image
+      .reshape([height * width * 4])
+      .dataSync();
+    data = Uint8ClampedArray.from(data);
+    return { width, height, data };
+  }
+  throw new Error(`Unsupported image rank.`);
 }
 
 function webImageDecoder(filename: string, mode: Mode)
@@ -110,12 +149,35 @@ function pngReadHandler(filename: string, mode: Mode): Promise<Tensor> {
   });
 }
 
+function pngSaveHandler(filename: string, image): Promise<void> {
+  const PNG = nodeRequire("pngjs").PNG;
+  const fs = nodeRequire("fs");
+  const file = new PNG({
+    height: image.height,
+    width: image.width
+  });
+  file.data = image.data;
+  return new Promise(resolve => {
+    file.pack()
+      .pipe(fs.createWriteStream(filename))
+      .on("finish", resolve);
+  });
+}
+
 function jpegReadHandler(filename: string, mode: Mode): Tensor {
   const JPEG = require("jpeg-js");
   const fs = nodeRequire("fs");
   const jpegData = fs.readFileSync(filename);
   const img = JPEG.decode(jpegData, true);
   return toTensor(img.data, img.height, img.width, mode);
+}
+
+function jpegSaveHandler(filename: string, image): void {
+  const JPEG = nodeRequire("jpeg-js");
+  const fs = nodeRequire("fs");
+  const {data} = JPEG.encode(image);
+  fs.writeFileSync(filename, data);
+  return;
 }
 
 async function nodeImageDecoder(filename: string, mode: Mode)
@@ -151,4 +213,30 @@ export async function imread(filename: string, mode: Mode = "RGBA")
     return null;
   }
   return await webImageDecoder(filename, mode);
+}
+
+/** Save a 3D tensor to disk as an image
+ */
+export async function imsave(tensor: Tensor,
+                             filename: string,
+                             handler?: "PNG" | "JPEG"): Promise<void> {
+  if (IS_NODE) {
+    const image = toUint8Image(tensor);
+    if (!handler) {
+      const path = nodeRequire("path");
+      const ext = path.extname(filename).toLowerCase();
+      if (ext === ".png" || ext === ".jpeg") {
+        handler = ext.substr(1).toUpperCase();
+      }
+    }
+    handler = handler || "PNG";
+    switch (handler) {
+      case "PNG":
+        return await pngSaveHandler(filename, image);
+      case "JPEG":
+        return jpegSaveHandler(filename, image);
+    }
+    throw new Error(`Unsupported image format "${handler}"`);
+  }
+  throw new Error(`"imsave" is not supported in browsers.`);
 }

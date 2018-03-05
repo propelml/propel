@@ -14,7 +14,8 @@
  */
 
 import { test } from "../tools/tester";
-import { imread } from "./im";
+import { imread, toUint8Image } from "./im";
+import { assertAllEqual } from "./tensor_util";
 import { assert, assertShapesEqual } from "./tensor_util";
 import { fetch2ArgManipulation, IS_NODE } from "./util";
 
@@ -24,38 +25,93 @@ const pngPath = fetch2ArgManipulation("src/testdata/sample.png");
 // d37ff170a58223de46152ce837b8e0c4  testdata/sample.jpg
 const jpgPath = fetch2ArgManipulation("src/testdata/sample.jpg");
 
+function getPixel(channels, data, x, y, rgba = false) {
+  // we know sample images are 64x64
+  const idx = (rgba ? 4 : channels) * (y * 64 + x);
+  const pixel = new Array(channels)
+    .fill(null)
+    .map((x, i) => data[idx + i]);
+  return pixel;
+}
+
 test(async function im_pngEncoder() {
   const img = await imread(pngPath);
-  assertShapesEqual([64, 64, 4], img.shape);
+  assertShapesEqual(img.shape, [64, 64, 4]);
   const data = img.dataSync();
-  assert(data[0] === 255);
-  assert(data[4 * 34] === 125);
-  assert(data[4 * 3254] === 123);
+  assertAllEqual(getPixel(4, data, 2, 3), [255, 255, 255, 255]);
+  assertAllEqual(getPixel(4, data, 20, 20), [242, 232, 237, 255]);
+  assertAllEqual(getPixel(4, data, 62, 3), [255, 255, 255, 255]);
+  assertAllEqual(getPixel(4, data, 34, 5), [120, 100, 169, 255]);
 });
 
 test(async function im_jpegEncoder() {
   const img = await imread(jpgPath);
-  assertShapesEqual([64, 64, 4], img.shape);
-  const data = img.dataSync();
+  assertShapesEqual(img.shape, [64, 64, 4]);
   // JPEG-js does not work properly on Node.js and we're aware of this bug
   // so skip these tests for Node.js
-  assert(data[0] === 49 || IS_NODE);
-  assert(data[4 * 34] === 41 || IS_NODE);
-  assert(data[4 * 3254] === 192 || IS_NODE);
+  if (IS_NODE) {
+    return;
+  }
+  const data = img.dataSync();
+  assert(data[0] === 49);
+  assert(data[4 * 34] === 41);
+  assert(data[4 * 3254] === 192);
 });
 
 test(async function im_toRGB() {
   const img = await imread(pngPath, "RGB");
-  assertShapesEqual([64, 64, 3], img.shape);
+  assertShapesEqual(img.shape, [64, 64, 3]);
   const data = img.dataSync();
-  assert(data[0] === 255);
-  assert(data[3 * 34] === 125);
-  assert(data[3 * 3254] === 123);
+  assertAllEqual(getPixel(3, data, 2, 3), [255, 255, 255]);
+  assertAllEqual(getPixel(3, data, 20, 20), [242, 232, 237]);
+  assertAllEqual(getPixel(3, data, 62, 3), [255, 255, 255]);
+  assertAllEqual(getPixel(3, data, 34, 5), [120, 100, 169]);
 });
 
 test(async function im_toGrayscale() {
   const img = await imread(pngPath, "L");
-  assertShapesEqual([64, 64, 1], img.shape);
+  assertShapesEqual(img.shape, [64, 64, 1]);
   const data = img.dataSync();
   assert(data.length === 64 * 64);
+  assertAllEqual(getPixel(1, data, 2, 3), [255]);
+  assertAllEqual(getPixel(1, data, 20, 20), [237]);
+  assertAllEqual(getPixel(1, data, 62, 3), [255]);
+});
+
+test(async function im_toUint8ImageRGBA() {
+  const img = await imread(pngPath);
+  const rawImage = toUint8Image(img);
+  assert(rawImage.width === 64);
+  assert(rawImage.height === 64);
+  assert(rawImage.data.length === 64 * 64 * 4);
+  const data = rawImage.data;
+  assertAllEqual(getPixel(4, data, 2, 3, true), [255, 255, 255, 255]);
+  assertAllEqual(getPixel(4, data, 20, 20, true), [242, 232, 237, 255]);
+  assertAllEqual(getPixel(4, data, 62, 3, true), [255, 255, 255, 255]);
+  assertAllEqual(getPixel(4, data, 34, 5, true), [120, 100, 169, 255]);
+});
+
+test(async function im_toUint8ImageRGB() {
+  const img = await imread(pngPath, "RGB");
+  const rawImage = toUint8Image(img);
+  assert(rawImage.width === 64);
+  assert(rawImage.height === 64);
+  assert(rawImage.data.length === 64 * 64 * 4);
+  const data = rawImage.data;
+  assertAllEqual(getPixel(3, data, 2, 3, true), [255, 255, 255]);
+  assertAllEqual(getPixel(3, data, 20, 20, true), [242, 232, 237]);
+  assertAllEqual(getPixel(3, data, 62, 3, true), [255, 255, 255]);
+  assertAllEqual(getPixel(3, data, 34, 5, true), [120, 100, 169]);
+});
+
+test(async function im_toUint8ImageGrayscale() {
+  const img = await imread(pngPath, "L");
+  const rawImage = toUint8Image(img);
+  assert(rawImage.width === 64);
+  assert(rawImage.height === 64);
+  assert(rawImage.data.length === 64 * 64 * 4);
+  const data = rawImage.data;
+  assertAllEqual(getPixel(1, data, 2, 3, true), [255]);
+  assertAllEqual(getPixel(1, data, 20, 20, true), [237]);
+  assertAllEqual(getPixel(1, data, 62, 3, true), [255]);
 });
