@@ -17,7 +17,12 @@
 import * as d3 from "d3";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
-export type ImshowData = { height: number, width: number, values: number[] };
+export type ImshowData = {
+  channels: number,
+  height: number,
+  width: number,
+  values: number[]
+};
 
 export interface OutputHandler {
   plot(data: PlotData): void;
@@ -136,7 +141,7 @@ export class OutputHandlerDOM implements OutputHandler {
       });
   }
 
-  imshow({ width, height, values }: ImshowData): void {
+  imshow({ channels, width, height, values }: ImshowData): void {
     const canvas = document.createElement("canvas");
     canvas.height = height;
     canvas.width = width;
@@ -145,12 +150,34 @@ export class OutputHandlerDOM implements OutputHandler {
     const data = imageData.data;
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
-        let index = (y * width + x) * 4;
-        const value = values[y * width + x];
-        data[index]   = value; // red
-        data[++index] = value; // green
-        data[++index] = value; // blue
-        data[++index] = 255;   // alpha
+        const pixelIndex = y * width + x;
+        const dataIndex = 4 * pixelIndex;
+        const valueIndex = channels * pixelIndex;
+        let rgba: number[];
+        if (channels === 1) {
+          const v = values[valueIndex];
+          rgba = [v, v, v, 255];
+        } else if (channels === 3) {
+          rgba = [
+            values[valueIndex + 0],
+            values[valueIndex + 1],
+            values[valueIndex + 2],
+            255
+          ];
+        } else if (channels === 4) {
+          rgba = [
+            values[valueIndex + 0],
+            values[valueIndex + 1],
+            values[valueIndex + 2],
+            values[valueIndex + 3],
+          ];
+        } else {
+          throw Error("Bad channels.");
+        }
+        data[dataIndex + 0] = rgba[0];  // red
+        data[dataIndex + 1] = rgba[1];  // green
+        data[dataIndex + 2] = rgba[2];  // blue
+        data[dataIndex + 3] = rgba[3];  // alpha
       }
     }
     ctx.putImageData(imageData, 0, 0);
