@@ -13,7 +13,7 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import { Handle } from "./binding";
+import { AttrDef, Handle } from "./binding";
 import { assert, assertEqual, getDType } from "./tensor_util";
 import * as types from "./types";
 
@@ -501,4 +501,45 @@ export class OpsTF implements types.BackendOps {
       ["axis", binding.ATTR_INT, -1],
     ]);
   }
+
+  conv2d(input: TensorTF, filter: TensorTF, opts: types.ConvOpts): TensorTF {
+    return execute0("Conv2D", [input, filter], convAttrs(opts));
+  }
+
+  conv2dBackpropFilter(gradient: TensorTF, input: TensorTF,
+                       filterShape: types.Shape,
+                       opts: types.ConvOpts): TensorTF {
+    const filterShapeT = int32Small(filterShape);
+    return execute0("Conv2DBackpropFilter",
+                    [input, filterShapeT, gradient],
+                    convAttrs(opts));
+  }
+
+  conv2dBackpropInput(gradient: TensorTF, inputShape: types.Shape,
+                      filter: TensorTF, opts: types.ConvOpts): TensorTF {
+    const inputShapeT = int32Small(inputShape);
+    return execute0("Conv2DBackpropInput",
+                    [inputShapeT, filter, gradient],
+                    convAttrs(opts));
+  }
+}
+
+function convAttrs(opts: types.ConvOpts): AttrDef[] {
+  let strides;
+  if (typeof opts.strides  === "number") {
+    strides = [1, opts.strides, opts.strides, 1];
+  } else {
+    assert(opts.strides.length === 2);
+    strides = [1, opts.strides[0], opts.strides[1], 1];
+  }
+  const dilations = [1, 1, 1, 1];  // TODO
+  const padding = opts.padding.toUpperCase();
+  return [
+    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+    ["strides", binding.ATTR_INT_LIST, strides],
+    ["use_cudnn_on_gpu", binding.ATTR_BOOL, false],
+    ["padding", binding.ATTR_STRING, padding],
+    ["data_format", binding.ATTR_STRING, opts.format],
+    ["dilations", binding.ATTR_INT_LIST, dilations],
+  ];
 }

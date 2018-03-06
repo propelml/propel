@@ -145,13 +145,18 @@ const std::map<std::string, int> attrNameMap = {
     {"Tperm", 0},
     {"Tshape", 0},
     {"axis", 0},
+    {"data_format", 0},
+    {"dilations", 0},
     {"dtype", 0},
     {"keep_dims", 0},
     {"output_type", 0},
+    {"padding", 0},
     {"seed", 0},
     {"seed2", 0},
+    {"strides", 0},
     {"transpose_a", 0},
     {"transpose_b", 0},
+    {"use_cudnn_on_gpu", 0},
 };
 
 const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
@@ -272,6 +277,14 @@ void SetOpAttr(napi_env env, TFE_Op* op, napi_value attr) {
       }
       TFE_OpSetAttrIntList(op, attr_name, list, static_cast<int>(len));
       delete[] list;
+      break;
+    }
+
+    case ATTR_STRING: {
+      char str[512];
+      nstatus = napi_get_value_string_utf8(env, attr2, str, 512, NULL);
+      check(nstatus == napi_ok);
+      TFE_OpSetAttrString(op, attr_name, str);
       break;
     }
 

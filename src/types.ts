@@ -23,6 +23,13 @@ export type ShapeDTypeList = Array<null | ShapeDType>;
 export type Convertible = number | RegularArray<number> | TypedArray;
 export type TensorLike = BasicTensor | Convertible;
 export type DeviceType = "CPU" | "GPU";
+export type ImageFormat = "NHWC" | "NCHW"; // Note HTML intrinsically is NHWC.
+export type Padding = "same" | "valid";
+export interface ConvOpts {
+  strides: [number, number] | number;
+  padding: Padding;
+  format: ImageFormat;
+}
 
 // BasicTensor does not use backprop.
 // TODO rename BasicTensor to Storage like in pytorch
@@ -93,6 +100,12 @@ export interface BackendOps {
   cast(x: BasicTensor, dtype: DType): BasicTensor;
   oneHot(x: BasicTensor, depth: number, onValue: number,
          offValue: number): BasicTensor;
+
+  conv2d(input: BasicTensor, filter: BasicTensor, opts: ConvOpts): BasicTensor;
+  conv2dBackpropFilter(gradient: BasicTensor, input: BasicTensor,
+                       filterShape: Shape, opts: ConvOpts): BasicTensor;
+  conv2dBackpropInput(gradient: BasicTensor, inputShape: Shape,
+                      filter: BasicTensor, opts: ConvOpts): BasicTensor;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

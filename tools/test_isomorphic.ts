@@ -1,5 +1,6 @@
 import "../src/api_test";
 import "../src/backend_test";
+import "../src/conv_test";
 import "../src/dataset_test";
 import "../src/format_test";
 import "../src/im_test";
