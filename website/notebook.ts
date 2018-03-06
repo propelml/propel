@@ -82,7 +82,7 @@ function createSandbox(context: Window): SandboxRPC {
 
     imshow(cellId: number, data: any): void {
       const cell = lookupCell(cellId);
-      cell.plot(data);
+      cell.imshow(data);
     }
   });
 
@@ -180,7 +180,7 @@ export class Cell extends Component<CellProps, CellState> {
 
   imshow(data) {
     const o = new OutputHandlerDOM(this.output);
-    o.plot(data);
+    o.imshow(data);
   }
 
   clearOutput() {
