@@ -14,7 +14,7 @@
  */
 
 import { Tensor } from "./api";
-import { ImshowData, OutputHandler, PlotData } from "./output_handler";
+import { OutputHandler, PlotData } from "./output_handler";
 import { assertEqual } from "./tensor_util";
 
 let currentOutputHandler: OutputHandler = null;
@@ -72,29 +72,5 @@ export function imshow(tensor: Tensor): void {
     return;
   }
 
-  // Assuming image shape is [height, width, 3] for RGB.
-  // [height, width] for monochrome.
-  let channels;
-  // [height, width] monochrome.
-  if (tensor.rank === 2) {
-    tensor = tensor.reshape([tensor.shape[0], tensor.shape[1], 1]);
-    channels = 1;
-  } else if (tensor.rank === 3) {
-    channels = tensor.shape[2];
-  } else {
-    throw Error("Bad image shape. Expecting [height, width, channels].");
-  }
-
-  if (!(channels === 1 || channels === 3 || channels === 4)) {
-    throw Error("Bad channels. 1 (gray), 3 (rgb), 4 (rgba) channels.");
-  }
-
-  const data: ImshowData = {
-    channels,
-    height: tensor.shape[0],
-    width: tensor.shape[1],
-    values: Array.from(tensor.dataSync())
-  };
-
-  currentOutputHandler.imshow(data);
+  currentOutputHandler.imshow(tensor);
 }
