@@ -15,7 +15,7 @@
 // tslint:disable:variable-name
 import { h } from "preact";
 import { div, p, PropelLogo } from "./common";
-import * as nb from "./notebook";
+import * as nb from "./nb";
 
 export interface DocEntry {
   kind: "class" | "method" | "property";
