@@ -103,6 +103,18 @@ function webImageDecoder(filename: string, mode: Mode)
   });
 }
 
+export function createCanvas(image: Tensor) {
+  const uint8Image = toUint8Image(image);
+  const { height, width, data } = uint8Image;
+  const canvas = document.createElement("canvas");
+  canvas.height = height;
+  canvas.width = width;
+  const ctx = canvas.getContext("2d");
+  const imageData = new ImageData(data, width, height);
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
 const imageSignatures: Array<[number[], string]> = [
   [[0xFF, 0xD8], "image/jpeg"],
   [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], "image/png"]
@@ -224,7 +236,9 @@ export async function imsave(tensor: Tensor,
     const image = toUint8Image(tensor);
     if (!handler) {
       const path = nodeRequire("path");
-      const ext = path.extname(filename).toLowerCase();
+      const ext = path.extname(filename)
+        .toLowerCase()
+        .replace(".jpg", ".jpeg");
       if (ext === ".png" || ext === ".jpeg") {
         handler = ext.substr(1).toUpperCase();
       }
@@ -238,5 +252,10 @@ export async function imsave(tensor: Tensor,
     }
     throw new Error(`Unsupported image format "${handler}"`);
   }
-  throw new Error(`"imsave" is not supported in browsers.`);
+  const canvas = createCanvas(tensor);
+  const base64 = canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.setAttribute("href", base64);
+  link.setAttribute("download", filename);
+  link.click();
 }
