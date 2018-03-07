@@ -20,7 +20,7 @@ import { Component, h, render } from "preact";
 import { div, GlobalHeader, p, UserMenu } from "./common";
 import * as db from "./db";
 import { Docs } from "./docs";
-import * as nb from "./notebook";
+import * as nb from "./nb";
 const { version } = require("../package.json");
 
 export interface Page {

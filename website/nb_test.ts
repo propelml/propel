@@ -2,7 +2,7 @@ import { h, render } from "preact";
 import { assert, objectsEqual } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import { enableMock } from "./db";
-import * as nb from "./notebook";
+import * as nb from "./nb";
 
 function resetPage() {
   document.body.innerHTML = "";
