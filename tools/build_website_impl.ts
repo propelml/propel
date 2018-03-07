@@ -4,7 +4,7 @@ import { join, resolve } from "path";
 import { renderSync } from "sass";
 import * as toArrayBuffer from "to-arraybuffer";
 import { URL } from "url";
-import { drainExecuteQueue, initSandbox } from "../website/notebook";
+import { drainExecuteQueue, initSandbox } from "../website/nb";
 import * as website from "../website/website";
 import * as gendoc from "./gendoc";
 import * as run from "./run";
