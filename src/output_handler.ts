@@ -15,14 +15,13 @@
 // handler can be loaded without pulling in the entire math library.
 
 import * as d3 from "d3";
-import { Tensor } from "./api";
-import { createCanvas } from "./im";
+import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
 
 export interface OutputHandler {
   plot(data: PlotData): void;
-  imshow(data: Tensor): void;
+  imshow(image: Image): void;
 }
 
 export class OutputHandlerDOM implements OutputHandler {
@@ -137,8 +136,8 @@ export class OutputHandlerDOM implements OutputHandler {
       });
   }
 
-  imshow(tensor: Tensor): void {
-    const canvas = createCanvas(tensor);
+  imshow(image: Image): void {
+    const canvas = createCanvas(image);
     this.element.appendChild(canvas);
   }
 }

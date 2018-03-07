@@ -14,6 +14,7 @@
  */
 
 import { Tensor } from "./api";
+import { toUint8Image } from "./im";
 import { OutputHandler, PlotData } from "./output_handler";
 import { assertEqual } from "./tensor_util";
 
@@ -71,6 +72,6 @@ export function imshow(tensor: Tensor): void {
     console.warn("imshow: no output handler");
     return;
   }
-
-  currentOutputHandler.imshow(tensor);
+  const image = toUint8Image(tensor);
+  currentOutputHandler.imshow(image);
 }

@@ -103,9 +103,8 @@ function webImageDecoder(filename: string, mode: Mode)
   });
 }
 
-export function createCanvas(image: Tensor) {
-  const uint8Image = toUint8Image(image);
-  const { height, width, data } = uint8Image;
+export function createCanvas(image: Image) {
+  const { height, width, data } = image;
   const canvas = document.createElement("canvas");
   canvas.height = height;
   canvas.width = width;
@@ -252,7 +251,8 @@ export async function imsave(tensor: Tensor,
     }
     throw new Error(`Unsupported image format "${handler}"`);
   }
-  const canvas = createCanvas(tensor);
+  const image = toUint8Image(tensor);
+  const canvas = createCanvas(image);
   const base64 = canvas.toDataURL("image/png");
   const link = document.createElement("a");
   link.setAttribute("href", base64);
