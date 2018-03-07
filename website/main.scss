@@ -414,8 +414,111 @@ header {
   }
 }
 
+.propel-logo {
+  display: flex;
+  flex-direction: row;
+  margin-right: $size0;
+  margin-left: $size0;
+
+  a,
+  a:hover,
+  a:visited,
+  a:active {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  * {
+    margin: auto 0;
+    margin-right: $size0;
+  }
+
+  .logo {
+    display: flex;
+    height: 64px;
+
+    svg {
+      margin: auto auto;
+    }
+  }
+
+  .global-title {
+    display: flex;
+    flex-direction: column;
+    margin: auto 0;
+
+    .global-main-title {
+      margin: auto 0;
+
+      h1 {
+        display: inline;
+        font-size: 20pt;
+        line-height: 24px;
+        font-weight: bold;
+        letter-spacing: 0.2px;
+      }
+    }
+
+    .global-sub-title {
+      margin: auto 0;
+
+      h2 {
+        display: inline;
+        color: $accentColor;
+        font-size: 14pt;
+        line-height: 16px;
+        letter-spacing: 0.2px;
+        font-weight: 200;
+      }
+    }
+  }
+}
+
+.global-header {
+  width: 100%;
+  background-color: inherit;
+  border-bottom: 1px solid $borderColor;
+
+  .global-header-right {
+    display: flex;
+    flex-direction: row;
+    margin-right: 16px;
+
+    > * {
+      display: block;
+      margin: auto 0 auto 36px;
+    }
+
+    > :first-child {
+      margin-left: 0;
+    }
+
+    a {
+      font-size: 14pt;
+      font-variant: all-small-caps;
+      text-decoration: none;
+      color: $accentColor;
+      white-space: nowrap;
+    }
+  }
+
+  .global-header-inner {
+    display: flex;
+    max-width: 960px;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 64px;
+    margin: 0 auto;
+  }
+}
+
 .panel {
   background-color: $bodyBackground;
+
+  & .propel-logo {
+    border-bottom: 1px solid $base01;
+    margin-bottom: 8px;
+  }
 
   ol.docindex {
     list-style-type: none;
@@ -515,6 +618,7 @@ header {
 
       &:hover {
         border: 1px solid $linkColor;
+        text-decoration: none;
       }
 
       &:hover .displayName {
@@ -569,104 +673,6 @@ header {
 
   &:hover .dropdown-content {
     display: block;
-  }
-}
-
-.global-header {
-  width: 100%;
-  background-color: inherit;
-  border-bottom: 1px solid $borderColor;
-
-  .global-header-right {
-    display: flex;
-    flex-direction: row;
-    margin-right: 16px;
-
-    > * {
-      display: block;
-      margin: auto 0 auto 36px;
-    }
-
-    > :first-child {
-      margin-left: 0;
-    }
-
-    a {
-      font-size: 14pt;
-      font-variant: all-small-caps;
-      text-decoration: none;
-      color: $accentColor;
-      white-space: nowrap;
-    }
-  }
-
-  .global-header-inner {
-    display: flex;
-    max-width: 960px;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 64px;
-    margin: 0 auto;
-
-    .propel-logo {
-      display: flex;
-      flex-direction: row;
-      margin-right: $size0;
-      margin-left: $size0;
-
-      a,
-      a:hover,
-      a:visited,
-      a:active {
-        text-decoration: none;
-        color: inherit;
-      }
-
-      * {
-        margin: auto 0;
-        margin-right: $size0;
-      }
-
-      .logo {
-        display: flex;
-        height: 64px;
-
-        svg {
-          margin: auto auto;
-        }
-      }
-
-      .global-title {
-        display: flex;
-        flex-direction: column;
-        margin: auto 0;
-
-        .global-main-title {
-          margin: auto 0;
-
-          h1 {
-            display: inline;
-            font-size: 20pt;
-            line-height: 24px;
-            font-weight: bold;
-            letter-spacing: 0.2px;
-          }
-        }
-
-        .global-sub-title {
-          margin: auto 0;
-
-          h2 {
-            display: inline;
-            color: $accentColor;
-            font-size: 14pt;
-            line-height: 16px;
-            letter-spacing: 0.2px;
-            font-weight: 200;
-          }
-        }
-      }
-    }
   }
 }
 
