@@ -15,18 +15,14 @@
 // handler can be loaded without pulling in the entire math library.
 
 import * as d3 from "d3";
+import { Tensor } from "./api";
+import { createCanvas } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
-export type ImshowData = {
-  channels: number,
-  height: number,
-  width: number,
-  values: number[]
-};
 
 export interface OutputHandler {
   plot(data: PlotData): void;
-  imshow(data: ImshowData): void;
+  imshow(data: Tensor): void;
 }
 
 export class OutputHandlerDOM implements OutputHandler {
@@ -141,46 +137,8 @@ export class OutputHandlerDOM implements OutputHandler {
       });
   }
 
-  imshow({ channels, width, height, values }: ImshowData): void {
-    const canvas = document.createElement("canvas");
-    canvas.height = height;
-    canvas.width = width;
-    const ctx = canvas.getContext("2d");
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    for (let y = 0; y < height; ++y) {
-      for (let x = 0; x < width; ++x) {
-        const pixelIndex = y * width + x;
-        const dataIndex = 4 * pixelIndex;
-        const valueIndex = channels * pixelIndex;
-        let rgba: number[];
-        if (channels === 1) {
-          const v = values[valueIndex];
-          rgba = [v, v, v, 255];
-        } else if (channels === 3) {
-          rgba = [
-            values[valueIndex + 0],
-            values[valueIndex + 1],
-            values[valueIndex + 2],
-            255
-          ];
-        } else if (channels === 4) {
-          rgba = [
-            values[valueIndex + 0],
-            values[valueIndex + 1],
-            values[valueIndex + 2],
-            values[valueIndex + 3],
-          ];
-        } else {
-          throw Error("Bad channels.");
-        }
-        data[dataIndex + 0] = rgba[0];  // red
-        data[dataIndex + 1] = rgba[1];  // green
-        data[dataIndex + 2] = rgba[2];  // blue
-        data[dataIndex + 3] = rgba[3];  // alpha
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
+  imshow(tensor: Tensor): void {
+    const canvas = createCanvas(tensor);
     this.element.appendChild(canvas);
   }
 }
