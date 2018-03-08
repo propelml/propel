@@ -28,6 +28,11 @@ export interface ConvOpts {
   stride?: number | [number, number];
   padding?: Padding;
 }
+export interface PoolOpts {
+  size?: number | [number, number];
+  stride?: number | [number, number];
+  padding?: Padding;
+}
 
 // Storage does not use backprop.
 export interface Storage {
@@ -102,6 +107,9 @@ export interface BackendOps {
                    filterShape: Shape, opts: ConvOpts): Storage;
   conv2dGradInput(gradient: Storage, inputShape: Shape,
                   filter: Storage, opts: ConvOpts): Storage;
+  maxPool(input: Storage, opts: PoolOpts): Storage;
+  maxPoolGrad(grad: Storage, origInput: Storage, origOutput: Storage,
+              opts: PoolOpts): Storage;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

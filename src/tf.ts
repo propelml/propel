@@ -13,7 +13,11 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import { AttrDef, Handle } from "./binding";
+import {
+  AttrDef,
+  DTypeCode,
+  Handle,
+} from "./binding";
 import { assert, assertEqual, getDType } from "./tensor_util";
 import * as types from "./types";
 
@@ -522,6 +526,27 @@ export class OpsTF implements types.BackendOps {
                     [inputShapeT, filter, grad],
                     convAttrs(opts));
   }
+
+  maxPool(input: TensorTF, opts: types.PoolOpts): TensorTF {
+    const attrs = poolAttrs(opts, binding.getDType(input.handle));
+    return execute0("MaxPool", [input], attrs);
+  }
+
+  maxPoolGrad(grad: TensorTF, origInput: TensorTF, origOutput: TensorTF,
+              opts: types.PoolOpts): TensorTF {
+    const attrs = poolAttrs(opts, binding.getDType(origInput.handle));
+    return execute0("MaxPoolGrad", [origInput, origOutput, grad], attrs);
+  }
+}
+
+function poolAttrs(opts: types.PoolOpts, dtypeCode: DTypeCode): AttrDef[] {
+  return [
+    ["T", binding.ATTR_TYPE, dtypeCode],
+    ["ksize", binding.ATTR_INT_LIST, tfStrides(opts.size)],
+    ["strides", binding.ATTR_INT_LIST, tfStrides(opts.stride)],
+    ["padding", binding.ATTR_STRING, opts.padding.toUpperCase()],
+    ["data_format", binding.ATTR_STRING, "NHWC"],
+  ];
 }
 
 function convAttrs(opts: types.ConvOpts): AttrDef[] {

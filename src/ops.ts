@@ -529,3 +529,15 @@ defBW("conv2d",
                                   opts);
     return new Tensor(s);
   });
+
+export const maxPool = defFW("maxPool",
+  (input: types.Storage, opts: types.PoolOpts) => {
+    const output = bo.maxPool(input, opts);
+    saveForBackward(input, output, opts);
+    return output;
+  });
+defBW("maxPool", (g: Tensor, origInput: Tensor, origOutput: Tensor, opts) => {
+  const s = bo.maxPoolGrad(g.storage, origInput.storage, origOutput.storage,
+                           opts);
+  return new Tensor(s);
+});

@@ -465,4 +465,18 @@ export class OpsDL implements types.BackendOps {
       opts.stride,
       opts.padding);
   }
+
+  maxPool(input: TensorDL, opts: types.PoolOpts): TensorDL {
+    ENV.setMath(input.math);
+    return input.math.maxPool(input as Array4D, opts.size, opts.stride,
+                              opts.padding);
+  }
+
+  maxPoolGrad(grad: TensorDL, origInput: TensorDL, origOutput: TensorDL,
+              opts: types.PoolOpts): TensorDL {
+    const m = grad.math;
+    ENV.setMath(m);
+    return m.maxPoolBackprop(grad, origInput, opts.size, opts.stride,
+                             opts.padding);
+  }
 }
