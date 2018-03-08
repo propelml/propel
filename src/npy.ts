@@ -155,8 +155,8 @@ export async function load(filename: string): Promise<Tensor> {
 // TODO move to backend.ts.
 function fromTypedArrayAndShape(ta: types.TypedArray,
                                 shape: types.Shape): Tensor {
-  const basic = bo.fromTypedArray(ta, shape);
-  return new Tensor(basic);
+  const storage = bo.fromTypedArray(ta, shape);
+  return new Tensor(storage);
 }
 
 function numEls(shape: types.Shape): number {

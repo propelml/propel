@@ -13,7 +13,7 @@
    limitations under the License.
  */
 import { randn, range, zeros } from "./api";
-import { bo, convertBasic } from "./backend";
+import { bo, convertStorage } from "./backend";
 import * as format from "./format";
 import * as ops from "./ops";
 import { Params } from "./params";
@@ -24,10 +24,10 @@ import { assert, IS_NODE } from "./util";
 export function convert(t: types.TensorLike,
                         opts?: types.TensorOpts): Tensor {
   if (t instanceof Tensor) return t;
-  return new Tensor(convertBasic(t, opts));
+  return new Tensor(convertStorage(t, opts));
 }
 
-/** Tensor wraps a BasicTensor object. This is the main public
+/** Tensor wraps a Storage object. This is the main public
  * interface to tensor operatiors. Each instance has a unique id for use in
  * backprop.  Nothing about Tensors is backend specific.
  * Tensor might be renamed to BoxedTensor in the near future. To
@@ -35,19 +35,19 @@ export function convert(t: types.TensorLike,
  * internally so as not to confuse it with the many other tensor classes in
  * Propel.
  */
-export class Tensor implements types.BasicTensor {
-  /* TODO The basic property should be private. Probably better would be if
+export class Tensor implements types.Storage {
+  /* TODO The storage property should be private. Probably better would be if
    * Tensor was an interface.
-   * Users should not access the basic tensor.
+   * Users should not access the storage object.
    * But it is mutable, and thus tensors are mutable.
    */
-  basic: null | types.BasicTensor;
+  storage: null | types.Storage;
 
   private static nextId = 1;
   private _id: number;
 
-  constructor(t: types.BasicTensor) {
-    this.basic = t;
+  constructor(t: types.Storage) {
+    this.storage = t;
     this._id = Tensor.nextId++;
     track(this);
   }
@@ -56,8 +56,8 @@ export class Tensor implements types.BasicTensor {
    * when using the DL/WebGL backend, see also gc().
    */
   dispose(): void {
-    this.basic.dispose();
-    this.basic = null;
+    this.storage.dispose();
+    this.storage = null;
     untrack(this);
   }
 
@@ -72,11 +72,11 @@ export class Tensor implements types.BasicTensor {
     assert(t.dtype === this.dtype);
 
     this.dispose();
-    this.basic = t.basic;
+    this.storage = t.storage;
     this._id = t.id;
     // It would be nice to not forcably destroy the argument here, but
-    // that would require reference counting basic.
-    t.basic = null;
+    // that would require reference counting storage.
+    t.storage = null;
   }
 
   /** Returns an iterator over the values of the tensor.
@@ -87,7 +87,7 @@ export class Tensor implements types.BasicTensor {
    *    }
    */
   [Symbol.iterator]() {
-    const d = this.basic.dataSync();
+    const d = this.storage.dataSync();
     let i = 0;
     return {
       next: () => {
@@ -109,9 +109,9 @@ export class Tensor implements types.BasicTensor {
       // TODO Warning! This might be an unnecessary copy. Maybe we should
       // notify the user? Maybe this shouldn't be allowed even.
       // For now we stay silent.
-      return new Tensor(bo.copyToDevice(t.basic, this.device));
+      return new Tensor(bo.copyToDevice(t.storage, this.device));
     }
-    return new Tensor(convertBasic(t, {dtype, device: this.device}));
+    return new Tensor(convertStorage(t, {dtype, device: this.device}));
   }
 
   /** Returns a TypedArray containing the actual data of the tensor.
@@ -123,7 +123,7 @@ export class Tensor implements types.BasicTensor {
    *    t.dataSync();
    */
   dataSync(): types.TypedArray {
-    return this.basic.dataSync();
+    return this.storage.dataSync();
   }
 
   /** Returns a promise to a TypedArray of the actual data.
@@ -133,7 +133,7 @@ export class Tensor implements types.BasicTensor {
    *    await t.data();
    */
   data(): Promise<types.TypedArray> {
-    return this.basic.data();
+    return this.storage.data();
   }
 
   get id(): number {
@@ -145,15 +145,15 @@ export class Tensor implements types.BasicTensor {
   }
 
   get device(): string {
-    return bo.getDevice(this.basic);
+    return bo.getDevice(this.storage);
   }
 
   get dtype(): types.DType {
-    return this.basic.dtype;
+    return this.storage.dtype;
   }
 
   get shape(): types.Shape {
-    return this.basic.shape;
+    return this.storage.shape;
   }
 
   toString(): string {
@@ -165,21 +165,21 @@ export class Tensor implements types.BasicTensor {
    */
   copy(device?: string): Tensor {
     if (!device) device = this.device;
-    const r = bo.copyToDevice(this.basic, device);
+    const r = bo.copyToDevice(this.storage, device);
     return new Tensor(r);
   }
 
   gpu(): Tensor {
     if (this.device === "GPU:0") return this;
     // TODO: support different GPUs.
-    const r = bo.copyToDevice(this.basic, "GPU:0");
+    const r = bo.copyToDevice(this.storage, "GPU:0");
     return new Tensor(r);
   }
 
   cpu(): Tensor {
     if (this.device === "CPU:0") return this;
     // TODO: support different CPUs? Is that even possible?
-    const r = bo.copyToDevice(this.basic, "CPU:0");
+    const r = bo.copyToDevice(this.storage, "CPU:0");
     return new Tensor(r);
   }
 
@@ -208,12 +208,12 @@ export class Tensor implements types.BasicTensor {
   }
 
   onesLike(): Tensor {
-    const b = bo.onesLike(this.basic);
+    const b = bo.onesLike(this.storage);
     return new Tensor(b);
   }
 
   zerosLike(): Tensor {
-    const b = bo.zerosLike(this.basic);
+    const b = bo.zerosLike(this.storage);
     return new Tensor(b);
   }
 
@@ -841,7 +841,7 @@ class GCScope {
       // If we're not keeping it, nor have we already
       // disposed of it (which happens with assign)
       // then we dispose.
-      if (!this.keeping.has(t) && t.basic != null) {
+      if (!this.keeping.has(t) && t.storage != null) {
         t.dispose();
       }
     });

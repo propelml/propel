@@ -23,9 +23,9 @@ import { assert, bcastGradientArgs, shapesEqual } from "./tensor_util";
 import * as types from "./types";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
-// never use Tensors, only BasicTensors. These forward pass functions
+// never use Tensors, only Storage objects. These forward pass functions
 // are defined in ops.ts.
-type FWFunc = (...args) => types.BasicTensor;
+type FWFunc = (...args) => types.Storage;
 
 // BWFunc is a backwards pass function which receives the gradient and any
 // objects passed to saveForBackward(). Backwards pass functions are defined
@@ -80,23 +80,23 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
       }
     });
 
-    // Convert any Tensor args to basic ones.
+    // Convert any Tensor args to storage ones.
     const bargs = args.map((t) => {
-      if ((t as Tensor).basic) {
-        return (t as Tensor).basic;
+      if ((t as Tensor).storage) {
+        return (t as Tensor).storage;
       } else {
         return t;
       }
     });
 
-    // Call the forward function, and wrap the resulting BasicTensor in a
+    // Call the forward function, and wrap the resulting Storage object in a
     // Tensor.
-    const basicAnswer: types.BasicTensor = fwFunc(...bargs);
-    const ans = new Tensor(basicAnswer);
+    const storageAnswer: types.Storage = fwFunc(...bargs);
+    const ans = new Tensor(storageAnswer);
     cTensors.push(ans);
 
     const savedForBackward =
-      convertSavedBasicsTos(globalSavedForBackward, cTensors);
+      convertSavedStorageObjectsTos(globalSavedForBackward, cTensors);
     globalSavedForBackward = null;
 
     backprop.recordOp({
@@ -117,13 +117,13 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
   return opFunc;
 }
 
-function convertSavedBasicsTos(saved: any[], cTensors: Tensor[]) {
+function convertSavedStorageObjectsTos(saved: any[], cTensors: Tensor[]) {
   if (!saved) return null;
   return saved.map((t) => {
-    if ((t as types.BasicTensor).dataSync) {
-      const b = t as types.BasicTensor;
+    if ((t as types.Storage).dataSync) {
+      const s = t as types.Storage;
       for (const ct of cTensors) {
-        if (ct.basic === b) return ct;
+        if (ct.storage === s) return ct;
       }
       throw new Error("Couldn't find corresponding Tensor.");
     } else {
@@ -422,7 +422,7 @@ defBW("slice", (g, sx, begin, size) => {
 });
 
 export const concat = defFW("concat",
-  (axis: number, ...inputs: types.BasicTensor[]) => {
+  (axis: number, ...inputs: types.Storage[]) => {
     const shapes = inputs.map(t => t.shape);
     saveForBackward(axis, shapes);
     return bo.concat(axis, inputs);
@@ -513,7 +513,7 @@ defBW("setDiag", (g) => {
 });
 
 export const conv2d = defFW("conv2d",
-  (input: types.BasicTensor, filter: types.BasicTensor,
+  (input: types.Storage, filter: types.Storage,
    opts: types.ConvOpts) => {
     saveForBackward(input, filter, opts);
     return bo.conv2d(input, filter, opts);

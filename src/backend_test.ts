@@ -13,11 +13,11 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
-import { bo, convertBasic } from "./backend";
+import { bo, convertStorage } from "./backend";
 import { assertAllClose, assertAllEqual, assertShapesEqual }
   from "./tensor_util";
 
-const tensor = convertBasic;
+const tensor = convertStorage;
 
 test(async function backend_shapes() {
   const a = tensor([[1, 2], [3, 4]]);
