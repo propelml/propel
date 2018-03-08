@@ -1181,3 +1181,23 @@ test(async function api_conv2d() {
   ]);
   assertAllEqual(g_[1].squeeze(), [[45, 54], [81, 90]]);
 });
+
+test(async function api_maxPool() {
+  // TODO Port over TF test cases like was done in src/conv_testcases.ts
+  // tslint:disable-next-line:max-line-length
+  // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/kernel_tests/pooling_ops_test.py#L227-L710
+  const x = api.range(4 * 4).reshape([1, 4, 4, 1]);
+  const r = x.maxPool({ size: 2, stride: 2 });
+  assertShapesEqual(r.shape, [1, 2, 2, 1]);
+  assertAllEqual(r.squeeze(), [[5, 7], [13, 15]]);
+  const f = img => img.maxPool();
+  const g = grad(f);
+  const gx = g(x);
+  assertShapesEqual(gx.shape, x.shape);
+  assertAllEqual(gx.squeeze(), [
+    [ 0, 0, 0, 0 ],
+    [ 0, 1, 0, 1 ],
+    [ 0, 0, 0, 0 ],
+    [ 0, 1, 0, 1 ],
+  ]);
+});

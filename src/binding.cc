@@ -149,6 +149,7 @@ const std::map<std::string, int> attrNameMap = {
     {"dilations", 0},
     {"dtype", 0},
     {"keep_dims", 0},
+    {"ksize", 0},
     {"output_type", 0},
     {"padding", 0},
     {"seed", 0},

@@ -707,6 +707,24 @@ export class Tensor implements types.Storage {
     }
     return t;
   }
+
+  /** Max pool.
+   * Input should be shaped [batch, height, width, channels]
+   * and by default the pooling is 2x2 with stride 2.
+   *
+   *    import * as pr from "propel"
+   *    img = pr.range(4*4).reshape([1, 4, 4, 1]);
+   *    img.maxPool({ size: 2, stride: 2 });
+   */
+  maxPool(opts?: types.PoolOpts): Tensor {
+    const defaults: types.PoolOpts = {
+      size: 2,
+      stride: 2,
+      padding: "valid",
+    };
+    assert(this.rank === 4);
+    return ops.maxPool(this, Object.assign(defaults, opts));
+  }
 }
 
 if (IS_NODE) {
