@@ -16,6 +16,7 @@ import { bo } from "./backend";
 import * as ops from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
+import { assert } from "./util";
 
 export { DType, TensorLike } from "./types";
 export { params, Params } from "./params";
@@ -182,4 +183,30 @@ export function int32(t: types.TensorLike): Tensor {
 /** Constructs a float32 tensor. */
 export function float32(t: types.TensorLike): Tensor {
   return tensor(t, { dtype: "float32" });
+}
+
+/** Performs 2d convolution.
+ * The input and filter tensors should both be rank 4 and float32, with the
+ * input formatted as [batch, height, width, channels] and the filter
+ * [height, width, in chans, out chans].
+ *
+ * Additional arguments are ConvOpts { stride, padding, bias }.
+ */
+export function conv2d(input: Tensor, filter: Tensor,
+                       opts?: types.ConvOpts): Tensor {
+  /* TODO gaussian blur example for conv2d.
+   *    import * as pr from "propel"
+   *    img = await pr.imread("/src/testdata/sample.png")
+   *    filter = pr.gaussian([5, 5]);
+   *    pr.imshow(img.conv2d(filter))
+   */
+  const defaults: types.ConvOpts = {
+    stride: 1,
+    padding: "valid",
+  };
+  assert(input.dtype === "float32");
+  assert(filter.dtype === "float32");
+  assert(input.rank === 4);
+  assert(filter.rank === 4);
+  return ops.conv2d(input, filter, Object.assign(defaults, opts));
 }

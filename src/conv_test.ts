@@ -14,50 +14,45 @@
  */
 
 import { test } from "../tools/tester";
-import { range, Tensor } from "./api";
+import { conv2d, range, Tensor } from "./api";
 import { backend, bo } from "./backend";
 import { cases, ConvTestCase } from "./conv_testcases";
 import { assertAllClose } from "./tensor_util";
 import { ConvOpts, DType, Shape } from "./types";
 
-const format = "NHWC";
-
 // Forward pass tests.
 defineTests("fw", (c: ConvTestCase): Tensor => {
   const input = testInput("float32", c.inputShape);
   const filter = testInput("float32", c.filterShape);
-  return input.conv2d(filter, {
-    strides: c.strides,
+  return conv2d(input, filter, {
+    stride: c.stride,
     padding: c.padding,
-    format,
   });
 });
 
 // Backwards pass tests thru the filter.
 defineTests("bwFilter", (c: ConvTestCase): Tensor => {
   const input = testInput("float32", c.inputShape);
-  const gradient = testInput("float32", c.outputShape);
+  const grad = testInput("float32", c.outputShape);
   const opts: ConvOpts = {
-    strides: c.strides,
+    stride: c.stride,
     padding: c.padding,
-    format,
   };
-  const b = bo.conv2dBackpropFilter(gradient.storage, input.storage,
-                                    c.filterShape, opts);
+  const b = bo.conv2dGradFilter(grad.storage, input.storage,
+                                c.filterShape, opts);
   return new Tensor(b);
 });
 
 // Backwards pass tests thru the input..
 defineTests("bwInput", (c: ConvTestCase): Tensor => {
   const filter = testInput("float32", c.filterShape);
-  const gradient = testInput("float32", c.outputShape);
+  const grad = testInput("float32", c.outputShape);
   const opts: ConvOpts = {
-    strides: c.strides,
+    stride: c.stride,
     padding: c.padding,
-    format,
   };
-  const b = bo.conv2dBackpropInput(gradient.storage, c.inputShape,
-                                   filter.storage, opts);
+  const b = bo.conv2dGradInput(grad.storage, c.inputShape,
+                               filter.storage, opts);
   return new Tensor(b);
 });
 

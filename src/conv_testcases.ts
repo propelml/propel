@@ -8,7 +8,7 @@ export interface ConvTestCase {
   inputShape: [number, number, number, number]; // NHWC
   filterShape: [number, number, number, number]; // H W InChans OutChans
   outputShape?: [number, number, number, number];
-  strides: [number, number]; // [column, row ]
+  stride: [number, number]; // [column, row]
   padding: "same" | "valid";
   err?: number;
   skip?: string;  // tf or dl to skip certain backends.
@@ -23,7 +23,7 @@ const fw: ConvTestCase[] = [
     ],
     inputShape: [1, 2, 3, 3],
     filterShape: [1, 1, 3, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
   {
@@ -31,7 +31,7 @@ const fw: ConvTestCase[] = [
     expected: [],
     inputShape: [0, 2, 3, 3],
     filterShape: [1, 1, 3, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     skip: "dl",  // FIXME
   },
@@ -40,7 +40,7 @@ const fw: ConvTestCase[] = [
     expected: [2271.0, 2367.0, 2463.0, 2901.0, 3033.0, 3165.0],
     inputShape: [1, 2, 3, 3],
     filterShape: [2, 2, 3, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
   {
@@ -51,7 +51,7 @@ const fw: ConvTestCase[] = [
     ],
     inputShape: [1, 2, 3, 3],
     filterShape: [1, 2, 3, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
   {
@@ -59,7 +59,7 @@ const fw: ConvTestCase[] = [
     expected: [2271.0, 2367.0, 2463.0],
     inputShape: [1, 2, 3, 3],
     filterShape: [2, 2, 3, 3],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "valid",
   },
   {
@@ -67,7 +67,7 @@ const fw: ConvTestCase[] = [
     expected: [2271.0, 2367.0, 2463.0, 1230.0, 1305.0, 1380.0],
     inputShape: [1, 2, 3, 3],
     filterShape: [2, 2, 3, 3],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "same",
   },
   {
@@ -75,7 +75,7 @@ const fw: ConvTestCase[] = [
     expected: [58.0, 78.0, 98.0, 118.0, 138.0, 158.0],
     inputShape: [1, 3, 6, 1],
     filterShape: [2, 2, 1, 1],
-    strides: [1, 2],
+    stride: [1, 2],
     padding: "valid",
   },
   {
@@ -83,7 +83,7 @@ const fw: ConvTestCase[] = [
     expected: [65, 95, 275, 305],
     inputShape: [1, 7, 7, 1],
     filterShape: [2, 2, 1, 1],
-    strides: [3, 3],
+    stride: [3, 3],
     padding: "valid",
   },
   {
@@ -91,7 +91,7 @@ const fw: ConvTestCase[] = [
     expected: [1, 3, 7, 9],
     inputShape: [1, 3, 3, 1],
     filterShape: [1, 1, 1, 1],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "same",
   },
   {
@@ -99,7 +99,7 @@ const fw: ConvTestCase[] = [
     expected: [1, 3, 9, 11],
     inputShape: [1, 4, 4, 1],
     filterShape: [1, 1, 1, 1],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "same",
     skip: "dl",  // FIXME
   },
@@ -108,7 +108,7 @@ const fw: ConvTestCase[] = [
     expected: [44, 28, 41, 16],
     inputShape: [1, 4, 4, 1],
     filterShape: [2, 2, 1, 1],
-    strides: [3, 3],
+    stride: [3, 3],
     padding: "same",
   },
   {
@@ -116,7 +116,7 @@ const fw: ConvTestCase[] = [
     expected: [50, 60],
     inputShape: [1, 2, 2, 1],
     filterShape: [2, 2, 1, 2],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
 ];
@@ -128,7 +128,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [1, 2, 3, 1],
     filterShape: [2, 2, 1, 1],
     outputShape: [1, 1, 2, 1],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     err: 1e-5
   },
@@ -138,7 +138,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [0, 2, 3, 1],
     filterShape: [2, 2, 1, 1],
     outputShape: [0, 1, 2, 1],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     err: 1e-5,
     skip: "dl",
@@ -152,7 +152,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [1, 2, 3, 3],
     filterShape: [2, 2, 3, 3],
     outputShape: [1, 1, 2, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     err: 1e-4
   },
@@ -165,7 +165,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [1, 3, 6, 1],
     filterShape: [2, 2, 1, 1],
     outputShape: [1, 2, 3, 1],
-    strides: [1, 2],
+    stride: [1, 2],
     padding: "valid",
     err: 1e-5
   },
@@ -178,7 +178,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [1, 4, 4, 1],
     filterShape: [1, 1, 1, 1],
     outputShape: [1, 2, 2, 1],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "same",
     err: 1e-5,
     skip: "dl",
@@ -189,7 +189,7 @@ const bwInput: ConvTestCase[] = [
     inputShape: [1, 2, 2, 1],
     filterShape: [2, 2, 1, 2],
     outputShape: [1, 1, 1, 2],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     err: 1e-5
   },
@@ -202,7 +202,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 2, 3, 1],
     filterShape: [2, 2, 1, 1],
     outputShape: [1, 1, 2, 1],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
   {
@@ -211,7 +211,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 2, 3, 1],
     filterShape: [2, 2, 1, 0],
     outputShape: [1, 1, 2, 0],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
     skip: "dl",
   },
@@ -226,7 +226,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 2, 3, 3],
     filterShape: [2, 2, 3, 3],
     outputShape: [1, 1, 2, 3],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
   {
@@ -235,7 +235,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 3, 6, 1],
     filterShape: [2, 2, 1, 1],
     outputShape: [1, 2, 3, 1],
-    strides: [1, 2],
+    stride: [1, 2],
     padding: "valid",
   },
   {
@@ -244,7 +244,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 4, 4, 1],
     filterShape: [1, 1, 1, 1],
     outputShape: [1, 2, 2, 1],
-    strides: [2, 2],
+    stride: [2, 2],
     padding: "same",
     skip: "dl",
   },
@@ -254,7 +254,7 @@ const bwFilter: ConvTestCase[] = [
     inputShape: [1, 2, 2, 1],
     filterShape: [2, 2, 1, 2],
     outputShape: [1, 1, 1, 2],
-    strides: [1, 1],
+    stride: [1, 1],
     padding: "valid",
   },
 ];
