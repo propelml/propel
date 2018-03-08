@@ -14,7 +14,7 @@
  */
 
 import { Tensor } from "./tensor";
-import { BasicTensor, DType, FlatVector, RegularArray, Shape, TensorLike,
+import { DType, FlatVector, RegularArray, Shape, Storage, TensorLike,
     TypedArray } from "./types";
 import { assert } from "./util";
 export { assert } from "./util";
@@ -23,8 +23,8 @@ function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   if ((t as Tensor).cpu) {
     t = (t as Tensor).cpu(); // Copy to CPU if necessary.
   }
-  if ((t as BasicTensor).dataSync) {
-    t = t as BasicTensor;
+  if ((t as Storage).dataSync) {
+    t = t as Storage;
     return [t.shape, t.dataSync()];
   } else if (isTypedArray(t)) {
     return [[t.length], t];

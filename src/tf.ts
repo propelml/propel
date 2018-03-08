@@ -96,7 +96,7 @@ function floatSmall(v: number | number[], colocateWith?: TensorTF): TensorTF {
     colocateDevice(colocateWith), v));
 }
 
-export class TensorTF implements types.BasicTensor {
+export class TensorTF implements types.Storage {
   handle: null | Handle;
   private data_?: types.TypedArray;
 

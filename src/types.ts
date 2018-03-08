@@ -21,7 +21,7 @@ export type ShapeDType = [Shape, DType];
 export type ShapeDTypeList = Array<null | ShapeDType>;
 // JavaScript objects that can be generally converted to Tensors.
 export type Convertible = number | RegularArray<number> | TypedArray;
-export type TensorLike = BasicTensor | Convertible;
+export type TensorLike = Storage | Convertible;
 export type DeviceType = "CPU" | "GPU";
 export type ImageFormat = "NHWC" | "NCHW"; // Note HTML intrinsically is NHWC.
 export type Padding = "same" | "valid";
@@ -31,10 +31,8 @@ export interface ConvOpts {
   format: ImageFormat;
 }
 
-// BasicTensor does not use backprop.
-// TODO rename BasicTensor to Storage like in pytorch
-// http://pytorch.org/docs/0.3.0/storage.html
-export interface BasicTensor {
+// Storage does not use backprop.
+export interface Storage {
   readonly shape: Shape;
   readonly dtype: DType;
   dataSync(): TypedArray;
@@ -44,68 +42,68 @@ export interface BasicTensor {
 
 // BackendOps do not use backprop.
 export interface BackendOps {
-  copyToDevice(x: BasicTensor, device: string): BasicTensor;
-  getDevice(x: BasicTensor): string;
+  copyToDevice(x: Storage, device: string): Storage;
+  getDevice(x: Storage): string;
   listDevices(): string[];
   fromTypedArray(data: TypedArray, shape: Shape, dtype?: DType,
-                 device?: string): BasicTensor;
-  add(x: BasicTensor, y: BasicTensor): BasicTensor;
-  sub(x: BasicTensor, y: BasicTensor): BasicTensor;
-  mul(x: BasicTensor, y: BasicTensor): BasicTensor;
-  div(x: BasicTensor, y: BasicTensor): BasicTensor;
-  neg(x: BasicTensor): BasicTensor;
-  exp(x: BasicTensor): BasicTensor;
-  log(x: BasicTensor): BasicTensor;
-  setDiag(input: BasicTensor, diag: BasicTensor): BasicTensor;
-  onesLike(x: BasicTensor): BasicTensor;
-  zerosLike(x: BasicTensor): BasicTensor;
-  fill(value: BasicTensor, shape: Shape): BasicTensor;
-  square(x: BasicTensor): BasicTensor;
-  sinh(x: BasicTensor): BasicTensor;
-  cosh(x: BasicTensor): BasicTensor;
-  tanh(x: BasicTensor): BasicTensor;
-  relu(x: BasicTensor): BasicTensor;
+                 device?: string): Storage;
+  add(x: Storage, y: Storage): Storage;
+  sub(x: Storage, y: Storage): Storage;
+  mul(x: Storage, y: Storage): Storage;
+  div(x: Storage, y: Storage): Storage;
+  neg(x: Storage): Storage;
+  exp(x: Storage): Storage;
+  log(x: Storage): Storage;
+  setDiag(input: Storage, diag: Storage): Storage;
+  onesLike(x: Storage): Storage;
+  zerosLike(x: Storage): Storage;
+  fill(value: Storage, shape: Shape): Storage;
+  square(x: Storage): Storage;
+  sinh(x: Storage): Storage;
+  cosh(x: Storage): Storage;
+  tanh(x: Storage): Storage;
+  relu(x: Storage): Storage;
   // reluGrad should not be exposed to the public API.
   // Generally Propel wants to express gradient functions in terms of other
   // known ops. However due to the ubiquity and performance necessities of
   // ReLU, we break this design goal and expose a special op for ReLU's
   // backward pass.
-  reluGrad(grads: BasicTensor, features: BasicTensor): BasicTensor;
-  sigmoid(x: BasicTensor): BasicTensor;
-  abs(x: BasicTensor): BasicTensor;
-  randn(shape: Shape, seed?: number): BasicTensor;
-  linspace(start: number, stop: number, num: number): BasicTensor;
-  range(start: number, limit: number, delta: number): BasicTensor;
-  transpose(x: BasicTensor, perm: BasicTensor): BasicTensor;
-  reverse(x: BasicTensor, dims: BasicTensor): BasicTensor;
-  matmul(x: BasicTensor, y: BasicTensor, transposeA: boolean,
-         transposeB: boolean): BasicTensor;
-  argmax(x: BasicTensor, axis: number): BasicTensor;
-  argmin(x: BasicTensor, axis: number): BasicTensor;
-  reduceSum(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
-  reduceMean(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
-  reduceMax(x: BasicTensor, axes: number[], keepDims: boolean): BasicTensor;
-  slice(x: BasicTensor, begin: number[], size: number[]): BasicTensor;
-  concat(axis: number, inputs: BasicTensor[]): BasicTensor;
-  reshape(x: BasicTensor, newShape: Shape): BasicTensor;
-  equal(x: BasicTensor, y: BasicTensor): BasicTensor;
-  greater(x: BasicTensor, y: BasicTensor): BasicTensor;
-  greaterEqual(x: BasicTensor, y: BasicTensor): BasicTensor;
-  less(x: BasicTensor, y: BasicTensor): BasicTensor;
-  lessEqual(x: BasicTensor, y: BasicTensor): BasicTensor;
-  select(cond: BasicTensor, t: BasicTensor, f: BasicTensor): BasicTensor;
-  sign(x: BasicTensor): BasicTensor;
-  softmax(x: BasicTensor): BasicTensor;
-  logSoftmax(x: BasicTensor): BasicTensor;
-  cast(x: BasicTensor, dtype: DType): BasicTensor;
-  oneHot(x: BasicTensor, depth: number, onValue: number,
-         offValue: number): BasicTensor;
+  reluGrad(grads: Storage, features: Storage): Storage;
+  sigmoid(x: Storage): Storage;
+  abs(x: Storage): Storage;
+  randn(shape: Shape, seed?: number): Storage;
+  linspace(start: number, stop: number, num: number): Storage;
+  range(start: number, limit: number, delta: number): Storage;
+  transpose(x: Storage, perm: Storage): Storage;
+  reverse(x: Storage, dims: Storage): Storage;
+  matmul(x: Storage, y: Storage, transposeA: boolean,
+         transposeB: boolean): Storage;
+  argmax(x: Storage, axis: number): Storage;
+  argmin(x: Storage, axis: number): Storage;
+  reduceSum(x: Storage, axes: number[], keepDims: boolean): Storage;
+  reduceMean(x: Storage, axes: number[], keepDims: boolean): Storage;
+  reduceMax(x: Storage, axes: number[], keepDims: boolean): Storage;
+  slice(x: Storage, begin: number[], size: number[]): Storage;
+  concat(axis: number, inputs: Storage[]): Storage;
+  reshape(x: Storage, newShape: Shape): Storage;
+  equal(x: Storage, y: Storage): Storage;
+  greater(x: Storage, y: Storage): Storage;
+  greaterEqual(x: Storage, y: Storage): Storage;
+  less(x: Storage, y: Storage): Storage;
+  lessEqual(x: Storage, y: Storage): Storage;
+  select(cond: Storage, t: Storage, f: Storage): Storage;
+  sign(x: Storage): Storage;
+  softmax(x: Storage): Storage;
+  logSoftmax(x: Storage): Storage;
+  cast(x: Storage, dtype: DType): Storage;
+  oneHot(x: Storage, depth: number, onValue: number,
+         offValue: number): Storage;
 
-  conv2d(input: BasicTensor, filter: BasicTensor, opts: ConvOpts): BasicTensor;
-  conv2dBackpropFilter(gradient: BasicTensor, input: BasicTensor,
-                       filterShape: Shape, opts: ConvOpts): BasicTensor;
-  conv2dBackpropInput(gradient: BasicTensor, inputShape: Shape,
-                      filter: BasicTensor, opts: ConvOpts): BasicTensor;
+  conv2d(input: Storage, filter: Storage, opts: ConvOpts): Storage;
+  conv2dBackpropFilter(gradient: Storage, input: Storage,
+                       filterShape: Shape, opts: ConvOpts): Storage;
+  conv2dBackpropInput(gradient: Storage, inputShape: Shape,
+                      filter: Storage, opts: ConvOpts): Storage;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

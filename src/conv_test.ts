@@ -42,8 +42,8 @@ defineTests("bwFilter", (c: ConvTestCase): Tensor => {
     padding: c.padding,
     format,
   };
-  const b = bo.conv2dBackpropFilter(gradient.basic, input.basic, c.filterShape,
-                                    opts);
+  const b = bo.conv2dBackpropFilter(gradient.storage, input.storage,
+                                    c.filterShape, opts);
   return new Tensor(b);
 });
 
@@ -56,8 +56,8 @@ defineTests("bwInput", (c: ConvTestCase): Tensor => {
     padding: c.padding,
     format,
   };
-  const b = bo.conv2dBackpropInput(gradient.basic, c.inputShape, filter.basic,
-                                   opts);
+  const b = bo.conv2dBackpropInput(gradient.storage, c.inputShape,
+                                   filter.storage, opts);
   return new Tensor(b);
 });
 

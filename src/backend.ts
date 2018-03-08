@@ -13,9 +13,9 @@
    limitations under the License.
  */
 
-// BasicTensor abstracts TensorFlow and DeepLearn BackendOps. Operations on
-// BasicTensors are not traced in backprop and the class is not exposed to the
-// public API.
+// Storage abstracts TensorFlow and DeepLearn BackendOps. Operations on
+// Storage objects are not traced in backprop and the class is not exposed to
+// the public API.
 
 import * as dl from "./dl";
 import { flatten, inferShape, isTypedArray, makeTypedArray }
@@ -65,8 +65,8 @@ function preferTF(): boolean {
   return true;
 }
 
-export function convertBasic(x: types.TensorLike,
-                             opts?: types.TensorOpts): types.BasicTensor {
+export function convertStorage(x: types.TensorLike,
+                               opts?: types.TensorOpts): types.Storage {
   // Alias fromTypedArray for brevity.
   const create = bo.fromTypedArray;
 

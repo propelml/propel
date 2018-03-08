@@ -61,7 +61,7 @@ function dtypeDL(propelDtype: types.DType): DTypeDL {
   }
 }
 
-export type TensorDL = NDArray; // Note NDArray implements BasicTensor.
+export type TensorDL = NDArray; // Note NDArray implements Storage.
 
 export class OpsDL implements types.BackendOps {
 
