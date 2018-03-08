@@ -506,40 +506,43 @@ export class OpsTF implements types.BackendOps {
     return execute0("Conv2D", [input, filter], convAttrs(opts));
   }
 
-  conv2dBackpropFilter(gradient: TensorTF, input: TensorTF,
-                       filterShape: types.Shape,
-                       opts: types.ConvOpts): TensorTF {
+  conv2dGradFilter(grad: TensorTF, input: TensorTF,
+                   filterShape: types.Shape,
+                   opts: types.ConvOpts): TensorTF {
     const filterShapeT = int32Small(filterShape);
     return execute0("Conv2DBackpropFilter",
-                    [input, filterShapeT, gradient],
+                    [input, filterShapeT, grad],
                     convAttrs(opts));
   }
 
-  conv2dBackpropInput(gradient: TensorTF, inputShape: types.Shape,
-                      filter: TensorTF, opts: types.ConvOpts): TensorTF {
+  conv2dGradInput(grad: TensorTF, inputShape: types.Shape,
+                  filter: TensorTF, opts: types.ConvOpts): TensorTF {
     const inputShapeT = int32Small(inputShape);
     return execute0("Conv2DBackpropInput",
-                    [inputShapeT, filter, gradient],
+                    [inputShapeT, filter, grad],
                     convAttrs(opts));
   }
 }
 
 function convAttrs(opts: types.ConvOpts): AttrDef[] {
-  let strides;
-  if (typeof opts.strides  === "number") {
-    strides = [1, opts.strides, opts.strides, 1];
-  } else {
-    assert(opts.strides.length === 2);
-    strides = [1, opts.strides[0], opts.strides[1], 1];
-  }
   const dilations = [1, 1, 1, 1];  // TODO
   const padding = opts.padding.toUpperCase();
   return [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-    ["strides", binding.ATTR_INT_LIST, strides],
+    ["strides", binding.ATTR_INT_LIST, tfStrides(opts.stride)],
     ["use_cudnn_on_gpu", binding.ATTR_BOOL, false],
     ["padding", binding.ATTR_STRING, padding],
-    ["data_format", binding.ATTR_STRING, opts.format],
+    ["data_format", binding.ATTR_STRING, "NHWC"],
     ["dilations", binding.ATTR_INT_LIST, dilations],
   ];
+}
+
+function tfStrides(s: number | [number, number]):
+                   [number, number, number, number] {
+  if (typeof s === "number") {
+    return [1, s, s, 1];
+  } else {
+    assert(s.length === 2);
+    return [1, s[0], s[1], 1];
+  }
 }

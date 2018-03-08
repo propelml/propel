@@ -519,11 +519,13 @@ export const conv2d = defFW("conv2d",
     return bo.conv2d(input, filter, opts);
   });
 defBW("conv2d",
-  (g, input, filter, opts) => {
-    const b = bo.conv2dBackpropFilter(g, input, filter.shape, opts);
-    return convert(b);
+  (g: Tensor, input: Tensor, filter: Tensor, opts: types.ConvOpts) => {
+    const s = bo.conv2dGradInput(g.storage, input.shape, filter.storage,
+                                 opts);
+    return new Tensor(s);
   },
-  (g, input, filter, opts) => {
-    const b =  bo.conv2dBackpropInput(g, input.shape, filter, opts);
-    return convert(b);
+  (g: Tensor, input: Tensor, filter: Tensor, opts: types.ConvOpts) => {
+    const s = bo.conv2dGradFilter(g.storage, input.storage, filter.shape,
+                                  opts);
+    return new Tensor(s);
   });

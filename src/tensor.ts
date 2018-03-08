@@ -707,33 +707,6 @@ export class Tensor implements types.Storage {
     }
     return t;
   }
-
-  /** Performs 2d convolution.
-   * The input and filter tensors should both be rank 4 and float32, with the
-   * input formatted as [batch, height, width, channels] and the filter
-   * [height, width, in chans, out chans].
-   *
-   * Additional arguments are ConvOpts { stride, padding, bias }.
-   */
-  conv2d(filter: Tensor, opts?: types.ConvOpts): Tensor {
-    /* TODO gaussian blur example for conv2d.
-     *    import * as pr from "propel"
-     *    img = await pr.imread("/src/testdata/sample.png")
-     *    filter = pr.gaussian([5, 5]);
-     *    pr.imshow(img.conv2d(filter))
-     */
-    const defaults: types.ConvOpts = {
-      strides: 1,
-      padding: "valid",
-      format: "NHWC",
-    };
-    const input = this;
-    assert(input.dtype === "float32");
-    assert(filter.dtype === "float32");
-    assert(input.rank === 4);
-    assert(filter.rank === 4);
-    return ops.conv2d(input, filter, Object.assign(defaults, opts));
-  }
 }
 
 if (IS_NODE) {

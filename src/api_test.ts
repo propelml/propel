@@ -1162,3 +1162,22 @@ test(async function api_dtypeConstructors() {
   assert(f32.dtype === "float32");
   assertAllEqual(f32, [1.5, 3.5]);
 });
+
+test(async function api_conv2d() {
+  // Just check that conv2d works with grad, more detailed
+  // tests are done in src/conv_test.ts
+  const f = (a, b) => api.conv2d(a, b);
+  const g = multigrad(f, [0, 1]);
+  const img = api.range(4 * 4).reshape([1, 4, 4, 1]).cast("float32");
+  const filter = api.range(2 * 2).reshape([2, 2, 1, 1]).cast("float32");
+  const g_ = g(img, filter);
+  assertShapesEqual(g_[0].shape, img.shape);
+  assertShapesEqual(g_[1].shape, filter.shape);
+  assertAllEqual(g_[0].squeeze(), [
+    [ 0, 1, 1, 1 ],
+    [ 2, 6, 6, 4 ],
+    [ 2, 6, 6, 4 ],
+    [ 2, 5, 5, 3 ],
+  ]);
+  assertAllEqual(g_[1].squeeze(), [[45, 54], [81, 90]]);
+});

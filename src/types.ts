@@ -23,12 +23,10 @@ export type ShapeDTypeList = Array<null | ShapeDType>;
 export type Convertible = number | RegularArray<number> | TypedArray;
 export type TensorLike = Storage | Convertible;
 export type DeviceType = "CPU" | "GPU";
-export type ImageFormat = "NHWC" | "NCHW"; // Note HTML intrinsically is NHWC.
 export type Padding = "same" | "valid";
 export interface ConvOpts {
-  strides: [number, number] | number;
-  padding: Padding;
-  format: ImageFormat;
+  stride?: number | [number, number];
+  padding?: Padding;
 }
 
 // Storage does not use backprop.
@@ -100,10 +98,10 @@ export interface BackendOps {
          offValue: number): Storage;
 
   conv2d(input: Storage, filter: Storage, opts: ConvOpts): Storage;
-  conv2dBackpropFilter(gradient: Storage, input: Storage,
-                       filterShape: Shape, opts: ConvOpts): Storage;
-  conv2dBackpropInput(gradient: Storage, inputShape: Shape,
-                      filter: Storage, opts: ConvOpts): Storage;
+  conv2dGradFilter(grad: Storage, input: Storage,
+                   filterShape: Shape, opts: ConvOpts): Storage;
+  conv2dGradInput(gradient: Storage, inputShape: Shape,
+                  filter: Storage, opts: ConvOpts): Storage;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping
