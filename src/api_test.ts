@@ -1208,3 +1208,17 @@ test(async function api_moments() {
   assertAllEqual(mean, [0.5, 2.5]);
   assertAllEqual(variance, [0.25, 0.25]);
 });
+
+test(async function api_sin_cos_tan() {
+  const sin = x => tensor(x).sin();
+  const cos = x => tensor(x).cos();
+  const tan = x => tensor(x).tan();
+  const v = tensor([0, Math.PI / 4, Math.PI]);
+  const a = 1 / Math.sqrt(2);
+  assertAllClose(sin(v), [0, a, 0]);
+  assertAllClose(cos(v), [1, a, -1]);
+  assertAllClose(tan(v), [0, 1, 0]);
+  assertAllClose(grad(sin)(v), [1, a, -1]);
+  assertAllClose(grad(cos)(v), [0, a, 0]);
+  assertAllClose(grad(tan)(v), [1, 2, 1]);
+});

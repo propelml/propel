@@ -276,6 +276,24 @@ defBW("square", (g, x) => {
   return g.mul(x.mul(two));
 });
 
+export const sin = defFW("sin", (x) => {
+  saveForBackward(x);
+  return bo.sin(x);
+});
+defBW("sin", (g, x) => mul(g, cos(x)));
+
+export const cos = defFW("cos", (x) => {
+  saveForBackward(x);
+  return bo.cos(x);
+});
+defBW("cos", (g, x) => mul(g, sin(x)));
+
+export const tan = defFW("tan", (x) => {
+  saveForBackward(x);
+  return bo.tan(x);
+});
+defBW("tan", (g, x) => div(g, square(cos(x))));
+
 export const sinh = defFW("sinh", (x) => {
   saveForBackward(x);
   return bo.sinh(x);
