@@ -149,7 +149,7 @@ export function float32(t: types.TensorLike): Tensor {
  * input formatted as [batch, height, width, channels] and the filter
  * [height, width, in chans, out chans].
  *
- * Additional arguments are ConvOpts { stride, padding, bias }.
+ * Additional arguments are ConvOpts { stride, padding }.
  */
 export function conv2d(input: Tensor, filter: Tensor,
                        opts?: types.ConvOpts): Tensor {
