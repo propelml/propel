@@ -183,6 +183,16 @@ export class OpsDL implements types.BackendOps {
     return x.math.square(x);
   }
 
+  sqrt(x: TensorDL): TensorDL {
+    ENV.setMath(x.math);
+    return x.math.sqrt(x);
+  }
+
+  pow(x: TensorDL, exponent: TensorDL): TensorDL {
+    ENV.setMath(x.math);
+    return x.math.pow(x, exponent);
+  }
+
   sin(x: TensorDL): TensorDL {
     ENV.setMath(x.math);
     return x.math.sin(x);

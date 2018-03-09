@@ -62,6 +62,8 @@ export interface BackendOps {
   zerosLike(x: Storage): Storage;
   fill(value: Storage, shape: Shape): Storage;
   square(x: Storage): Storage;
+  pow(x: Storage, exponent: Storage): Storage;
+  sqrt(x: Storage): Storage;
   sin(x: Storage): Storage;
   cos(x: Storage): Storage;
   tan(x: Storage): Storage;

@@ -305,13 +305,21 @@ test(async function api_fill() {
   // assertAllEqual(g(1), [1]);
 });
 
-test(async function api_square() {
-  const f = (x) => tensor(x).square();
-  const v = tensor([2, 4, -1]);
-  assertAllClose(f(v), [4, 16, 1]);
-  // The derivtive of x^2 is 2x
-  const g = grad(f);
-  assertAllClose(g(v), [4, 8, -2]);
+testDevices(async function api_square_sqrt_pow(tensor, device) {
+  const square = x => x.square();
+  const sqrt = x => x.sqrt();
+  const pow3 = x => x.pow(3);
+  const v = tensor([4, 16]);
+  assertAllClose(square(v), [16, 256]);
+  assertAllClose(sqrt(v), [2, 4]);
+  assertAllClose(pow3(v), [64, 4096]);
+  assertAllClose(grad(square)(v), [8, 32]);
+  assertAllClose(grad(sqrt)(v), [1 / 4, 1 / 8]);
+  assertAllClose(grad(pow3)(v), [48, 768]);
+  // TODO There's a bug in backprop when taking the gradient wrt to the
+  // exponent on WebGL.
+  // const exp3 = e => tensor(3).pow(e);
+  // assertAllClose(grad(exp3)([0, 1]), [ 1.09861229,  3.29583687]);
 });
 
 test(async function api_transpose() {
