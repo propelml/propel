@@ -23,13 +23,13 @@ export async function train(maxSteps = 0) {
     // justified.
     // The callback given takes the current parameters (restored from disk, or
     // initialized from random) and must return the loss.
-    exp.sgd({ lr: 0.01 }, (params) => {
+    exp.sgd({ lr: 0.01 }, (params) =>
       // Calculate and return the loss. This is the model definition.
       // The images tensor is [128, 28, 28] and uint8 dtype.
       // Before inputting it into the neural network, rescale the values
       // from [0, 255] to [-1, 1]. Zero centered tensors are usually the
       // easiest for the network to consume.
-      return images.rescale([0, 255], [-1, 1])
+      images.rescale([0, 255], [-1, 1])
         // Apply three linear (densely connected) layers with a relu after each
         // except the last. The shape of the activations are:
         // [128, 28, 28] -> [128, 200] -> [128, 100] -> [128, 10] -> []
@@ -40,8 +40,7 @@ export async function train(maxSteps = 0) {
         // Using the logits, calculate a classification loss between the
         // labels. Labels's shape is [128]. This value is returned, and will be
         // backpropagated thru.
-        .softmaxLoss(labels);
-    });
+        .softmaxLoss(labels));
     // Stop after maxSteps.
     // Note the step counter is stored with the experiment.
     if (maxSteps && exp.step >= maxSteps) break;

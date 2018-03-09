@@ -32,6 +32,7 @@ export function params(): Params {
  */
 export interface Params {
   length: number;
+  isTraining: boolean;
   has(name: string): boolean;
   get(name: string): Tensor;
   set(name: string, t: Tensor): Tensor;
@@ -65,6 +66,7 @@ class RootParams implements Params {
   // Note TS doesn't allow extending Map:
   // https://github.com/Microsoft/TypeScript/issues/10853
   private store = new Map<string, Tensor>();
+  isTraining = false;  // TODO users shouldn't be able to change this.
 
   has(name: string): boolean {
     return this.store.has(name);
@@ -121,6 +123,10 @@ class ScopedParams implements Params {
       if (name.startsWith(this.prefix)) c++;
     }
     return c;
+  }
+
+  get isTraining(): boolean {
+    return this.parent.isTraining;
   }
 
   has(name: string): boolean {
