@@ -257,6 +257,36 @@ export class Tensor implements types.Storage {
     return ops.square(this);
   }
 
+  /** Applies the sine (sinusoid) to each element of the input.
+   *
+   *    import * as pr from "propel";
+   *    x = pr.linspace(-4*Math.PI, 4*Math.PI, 200);
+   *    pr.plot(x, x.sin())
+   */
+  sin(): Tensor {
+    return ops.sin(this);
+  }
+
+  /** Applies the cosine function to each element of the input.
+   *
+   *    import * as pr from "propel";
+   *    x = pr.linspace(-4*Math.PI, 4*Math.PI, 200);
+   *    pr.plot(x, x.cos())
+   */
+  cos(): Tensor {
+    return ops.cos(this);
+  }
+
+  /** Applies the tangent function to each element of the input.
+   *
+   *    import * as pr from "propel";
+   *    x = pr.linspace(-Math.PI/4, Math.PI/4, 200);
+   *    pr.plot(x, x.tan())
+   */
+  tan(): Tensor {
+    return ops.tan(this);
+  }
+
   /** Applies the hyperbolic sine function component-wise.
    *
    *    import { linspace, plot } from "propel";

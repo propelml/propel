@@ -243,6 +243,18 @@ export class OpsTF implements types.BackendOps {
     return execute1("Square", [x]);
   }
 
+  sin(x: TensorTF): TensorTF {
+    return execute1("Sin", [x]);
+  }
+
+  cos(x: TensorTF): TensorTF {
+    return execute1("Cos", [x]);
+  }
+
+  tan(x: TensorTF): TensorTF {
+    return execute1("Tan", [x]);
+  }
+
   sinh(x: TensorTF): TensorTF {
     return execute1("Sinh", [x]);
   }
