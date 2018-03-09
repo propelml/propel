@@ -388,6 +388,27 @@ export class Tensor implements types.Storage {
     return ops.reduceLogSumExp(this, axes, keepDims);
   }
 
+  /** Prevents from backproping thru the tensor. Returned tensor uses the same
+   * storage.
+   */
+  stopGradient(): Tensor {
+    return new Tensor(this.storage);
+  }
+
+  /** Calculates mean and variance. */
+  moments(axes?: number[], keepDims = false):
+          { mean: Tensor, variance: Tensor } {
+    const x = this.cast("float32");
+    let mean = x.reduceMean(axes, true);
+    const sqDiff = x.sub(mean.stopGradient()).square();
+    let variance = sqDiff.reduceMean(axes, true);
+    if (!keepDims) {
+      mean = mean.squeeze();
+      variance = variance.squeeze();
+    }
+    return { mean, variance };
+  }
+
   /** Element-wise comparison. Returns a tensor with dtype == "bool". */
   equal(x: types.TensorLike): Tensor {
     return ops.equal(this, this.colocate(x));

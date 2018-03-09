@@ -1201,3 +1201,10 @@ test(async function api_maxPool() {
     [ 0, 1, 0, 1 ],
   ]);
 });
+
+test(async function api_moments() {
+  const x = api.range(4).reshape([2, 2]);
+  const { mean, variance } = x.moments([1]);
+  assertAllEqual(mean, [0.5, 2.5]);
+  assertAllEqual(variance, [0.25, 0.25]);
+});
