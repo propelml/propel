@@ -94,7 +94,7 @@ export interface MathBackend extends NDArrayStorage {
   ceil<T extends NDArray>(x: T): T;
   floor<T extends NDArray>(x: T): T;
 
-  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T;
+  pow<T extends NDArray>(a: T, b: NDArray): T;
   exp<T extends NDArray>(x: T): T;
   log<T extends NDArray>(x: T): T;
   sqrt<T extends NDArray>(x: T): T;

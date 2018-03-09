@@ -1001,12 +1001,8 @@ export class NDArrayMath implements NDArrayManager {
    * @param b The exponent NDArray to pow element-wise.
    */
   pow<D extends DataType, T extends NDArray<D>>(
-      a: NDArray<D>, b: NDArray<"int32">): T {
-    util.assert(
-        b.dtype === "int32",
-        "only supports int32 data type for the exponent parameter.");
+      a: NDArray<D>, b: NDArray): T {
     broadcast_util.assertAndGetBroadcastShape(a.shape, b.shape);
-
     return this.backend.pow(a, b) as T;
   }
 
@@ -1017,7 +1013,7 @@ export class NDArrayMath implements NDArrayManager {
    * @param a The base NDArray to pow element-wise.
    * @param b The exponent NDArray to pow element-wise.
    */
-  powStrict<D extends DataType>(a: NDArray<D>, b: NDArray<"int32">):
+  powStrict<D extends DataType>(a: NDArray<D>, b: NDArray):
       NDArray<D> {
     util.assertShapesMatch(a.shape, b.shape, "Error in powStrict: ");
     return this.pow(a, b);
