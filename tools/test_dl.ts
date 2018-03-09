@@ -11,7 +11,6 @@ import "../src/dl/math/backends/webgl/mulmat_packed_gpu_test";
 import "../src/dl/math/backends/webgl/render_ndarray_gpu_util_test";
 import "../src/dl/math/backends/webgl/tex_util_test";
 import "../src/dl/math/backends/webgl/webgl_util_test";
-import "../src/dl/math/batchnorm_test";
 import "../src/dl/math/binaryop_test";
 import "../src/dl/math/broadcast_util_test";
 import "../src/dl/math/clip_test";

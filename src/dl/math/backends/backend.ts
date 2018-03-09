@@ -153,19 +153,6 @@ export interface MathBackend extends NDArrayStorage {
   resizeBilinear3D(
       x: Array3D, newShape2D: [number, number], alignCorners: boolean): Array3D;
 
-  batchNormalization2D(
-      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
-      varianceEpsilon: number, scale?: Array2D | Array1D,
-      offset?: Array2D | Array1D): Array2D;
-  batchNormalization3D(
-      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
-      varianceEpsilon: number, scale?: Array3D | Array1D,
-      offset?: Array3D | Array1D): Array3D;
-  batchNormalization4D(
-      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
-      varianceEpsilon: number, scale?: Array4D | Array1D,
-      offset?: Array4D | Array1D): Array4D;
-
   multinomial(probabilities: Array2D, numSamples: number, seed: number):
       Array2D<"int32">;
 

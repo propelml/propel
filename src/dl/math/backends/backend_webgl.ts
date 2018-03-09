@@ -27,7 +27,6 @@ import * as types from "../types";
 import { SumTypes, SumTypesMap } from "../types";
 import { MathBackend } from "./backend";
 import { ArgMinMaxProgram } from "./webgl/argminmax_gpu";
-import { BatchNormProgram } from "./webgl/batchnorm_gpu";
 import { BinaryOpProgram } from "./webgl/binaryop_gpu";
 import * as binaryop_gpu from "./webgl/binaryop_gpu";
 import { ClipProgram } from "./webgl/clip_gpu";
@@ -322,78 +321,6 @@ export class MathBackendWebGL implements MathBackend {
                        program.outputShape,
                        types.upcastType(a.dtype, b.dtype)) as NDArray<D>;
     return this.compileAndRun(program, [a, b], output) as NDArray<D>;
-  }
-
-  batchNormalization2D(
-      x: Array2D, mean: Array2D | Array1D, variance: Array2D | Array1D,
-      varianceEpsilon: number, scale?: Array2D | Array1D,
-      offset?: Array2D | Array1D): Array2D {
-    const inputs = [x, mean, variance];
-
-    let offsetShape = null;
-    if (offset != null) {
-      offsetShape = offset.shape;
-      inputs.push(offset);
-    }
-
-    let scaleShape = null;
-    if (scale != null) {
-      scaleShape = scale.shape;
-      inputs.push(scale);
-    }
-
-    const program = new BatchNormProgram(
-        x.shape, mean.shape, variance.shape, offsetShape, scaleShape,
-        varianceEpsilon);
-    return this.compileAndRun(program, inputs);
-  }
-
-  batchNormalization3D(
-      x: Array3D, mean: Array3D | Array1D, variance: Array3D | Array1D,
-      varianceEpsilon: number, scale?: Array3D | Array1D,
-      offset?: Array3D | Array1D): Array3D {
-    const inputs = [x, mean, variance];
-
-    let offsetShape = null;
-    if (offset != null) {
-      offsetShape = offset.shape;
-      inputs.push(offset);
-    }
-
-    let scaleShape = null;
-    if (scale != null) {
-      scaleShape = scale.shape;
-      inputs.push(scale);
-    }
-
-    const program = new BatchNormProgram(
-        x.shape, mean.shape, variance.shape, offsetShape, scaleShape,
-        varianceEpsilon);
-    return this.compileAndRun(program, inputs);
-  }
-
-  batchNormalization4D(
-      x: Array4D, mean: Array4D | Array1D, variance: Array4D | Array1D,
-      varianceEpsilon: number, scale?: Array4D | Array1D,
-      offset?: Array4D | Array1D): Array4D {
-    const inputs = [x, mean, variance];
-
-    let offsetShape = null;
-    if (offset != null) {
-      offsetShape = offset.shape;
-      inputs.push(offset);
-    }
-
-    let scaleShape = null;
-    if (scale != null) {
-      scaleShape = scale.shape;
-      inputs.push(scale);
-    }
-
-    const program = new BatchNormProgram(
-        x.shape, mean.shape, variance.shape, offsetShape, scaleShape,
-        varianceEpsilon);
-    return this.compileAndRun(program, inputs);
   }
 
   tile<D extends DataType, T extends NDArray<D>>(x: T, reps: number[]): T {
