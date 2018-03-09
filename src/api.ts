@@ -29,6 +29,7 @@ export { imread, imsave } from "./im";
 export { Tensor } from "./tensor";
 export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
   from "./backprop";
+export { ones, zeros, randn } from "./ops";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
  *
@@ -65,8 +66,8 @@ export function listDevices(): string[] {
  */
 export function eye(size: number,
                     opts: types.TensorOpts = {dtype: "float32"}): Tensor {
-  const matrix = zeros([size, size], opts);
-  const diag = ones([size], opts);
+  const matrix = ops.zeros([size, size], opts);
+  const diag = ops.ones([size], opts);
   return matrix.setDiag(diag);
 }
 
@@ -115,22 +116,6 @@ export function range(...args: number[]): Tensor {
   return new Tensor(t);
 }
 
-/** Produces a new tensor with random values, drawn from the standard normal
- * distribution.
- *
- *    import { range, randn, plot } from "propel"
- *    n = 1000
- *    plot(range(n), randn([n]))
- */
-export function randn(shape: number[],
-                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
-  let t = bo.randn(shape);
-  if (opts.device && opts.device !== "CPU:0") {
-    t = bo.copyToDevice(t, opts.device);
-  }
-  return new Tensor(t);
-}
-
 /** fill returns a new tensor of the given shape, filled with constant values
  * specified by the `value` argument. `value` must be a scalar tensor.
  *
@@ -142,32 +127,6 @@ export function fill(value: types.TensorLike, shape: types.Shape): Tensor {
     throw new Error("Fill takes a shape as an argument");
   }
   return ops.fill(tensor(value), shape);
-}
-
-/** Return a new tensor of given shape and dtype, filled with zeros.
- *
- *    import { zeros } from "propel"
- *    zeros([5, 2])
- */
-export function zeros(shape: types.Shape,
-                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
-  if (!(shape instanceof Array)) {
-    throw new Error("Zeros takes a shape as an argument");
-  }
-  return ops.zeros(shape, opts);
-}
-
-/** Return a new tensor of given shape and dtype, filled with ones.
- *
- *    import { ones } from "propel"
- *    ones([2, 3])
- */
-export function ones(shape: types.Shape,
-                     opts: types.TensorOpts = {dtype: "float32"}): Tensor {
-  if (!(shape instanceof Array)) {
-    throw new Error("Ones takes a shape as an argument");
-  }
-  return ops.ones(shape, opts);
 }
 
 /** Constructs a uint8 tensor. */

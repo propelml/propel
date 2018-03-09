@@ -12,9 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { randn, range, zeros } from "./api";
+import { range } from "./api";
 import { bo, convertStorage } from "./backend";
 import * as format from "./format";
+import * as layers from "./layers";
 import * as ops from "./ops";
 import { Params } from "./params";
 import { allFinite, assertShapesEqual } from "./tensor_util";
@@ -749,37 +750,6 @@ export class Tensor implements types.Storage {
                .add(outScale[0]);
   }
 
-  /** Returns x*w+b for the input tensor x.
-   * Where w ("weights") and b ("bias") looked up in params.
-   * If the params object doesn't contain these parameters, they are
-   * initialized.
-   *
-   * If the input tensor has shape [d0, d1, d2, ... ] then it will be reshaped
-   * to [d0, d1 * d2 * ...] before applying the matmul. That means you can use
-   * 4D image tensors with this function without having to reshape it.
-   *
-   *    import { params, zeros } from "propel";
-   *    params = params();
-   *    inputs = zeros([2, 5]);
-   *    outputs = inputs.linear("L1", params, 10);
-   *    params.has("L1/weights") && params.has("L1/bias");
-   */
-  linear(scopeName: string, params: Params, outDim: number,
-         { useBias = true, scale = 0.01 }: LinearOpts = {}): Tensor {
-    assert(this.rank >= 2);
-    const p = params.scope(scopeName);
-    // Partially flatten tensor if needed.
-    let t = this.rank === 2 ? this : this.reshape([this.shape[0], -1]);
-    const inDim = t.shape[t.rank - 1];
-    const w = p.define("weights", () => randn([inDim, outDim]).mul(scale));
-    t = t.matmul(w);
-    if (useBias) {
-      const b = p.define("bias", () => zeros([outDim]));
-      t = t.add(b);
-    }
-    return t;
-  }
-
   /** Max pool.
    * Input should be shaped [batch, height, width, channels]
    * and by default the pooling is 2x2 with stride 2.
@@ -796,6 +766,38 @@ export class Tensor implements types.Storage {
     };
     assert(this.rank === 4);
     return ops.maxPool(this, Object.assign(defaults, opts));
+  }
+
+  /** Returns x*w+b for the input tensor x.
+   * Where w ("weights") and b ("bias") looked up in params.
+   * If the params object doesn't contain these parameters, they are
+   * initialized.
+   *
+   * If the input tensor has shape [d0, d1, d2, ... ] then it will be reshaped
+   * to [d0, d1 * d2 * ...] before applying the matmul. That means you can use
+   * 4D image tensors with this function without having to reshape it.
+   *
+   *    import { params, zeros } from "propel";
+   *    params = params();
+   *    inputs = zeros([2, 5]);
+   *    outputs = inputs.linear("L1", params, 10);
+   *    params.has("L1/weights") && params.has("L1/bias");
+   */
+  linear(name: string, params: Params, outDim: number,
+         opts?: layers.LinearOpts): Tensor {
+    return layers.linear(this, params.scope(name), outDim, opts);
+  }
+
+  /** Convolutional Layer */
+  conv2d(name: string, params: Params, outChans: number,
+         opts?: layers.ConvOpts): Tensor {
+    return layers.conv2d(this, params.scope(name), outChans, opts);
+  }
+
+  /** Batch Normalization. input must be rank 4. */
+  batchNorm(name: string, params: Params,
+            opts?: layers.BatchNormOpts): Tensor {
+    return layers.batchNorm(this, params.scope(name), opts);
   }
 }
 

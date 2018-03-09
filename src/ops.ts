@@ -158,12 +158,46 @@ export function getBackwardFunc(name: string): BWArgFunc {
   return ops[name].bwArgFunc;
 }
 
-export function ones(shape: types.Shape, opts: types.TensorOpts) {
+/** Return a new tensor of given shape and dtype, filled with ones.
+ *
+ *    import { ones } from "propel"
+ *    ones([2, 3])
+ */
+export function ones(shape: types.Shape,
+                     opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  if (!(shape instanceof Array)) {
+    throw new Error("Ones takes a shape as an argument");
+  }
   return fill(convert(1, opts), shape);
 }
 
-export function zeros(shape: types.Shape, opts: types.TensorOpts) {
+/** Return a new tensor of given shape and dtype, filled with zeros.
+ *
+ *    import { zeros } from "propel"
+ *    zeros([5, 2])
+ */
+export function zeros(shape: types.Shape,
+                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  if (!(shape instanceof Array)) {
+    throw new Error("Zeros takes a shape as an argument");
+  }
   return fill(convert(0, opts), shape);
+}
+
+/** Produces a new tensor with random values, drawn from the standard normal
+ * distribution.
+ *
+ *    import { range, randn, plot } from "propel"
+ *    n = 1000
+ *    plot(range(n), randn([n]))
+ */
+export function randn(shape: number[],
+                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+  let t = bo.randn(shape);
+  if (opts.device && opts.device !== "CPU:0") {
+    t = bo.copyToDevice(t, opts.device);
+  }
+  return new Tensor(t);
 }
 
 function addGrad(firstArg: boolean) {

@@ -5,6 +5,7 @@ import { assert, assertAllEqual, assertShapesEqual } from "./tensor_util";
 
 test(async function params_smoke() {
   const p = params();
+  assert(!p.isTraining);
   // randn
   const a = p.define("a", () => randn([2, 3]));
   assert(a.dataSync()[0] !== 0);

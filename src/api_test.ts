@@ -1144,15 +1144,6 @@ test(async function api_rescale() {
   assertAllClose(r, [-1, -0.607843137254902, 1]);
 });
 
-test(async function api_linear() {
-  const params = api.params();
-  const inputs = api.zeros([2, 5]);
-  const outputs = inputs.linear("L1", params, 10);
-  assert(params.has("L1/weights"));
-  assert(params.has("L1/bias"));
-  assertShapesEqual(outputs.shape, [2, 10]);
-});
-
 test(async function api_data() {
   const t = api.range(3);
   assertAllEqual(await t.data(), [0, 1, 2]);
