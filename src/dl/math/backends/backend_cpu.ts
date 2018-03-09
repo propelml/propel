@@ -322,7 +322,7 @@ export class MathBackendCPU implements MathBackend {
                (aValue, bValue) => aValue - bValue) as NDArray<D>;
   }
 
-  pow<T extends NDArray>(a: T, b: NDArray<"int32">): T {
+  pow<T extends NDArray>(a: T, b: NDArray): T {
     return this.broadcastedBinaryOp(
                a, b, a.dtype, (aValue, bValue) => Math.pow(aValue, bValue)) as
         T;
