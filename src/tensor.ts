@@ -257,6 +257,27 @@ export class Tensor implements types.Storage {
     return ops.square(this);
   }
 
+  /** Raises each element component-wise to the provided exponent.
+   *
+   *    import { linspace, plot } from "propel";
+   *    x = linspace(-5, 5, 200);
+   *    plot(x, x.pow(3))
+   */
+  pow(exponent: types.TensorLike): Tensor {
+    exponent = this.colocate(exponent);
+    return ops.pow(this, exponent);
+  }
+
+  /** Applies the square root to each element of the input.
+   *
+   *    import * as pr from "propel";
+   *    x = pr.linspace(0, 10, 200);
+   *    pr.plot(x, x.sqrt())
+   */
+  sqrt(): Tensor {
+    return ops.sqrt(this);
+  }
+
   /** Applies the sine (sinusoid) to each element of the input.
    *
    *    import * as pr from "propel";

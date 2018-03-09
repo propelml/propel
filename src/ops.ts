@@ -276,6 +276,25 @@ defBW("square", (g, x) => {
   return g.mul(x.mul(two));
 });
 
+export const pow = defFW("pow", (x: types.Storage, e: types.Storage) => {
+  saveForBackward(x, e);
+  return bo.pow(x, e);
+});
+defBW("pow",
+  (g: Tensor, x: Tensor, e: Tensor) => g.mul(e).mul(x.pow(e.sub(1))),
+  null);
+// FIXME There's a bug in backprop when evaluating grads wrt the second
+// argument of pow.
+// (g: Tensor, x: Tensor, e: Tensor) => g.mul(x.pow(e)).mul(x.log()));
+
+export const sqrt = defFW("sqrt", (x: types.Storage) => {
+  saveForBackward(x);
+  return bo.sqrt(x);
+});
+defBW("sqrt", (g: Tensor, x: Tensor) => {
+  return g.mul(x.pow(-0.5).mul(0.5));
+});
+
 export const sin = defFW("sin", (x) => {
   saveForBackward(x);
   return bo.sin(x);
