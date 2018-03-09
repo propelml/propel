@@ -188,6 +188,10 @@ export function genJSON(): DocEntry[] {
       // TODO Ignoring for now.
       log("- ObjectLiteralExpression");
 
+    } else if (ts.isTypeLiteralNode(node)) {
+      // TODO Ignoring for now.
+      log("- TypeLiteral");
+
     } else {
       log("Unknown node", node.kind);
       assert(false);
