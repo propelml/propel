@@ -25,7 +25,7 @@ export interface Database {
   updateDoc(nbId: string, doc: NotebookDoc): Promise<void>;
   clone(existingDoc: NotebookDoc): Promise<string>;
   create(): Promise<string>;
-  queryLatest(): Promise<NbInfo[]>;
+  queryLatest(after: string): Promise<NbInfo[]>;
   signIn(): void;
   signOut(): void;
   ownsDoc(doc: NotebookDoc): boolean;
@@ -147,9 +147,14 @@ class DatabaseFB implements Database {
     return docRef.id;
   }
 
-  async queryLatest(): Promise<NbInfo[]> {
+  async queryLatest(after: string): Promise<NbInfo[]> {
     lazyInit();
-    const query = nbCollection.orderBy("updated").limit(100);
+    let query = nbCollection.orderBy("updated", "desc");
+    if (after) {
+      const last = await nbCollection.doc(after).get();
+      query = query.startAfter(last);
+    }
+    query = query.limit(33);
     const snapshots = await query.get();
     const out = [];
     snapshots.forEach(snap => {
@@ -157,7 +162,7 @@ class DatabaseFB implements Database {
       const doc = snap.data();
       out.unshift({ nbId, doc });
     });
-    return out;
+    return out.reverse();
   }
 
   signIn() {

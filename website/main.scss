@@ -572,6 +572,16 @@ header {
   margin: 0 auto;
   padding: 0 8px;
 
+  .most-recent-nextpage {
+    width: 100%;
+    margin: $size0 auto;
+    max-width: 960px;
+
+    button {
+      width: 100%;
+    }
+  }
+
   .most-recent-header {
     display: grid;
     grid-template-columns: auto auto;
