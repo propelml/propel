@@ -21,6 +21,13 @@ import { exitOnFail } from "./tester";
 // side-effect of making unhandled rejections crash node.
 import { IS_NODE } from "../src/util";
 
+let useRenderFlag = false;
+const i = process.argv.indexOf("use-render");
+if (i >= 0) {
+  useRenderFlag = true;
+  process.argv.splice(i, 1); // delete flag;
+}
+
 // Allow people to filter the tests from the command-line.
 // Example: ts-node ./tools/test_browser.ts concat
 let filterExpr: string = null;
@@ -58,36 +65,13 @@ const propelTests: Test = {
     timeout: 2 * 60 * 1000,
 };
 
-let TESTS: Test[] = [
+const TESTS: Test[] = [
   // This page loads and runs all the webpack'ed unit tests.
   // The test harness logs "DONE bla bla" to the console when done.
   // If this message doesn't appear, or an unhandled error is thrown on the
   // page, the test fails.
   propelTests,
 ];
-
-if (!filterExpr) {
-  TESTS = TESTS.concat([{
-    path: "index.html",
-    doneMsg: /Propel onload/,
-    timeout: 10 * 1000,
-  },
-  {
-    path: "notebook/",
-    doneMsg: /Propel onload/,
-    timeout: 10 * 1000,
-  },
-  {
-    path: "notebook/?nbId=default",
-    doneMsg: /Propel onload/,
-    timeout: 10 * 1000,
-  },
-  {
-    path: "docs/index.html",
-    doneMsg: /Propel onload/,
-    timeout: 10 * 1000,
-  }]);
-}
 
 if (testdl) {
   TESTS.unshift({
@@ -100,9 +84,14 @@ if (testdl) {
 (async() => {
   let passed = 0, failed = 0;
 
-  const server = createServer({ cors: true, root: "./build/website" });
-  server.listen();
-  const port = server.server.address().port;
+  let server, port;
+  if (useRenderFlag) {
+    server = createServer({ cors: true, root: "./build/website_render" });
+    server.listen();
+    port = server.server.address().port;
+  } else {
+    port = 8080;
+  }
 
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -124,11 +113,12 @@ if (testdl) {
   }
 
   await browser.close();
-  server.close();
 
   console.log(`DONE. passed: ${passed}, failed: ${failed}`);
   if (failed > 0) {
     process.exit(1);
+  } else {
+    process.exit(0);
   }
 })();
 

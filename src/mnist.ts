@@ -18,13 +18,13 @@ import { assert, fetchArrayBuffer } from "./util";
 export function filenames(split: string): [string, string] {
   if (split === "train") {
     return [
-      "deps/data/mnist/train-labels-idx1-ubyte",
-      "deps/data/mnist/train-images-idx3-ubyte",
+      "deps/data/mnist/train-labels-idx1-ubyte.bin",
+      "deps/data/mnist/train-images-idx3-ubyte.bin",
     ];
   } else if (split === "test") {
     return [
-      "deps/data/mnist/t10k-labels-idx1-ubyte",
-      "deps/data/mnist/t10k-images-idx3-ubyte",
+      "deps/data/mnist/t10k-labels-idx1-ubyte.bin",
+      "deps/data/mnist/t10k-images-idx3-ubyte.bin",
     ];
   } else {
     throw new Error(`Bad split: ${split}`);
