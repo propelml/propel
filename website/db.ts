@@ -149,7 +149,7 @@ class DatabaseFB implements Database {
 
   async queryLatest(): Promise<NbInfo[]> {
     lazyInit();
-    const query = nbCollection.orderBy("updated").limit(100);
+    const query = nbCollection.orderBy("updated", "desc").limit(100);
     const snapshots = await query.get();
     const out = [];
     snapshots.forEach(snap => {
@@ -157,7 +157,7 @@ class DatabaseFB implements Database {
       const doc = snap.data();
       out.unshift({ nbId, doc });
     });
-    return out;
+    return out.reverse();
   }
 
   signIn() {
