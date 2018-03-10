@@ -246,6 +246,7 @@ export class Router extends Component<any, RouterState> {
   }
 
   render() {
+    console.log("document.location.pathname", document.location.pathname);
     const page = route(document.location.pathname);
     return h(page.root, { userInfo: this.state.userInfo });
   }
@@ -264,25 +265,25 @@ export function route(pathname: string): Page {
 export const pages: Page[] = [
   {
     title: "Propel ML",
-    path: "website/index.html",
+    path: "index.html",
     root: PropelIndex,
     route: /^\/(index.html)?$/,
   },
   {
     title: "Propel Notebook",
-    path: "website/notebook/index.html",
+    path: "notebook/index.html",
     root: nb.NotebookRoot,
     route: /^\/notebook/,
   },
   {
     title: "Propel References",
-    path: "website/references.html",
+    path: "references/index.html",
     root: References,
-    route: /^\/references/,
+    route: /^\/references(.html)?/,
   },
   {
     title: "Propel Docs",
-    path: "website/docs/index.html",
+    path: "docs/index.html",
     root: Docs,
     route: /^\/docs/,
   },

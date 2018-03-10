@@ -96,15 +96,10 @@ When working on the website, it's often nice to run a dev server
 This will automatically rebuild the website on any scss or javascript
 changes.
 
-Sometimes you'll want to work on the tests - this can be done like so:
-
-    ./tools/parcel.js tools/test_website.ts -d build/website/
-
 To run the website tests, point your browser to
 http://localhost:8080/static/test.html#script=/test_website.js
 
-However to build the release website, `./tools/build_website.js` must be run
-after every change. (We don't yet have auto-build on change, sorry.)
+To build the production website, `./tools/render_website.js prod` must be run.
 
 
 ### Adding An Op

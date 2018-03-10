@@ -13,7 +13,7 @@ process.on("unhandledRejection", e => { throw e; });
   run.tsnode("./tools/gendoc_test.ts");
 
   // Web browser tests
-  run.tsnode("tools/test_browser.ts");
+  run.tsnode("tools/test_browser.ts use-render");
 
   run.tsnode("tools/jasmine_shim_test.ts");
 })();

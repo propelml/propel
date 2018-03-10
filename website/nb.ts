@@ -32,6 +32,13 @@ import { SandboxRPC } from "./sandbox_rpc";
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
 
+const prerenderedOutputs = new Map<number, string>();
+
+export function registerPrerenderedOutput(output) {
+  const cellId = Number(output.id.replace("output", ""));
+  prerenderedOutputs.set(cellId, output.innerHTML);
+}
+
 // An anonymous notebook doc for when users aren't logged in
 const anonDoc = {
   anonymous: true,
@@ -161,15 +168,21 @@ export class Cell extends Component<CellProps, CellState> {
   output: Element;
   editor: CodeMirror.Editor;
   readonly id: number;
+  outputHTML?: string;
 
   constructor(props) {
     super(props);
     this.id = nextCellId++;
+    if (prerenderedOutputs.has(this.id)) {
+      this.outputHTML = prerenderedOutputs.get(this.id);
+    }
     cellTable.set(this.id, this);
   }
 
   componentWillMount() {
-    cellExecuteQueue.push(this);
+    if (!this.outputHTML) {
+      cellExecuteQueue.push(this);
+    }
   }
 
   get code(): string {
@@ -334,6 +347,19 @@ export class Cell extends Component<CellProps, CellState> {
       }, "");
     }
 
+    // If supplied outputHTML, use that in the output div.
+    const outputDivAttr = {
+      "class": "output",
+      "id": "output" + this.id,
+      "ref": (ref => { this.output = ref; }),
+    };
+    if (this.outputHTML) {
+      outputDivAttr["dangerouslySetInnerHTML"] = {
+        __html: this.outputHTML,
+      };
+    }
+    const outputDiv = h("div", outputDivAttr);
+
     return h("div", {
         "class": "notebook-cell",
         "id": `cell${this.id}`,
@@ -349,11 +375,7 @@ export class Cell extends Component<CellProps, CellState> {
         runButton,
       ),
       h("div", { "class": "output-container" },
-        h("div", {
-          "class": "output",
-          "id": "output" + this.id,
-          "ref": (ref => { this.output = ref; }),
-        }),
+        outputDiv,
         insertButton,
       )
     );
