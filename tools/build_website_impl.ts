@@ -95,7 +95,17 @@ function scss(inFile, outFile) {
     file: inFile,
     includePaths: ["./website"],
   };
-  const result = renderSync(options).css.toString("utf8");
+  let result = renderSync(options).css.toString("utf8");
+  // Due to how parcel works, we have to include relative URLs in the sass
+  // file website/main.scss
+  // Example:
+  //  background-image: url(./img/deleteButtonOutline.svg);
+  // When bundle.scss is built in ./build/website/ it then can't resolve these
+  // relative path names. Like if it's in /docs.
+  // So just hack it here... All this should be replaced with parcel soon.
+  result = result.replace(/.\/img\//g, "/static/img/");
+  result = result.replace(/\(img\//g, "(/static/img/");
+  result = result.replace(/\("img\//g, `("/static/img/`);
   console.log("scss", inFile, outFile);
   fs.writeFileSync(outFile, result);
 }
