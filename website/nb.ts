@@ -386,6 +386,7 @@ export interface NotebookRootProps {
 
 export interface NotebookRootState {
   nbId?: string;
+  after?: string;
 }
 
 export class NotebookRoot extends Component<NotebookRootProps,
@@ -400,8 +401,10 @@ export class NotebookRoot extends Component<NotebookRootProps,
       const matches = window.location.search.match(/nbId=(\w+)/);
       nbId = matches ? matches[1] : null;
     }
+    const afterMatchs = window.location.search.match(/after=(\w+)/);
+    const after = afterMatchs ? afterMatchs[1] : null;
 
-    this.state = { nbId };
+    this.state = { nbId, after };
   }
 
   render() {
@@ -412,7 +415,9 @@ export class NotebookRoot extends Component<NotebookRootProps,
         userInfo: this.props.userInfo,
       });
     } else {
-      body = h(MostRecent, null);
+      body = h(MostRecent, {
+        after: this.state.after
+      });
     }
 
     return h("div", { "class": "notebook" },
@@ -429,6 +434,10 @@ export interface MostRecentState {
   latest: db.NbInfo[];
 }
 
+export interface MostRecentProps {
+  after?: string;
+}
+
 function nbUrl(nbId: string): string {
   // Careful, S3 is finicy about what URLs it serves. So
   // /notebook?nbId=blah  will get redirect to /notebook/
@@ -437,12 +446,22 @@ function nbUrl(nbId: string): string {
   return u;
 }
 
-export class MostRecent extends Component<any, MostRecentState> {
+function nextPageUrl(latest: db.NbInfo[]): string {
+  if (latest.length < 33) {
+    return null;
+  }
+  const last = latest[latest.length - 1];
+  const u = window.location.origin + "/notebook/?after=" + last.nbId;
+  return u;
+}
+
+export class MostRecent extends Component<MostRecentProps, MostRecentState> {
   async componentWillMount() {
     // Only query firebase when in the browser.
     // This is to avoiding calling into firebase during static HTML generation.
     if (IS_WEB) {
-      const latest = await db.active.queryLatest();
+      const after = this.props.after;
+      const latest = await db.active.queryLatest(after ? after : null);
       this.setState({latest});
     }
   }
@@ -452,6 +471,10 @@ export class MostRecent extends Component<any, MostRecentState> {
     const nbId = await db.active.create();
     // Redirect to new notebook.
     window.location.href = nbUrl(nbId);
+  }
+
+  nextPage() {
+    window.location.href = nextPageUrl(this.state.latest);
   }
 
   render() {
@@ -482,6 +505,13 @@ export class MostRecent extends Component<any, MostRecentState> {
         ),
       ),
       h("ol", null, ...notebookList),
+      nextPageUrl(this.state.latest) ?
+      h("div", {"class": "most-recent-nextpage"},
+        h("button", {
+          "onClick": () => this.nextPage()
+        }, "Load more...")
+      )
+      : null
     );
   }
 }
