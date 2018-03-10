@@ -120,8 +120,7 @@ function sandbox(): SandboxRPC {
 }
 
 // Convenience function to create Notebook JSX element.
-// TODO This function is badly named. It should be called notebookCell()
-export function notebook(code: string, props: CellProps = {}): JSX.Element {
+export function cell(code: string, props: CellProps = {}): JSX.Element {
   props.code = code;
   return h(Cell, props);
 }
@@ -584,7 +583,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   renderCells(doc): JSX.Element {
     return h("div", { "class": "cells" }, doc.cells.map((code, i) => {
-      return notebook(code, {
+      return cell(code, {
         onRun: (updatedCode) => { this.onRun(updatedCode, i); },
         onDelete: () => { this.onDelete(i); },
         onInsertCell: () => { this.onInsertCell(i); },

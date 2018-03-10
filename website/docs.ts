@@ -68,7 +68,7 @@ export function markupDocStr(docstr: string): JSX.Element {
         if (line == null || !isIndented(line)) {
           state = "normal";
           const src = buf.map(unindent).join("\n");
-          elements.push(nb.notebook(src));
+          elements.push(nb.cell(src));
           buf = [];
         }
         break;
