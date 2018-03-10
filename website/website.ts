@@ -76,7 +76,7 @@ export const PropelIndex = (props) => {
 };
 
 const ReferencesFooter = () =>
-  div("footer", link("references.html", "References"));
+  div("footer", link("/references", "References"));
 
 const Splash = (props) =>
   div("splash",
