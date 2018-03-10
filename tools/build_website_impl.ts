@@ -129,7 +129,7 @@ process.on("unhandledRejection", e => { throw e; });
   scss("website/main.scss", join(websiteRoot, "bundle.css"));
 
   // Bundle all scripts that are used on the website (except the sandbox).
-  await run.parcel("website/website_main.ts", "build/website");
+  await run.parcel("website/main.ts", "build/website");
   // Bundle all scripts that run in the notebook sandbox iframe.
   await run.parcel("website/sandbox.ts", "build/website");
 
