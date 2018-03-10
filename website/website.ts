@@ -202,7 +202,7 @@ export function getHTML(title, markup) {
       minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="stylesheet" href="/bundle.css"/>
     ${scriptTags}
-    <script src="/website_main.js"></script>
+    <script src="/main.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
   </head>
   <body>${markup}
