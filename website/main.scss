@@ -3,7 +3,7 @@
 //@import './theme_dark.scss';
 @import './theme_light.scss';
 @import './syntax.scss';
-@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono');
+@import url(https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono);
 
 $githubGreen: #39aa56;
 $size0: 8px;
@@ -250,10 +250,10 @@ header {
       /* Top right corner */
       grid-column: 2 / -1;
       grid-row: 1 / 2;
-      background-image: url(/static/img/deleteButtonOutline.svg);
+      background-image: url(./img/deleteButtonOutline.svg);
 
       &:hover {
-        background-image: url(/static/img/deleteButtonFill.svg);
+        background-image: url(./img/deleteButtonFill.svg);
       }
     }
 
@@ -261,7 +261,7 @@ header {
       /* Bottom right corner */
       grid-column: 2 / -1;
       grid-row: 3 / -1;
-      background-image: url(/static/img/runButton.svg);
+      background-image: url(./img/runButton.svg);
     }
 
     /* Auto-resizing cells. */
@@ -279,7 +279,7 @@ header {
       /* Bottom right corner */
       grid-column: 2 / -1;
       grid-row: 3 / -1;
-      background-image: url(/static/img/insertButton.svg);
+      background-image: url(./img/insertButton.svg);
     }
   }
 
@@ -331,19 +331,19 @@ header {
     background-repeat: no-repeat;
 
     &.world {
-      background-image: url("/static/img/world.svg");
+      background-image: url(./img/world.svg);
     }
 
     &.upward {
-      background-image: url("/static/img/upward.svg");
+      background-image: url(./img/upward.svg);
     }
 
     &.chip {
-      background-image: url("/static/img/chip.svg");
+      background-image: url(./img/chip.svg);
     }
 
     &.lightning {
-      background-image: url("/static/img/lightning.svg");
+      background-image: url(./img/lightning.svg);
     }
   }
 }

@@ -66,7 +66,7 @@ function createIframe(): Window {
       <head>
         <meta charset="utf-8">
         <base href="${escape(base, { isAttributeValue: true })}">
-        <script async type="text/javascript" src="sandbox.js">
+        <script async type="text/javascript" src="/sandbox.js">
         </script>
       </head>
       <body>
