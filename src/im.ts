@@ -209,9 +209,9 @@ async function nodeImageDecoder(filename: string, mode: Mode)
  * The second argument specifies if you want "RGBA", "RGB", or "L" (for
  * luminosity/greyscale).
  *
- *    import { imread } from "propel"
+ *    import { imread, imshow } from "propel"
  *    img = await imread("/src/testdata/sample.png")
- *    img.reduceMean([0, 1])  // Average RGBA values
+ *    imshow(img.transpose([1, 0, 2]))
  */
 export async function imread(filename: string, mode: Mode = "RGBA")
     : Promise<Tensor> {
