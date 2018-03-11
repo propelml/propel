@@ -21,7 +21,8 @@ environment:
 clone_folder: c:\propel
 
 clone_script:
-  - ps: git clone -q --depth=1 --config core.symlinks=true --branch=$env:appveyor_repo_branch https://github.com/$env:appveyor_repo_name.git $env:appveyor_build_folder
+  - ps: git config --global core.symlinks true
+  - ps: git clone -q --depth=1 --branch=$env:appveyor_repo_branch https://github.com/$env:appveyor_repo_name.git $env:appveyor_build_folder
   - ps: cd $env:appveyor_build_folder
   - ps: >-
         if ($env:appveyor_pull_request_number) {
