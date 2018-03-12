@@ -618,7 +618,7 @@ declare namespace firebase.firestore {
     ssl?: boolean;
   }
 
-  export type LogLevel = 'debug' | 'error' | 'silent';
+  export type LogLevel = "debug" | "error" | "silent";
 
   function setLogLevel(logLevel: LogLevel): void;
 
@@ -1160,13 +1160,13 @@ declare namespace firebase.firestore {
    * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
    * (descending or ascending).
    */
-  export type OrderByDirection = 'desc' | 'asc';
+  export type OrderByDirection = "desc" | "asc";
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
    * strings '<', '<=', '==', '>=', and '>'.
    */
-  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>';
+  export type WhereFilterOp = "<" | "<=" | "==" | ">=" | ">";
 
   /**
    * Options for use with `Query.onSnapshot() to control the behavior of the
@@ -1434,7 +1434,7 @@ declare namespace firebase.firestore {
   /**
    * The type of of a `DocumentChange` may be 'added', 'removed', or 'modified'.
    */
-  export type DocumentChangeType = 'added' | 'removed' | 'modified';
+  export type DocumentChangeType = "added" | "removed" | "modified";
 
   /**
    * A `DocumentChange` represents a change to the documents matching a query.
@@ -1587,22 +1587,22 @@ declare namespace firebase.firestore {
    *   credentials for the operation.
    */
   export type FirestoreErrorCode =
-    | 'cancelled'
-    | 'unknown'
-    | 'invalid-argument'
-    | 'deadline-exceeded'
-    | 'not-found'
-    | 'already-exists'
-    | 'permission-denied'
-    | 'resource-exhausted'
-    | 'failed-precondition'
-    | 'aborted'
-    | 'out-of-range'
-    | 'unimplemented'
-    | 'internal'
-    | 'unavailable'
-    | 'data-loss'
-    | 'unauthenticated';
+    | "cancelled"
+    | "unknown"
+    | "invalid-argument"
+    | "deadline-exceeded"
+    | "not-found"
+    | "already-exists"
+    | "permission-denied"
+    | "resource-exhausted"
+    | "failed-precondition"
+    | "aborted"
+    | "out-of-range"
+    | "unimplemented"
+    | "internal"
+    | "unavailable"
+    | "data-loss"
+    | "unauthenticated";
 
   /** An error returned by a Firestore operation. */
   // TODO(b/63008957): FirestoreError should extend firebase.FirebaseError
@@ -1614,6 +1614,6 @@ declare namespace firebase.firestore {
   }
 }
 
-declare module 'firebase' {
+declare module "firebase" {
   export = firebase;
 }

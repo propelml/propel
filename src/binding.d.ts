@@ -43,11 +43,19 @@ export interface BindingInterface {
   getShape(h: Handle): types.Shape;
   getDevice(h: Handle): string;
   listDevices(ctx: Context): DeviceDesc[];
-  createSmallHandle(ctx: Context, dtype: DTypeCode, device: string,
-                    data: number | number[]): Handle;
+  createSmallHandle(
+    ctx: Context,
+    dtype: DTypeCode,
+    device: string,
+    data: number | number[]
+  ): Handle;
   copyToDevice(ctx: Context, h: Handle, device: string): Handle;
-  execute(ctx: Context, op: string, attrs: AttrDef[],
-          inputs: Handle[]): Handle[];
+  execute(
+    ctx: Context,
+    op: string,
+    attrs: AttrDef[],
+    inputs: Handle[]
+  ): Handle[];
   dispose(h: Handle): void;
 
   TF_FLOAT: DTypeCode;

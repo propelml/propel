@@ -29,7 +29,7 @@ test(async function mnist_trainSplit() {
 });
 
 test(async function mnist_testSplit() {
-  const {images, labels} = await mnist.loadSplit("test");
+  const { images, labels } = await mnist.loadSplit("test");
   assertShapesEqual(images.shape, [10000, 28, 28]);
   assertShapesEqual(labels.shape, [10000]);
   assertAllEqual(labels.slice([0], [3]), [7, 2, 1]);

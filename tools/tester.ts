@@ -93,12 +93,7 @@ async function runTests() {
 
   for (let i = 0; i < tests.length; i++) {
     const { fn, name } = tests[i];
-    log("%d/%d +%d -%d: %s",
-        i + 1,
-        tests.length,
-        passed,
-        failed,
-        name);
+    log("%d/%d +%d -%d: %s", i + 1, tests.length, passed, failed, name);
     try {
       await fn();
       passed++;

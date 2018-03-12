@@ -85,23 +85,31 @@ export function markupDocStr(docstr: string): JSX.Element {
   return div("docstr", elements);
 }
 
-const DocIndex = ({docs}) => {
+const DocIndex = ({ docs }) => {
   const list = docs.map(entry => {
     const tag = toTagName(entry.name);
     const className = "name " + entry.kind;
-    return h("li", null, h("a", { href: "#" + tag, "class": className },
-      entry.name));
+    return h(
+      "li",
+      null,
+      h("a", { href: "#" + tag, class: className }, entry.name)
+    );
   });
-  return h("ol", { "class": "docindex" }, list);
+  return h("ol", { class: "docindex" }, list);
 };
 
-const DocEntries = ({docs}) => {
+const DocEntries = ({ docs }) => {
   const entries = docs.map(entry => {
     const tag = toTagName(entry.name);
     const out = [];
 
-    out.push(h("h2", { id: tag, "class": "name" },
-      h("a", { "href": "#" + tag }, entry.name)));
+    out.push(
+      h(
+        "h2",
+        { id: tag, class: "name" },
+        h("a", { href: "#" + tag }, entry.name)
+      )
+    );
 
     if (entry.typestr) {
       out.push(div("typestr", entry.typestr));
@@ -110,8 +118,9 @@ const DocEntries = ({docs}) => {
       out.push(markupDocStr(entry.docstr));
     }
 
-    const sourceLink = !entry.sourceUrl ? null
-      : h("a", { "class": "source-link", "href": entry.sourceUrl }, " source");
+    const sourceLink = !entry.sourceUrl
+      ? null
+      : h("a", { class: "source-link", href: entry.sourceUrl }, " source");
 
     return div("doc-entry", sourceLink, ...out);
   });
@@ -136,13 +145,13 @@ export function Docs(props) {
     return 0;
   });
 
-  return div("docs",
+  return div(
+    "docs",
     h(GlobalHeader, { subtitle: "Docs" }),
-      div("doc-wrapper",
-        div("panel",
-          h(DocIndex, { docs }),
-        ),
-        h(DocEntries, { docs }),
-    ),
+    div(
+      "doc-wrapper",
+      div("panel", h(DocIndex, { docs })),
+      h(DocEntries, { docs })
+    )
   );
 }

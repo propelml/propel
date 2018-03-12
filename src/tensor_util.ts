@@ -14,8 +14,15 @@
  */
 
 import { Tensor } from "./tensor";
-import { DType, FlatVector, RegularArray, Shape, Storage, TensorLike,
-    TypedArray } from "./types";
+import {
+  DType,
+  FlatVector,
+  RegularArray,
+  Shape,
+  Storage,
+  TensorLike,
+  TypedArray
+} from "./types";
 import { assert } from "./util";
 export { assert } from "./util";
 
@@ -60,18 +67,28 @@ export function allFinite(arr: number[]): boolean {
   return true;
 }
 
-export function assertClose(actual: TensorLike, expected: TensorLike,
-                            delta = 0.001) {
+export function assertClose(
+  actual: TensorLike,
+  expected: TensorLike,
+  delta = 0.001
+) {
   actual = toNumber(actual);
   expected = toNumber(expected);
-  assert(Math.abs(actual - expected) < delta,
-    `actual: ${actual} expected: ${expected}`);
+  assert(
+    Math.abs(actual - expected) < delta,
+    `actual: ${actual} expected: ${expected}`
+  );
 }
 
-export function assertEqual(actual: TensorLike, expected: number | boolean,
-                            msg = null) {
+export function assertEqual(
+  actual: TensorLike,
+  expected: number | boolean,
+  msg = null
+) {
   actual = toNumber(actual);
-  if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
+  if (!msg) {
+    msg = `actual: ${actual} expected: ${expected}`;
+  }
   assert(actual === expected, msg);
 }
 
@@ -86,23 +103,30 @@ export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
   const [expectedShape, expectedFlat] = toShapeAndFlatVector(expected);
   assertShapesEqual(actualShape, expectedShape);
   for (let i = 0; i < actualFlat.length; i++) {
-    assert(actualFlat[i] === expectedFlat[i],
-      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`);
+    assert(
+      actualFlat[i] === expectedFlat[i],
+      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`
+    );
   }
 }
 
-export function assertAllClose(actual: TensorLike, expected: TensorLike,
-                               delta = 0.001) {
+export function assertAllClose(
+  actual: TensorLike,
+  expected: TensorLike,
+  delta = 0.001
+) {
   const [actualShape, actualFlat] = toShapeAndFlatVector(actual);
   const [expectedShape, expectedFlat] = toShapeAndFlatVector(expected);
 
   assertShapesEqual(actualShape, expectedShape);
 
   for (let i = 0; i < actualFlat.length; ++i) {
-    const a = (actualFlat[i]) as number;
-    const e = (expectedFlat[i]) as number;
-    assert(Math.abs(a - e) < delta,
-      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`);
+    const a = actualFlat[i] as number;
+    const e = expectedFlat[i] as number;
+    assert(
+      Math.abs(a - e) < delta,
+      `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`
+    );
   }
 }
 
@@ -138,8 +162,11 @@ export function bcastGradientArgs(sx: Shape, sy: Shape): [Shape, Shape] {
 }
 
 export function isTypedArray(x: any): x is TypedArray {
-  return (x instanceof Float32Array || x instanceof Uint8Array ||
-          x instanceof Int32Array);
+  return (
+    x instanceof Float32Array ||
+    x instanceof Uint8Array ||
+    x instanceof Int32Array
+  );
 }
 
 export function getDType(data: TypedArray): DType {
@@ -188,8 +215,9 @@ export function makeTypedArray(data, dtype: DType = "float32"): TypedArray {
  */
 
 export function flatten(
-    arr: number | boolean | RegularArray<number> | RegularArray<boolean>,
-    ret: Array<number | boolean> = []): Array<number | boolean> {
+  arr: number | boolean | RegularArray<number> | RegularArray<boolean>,
+  ret: Array<number | boolean> = []
+): Array<number | boolean> {
   if (Array.isArray(arr)) {
     for (let i = 0; i < arr.length; ++i) {
       flatten(arr[i], ret);
@@ -200,8 +228,9 @@ export function flatten(
   return ret;
 }
 
-export function inferShape(arr: number | boolean | RegularArray<number> |
-                           RegularArray<boolean>): number[] {
+export function inferShape(
+  arr: number | boolean | RegularArray<number> | RegularArray<boolean>
+): number[] {
   const shape: number[] = [];
   while (arr instanceof Array) {
     shape.push(arr.length);

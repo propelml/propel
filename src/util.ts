@@ -30,7 +30,7 @@ export const IS_WEB = global.window !== undefined;
 export const IS_NODE = !IS_WEB;
 
 if (IS_NODE) {
-  process.on("unhandledRejection", (error) => {
+  process.on("unhandledRejection", error => {
     throw error;
   });
 }
@@ -66,7 +66,6 @@ export class CounterMap {
 
   keys(): number[] {
     return Array.from(this.map.keys());
-
   }
 
   inc(id: number): void {
@@ -141,9 +140,10 @@ const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(p: string,
-                      encoding: "binary" | "utf8" = "binary")
-                      : Promise<string | ArrayBuffer> {
+async function fetch2(
+  p: string,
+  encoding: "binary" | "utf8" = "binary"
+): Promise<string | ArrayBuffer> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
   p = fetch2ArgManipulation(p);

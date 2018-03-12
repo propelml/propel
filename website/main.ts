@@ -15,7 +15,7 @@ function cells() {
   }
 }
 
-window.addEventListener("load", async() => {
+window.addEventListener("load", async () => {
   cells();
 
   render(h(Router, null), document.body, document.body.children[0]);

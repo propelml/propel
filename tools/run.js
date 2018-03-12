@@ -6,7 +6,7 @@ const rimraf = require("rimraf");
 // Be extra careful to enable ts-node type checking.
 process.env.TS_NODE_TYPE_CHECK = true;
 
-require("ts-node").register({"typeCheck": true });
+require("ts-node").register({ typeCheck: true });
 const gendoc = require("./gendoc.ts");
 
 // Always chdir to propel's project root.
@@ -14,10 +14,10 @@ const root = resolve(__dirname, "..");
 process.chdir(root);
 
 /** Runs a new subprocess synchronously.
-  * We use this instead of shell scripts to support Windows.
-  * The process arguments are forwarded to commands.
-  * This is so one can run ./tools/tslint.js --fix
-  */
+ * We use this instead of shell scripts to support Windows.
+ * The process arguments are forwarded to commands.
+ * This is so one can run ./tools/tslint.js --fix
+ */
 function sh(cmd, env = {}) {
   let args = cmd.split(/\s+/);
   console.log(args.join(" "));
@@ -25,7 +25,7 @@ function sh(cmd, env = {}) {
   // Use this node if node is specified.
   if (exe === "node") exe = process.execPath;
   let r = spawnSync(exe, args, {
-    stdio: 'inherit',
+    stdio: "inherit",
     env: { ...process.env, ...env }
   });
   if (r.error) throw r.error;
@@ -103,15 +103,14 @@ function version() {
   return pkg.version;
 }
 
-exports.gendoc = (fn) => {
-  let gendocFlag = (process.argv.indexOf("gendoc") >= 0);
+exports.gendoc = fn => {
+  let gendocFlag = process.argv.indexOf("gendoc") >= 0;
   if (gendocFlag || !fs.existsSync(fn)) {
     const docs = gendoc.genJSON();
     const docsJson = JSON.stringify(docs, null, 2);
     fs.writeFileSync(fn, docsJson);
   }
-}
-
+};
 
 exports.mkdir = mkdir;
 exports.parcel = parcel;

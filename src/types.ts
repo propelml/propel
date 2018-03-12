@@ -48,8 +48,12 @@ export interface BackendOps {
   copyToDevice(x: Storage, device: string): Storage;
   getDevice(x: Storage): string;
   listDevices(): string[];
-  fromTypedArray(data: TypedArray, shape: Shape, dtype?: DType,
-                 device?: string): Storage;
+  fromTypedArray(
+    data: TypedArray,
+    shape: Shape,
+    dtype?: DType,
+    device?: string
+  ): Storage;
   add(x: Storage, y: Storage): Storage;
   sub(x: Storage, y: Storage): Storage;
   mul(x: Storage, y: Storage): Storage;
@@ -84,8 +88,12 @@ export interface BackendOps {
   range(start: number, limit: number, delta: number): Storage;
   transpose(x: Storage, perm: Storage): Storage;
   reverse(x: Storage, dims: Storage): Storage;
-  matmul(x: Storage, y: Storage, transposeA: boolean,
-         transposeB: boolean): Storage;
+  matmul(
+    x: Storage,
+    y: Storage,
+    transposeA: boolean,
+    transposeB: boolean
+  ): Storage;
   argmax(x: Storage, axis: number): Storage;
   argmin(x: Storage, axis: number): Storage;
   reduceSum(x: Storage, axes: number[], keepDims: boolean): Storage;
@@ -104,17 +112,28 @@ export interface BackendOps {
   softmax(x: Storage): Storage;
   logSoftmax(x: Storage): Storage;
   cast(x: Storage, dtype: DType): Storage;
-  oneHot(x: Storage, depth: number, onValue: number,
-         offValue: number): Storage;
+  oneHot(x: Storage, depth: number, onValue: number, offValue: number): Storage;
 
   conv2d(input: Storage, filter: Storage, opts: ConvOpts): Storage;
-  conv2dGradFilter(grad: Storage, input: Storage,
-                   filterShape: Shape, opts: ConvOpts): Storage;
-  conv2dGradInput(gradient: Storage, inputShape: Shape,
-                  filter: Storage, opts: ConvOpts): Storage;
+  conv2dGradFilter(
+    grad: Storage,
+    input: Storage,
+    filterShape: Shape,
+    opts: ConvOpts
+  ): Storage;
+  conv2dGradInput(
+    gradient: Storage,
+    inputShape: Shape,
+    filter: Storage,
+    opts: ConvOpts
+  ): Storage;
   maxPool(input: Storage, opts: PoolOpts): Storage;
-  maxPoolGrad(grad: Storage, origInput: Storage, origOutput: Storage,
-              opts: PoolOpts): Storage;
+  maxPoolGrad(
+    grad: Storage,
+    origInput: Storage,
+    origOutput: Storage,
+    opts: PoolOpts
+  ): Storage;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

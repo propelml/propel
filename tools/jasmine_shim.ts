@@ -64,8 +64,12 @@ export const matchTesters: MatchTesters = {
       if (a === b) {
         return true;
       }
-      if (typeof a === "number" && typeof b === "number" &&
-          isNaN(a) && isNaN(b)) {
+      if (
+        typeof a === "number" &&
+        typeof b === "number" &&
+        isNaN(a) &&
+        isNaN(b)
+      ) {
         return true;
       }
       if (a && typeof a === "object" && b && typeof b === "object") {
@@ -162,7 +166,7 @@ global.it = function it(name: string, fn: (done?: DoneFn) => void): void {
   const isAsync = fn.length > 0;
   name = `${suite.name}: ${name}`;
 
-  const wrapper = async() => {
+  const wrapper = async () => {
     callHooks(suite.before);
     try {
       if (isAsync) {

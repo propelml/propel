@@ -59,7 +59,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     const cTensors: Tensor[] = [];
 
     // Gather ids of args that are tensors. null for non-Tensor args.
-    const inputIds = args.map((t) => {
+    const inputIds = args.map(t => {
       if ((t as Tensor).id) {
         cTensors.push(t);
         return (t as Tensor).id;
@@ -70,7 +70,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
 
     // An array of tuples [shape, dtype] for each argument.
     // Non-tensor arguments are null.
-    const inputShapeDTypes: types.ShapeDTypeList = args.map((t) => {
+    const inputShapeDTypes: types.ShapeDTypeList = args.map(t => {
       if ((t as Tensor).shape) {
         const ct = t as Tensor;
         const st: types.ShapeDType = [ct.shape, ct.dtype];
@@ -81,7 +81,7 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     });
 
     // Convert any Tensor args to storage ones.
-    const bargs = args.map((t) => {
+    const bargs = args.map(t => {
       if ((t as Tensor).storage) {
         return (t as Tensor).storage;
       } else {
@@ -95,8 +95,10 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
     const ans = new Tensor(storageAnswer);
     cTensors.push(ans);
 
-    const savedForBackward =
-      convertSavedStorageObjectsTos(globalSavedForBackward, cTensors);
+    const savedForBackward = convertSavedStorageObjectsTos(
+      globalSavedForBackward,
+      cTensors
+    );
     globalSavedForBackward = null;
 
     backprop.recordOp({
@@ -105,21 +107,21 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
       inputIds,
       inputShapeDTypes,
       outputIds: [ans.id],
-      savedForBackward,
+      savedForBackward
     });
     return ans;
   };
   ops[name] = {
     name,
     opFunc,
-    bwArgFunc: null,
+    bwArgFunc: null
   };
   return opFunc;
 }
 
 function convertSavedStorageObjectsTos(saved: any[], cTensors: Tensor[]) {
   if (!saved) return null;
-  return saved.map((t) => {
+  return saved.map(t => {
     if ((t as types.Storage).dataSync) {
       const s = t as types.Storage;
       for (const ct of cTensors) {
@@ -163,8 +165,10 @@ export function getBackwardFunc(name: string): BWArgFunc {
  *    import { ones } from "propel"
  *    ones([2, 3])
  */
-export function ones(shape: types.Shape,
-                     opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+export function ones(
+  shape: types.Shape,
+  opts: types.TensorOpts = { dtype: "float32" }
+): Tensor {
   if (!(shape instanceof Array)) {
     throw new Error("Ones takes a shape as an argument");
   }
@@ -176,8 +180,10 @@ export function ones(shape: types.Shape,
  *    import { zeros } from "propel"
  *    zeros([5, 2])
  */
-export function zeros(shape: types.Shape,
-                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+export function zeros(
+  shape: types.Shape,
+  opts: types.TensorOpts = { dtype: "float32" }
+): Tensor {
   if (!(shape instanceof Array)) {
     throw new Error("Zeros takes a shape as an argument");
   }
@@ -191,8 +197,10 @@ export function zeros(shape: types.Shape,
  *    n = 1000
  *    plot(range(n), randn([n]))
  */
-export function randn(shape: number[],
-                      opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+export function randn(
+  shape: number[],
+  opts: types.TensorOpts = { dtype: "float32" }
+): Tensor {
   let t = bo.randn(shape);
   if (opts.device && opts.device !== "CPU:0") {
     t = bo.copyToDevice(t, opts.device);
@@ -218,24 +226,33 @@ export const add = defFW("add", (x, y) => {
   saveForBackward(x.shape, y.shape);
   return bo.add(x, y);
 });
-defBW("add",
+defBW(
+  "add",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
-  (g, sx, sy) => addGrad(false)(g, sx, sy));
+  (g, sx, sy) => addGrad(false)(g, sx, sy)
+);
 
 export const sub = defFW("sub", (x, y) => {
   saveForBackward(x.shape, y.shape);
   return bo.sub(x, y);
 });
-defBW("sub",
+defBW(
+  "sub",
   (g, sx, sy) => addGrad(true)(g, sx, sy),
-  (g, sx, sy) => addGrad(false)(g, sx, sy).neg());
+  (g, sx, sy) => addGrad(false)(g, sx, sy).neg()
+);
 
 function mulDivGrad(firstArg: boolean, isMul: boolean) {
   return (g: Tensor, x: Tensor, y: Tensor) => {
     if (isMul) {
       g = firstArg ? g.mul(y) : g.mul(x);
     } else {
-      g = firstArg ? g.div(y) : g.mul(x).neg().div(y.square());
+      g = firstArg
+        ? g.div(y)
+        : g
+            .mul(x)
+            .neg()
+            .div(y.square());
     }
     // If sx and sy are the same (no broadcasting) just return g.
     if (shapesEqual(x.shape, y.shape)) return g;
@@ -253,41 +270,49 @@ export const mul = defFW("mul", (x, y) => {
   saveForBackward(x, y);
   return bo.mul(x, y);
 });
-defBW("mul",
+defBW(
+  "mul",
   (g, x, y) => mulDivGrad(true, true)(g, x, y),
-  (g, x, y) => mulDivGrad(false, true)(g, x, y));
+  (g, x, y) => mulDivGrad(false, true)(g, x, y)
+);
 
 export const div = defFW("div", (x, y) => {
   saveForBackward(x, y);
   return bo.div(x, y);
 });
-defBW("div",
+defBW(
+  "div",
   (g, x, y) => mulDivGrad(true, false)(g, x, y),
-  (g, x, y) => mulDivGrad(false, false)(g, x, y));
+  (g, x, y) => mulDivGrad(false, false)(g, x, y)
+);
 
-export const matmul = defFW("matmul",
+export const matmul = defFW(
+  "matmul",
   (a, b, transposeA = false, transposeB = false) => {
     saveForBackward(a, b, transposeA, transposeB);
     return bo.matmul(a, b, transposeA, transposeB);
-  });
+  }
+);
 // y = a * b
 // da = dy * bT
 // db = aT * dy
-defBW("matmul",
+defBW(
+  "matmul",
   (g, a, b, tA, tB) => matmul(g, b, tA, !tB),
-  (g, a, b, tA, tB) => matmul(a, g, !tA, tB));
+  (g, a, b, tA, tB) => matmul(a, g, !tA, tB)
+);
 
-export const neg = defFW("neg", (x) => bo.neg(x));
-defBW("neg", (g) => neg(g));
+export const neg = defFW("neg", x => bo.neg(x));
+defBW("neg", g => neg(g));
 
-export const exp = defFW("exp", (x) => {
+export const exp = defFW("exp", x => {
   const ans = bo.exp(x);
   saveForBackward(ans);
   return ans;
 });
 defBW("exp", (g, ans) => mul(ans, g));
 
-export let log = defFW("log", (x) => {
+export let log = defFW("log", x => {
   saveForBackward(x);
   return bo.log(x);
 });
@@ -301,7 +326,7 @@ defBW("fill", (g, value) => {
   throw new Error("Not Implemented: backward pass of fill.");
 });
 
-export const square = defFW("square", (x) => {
+export const square = defFW("square", x => {
   saveForBackward(x);
   return bo.square(x);
 });
@@ -314,9 +339,11 @@ export const pow = defFW("pow", (x: types.Storage, e: types.Storage) => {
   saveForBackward(x, e);
   return bo.pow(x, e);
 });
-defBW("pow",
+defBW(
+  "pow",
   (g: Tensor, x: Tensor, e: Tensor) => g.mul(e).mul(x.pow(e.sub(1))),
-  null);
+  null
+);
 // FIXME There's a bug in backprop when evaluating grads wrt the second
 // argument of pow.
 // (g: Tensor, x: Tensor, e: Tensor) => g.mul(x.pow(e)).mul(x.log()));
@@ -329,43 +356,43 @@ defBW("sqrt", (g: Tensor, x: Tensor) => {
   return g.mul(x.pow(-0.5).mul(0.5));
 });
 
-export const sin = defFW("sin", (x) => {
+export const sin = defFW("sin", x => {
   saveForBackward(x);
   return bo.sin(x);
 });
 defBW("sin", (g, x) => mul(g, cos(x)));
 
-export const cos = defFW("cos", (x) => {
+export const cos = defFW("cos", x => {
   saveForBackward(x);
   return bo.cos(x);
 });
 defBW("cos", (g, x) => mul(g, sin(x)));
 
-export const tan = defFW("tan", (x) => {
+export const tan = defFW("tan", x => {
   saveForBackward(x);
   return bo.tan(x);
 });
 defBW("tan", (g, x) => div(g, square(cos(x))));
 
-export const sinh = defFW("sinh", (x) => {
+export const sinh = defFW("sinh", x => {
   saveForBackward(x);
   return bo.sinh(x);
 });
 defBW("sinh", (g, x) => mul(g, cosh(x)));
 
-export let cosh = defFW("cosh", (x) => {
+export let cosh = defFW("cosh", x => {
   saveForBackward(x);
   return bo.cosh(x);
 });
 defBW("cosh", (g, x) => mul(g, sinh(x)));
 
-export let tanh = defFW("tanh", (x) => {
+export let tanh = defFW("tanh", x => {
   saveForBackward(x);
   return bo.tanh(x);
 });
 defBW("tanh", (g, x) => div(g, square(cosh(x))));
 
-export let relu = defFW("relu", (x) => {
+export let relu = defFW("relu", x => {
   saveForBackward(x);
   return bo.relu(x);
 });
@@ -375,11 +402,9 @@ export let reluGrad = defFW("reluGrad", (grad, features) => {
   saveForBackward(features);
   return bo.reluGrad(grad, features);
 });
-defBW("reluGrad",
-  (g, features) => reluGrad(g, features),
-  null);
+defBW("reluGrad", (g, features) => reluGrad(g, features), null);
 
-export let sigmoid = defFW("sigmoid", (x) => {
+export let sigmoid = defFW("sigmoid", x => {
   const ans = bo.sigmoid(x);
   saveForBackward(ans);
   return ans;
@@ -389,7 +414,7 @@ defBW("sigmoid", (g, ans) => {
   return g.mul(ans.sub(ans.square()));
 });
 
-export let abs = defFW("abs", (x) => {
+export let abs = defFW("abs", x => {
   saveForBackward(x);
   return bo.abs(x);
 });
@@ -414,12 +439,12 @@ defBW("reverse", (g, dims) => reverse(g, dims));
 export let argmax = defFW("argmax", (x, axis: number) => {
   return bo.argmax(x, axis);
 });
-defBW("argmax", null);  // Not differentiable.
+defBW("argmax", null); // Not differentiable.
 
 export let argmin = defFW("argmin", (x, axis: number) => {
   return bo.argmin(x, axis);
 });
-defBW("argmin", null);  // Not differentiable.
+defBW("argmin", null); // Not differentiable.
 
 export let reduceSum = defFW("reduceSum", (x, axes, keepDims) => {
   saveForBackward(x.shape, x.dtype, axes);
@@ -446,7 +471,7 @@ defBW("reduceMean", (g, axes, shape, dtype) => {
     n *= shape[j];
     gs[j] = 1;
   }
-  const a = convert(1 / n, {dtype: "float32", device: g.device});
+  const a = convert(1 / n, { dtype: "float32", device: g.device });
   return g.reshape(gs).mul(fill(a, shape));
 });
 
@@ -463,8 +488,9 @@ defBW("equal", null, null); // Not differentiable.
 export let greater = defFW("greater", (x, y) => bo.greater(x, y));
 defBW("greater", null, null); // Not differentiable.
 
-export let greaterEqual = defFW("greaterEqual",
-  (x, y) => bo.greaterEqual(x, y));
+export let greaterEqual = defFW("greaterEqual", (x, y) =>
+  bo.greaterEqual(x, y)
+);
 defBW("greaterEqual", null, null); // Not differentiable.
 
 export let less = defFW("less", (x, y) => bo.less(x, y));
@@ -477,11 +503,19 @@ export let select = defFW("select", (cond, x, y) => {
   saveForBackward(cond);
   return bo.select(cond, x, y);
 });
-defBW("select", null,
+defBW(
+  "select",
+  null,
   (g, cond) => cond.cast(g.dtype).mul(g),
-  (g, cond) => cond.cast(g.dtype).neg().add(1).mul(g));
+  (g, cond) =>
+    cond
+      .cast(g.dtype)
+      .neg()
+      .add(1)
+      .mul(g)
+);
 
-export const sign = defFW("sign", (x) => bo.sign(x));
+export const sign = defFW("sign", x => bo.sign(x));
 defBW("sign", null); // Not differentiable.
 
 export let slice = defFW("slice", (x, begin, size) => {
@@ -492,12 +526,14 @@ defBW("slice", (g, sx, begin, size) => {
   throw new Error("Not Implemented.");
 });
 
-export const concat = defFW("concat",
+export const concat = defFW(
+  "concat",
   (axis: number, ...inputs: types.Storage[]) => {
     const shapes = inputs.map(t => t.shape);
     saveForBackward(axis, shapes);
     return bo.concat(axis, inputs);
-  });
+  }
+);
 defBWArgs("concat", (argIndex, g, axis, shapes) => {
   // We cannot take the gradient with respect to axis.
   if (argIndex === 0) return null;
@@ -521,31 +557,40 @@ export let reshape = defFW("reshape", (x, newShape) => {
 });
 defBW("reshape", (g, origShape) => g.reshape(origShape));
 
-export let reduceLogSumExp = defFW("reduceLogSumExp",
+export let reduceLogSumExp = defFW(
+  "reduceLogSumExp",
   (x, axes: number[], keepDims = false) => {
     const m = bo.reduceMax(x, axes, true);
     const e = bo.exp(bo.sub(x, m));
     const s = bo.reduceSum(e, axes, true);
     const sLog = bo.log(s);
-    const ans =  bo.add(m, sLog);
+    const ans = bo.add(m, sLog);
     saveForBackward(ans, x);
     return ans;
-  });
+  }
+);
 defBW("reduceLogSumExp", (g, ans, x) => {
   return g.mul(exp(x.sub(ans)));
 });
 
-export const softmax = defFW("softmax", (x) => {
+export const softmax = defFW("softmax", x => {
   assert(x.shape.length === 2);
   const ans = bo.softmax(x);
   saveForBackward(ans);
   return ans;
 });
 defBW("softmax", (g, ans) => {
-  return g.sub(g.mul(ans).reduceSum([1]).reshape([-1, 1])).mul(ans);
+  return g
+    .sub(
+      g
+        .mul(ans)
+        .reduceSum([1])
+        .reshape([-1, 1])
+    )
+    .mul(ans);
 });
 
-export const logSoftmax = defFW("logSoftmax", (x) => {
+export const logSoftmax = defFW("logSoftmax", x => {
   assert(x.shape.length === 2);
   const ans = bo.logSoftmax(x);
   saveForBackward(ans);
@@ -564,51 +609,64 @@ defBW("cast", (g, dtype) => {
   return g.cast(dtype);
 });
 
-export const oneHot = defFW("oneHot",
+export const oneHot = defFW(
+  "oneHot",
   (x, depth: number, onValue: number, offValue: number) => {
     return bo.oneHot(x, depth, onValue, offValue);
-  });
+  }
+);
 defBW("oneHot", null);
 
 export const setDiag = defFW("setDiag", (input, diag) => {
   return bo.setDiag(input, diag);
 });
-defBW("setDiag", (g) => {
-  // TODO
-  // return bo.setDiag(g, zeros);
-  throw new Error("Not Implemented.");
-}, (g) => {
-  // TODO
-  // return bo.getDiag(g);
-  throw new Error("Not Implemented.");
-});
+defBW(
+  "setDiag",
+  g => {
+    // TODO
+    // return bo.setDiag(g, zeros);
+    throw new Error("Not Implemented.");
+  },
+  g => {
+    // TODO
+    // return bo.getDiag(g);
+    throw new Error("Not Implemented.");
+  }
+);
 
-export const conv2d = defFW("conv2d",
-  (input: types.Storage, filter: types.Storage,
-   opts: types.ConvOpts) => {
+export const conv2d = defFW(
+  "conv2d",
+  (input: types.Storage, filter: types.Storage, opts: types.ConvOpts) => {
     saveForBackward(input, filter, opts);
     return bo.conv2d(input, filter, opts);
-  });
-defBW("conv2d",
+  }
+);
+defBW(
+  "conv2d",
   (g: Tensor, input: Tensor, filter: Tensor, opts: types.ConvOpts) => {
-    const s = bo.conv2dGradInput(g.storage, input.shape, filter.storage,
-                                 opts);
+    const s = bo.conv2dGradInput(g.storage, input.shape, filter.storage, opts);
     return new Tensor(s);
   },
   (g: Tensor, input: Tensor, filter: Tensor, opts: types.ConvOpts) => {
-    const s = bo.conv2dGradFilter(g.storage, input.storage, filter.shape,
-                                  opts);
+    const s = bo.conv2dGradFilter(g.storage, input.storage, filter.shape, opts);
     return new Tensor(s);
-  });
+  }
+);
 
-export const maxPool = defFW("maxPool",
+export const maxPool = defFW(
+  "maxPool",
   (input: types.Storage, opts: types.PoolOpts) => {
     const output = bo.maxPool(input, opts);
     saveForBackward(input, output, opts);
     return output;
-  });
+  }
+);
 defBW("maxPool", (g: Tensor, origInput: Tensor, origOutput: Tensor, opts) => {
-  const s = bo.maxPoolGrad(g.storage, origInput.storage, origOutput.storage,
-                           opts);
+  const s = bo.maxPoolGrad(
+    g.storage,
+    origInput.storage,
+    origOutput.storage,
+    opts
+  );
   return new Tensor(s);
 });

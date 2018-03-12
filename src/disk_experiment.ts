@@ -20,7 +20,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as rimraf from "rimraf";
-import { Experiment, ExperimentOpts, print }  from "./experiment";
+import { Experiment, ExperimentOpts, print } from "./experiment";
 import * as npy from "./npy";
 import { Params, params as createParams } from "./params";
 import { assert } from "./util";
@@ -30,8 +30,8 @@ function propelDir(): string {
   if (process.env.PROPEL_DIR) {
     return process.env.PROPEL_DIR;
   } else {
-    const homeDir = process.platform === "win32" ? process.env.USERPROFILE
-                                                 : process.env.HOME;
+    const homeDir =
+      process.platform === "win32" ? process.env.USERPROFILE : process.env.HOME;
     return path.join(homeDir, ".propel/");
   }
 }
@@ -40,7 +40,7 @@ export class DiskExperiment extends Experiment {
   constructor(readonly name: string, opts?: ExperimentOpts) {
     super(name, opts);
     if (this.opts.saveOnExit) {
-      process.on("exit", (exitCode) => {
+      process.on("exit", exitCode => {
         // If there's no error, save the checkpoint one file last time.
         if (exitCode === 0 && this.step > 0) {
           this.save();
@@ -73,7 +73,8 @@ export class DiskExperiment extends Experiment {
     const npyFiles = filePatternSearch(p, /\.npy$/);
     const params = createParams();
     for (const fn of npyFiles) {
-      let name = path.normalize(fn)
+      let name = path
+        .normalize(fn)
         .replace(p + path.sep, "") // remove containing dir
         .replace(/\.npy$/, ""); // remove npy extension
       // On windows replace backwards slash with forward slash.

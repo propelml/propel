@@ -25,7 +25,7 @@ async function importModule(target) {
   const m = {
     matplotlib,
     mnist,
-    propel,
+    propel
   }[target];
   if (m) {
     return m;
@@ -60,7 +60,7 @@ const rpc = new SandboxRPC(window.parent, {
 });
 
 function guessCellId(): number {
-  const stacktrace = (new Error()).stack.split("\n");
+  const stacktrace = new Error().stack.split("\n");
   for (let i = stacktrace.length - 1; i >= 0; --i) {
     const line = stacktrace[i];
     const m = line.match(/__cell(\d+)__/);
@@ -70,7 +70,7 @@ function guessCellId(): number {
 }
 
 class Console {
-  constructor(private rpc: SandboxRPC, private cellId: number) { }
+  constructor(private rpc: SandboxRPC, private cellId: number) {}
 
   private inspect(value): string {
     if (value instanceof propel.Tensor) {

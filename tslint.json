@@ -59,7 +59,8 @@
     "quotemark": [true, "double"],
     "prefer-const": true,
     "radix": true,
-    "space-before-function-paren": [true, "never"],
+    // Conflicts with prettier:
+    // "space-before-function-paren": [true, "never"],
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     //"switch-default": true,
     "triple-equals": [true, "allow-null-check"],

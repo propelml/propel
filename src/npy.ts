@@ -26,18 +26,18 @@ import * as util from "./util";
 /** Serializes a tensor into a npy file contents. */
 export async function serialize(tensor: Tensor): Promise<ArrayBuffer> {
   const descr = {
-    "float32": "<f4",
-    "int32": "<i4",
+    float32: "<f4",
+    int32: "<i4"
   }[tensor.dtype];
 
   // First figure out how long the file is going to be so we can create the
   // output ArrayBuffer.
   const magicStr = "NUMPY";
   const versionStr = "\x01\x00";
-  const [ d, fo, s ] = [ descr, "False", tensor.shape.join(",") + "," ];
+  const [d, fo, s] = [descr, "False", tensor.shape.join(",") + ","];
   let header = `{'descr': '${d}', 'fortran_order': ${fo}, 'shape': (${s}), }`;
-  const unpaddedLength = 1 + magicStr.length + versionStr.length +
-                         2 + header.length;
+  const unpaddedLength =
+    1 + magicStr.length + versionStr.length + 2 + header.length;
   // Spaces to 16-bit align.
   const padding = " ".repeat((16 - unpaddedLength % 16) % 16);
   header += padding;
@@ -107,12 +107,13 @@ export function parse(ab: ArrayBuffer): Tensor {
   const headerPy = decoder.decode(new DataView(ab, pos, headerLen));
   pos += headerLen;
   const bytesLeft = view.byteLength - pos;
-  const headerJson = headerPy.replace("True", "true")
-                             .replace("False", "false")
-                             .replace(/'/g, `"`)
-                             .replace(/,\s*}/, " }")
-                             .replace(/,?\)/, "]")
-                             .replace("(", "[");
+  const headerJson = headerPy
+    .replace("True", "true")
+    .replace("False", "false")
+    .replace(/'/g, `"`)
+    .replace(/,\s*}/, " }")
+    .replace(/,?\)/, "]")
+    .replace("(", "[");
   const header = JSON.parse(headerJson);
   if (header.fortran_order) {
     throw Error("NPY parse error. Implement me.");
@@ -126,21 +127,18 @@ export function parse(ab: ArrayBuffer): Tensor {
     const s = ab.slice(pos, pos + size * 8);
     const ta = new Float32Array(new Float64Array(s));
     return fromTypedArrayAndShape(ta, header.shape);
-
   } else if (header["descr"] === "<f4") {
     // 4 byte float. float32.
     util.assert(bytesLeft === size * 4);
     const s = ab.slice(pos, pos + size * 4);
     const ta = new Float32Array(s);
     return fromTypedArrayAndShape(ta, header.shape);
-
   } else if (header["descr"] === "<i8") {
     // 8 byte int. int64.
     util.assert(bytesLeft === size * 8);
     const s = ab.slice(pos, pos + size * 8);
     const ta = new Int32Array(s).filter((val, i) => i % 2 === 0);
     return fromTypedArrayAndShape(ta, header.shape);
-
   } else {
     throw Error(`Unknown dtype "${header["descr"]}". Implement me.`);
   }
@@ -153,8 +151,10 @@ export async function load(filename: string): Promise<Tensor> {
 }
 
 // TODO move to backend.ts.
-function fromTypedArrayAndShape(ta: types.TypedArray,
-                                shape: types.Shape): Tensor {
+function fromTypedArrayAndShape(
+  ta: types.TypedArray,
+  shape: types.Shape
+): Tensor {
   const storage = bo.fromTypedArray(ta, shape);
   return new Tensor(storage);
 }

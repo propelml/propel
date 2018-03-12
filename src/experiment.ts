@@ -40,11 +40,13 @@ const defaultOpts: ExperimentOpts = {
   checkpointsToKeep: 3,
   printStepSecs: 1,
   saveOnExit: true,
-  saveSecs: 60,
+  saveSecs: 60
 };
 
-export async function experiment(name: string,
-                                 opts?: ExperimentOpts): Promise<Experiment> {
+export async function experiment(
+  name: string,
+  opts?: ExperimentOpts
+): Promise<Experiment> {
   let exp: Experiment;
   if (IS_NODE) {
     const { DiskExperiment } = require("./disk_experiment");
@@ -67,20 +69,22 @@ let lastPrint: Promise<void> = Promise.resolve();
  */
 export async function print(...args: PrintArgs): Promise<void> {
   // All this is to make sure that log items are in the order they came.
-  lastPrint = lastPrint.then(async() => {
+  lastPrint = lastPrint.then(async () => {
     console.log(await printHelper(...args));
   });
   await lastPrint;
 }
 
 async function printHelper(...args: PrintArgs): Promise<string> {
-  const strings = await Promise.all(args.map(async(arg) => {
-    if (arg instanceof Tensor) {
-      return format.toString(arg.shape, await arg.data());
-    } else {
-      return arg;
-    }
-  }));
+  const strings = await Promise.all(
+    args.map(async arg => {
+      if (arg instanceof Tensor) {
+        return format.toString(arg.shape, await arg.data());
+      } else {
+        return arg;
+      }
+    })
+  );
   return strings.join(" ");
 }
 
@@ -166,7 +170,7 @@ export abstract class Experiment {
   async minimize(optimizer: Optimizer, opts: SGDOpts, lossFn: LossFn) {
     this.step_++;
     let loss;
-    gc((keep) => {
+    gc(keep => {
       const gradFn = gradParams(lossFn);
       // Forward/Backward pass
       this.currentParams.isTraining = true;
@@ -204,7 +208,7 @@ export abstract class Experiment {
     if (!last || (secsSince(last.time) > 0.5 && this.step !== last.step)) {
       this.rateHistory.push({
         step: this.step,
-        time: new Date(),
+        time: new Date()
       });
       // We don't need too many elements.
       if (this.rateHistory.length > 3) {
@@ -237,11 +241,11 @@ class BrowserExperiment extends Experiment {
     this.step_ = 0;
   }
 
-  async save(): Promise<void> { }
+  async save(): Promise<void> {}
 
   async checkpoints(): Promise<number[]> {
     return [];
   }
 
-  async deleteCheckpoint(step: number): Promise<void> { }
+  async deleteCheckpoint(step: number): Promise<void> {}
 }

@@ -14,18 +14,16 @@ module.exports = (function() {
     "propel_linux_gpu",
     "propel_linux",
     "propel_mac",
-    "propel_windows",
+    "propel_windows"
   ];
 
   for (const m of toAttempt) {
     try {
       return require(m);
-    } catch(e) {
+    } catch (e) {
       // Ignore "module not found" errors.
-      if (e.code !== "MODULE_NOT_FOUND")
-        throw e;
+      if (e.code !== "MODULE_NOT_FOUND") throw e;
     }
   }
   return null;
 })();
-

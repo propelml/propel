@@ -33,9 +33,11 @@ function createPackageJson(src, dst, packageJson = {}) {
 
 function checkNoTars(dir) {
   for (const f of fs.readdirSync(dir)) {
-    if (f.match(/\.tgz$/) != null ||
-        f.match(/\.tar.gz$/) != null ||
-        f.match(/\.zip$/) != null) {
+    if (
+      f.match(/\.tgz$/) != null ||
+      f.match(/\.tar.gz$/) != null ||
+      f.match(/\.zip$/) != null
+    ) {
       console.error("Bad filename in package dir", dir, f);
       process.exit(1);
     }
@@ -76,33 +78,44 @@ async function buildAndTest() {
     fs.renameSync(genFn, mainFn);
 
     let c = fs.readFileSync(mainFn, "utf8");
-    fs.writeFileSync(mainFn, c + `
+    fs.writeFileSync(
+      mainFn,
+      c +
+        `
       if (typeof window !== "undefined") {
         propel = require(1);
       } else {
         module.exports = require(1);
       }
-    `);
+    `
+    );
     createPackageJson("package.json", distDir + "/package.json", {
       name: "propel",
-      main: "propel.js",
+      main: "propel.js"
     });
   });
 
   const tfPkgFn = await npmPack(config.tfPkg, async distDir => {
     fs.copyFileSync("src/load_binding.js", distDir + "/load_binding.js");
     // Copy over the TF binding.
-    fs.copyFileSync("build/Release/tensorflow-binding.node",
-                    distDir + "/tensorflow-binding.node"
+    fs.copyFileSync(
+      "build/Release/tensorflow-binding.node",
+      distDir + "/tensorflow-binding.node"
     );
     if (process.platform === "win32") {
-      fs.copyFileSync("build/Release/tensorflow.dll",
-                      distDir + "/tensorflow.dll");
+      fs.copyFileSync(
+        "build/Release/tensorflow.dll",
+        distDir + "/tensorflow.dll"
+      );
     } else {
-      fs.copyFileSync("build/Release/libtensorflow.so",
-                      distDir + "/libtensorflow.so");
-      fs.copyFileSync("build/Release/libtensorflow_framework.so",
-                      distDir + "/libtensorflow_framework.so");
+      fs.copyFileSync(
+        "build/Release/libtensorflow.so",
+        distDir + "/libtensorflow.so"
+      );
+      fs.copyFileSync(
+        "build/Release/libtensorflow_framework.so",
+        distDir + "/libtensorflow_framework.so"
+      );
     }
     createPackageJson("package.json", distDir + "/package.json", {
       name: config.tfPkg,
@@ -119,22 +132,27 @@ async function buildAndTest() {
 
   // Pretend we're the tar module. Copy package.json into the npm directory so it
   // doesn't warn about not having description or repository fields.
-  createPackageJson(run.root + "/node_modules/tar/package.json",
-                    path.join(testDir, "package.json"));
+  createPackageJson(
+    run.root + "/node_modules/tar/package.json",
+    path.join(testDir, "package.json")
+  );
 
   process.chdir(testDir);
   execSync("npm install " + propelPkgFn, { stdio: "inherit" });
   execSync("npm install " + tfPkgFn, { stdio: "inherit" });
 
   // Quick test that it works.
-  fs.writeFileSync("test.js", `
+  fs.writeFileSync(
+    "test.js",
+    `
     let propel = require('propel');
     console.log("propel", propel);
     let tensor = require('propel').tensor;
     console.log(tensor([1, 2, 3]).mul(42));
     console.log("Using backend: %s", propel.backend);
     if (propel.backend !== "tf") throw Error("Bad backend");
-  `);
+  `
+  );
   run.sh("node test.js");
 
   console.log("npm publish %s", propelPkgFn);
@@ -142,10 +160,12 @@ async function buildAndTest() {
   return [propelPkgFn, tfPkgFn];
 }
 
-process.on("unhandledRejection", e => { throw e; });
+process.on("unhandledRejection", e => {
+  throw e;
+});
 
-(async() => {
-  const skipBuild = (process.argv.indexOf("skip-build") >= 0);
+(async () => {
+  const skipBuild = process.argv.indexOf("skip-build") >= 0;
   if (!skipBuild) {
     await buildAndTest();
   }

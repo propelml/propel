@@ -13,11 +13,28 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
-import { fill, grad, linspace, listDevices, multigrad, ones,
-  Params, randn, range, tensor, Tensor, TensorLike, zeros } from "./api";
+import {
+  fill,
+  grad,
+  linspace,
+  listDevices,
+  multigrad,
+  ones,
+  Params,
+  randn,
+  range,
+  tensor,
+  Tensor,
+  TensorLike,
+  zeros
+} from "./api";
 import * as api from "./api";
-import { assertAllClose, assertAllEqual, assertClose,
-  assertShapesEqual } from "./tensor_util";
+import {
+  assertAllClose,
+  assertAllEqual,
+  assertClose,
+  assertShapesEqual
+} from "./tensor_util";
 import * as types from "./types";
 import { assert, IS_NODE } from "./util";
 
@@ -57,7 +74,7 @@ function testDevices(
 
 test(async function api_linspace() {
   const x = linspace(-4, 4, 6);
-  assertAllClose(x, [-4., -2.4, -0.8,  0.8,  2.4, 4.]);
+  assertAllClose(x, [-4, -2.4, -0.8, 0.8, 2.4, 4]);
 });
 
 test(async function api_range() {
@@ -80,7 +97,7 @@ test(async function api_randn() {
 });
 
 test(async function api_convertWithType() {
-  const t = tensor([1, 2, 3], {dtype: "int32"});
+  const t = tensor([1, 2, 3], { dtype: "int32" });
   assert(t.dtype === "int32");
   const ta = t.dataSync();
   assert(ta instanceof Int32Array);
@@ -100,16 +117,16 @@ test(async function api_inc() {
   assertClose(f(1), 2);
   assertClose(f(-1), 0);
   const g = grad(f);
-  assertClose(g(1.0), 1.);
+  assertClose(g(1.0), 1);
   checkGrad(f, g, 1.0);
 });
 
 test(async function api_mul() {
-  const f = (x) => tensor(42).mul(x);
+  const f = x => tensor(42).mul(x);
   assertClose(f(1), 42);
   assertClose(f(2), 84);
   const g = grad(f);
-  assertClose(g(1.), 42.);
+  assertClose(g(1), 42);
   checkGrad(f, g, 1.0);
 });
 
@@ -153,23 +170,25 @@ test(async function api_div() {
 });
 
 test(async function api_constant() {
-  const f = (_) => 42;
+  const f = _ => 42;
   assertClose(f(1), 42);
   assertClose(f(-1), 42);
   const g = grad(f);
-  assertClose(g(1.0), 0.);
+  assertClose(g(1.0), 0);
   checkGrad(f, g, 1.0);
 });
 
 test(async function api_exp() {
   // f(x) = exp(1+x)
   function f(x) {
-    return tensor(x).add(1).exp();
+    return tensor(x)
+      .add(1)
+      .exp();
   }
-  assertClose(f(1), 7.3890);
+  assertClose(f(1), 7.389);
   assertClose(f(2), 20.0855);
   const g = grad(f); // g == f
-  assertClose(g(1), 7.3890);
+  assertClose(g(1), 7.389);
   assertClose(g(2), 20.0855);
   checkGrad(f, g, 1.0);
 });
@@ -177,7 +196,9 @@ test(async function api_exp() {
 test(async function api_log() {
   // f(x) = log(x)/log(base)
   function f(x, base) {
-    return tensor(x).log().div(tensor(base).log());
+    return tensor(x)
+      .log()
+      .div(tensor(base).log());
   }
   assertClose(f(2, 2), 1);
   assertClose(f(9, 3), 2);
@@ -205,7 +226,9 @@ test(async function api_sub() {
 test(async function api_div2() {
   function f(x) {
     x = tensor(x);
-    return tensor(1).sub(x).div(x.add(1));
+    return tensor(1)
+      .sub(x)
+      .div(x.add(1));
   }
   assertClose(f(1), 0);
   assertClose(f(2), -1 / 3);
@@ -220,16 +243,16 @@ test(async function api_div3() {
     const y = tensor(x).exp();
     return y.div(y);
   }
-  assertClose(f(1), 1.);
-  assertClose(f(2), 1.);
+  assertClose(f(1), 1);
+  assertClose(f(2), 1);
   const g = grad(f);
-  assertClose(g(1), 0.);
-  assertClose(g(2), 0.);
+  assertClose(g(1), 0);
+  assertClose(g(2), 0);
   checkGrad(f, g, 1.0);
 });
 
 test(async function api_tanh() {
-  const f = (x) => tensor(x).tanh();
+  const f = x => tensor(x).tanh();
   assertClose(f(1), 0.7615);
   assertClose(f(16), 0.9999);
   const g = grad(f);
@@ -238,7 +261,7 @@ test(async function api_tanh() {
 });
 
 test(async function api_relu() {
-  const f = (x) => tensor(x).relu();
+  const f = x => tensor(x).relu();
   assertAllEqual(f([-5, 0, 5]), [0, 0, 5]);
   const g = grad(f);
   assertAllClose(g([-5, 0.1, 5]), [0, 1, 1]);
@@ -249,7 +272,7 @@ test(async function api_relu() {
 });
 
 test(async function api_sigmoid() {
-  const f = (x) => tensor(x).sigmoid();
+  const f = x => tensor(x).sigmoid();
   assertAllClose(f([-1, 0, 1]), [0.26894142, 0.5, 0.73105858]);
   const g = grad(f);
   assertAllClose(g([-1, 0, 1]), [0.19661193, 0.25, 0.19661193]);
@@ -258,7 +281,7 @@ test(async function api_sigmoid() {
 });
 
 test(async function api_abs() {
-  const f = (x) => tensor(x).abs();
+  const f = x => tensor(x).abs();
   assertAllEqual(f([-5, 0, 5]), [5, 0, 5]);
   const g = grad(f);
   assertAllClose(g([-5, 0.1, 5]), [-1, 1, 1]);
@@ -268,7 +291,9 @@ test(async function api_abs() {
 
 test(async function api_multigrad() {
   function f(a, b) {
-    return tensor(a).mul(2).add(tensor(b).mul(3));
+    return tensor(a)
+      .mul(2)
+      .add(tensor(b).mul(3));
   }
   assertClose(f(1, 1), 5);
   assertClose(f(1, 2), 8);
@@ -280,7 +305,7 @@ test(async function api_multigrad() {
 });
 
 test(async function api_gradGradTanh() {
-  const f = (x) => tensor(x).tanh();
+  const f = x => tensor(x).tanh();
   assertAllClose(f([1, 16]), [0.7615, 0.9999]);
   const g = grad(grad(f));
   // def g(x): return -2 * np.tanh(x) / np.square(np.cosh(x))
@@ -288,16 +313,16 @@ test(async function api_gradGradTanh() {
 });
 
 test(async function api_sinh() {
-  const f = (x) => tensor(x).sinh();
+  const f = x => tensor(x).sinh();
   const v = tensor([1, 2]);
-  assertAllClose(f(v), [1.17520119,  3.62686041]);
+  assertAllClose(f(v), [1.17520119, 3.62686041]);
   // The derivtive of sinh is cosh.
   const g = grad(f);
   assertAllClose(g(v), v.cosh());
 });
 
 test(async function api_fill() {
-  const f = (x) => fill(x, [2, 3]);
+  const f = x => fill(x, [2, 3]);
   assertAllEqual(f(1), [[1, 1, 1], [1, 1, 1]]);
   assertAllEqual(f(42), [[42, 42, 42], [42, 42, 42]]);
   // TODO
@@ -323,14 +348,17 @@ testDevices(async function api_square_sqrt_pow(tensor, device) {
 });
 
 test(async function api_transpose() {
-  const f = (x) => tensor(x).transpose();
+  const f = x => tensor(x).transpose();
   const a = tensor([[1, 2], [3, 4]]);
   const aT = tensor([[1, 3], [2, 4]]);
   assertAllEqual(f(a), aT);
   const g = grad(f);
   assertAllEqual(g(a), [[1, 1], [1, 1]]);
 
-  const f2 = (x) => tensor(x).transpose().mul(2);
+  const f2 = x =>
+    tensor(x)
+      .transpose()
+      .mul(2);
   const g2 = grad(f2);
   assertAllEqual(g2(a), [[2, 2], [2, 2]]);
 });
@@ -338,47 +366,42 @@ test(async function api_transpose() {
 test(async function api_reverse() {
   assertAllEqual(tensor([1, 2, 3, 4]).reverse(), [4, 3, 2, 1]);
 
-  const t = tensor([[
-    [[ 0,  1,  2,  3],
-     [ 4,  5,  6,  7],
-     [ 8,  9, 10, 11]],
-    [[12, 13, 14, 15],
-     [16, 17, 18, 19],
-     [20, 21, 22, 23]]
-  ]]);
+  const t = tensor([
+    [
+      [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+      [[12, 13, 14, 15], [16, 17, 18, 19], [20, 21, 22, 23]]
+    ]
+  ]);
   assertAllEqual(t.shape, [1, 2, 3, 4]);
-  const tR1 = tensor([[
-    [[12, 13, 14, 15],
-     [16, 17, 18, 19],
-     [20, 21, 22, 23]],
-    [[ 0,  1,  2,  3],
-     [ 4,  5,  6,  7],
-     [ 8,  9, 10, 11]]
-  ]]);
+  const tR1 = tensor([
+    [
+      [[12, 13, 14, 15], [16, 17, 18, 19], [20, 21, 22, 23]],
+      [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
+    ]
+  ]);
   assertAllEqual(t.reverse([1]), tR1);
   assertAllEqual(t.reverse([-3]), tR1);
-  const tR2 = tensor([[
-    [[ 8,  9, 10, 11],
-     [ 4,  5,  6,  7],
-     [ 0,  1,  2,  3]],
-    [[20, 21, 22, 23],
-     [16, 17, 18, 19],
-     [12, 13, 14, 15]]
-  ]]);
+  const tR2 = tensor([
+    [
+      [[8, 9, 10, 11], [4, 5, 6, 7], [0, 1, 2, 3]],
+      [[20, 21, 22, 23], [16, 17, 18, 19], [12, 13, 14, 15]]
+    ]
+  ]);
   assertAllEqual(t.reverse([2]), tR2);
   assertAllEqual(t.reverse([-2]), tR2);
-  const tR3 = tensor([[
-    [[3,  2,  1,  0],
-     [7,  6,  5,  4],
-     [11, 10, 9, 8]],
-    [[15, 14, 13, 12],
-     [19, 18, 17, 16],
-     [23, 22, 21, 20]]
-  ]]);
+  const tR3 = tensor([
+    [
+      [[3, 2, 1, 0], [7, 6, 5, 4], [11, 10, 9, 8]],
+      [[15, 14, 13, 12], [19, 18, 17, 16], [23, 22, 21, 20]]
+    ]
+  ]);
   assertAllEqual(t.reverse([3]), tR3);
   assertAllEqual(t.reverse([-1]), tR3);
 
-  const f = (x) => tensor(x).reverse().mul(2);
+  const f = x =>
+    tensor(x)
+      .reverse()
+      .mul(2);
   const g = grad(f);
   assertAllEqual(g([1, 2, 3]), [2, 2, 2]);
 });
@@ -387,40 +410,20 @@ test(async function api_matMul() {
   function f(x, y) {
     return tensor(x).matmul(y);
   }
-  const a = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-  ]);
-  const b = tensor([
-    [1, 2],
-    [4, 5],
-    [7, 8],
-  ]);
+  const a = tensor([[9, 8, 7], [6, 5, 4]]);
+  const b = tensor([[1, 2], [4, 5], [7, 8]]);
   const r = f(a, b);
   assertShapesEqual(r.shape, [2, 2]);
-  assertAllClose(r, [
-    [90, 114],
-    [54, 69],
-  ]);
+  assertAllClose(r, [[90, 114], [54, 69]]);
   // Now test gradients
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assertAllEqual(gab[0], [
-    [3, 9, 15],
-    [3, 9, 15],
-  ]);
-  assertAllEqual(gab[1], [
-    [15, 15],
-    [13, 13],
-    [11, 11],
-  ]);
+  assertAllEqual(gab[0], [[3, 9, 15], [3, 9, 15]]);
+  assertAllEqual(gab[1], [[15, 15], [13, 13], [11, 11]]);
 });
 
 testDevices(async function api_reduceSum(tensor, device) {
-  const a = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-  ]);
+  const a = tensor([[9, 8, 7], [6, 5, 4]]);
   assertAllEqual(a.reduceSum([0]), [9 + 6, 8 + 5, 7 + 4]);
   assertAllEqual(a.reduceSum([1]), [9 + 8 + 7, 6 + 5 + 4]);
   assertAllEqual(a.reduceSum(), 9 + 8 + 7 + 6 + 5 + 4);
@@ -428,32 +431,22 @@ testDevices(async function api_reduceSum(tensor, device) {
   assertAllEqual(a.reduceSum([0], true), [[9 + 6, 8 + 5, 7 + 4]]);
   assertAllEqual(a.reduceSum([1], true), [[9 + 8 + 7], [6 + 5 + 4]]);
 
-  const f = (x) => tensor(x).mul(2).reduceSum([0]);
+  const f = x =>
+    tensor(x)
+      .mul(2)
+      .reduceSum([0]);
   const g = grad(f);
   assertAllEqual(g(a), [[2, 2, 2], [2, 2, 2]]);
 
-  const b = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-    [1, 2, 3],
-    [4, -4, -5],
-  ]);
-  const f2 = (x) => tensor(x).reduceSum([1]);
+  const b = tensor([[9, 8, 7], [6, 5, 4], [1, 2, 3], [4, -4, -5]]);
+  const f2 = x => tensor(x).reduceSum([1]);
   assertShapesEqual(f2(b).shape, [4]);
   const g2 = grad(f2);
-  assertAllEqual(g2(b), [
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-  ]);
+  assertAllEqual(g2(b), [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]]);
 });
 
 testDevices(async function api_reduceMean(tensor, device) {
-  const a = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-  ]);
+  const a = tensor([[9, 8, 7], [6, 5, 4]]);
   assert(a.device === device);
   assertAllEqual(a.reduceMean([0]), [7.5, 6.5, 5.5]);
   assertAllEqual(a.reduceMean([1]), [8, 5]);
@@ -462,34 +455,24 @@ testDevices(async function api_reduceMean(tensor, device) {
   assertAllEqual(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
   assertAllEqual(a.reduceMean([1], true), [[8], [5]]);
 
-  const f = (x) => tensor(x).mul(2).reduceMean([0]);
+  const f = x =>
+    tensor(x)
+      .mul(2)
+      .reduceMean([0]);
   const g = grad(f);
   assertAllEqual(g(a), [[1, 1, 1], [1, 1, 1]]);
 
-  const b = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-    [1, 2, 3],
-    [4, -4, -5],
-  ]);
-  const f2 = (x) => tensor(x).reduceMean([1]);
+  const b = tensor([[9, 8, 7], [6, 5, 4], [1, 2, 3], [4, -4, -5]]);
+  const f2 = x => tensor(x).reduceMean([1]);
   assertShapesEqual(f2(b).shape, [4]);
   const g2 = grad(f2);
   const t = 1 / 3;
-  assertAllClose(g2(b), [
-    [t, t, t],
-    [t, t, t],
-    [t, t, t],
-    [t, t, t],
-  ]);
+  assertAllClose(g2(b), [[t, t, t], [t, t, t], [t, t, t], [t, t, t]]);
   assertAllEqual(api.uint8([255, 255, 255]).reduceMean(), 255);
 });
 
 testDevices(async function api_reduceMax(tensor, device) {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 4]]);
   assertAllEqual(a.reduceMax([0]), [9, 8, 7]);
   assertAllEqual(a.reduceMax([1]), [9, 8]);
   assertAllEqual(a.reduceMax(), 9);
@@ -504,183 +487,129 @@ testDevices(async function api_reduceMax(tensor, device) {
 });
 
 testDevices(async function api_onesAndZerosLike(tensor, device) {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 4]]);
   const ones = a.onesLike();
   const zeros = a.zerosLike();
   assert(ones.device === device);
   assert(zeros.device === device);
-  assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
-  assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(ones, [[1, 1, 1], [1, 1, 1]]);
+  assertAllEqual(zeros, [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_equal() {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 4],
-  ]);
-  const b = tensor([
-    [9, 3, 7],
-    [0, 8, 2],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 4]]);
+  const b = tensor([[9, 3, 7], [0, 8, 2]]);
   const r = a.equal(b);
   assert(r.dtype === "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 0, 1], [0, 1, 0] ]);
+  assertAllEqual(r, [[1, 0, 1], [0, 1, 0]]);
 
   // equal isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).equal(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_greater() {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 2],
-  ]);
-  const b = tensor([
-    [9, 3, 7],
-    [0, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 2]]);
+  const b = tensor([[9, 3, 7], [0, 8, 4]]);
   const r = a.greater(b);
   assert(r.dtype === "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [0, 1, 0], [1, 0, 0] ]);
+  assertAllEqual(r, [[0, 1, 0], [1, 0, 0]]);
   // greater isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).greater(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_greaterEqual() {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 2],
-  ]);
-  const b = tensor([
-    [9, 3, 7],
-    [0, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 2]]);
+  const b = tensor([[9, 3, 7], [0, 8, 4]]);
   const r = a.greaterEqual(b);
   assert(r.dtype === "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 1, 1], [1, 1, 0] ]);
+  assertAllEqual(r, [[1, 1, 1], [1, 1, 0]]);
   // greaterEqual isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).greaterEqual(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_less() {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 2],
-  ]);
-  const b = tensor([
-    [9, 3, 7],
-    [0, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 2]]);
+  const b = tensor([[9, 3, 7], [0, 8, 4]]);
   const r = a.less(b);
   assert(r.dtype === "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [0, 0, 0], [0, 0, 1] ]);
+  assertAllEqual(r, [[0, 0, 0], [0, 0, 1]]);
   // less isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).less(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_lessEqual() {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 2],
-  ]);
-  const b = tensor([
-    [9, 3, 7],
-    [0, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 2]]);
+  const b = tensor([[9, 3, 7], [0, 8, 4]]);
   const r = a.lessEqual(b);
   assert(r.dtype === "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 0, 1], [0, 1, 1] ]);
+  assertAllEqual(r, [[1, 0, 1], [0, 1, 1]]);
   // lessEqual isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).lessEqual(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_select() {
-  const t = tensor([
-    [1, 2, 3],
-    [4, 5, 6],
-  ]);
-  const f = tensor([
-    [ 7,  8,  9],
-    [10, 11, 12],
-  ]);
+  const t = tensor([[1, 2, 3], [4, 5, 6]]);
+  const f = tensor([[7, 8, 9], [10, 11, 12]]);
   // TODO Use false/true literals instead of 0 and 1 in cond.
-  const cond = tensor([
-    [1, 0, 1],
-    [0, 1, 0],
-  ], {dtype: "bool"});
+  const cond = tensor([[1, 0, 1], [0, 1, 0]], { dtype: "bool" });
   const r = cond.select(t, f);
-  assertAllEqual(r, [
-    [ 1, 8,  3],
-    [10, 5, 12],
-  ]);
+  assertAllEqual(r, [[1, 8, 3], [10, 5, 12]]);
   // select isn't differentiable.
-  const g = grad((c) => c.select(t, f));
-  assertAllEqual(g(cond), [ [0, 0, 0], [0, 0, 0] ]);
+  const g = grad(c => c.select(t, f));
+  assertAllEqual(g(cond), [[0, 0, 0], [0, 0, 0]]);
 
   function f2(x) {
     x = tensor(x);
     const y = x.sub(1).relu();
-    const z = tensor(-1).sub(x).relu();
+    const z = tensor(-1)
+      .sub(x)
+      .relu();
     return x.greater(x.zerosLike()).select(y, z);
   }
-  assertAllEqual(grad(f2)([-3, -0.5, 0.5, 3]),
-                 [-1, 0, 0, 1]);
+  assertAllEqual(grad(f2)([-3, -0.5, 0.5, 3]), [-1, 0, 0, 1]);
 });
 
 test(async function api_sign() {
   const x = tensor([-2, 5, -1, 3]);
   assertAllEqual(x.sign(), [-1, 1, -1, 1]);
   // sign isn't differentiable.
-  const g = grad((c) => c.sign());
+  const g = grad(c => c.sign());
   assertAllEqual(g(x), [0, 0, 0, 0]);
 });
 
 testDevices(async function api_reshape(tensor, device) {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 4],
-  ]);
-  assertAllEqual(a.reshape([3, 2]), [
-    [9, 5],
-    [7, 6],
-    [8, 4],
-  ]);
-  const f = (x) => tensor(x).reshape([3, 2]);
+  const a = tensor([[9, 5, 7], [6, 8, 4]]);
+  assertAllEqual(a.reshape([3, 2]), [[9, 5], [7, 6], [8, 4]]);
+  const f = x => tensor(x).reshape([3, 2]);
   const g = grad(f);
   const ga = g(a);
   assert(ga.device === device);
-  assertAllEqual(ga, [
-    [1, 1, 1],
-    [1, 1, 1],
-  ]);
+  assertAllEqual(ga, [[1, 1, 1], [1, 1, 1]]);
 });
 
 test(async function api_flatten() {
@@ -699,49 +628,52 @@ test(async function api_squeeze() {
 
 test(async function api_reduceLogSumExp() {
   assertClose(tensor([1, 2, 3, 4]).reduceLogSumExp(), 4.44018969856);
-  const f = (x) => tensor(x).reduceLogSumExp();
+  const f = x => tensor(x).reduceLogSumExp();
   const g = grad(f);
   assertAllClose(g([2, 3]), [0.26894142, 0.73105858]);
 });
 
 test(async function api_softmax() {
-  const f = (x) => tensor(x).softmax();
-  assertAllClose(f([1, 2, 3, 4]),
-    [0.0320586, 0.08714432, 0.23688281, 0.64391422]);
+  const f = x => tensor(x).softmax();
+  assertAllClose(f([1, 2, 3, 4]), [
+    0.0320586,
+    0.08714432,
+    0.23688281,
+    0.64391422
+  ]);
   // Derivative of softmax isn't numerically stable.
   const g = grad(f);
   assertAllClose(g([1, 2, 3, 4]), [0, 0, 0, 0]);
 });
 
 test(async function api_logSoftmax() {
-  const f = (x) => tensor(x).logSoftmax();
-  assertAllClose(f([1, 2, 3, 4]),
-    [-3.44018984, -2.44018984, -1.44018972, -0.44018975]);
+  const f = x => tensor(x).logSoftmax();
+  assertAllClose(f([1, 2, 3, 4]), [
+    -3.44018984,
+    -2.44018984,
+    -1.44018972,
+    -0.44018975
+  ]);
   const g = grad(f);
-  assertAllClose(g([1, 2, 3, 4]),
-    [0.87176559, 0.65142273, 0.05246873, -1.57565704]);
+  assertAllClose(g([1, 2, 3, 4]), [
+    0.87176559,
+    0.65142273,
+    0.05246873,
+    -1.57565704
+  ]);
 });
 
 testDevices(async function api_argMaxAndMin(tensor, device) {
-  const a = tensor([
-    [9, 5, 7],
-    [6, 8, 4],
-  ]);
+  const a = tensor([[9, 5, 7], [6, 8, 4]]);
   assertAllEqual(a.argmax(1), [0, 1]);
   assertAllEqual(a.argmin(1), [1, 2]);
   assertAllEqual(a.argmax(0), [0, 1, 0]);
   assertAllEqual(a.argmin(0), [1, 0, 1]);
   // Not differentiable.
-  const g = grad((x) => tensor(x).argmax(0));
-  assertAllEqual(g(a), [
-    [0, 0, 0],
-    [0, 0, 0],
-  ]);
-  const h = grad((x) => tensor(x).argmin(0));
-  assertAllEqual(h(a), [
-    [0, 0, 0],
-    [0, 0, 0],
-  ]);
+  const g = grad(x => tensor(x).argmax(0));
+  assertAllEqual(g(a), [[0, 0, 0], [0, 0, 0]]);
+  const h = grad(x => tensor(x).argmin(0));
+  assertAllEqual(h(a), [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_dot() {
@@ -749,15 +681,8 @@ test(async function api_dot() {
   assertAllEqual(tensor([[3]]).dot([[4]]), [[12]]);
   const r = tensor([9, 5, 7]).dot([6, 8, 4]);
   assertAllEqual(r, 122);
-  const m1 = tensor([
-    [9, 8, 7],
-    [6, 5, 4],
-  ]);
-  const m2 = tensor([
-    [1, 2],
-    [4, 5],
-    [7, 8],
-  ]);
+  const m1 = tensor([[9, 8, 7], [6, 5, 4]]);
+  const m2 = tensor([[1, 2], [4, 5], [7, 8]]);
   assertAllEqual(m1.dot(m2), [[90, 114], [54, 69]]);
   assertAllEqual(m1.dot([1, 2, 3]), [46, 28]);
   assertAllEqual(tensor([1, 2, 3]).dot(m2), [30, 36]);
@@ -768,7 +693,7 @@ test(async function api_zerosOnes() {
   assertAllEqual(z1, [[0, 0, 0], [0, 0, 0]]);
   assert(z1.dtype === "float32");
 
-  const z2 = zeros([2, 3], {dtype: "int32"});
+  const z2 = zeros([2, 3], { dtype: "int32" });
   assertAllEqual(z2, [[0, 0, 0], [0, 0, 0]]);
   assert(z2.dtype === "int32");
 
@@ -776,106 +701,71 @@ test(async function api_zerosOnes() {
   assertAllEqual(o1, [[1, 1, 1], [1, 1, 1]]);
   assert(o1.dtype === "float32");
 
-  const o2 = ones([2, 3], {dtype: "int32"});
+  const o2 = ones([2, 3], { dtype: "int32" });
   assertAllEqual(o2, [[1, 1, 1], [1, 1, 1]]);
   assert(o2.dtype === "int32");
 });
 
 test(async function api_bcastAdd() {
-  const a = tensor([
-    [1, 2],
-    [3, 4],
-    [5, 6],
-    [7, 8],
-  ]);
+  const a = tensor([[1, 2], [3, 4], [5, 6], [7, 8]]);
   const b = tensor([42, 43]);
   const f = (x, y) => tensor(x).add(y);
   assertAllEqual(f(a, b), [
     [1 + 42, 2 + 43],
     [3 + 42, 4 + 43],
     [5 + 42, 6 + 43],
-    [7 + 42, 8 + 43],
+    [7 + 42, 8 + 43]
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
   assert(gab.length === 2);
-  assertAllEqual(gab[0], [
-    [1, 1],
-    [1, 1],
-    [1, 1],
-    [1, 1],
-  ]);
+  assertAllEqual(gab[0], [[1, 1], [1, 1], [1, 1], [1, 1]]);
   assertAllEqual(gab[1], [4, 4]);
 });
 
 test(async function api_bcastSub() {
-  const a = tensor([
-    [1, 2],
-    [3, 4],
-    [5, 6],
-    [7, 8],
-  ]);
+  const a = tensor([[1, 2], [3, 4], [5, 6], [7, 8]]);
   const b = tensor([42, 43]);
   const f = (x, y) => tensor(x).sub(y);
   assertAllEqual(f(a, b), [
     [1 - 42, 2 - 43],
     [3 - 42, 4 - 43],
     [5 - 42, 6 - 43],
-    [7 - 42, 8 - 43],
+    [7 - 42, 8 - 43]
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
   assert(gab.length === 2);
-  assertAllEqual(gab[0], [
-    [1, 1],
-    [1, 1],
-    [1, 1],
-    [1, 1],
-  ]);
+  assertAllEqual(gab[0], [[1, 1], [1, 1], [1, 1], [1, 1]]);
   assertAllEqual(gab[1], [-4, -4]);
 });
 
 test(async function api_bcastMul() {
-  const a = tensor([
-    [1, 2],
-    [3, 4],
-    [5, 6],
-    [7, 8],
-  ]);
+  const a = tensor([[1, 2], [3, 4], [5, 6], [7, 8]]);
   const b = tensor([42, 43]);
   const f = (x, y) => tensor(x).mul(y);
   assertAllEqual(f(a, b), [
     [1 * 42, 2 * 43],
     [3 * 42, 4 * 43],
     [5 * 42, 6 * 43],
-    [7 * 42, 8 * 43],
+    [7 * 42, 8 * 43]
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
   assert(gab.length === 2);
-  assertAllEqual(gab[0], [
-    [42, 43],
-    [42, 43],
-    [42, 43],
-    [42, 43],
-  ]);
+  assertAllEqual(gab[0], [[42, 43], [42, 43], [42, 43], [42, 43]]);
   assertAllEqual(gab[1], [16, 20]);
 });
 
 test(async function api_bcastDiv() {
-  const a = tensor([
-    [1, 2],
-    [3, 4],
-    [5, 6],
-    [7, 8],
-  ]);
+  const a = tensor([[1, 2], [3, 4], [5, 6], [7, 8]]);
   const b = tensor([42, 43]);
   const f = (x, y) => tensor(x).div(y);
   assertAllClose(f(a, b), [
     [1 / 42, 2 / 43],
     [3 / 42, 4 / 43],
     [5 / 42, 6 / 43],
-    [7 / 42, 8 / 43],
+    [7 / 42, 8 / 43]
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
@@ -884,74 +774,59 @@ test(async function api_bcastDiv() {
     [0.02380952, 0.02325581],
     [0.02380952, 0.02325581],
     [0.02380952, 0.02325581],
-    [0.02380952, 0.02325581],
+    [0.02380952, 0.02325581]
   ]);
   assertAllClose(gab[1], [-0.00907029, -0.01081666]);
 });
 
 testDevices(async function api_slice(tensor, device) {
   // TODO support uint8 on CUDA.
-  const a = tensor([[[1, 1, 1], [2, 2, 2]],
-                    [[3, 3, 3], [4, 4, 4]],
-                    [[5, 5, 5], [6, 6, 6]]]);
+  const a = tensor([
+    [[1, 1, 1], [2, 2, 2]],
+    [[3, 3, 3], [4, 4, 4]],
+    [[5, 5, 5], [6, 6, 6]]
+  ]);
   const s1 = a.slice([1, 0, 0], [1, 1, 3]);
   assertAllEqual(s1, [[[3, 3, 3]]]);
-  assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]),
-                 [[[3, 3, 3],
-                   [4, 4, 4]]]);
-  assertAllEqual(a.slice([1, 0, 0], [2, 1, 3]),
-                 [[[3, 3, 3]],
-                  [[5, 5, 5]]]);
-  assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]),
-                 [[[3, 3, 3], [4, 4, 4]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, 2, 3]), [[[3, 3, 3], [4, 4, 4]]]);
+  assertAllEqual(a.slice([1, 0, 0], [2, 1, 3]), [[[3, 3, 3]], [[5, 5, 5]]]);
+  assertAllEqual(a.slice([1, 0, 0], [1, -1, -1]), [[[3, 3, 3], [4, 4, 4]]]);
 
   // Convenience APIs.
-  const t = tensor([
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-  ]);
-  assertAllEqual(t.slice(1), [
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-  ]);
-  assertAllEqual(a.slice(1), [
-    [[3, 3, 3], [4, 4, 4]],
-    [[5, 5, 5], [6, 6, 6]],
-  ]);
+  const t = tensor([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]);
+  assertAllEqual(t.slice(1), [[5, 6, 7, 8], [9, 10, 11, 12]]);
+  assertAllEqual(a.slice(1), [[[3, 3, 3], [4, 4, 4]], [[5, 5, 5], [6, 6, 6]]]);
   assertAllEqual(a.slice(1, 1), [[[3, 3, 3], [4, 4, 4]]]);
 
-  const s2 = tensor([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
+  const s2 = tensor([1, 2, 3], { dtype: "int32" }).slice([1], [1]);
   assert(s2.dtype === "int32");
   assertAllEqual(s2, [2]);
-  const f = (x) => tensor(x).slice([1, 0, 0], [2, 1, 3]);
+  const f = x => tensor(x).slice([1, 0, 0], [2, 1, 3]);
   grad(f);
   // TODO figure out backwards pass.
 });
 
 testDevices(async function api_concat(tensor, device) {
-  const a = tensor([[[1, 1, 1], [2, 2, 2]],
-                    [[3, 3, 3], [4, 4, 4]]]);
-  const b = tensor([[[5, 5, 5], [6, 6, 6]],
-                    [[7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(0, b),
-      [[[1, 1, 1], [2, 2, 2]],
-       [[3, 3, 3], [4, 4, 4]],
-       [[5, 5, 5], [6, 6, 6]],
-       [[7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(1, b),
-      [[[1, 1, 1], [2, 2, 2], [5, 5, 5], [6, 6, 6]],
-       [[3, 3, 3], [4, 4, 4], [7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(2, b),
-      [[[1, 1, 1, 5, 5, 5],
-        [2, 2, 2, 6, 6, 6]],
-       [[3, 3, 3, 7, 7, 7],
-        [4, 4, 4, 8, 8, 8]]]);
-  assertAllEqual(a.concat(2, b, b),
-      [[[1, 1, 1, 5, 5, 5, 5, 5, 5],
-        [2, 2, 2, 6, 6, 6, 6, 6, 6]],
-       [[3, 3, 3, 7, 7, 7, 7, 7, 7],
-        [4, 4, 4, 8, 8, 8, 8, 8, 8]]]);
+  const a = tensor([[[1, 1, 1], [2, 2, 2]], [[3, 3, 3], [4, 4, 4]]]);
+  const b = tensor([[[5, 5, 5], [6, 6, 6]], [[7, 7, 7], [8, 8, 8]]]);
+  assertAllEqual(a.concat(0, b), [
+    [[1, 1, 1], [2, 2, 2]],
+    [[3, 3, 3], [4, 4, 4]],
+    [[5, 5, 5], [6, 6, 6]],
+    [[7, 7, 7], [8, 8, 8]]
+  ]);
+  assertAllEqual(a.concat(1, b), [
+    [[1, 1, 1], [2, 2, 2], [5, 5, 5], [6, 6, 6]],
+    [[3, 3, 3], [4, 4, 4], [7, 7, 7], [8, 8, 8]]
+  ]);
+  assertAllEqual(a.concat(2, b), [
+    [[1, 1, 1, 5, 5, 5], [2, 2, 2, 6, 6, 6]],
+    [[3, 3, 3, 7, 7, 7], [4, 4, 4, 8, 8, 8]]
+  ]);
+  assertAllEqual(a.concat(2, b, b), [
+    [[1, 1, 1, 5, 5, 5, 5, 5, 5], [2, 2, 2, 6, 6, 6, 6, 6, 6]],
+    [[3, 3, 3, 7, 7, 7, 7, 7, 7], [4, 4, 4, 8, 8, 8, 8, 8, 8]]
+  ]);
   const t = tensor([[1, 2], [3, 4]]);
   const s = t.concat(0, [[5, 6]]);
   assertAllEqual(s, [[1, 2], [3, 4], [5, 6]]);
@@ -959,67 +834,58 @@ testDevices(async function api_concat(tensor, device) {
   const f = (x, y) => x.concat(0, y.mul(2));
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assertAllEqual(gab[0], [[[1, 1, 1], [1, 1, 1]],
-                          [[1, 1, 1], [1, 1, 1]]]);
-  assertAllEqual(gab[1], [[[2, 2, 2], [2, 2, 2]],
-                          [[2, 2, 2], [2, 2, 2]]]);
+  assertAllEqual(gab[0], [[[1, 1, 1], [1, 1, 1]], [[1, 1, 1], [1, 1, 1]]]);
+  assertAllEqual(gab[1], [[[2, 2, 2], [2, 2, 2]], [[2, 2, 2], [2, 2, 2]]]);
 });
 
 test(async function api_cast() {
-  const a = tensor([255, 127, 0], {dtype: "uint8"});
+  const a = tensor([255, 127, 0], { dtype: "uint8" });
   assert(a.dtype === "uint8");
   const r = a.cast("float32").div(255);
   assertAllClose(r, [1.0, 127 / 255, 0]);
 });
 
 testDevices(async function api_oneHot(tensor, device) {
-  const a = tensor([0, 1, 3, 4], {dtype: "int32"});
+  const a = tensor([0, 1, 3, 4], { dtype: "int32" });
   assertAllEqual(a.oneHot(6), [
     [1, 0, 0, 0, 0, 0],
     [0, 1, 0, 0, 0, 0],
     [0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 1, 0]
   ]);
 
-  const b = tensor([0, 1, 3, 4], {dtype: "int32"});
+  const b = tensor([0, 1, 3, 4], { dtype: "int32" });
   assertAllEqual(b.oneHot(5, 0.5, -0.5), [
-    [ 0.5, -0.5, -0.5, -0.5, -0.5],
-    [-0.5,  0.5, -0.5, -0.5, -0.5],
-    [-0.5, -0.5, -0.5,  0.5, -0.5],
-    [-0.5, -0.5, -0.5, -0.5,  0.5],
+    [0.5, -0.5, -0.5, -0.5, -0.5],
+    [-0.5, 0.5, -0.5, -0.5, -0.5],
+    [-0.5, -0.5, -0.5, 0.5, -0.5],
+    [-0.5, -0.5, -0.5, -0.5, 0.5]
   ]);
   // Make sure it works with uint8.
-  const c = tensor([0, 1], {dtype: "uint8"});
+  const c = tensor([0, 1], { dtype: "uint8" });
   assertAllEqual(c.oneHot(3), [[1, 0, 0], [0, 1, 0]]);
 });
 
 test(async function api_softmaxCE() {
-  const labels = tensor([
-    [1.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0],
-    [0.3, 0.0, 0.7],
-  ], {dtype: "float32"});
-  const f = (x) => tensor(x).softmaxCE(labels);
-  const logits = tensor([
-    [-2, 2, 10],
-    [-2, 2, 10],
-    [-2, 2, 10],
-  ], {dtype: "float32"});
+  const labels = tensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.3, 0.0, 0.7]], {
+    dtype: "float32"
+  });
+  const f = x => tensor(x).softmaxCE(labels);
+  const logits = tensor([[-2, 2, 10], [-2, 2, 10], [-2, 2, 10]], {
+    dtype: "float32"
+  });
   const ce = f(logits);
   assertAllClose(ce, [12.00034142, 8.00034142, 3.6003418]);
   const g = grad(f);
   assertAllClose(g(logits), [
-    [ -9.99993861e-01,   3.35348042e-04,   9.99658465e-01],
-    [  6.14211376e-06,  -9.99664664e-01,   9.99658465e-01],
-    [ -2.99993873e-01,   3.35348042e-04,   2.99658477e-01]
+    [-9.99993861e-1, 3.35348042e-4, 9.99658465e-1],
+    [6.14211376e-6, -9.99664664e-1, 9.99658465e-1],
+    [-2.99993873e-1, 3.35348042e-4, 2.99658477e-1]
   ]);
 });
 
 test(async function api_softmaxLoss() {
-  const logits = tensor([
-    [-2, 2, 10],
-    [-3, 2, 10],
-  ], {dtype: "float32"});
+  const logits = tensor([[-2, 2, 10], [-3, 2, 10]], { dtype: "float32" });
   const loss = logits.softmaxLoss([0, 2]);
   assertAllClose(loss, 6.0);
 });
@@ -1042,17 +908,22 @@ test(async function api_devicePlacement() {
 
 testDevices(async function api_neuralNet(tensor, device) {
   const inference = (params: Params, images: Tensor) => {
-    let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
+    let inputs = images
+      .cast("float32")
+      .div(255)
+      .reshape([-1, 28 * 28]);
     let outputs;
-    const layerSizes = [ 28 * 28, 64, 10 ];
+    const layerSizes = [28 * 28, 64, 10];
     for (let i = 0; i < layerSizes.length - 1; ++i) {
       const m = layerSizes[i];
       const n = layerSizes[i + 1];
       // Initialize or get weights and biases.
       const w = params.define(`w${i}`, () =>
-        randn([m, n], { dtype: "float32", device }));
+        randn([m, n], { dtype: "float32", device })
+      );
       const b = params.define(`b${i}`, () =>
-        zeros([n], { dtype: "float32", device }));
+        zeros([n], { dtype: "float32", device })
+      );
       outputs = inputs.matmul(w).add(b);
       inputs = outputs.relu();
     }
@@ -1068,8 +939,8 @@ testDevices(async function api_neuralNet(tensor, device) {
   };
 
   // Just zero data.
-  const images = tensor(zeros([16, 28, 28], {dtype: "int32"}));
-  const labels = tensor(zeros([16], {dtype: "int32"}));
+  const images = tensor(zeros([16, 28, 28], { dtype: "int32" }));
+  const labels = tensor(zeros([16], { dtype: "int32" }));
   let params = api.params();
   const gradFn = api.gradParams((params: Params): Tensor => {
     return loss(images, labels, params);
@@ -1094,12 +965,7 @@ testDevices(async function api_neuralNet(tensor, device) {
 testDevices(async function api_setDiag(tensor, device) {
   const matrix = tensor(zeros([4, 3]));
   const m = matrix.setDiag([1, 2, 3]);
-  assertAllEqual(m, [
-    [1, 0, 0],
-    [0, 2, 0],
-    [0, 0, 3],
-    [0, 0, 0]
-  ]);
+  assertAllEqual(m, [[1, 0, 0], [0, 2, 0], [0, 0, 3], [0, 0, 0]]);
 });
 
 testDevices(async function api_eye(tensor, device) {
@@ -1167,16 +1033,22 @@ test(async function api_conv2d() {
   // tests are done in src/conv_test.ts
   const f = (a, b) => api.conv2d(a, b);
   const g = multigrad(f, [0, 1]);
-  const img = api.range(4 * 4).reshape([1, 4, 4, 1]).cast("float32");
-  const filter = api.range(2 * 2).reshape([2, 2, 1, 1]).cast("float32");
+  const img = api
+    .range(4 * 4)
+    .reshape([1, 4, 4, 1])
+    .cast("float32");
+  const filter = api
+    .range(2 * 2)
+    .reshape([2, 2, 1, 1])
+    .cast("float32");
   const g_ = g(img, filter);
   assertShapesEqual(g_[0].shape, img.shape);
   assertShapesEqual(g_[1].shape, filter.shape);
   assertAllEqual(g_[0].squeeze(), [
-    [ 0, 1, 1, 1 ],
-    [ 2, 6, 6, 4 ],
-    [ 2, 6, 6, 4 ],
-    [ 2, 5, 5, 3 ],
+    [0, 1, 1, 1],
+    [2, 6, 6, 4],
+    [2, 6, 6, 4],
+    [2, 5, 5, 3]
   ]);
   assertAllEqual(g_[1].squeeze(), [[45, 54], [81, 90]]);
 });
@@ -1194,10 +1066,10 @@ test(async function api_maxPool() {
   const gx = g(x);
   assertShapesEqual(gx.shape, x.shape);
   assertAllEqual(gx.squeeze(), [
-    [ 0, 0, 0, 0 ],
-    [ 0, 1, 0, 1 ],
-    [ 0, 0, 0, 0 ],
-    [ 0, 1, 0, 1 ],
+    [0, 0, 0, 0],
+    [0, 1, 0, 1],
+    [0, 0, 0, 0],
+    [0, 1, 0, 1]
   ]);
 });
 

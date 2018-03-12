@@ -42,15 +42,15 @@ export function registerPrerenderedOutput(output) {
 // An anonymous notebook doc for when users aren't logged in
 const anonDoc = {
   anonymous: true,
-  cells: [ "// New Notebook. Insert code here." ],
+  cells: ["// New Notebook. Insert code here."],
   created: new Date(),
   owner: {
     displayName: "Anonymous",
     photoURL: "/static/img/anon_profile.png?",
-    uid: "",
+    uid: ""
   },
   title: "Anonymous Notebook. Changes will not be saved.",
-  updated: new Date(),
+  updated: new Date()
 };
 
 // Given a cell's id, which can either be an integer or
@@ -150,7 +150,7 @@ const codemirrorOptions = {
   mode: "javascript",
   scrollbarStyle: null,
   theme: "syntax",
-  viewportMargin: Infinity,
+  viewportMargin: Infinity
 };
 
 export interface CellProps {
@@ -160,7 +160,7 @@ export interface CellProps {
   onDelete?: () => void;
   onInsertCell?: () => void;
 }
-export interface CellState { }
+export interface CellState {}
 
 export class Cell extends Component<CellProps, CellState> {
   parentDiv: Element;
@@ -186,14 +186,15 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   get code(): string {
-    return normalizeCode(this.editor ? this.editor.getValue()
-                                     : this.props.code);
+    return normalizeCode(
+      this.editor ? this.editor.getValue() : this.props.code
+    );
   }
 
   console(...args: string[]) {
     const output = this.output;
     const last = output.lastChild;
-    let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
+    let s = last && last.nodeType !== Node.TEXT_NODE ? "\n" : "";
     s += args.join(" ") + "\n";
     const el = document.createTextNode(s);
     output.appendChild(el);
@@ -232,7 +233,7 @@ export class Cell extends Component<CellProps, CellState> {
   componentDidMount() {
     const options = Object.assign({}, codemirrorOptions, {
       mode: "javascript",
-      value: this.code,
+      value: this.code
     });
 
     // If we're in node, doing server-side rendering, we don't enable
@@ -250,7 +251,7 @@ export class Cell extends Component<CellProps, CellState> {
 
       this.editor = CodeMirror(this.input, options);
       this.editor.setOption("extraKeys", {
-        "Ctrl-Enter": () =>  {
+        "Ctrl-Enter": () => {
           this.run();
           return true;
         },
@@ -259,7 +260,7 @@ export class Cell extends Component<CellProps, CellState> {
           this.editor.getInputField().blur();
           this.focusNext();
           return true;
-        },
+        }
       });
 
       this.editor.on("focus", () => {
@@ -326,58 +327,77 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
-    const runButton = h("button", {
-      "class": "run-button",
-      "onClick": this.run.bind(this),
-    }, "");
+    const runButton = h(
+      "button",
+      {
+        class: "run-button",
+        onClick: this.run.bind(this)
+      },
+      ""
+    );
 
     let deleteButton = null;
     if (this.props.onDelete) {
-      deleteButton = h("button", {
-          "class": "delete-button",
-          "onClick": this.clickedDelete.bind(this),
-      }, "");
+      deleteButton = h(
+        "button",
+        {
+          class: "delete-button",
+          onClick: this.clickedDelete.bind(this)
+        },
+        ""
+      );
     }
 
     let insertButton = null;
     if (this.props.onInsertCell) {
-      insertButton = h("button", {
-          "class": "insert-button",
-          "onClick": this.clickedInsertCell.bind(this),
-      }, "");
+      insertButton = h(
+        "button",
+        {
+          class: "insert-button",
+          onClick: this.clickedInsertCell.bind(this)
+        },
+        ""
+      );
     }
 
     // If supplied outputHTML, use that in the output div.
     const outputDivAttr = {
-      "class": "output",
-      "id": "output" + this.id,
-      "ref": (ref => { this.output = ref; }),
+      class: "output",
+      id: "output" + this.id,
+      ref: ref => {
+        this.output = ref;
+      }
     };
     if (this.outputHTML) {
       outputDivAttr["dangerouslySetInnerHTML"] = {
-        __html: this.outputHTML,
+        __html: this.outputHTML
       };
     }
     const outputDiv = h("div", outputDivAttr);
 
-    return h("div", {
-        "class": "notebook-cell",
-        "id": `cell${this.id}`,
-        "ref": (ref => { this.parentDiv = ref; }),
+    return h(
+      "div",
+      {
+        class: "notebook-cell",
+        id: `cell${this.id}`,
+        ref: ref => {
+          this.parentDiv = ref;
+        }
       },
-      h("div", {
-        "class": "input",
-        "ref": (ref => { this.input = ref; }),
-      },
+      h(
+        "div",
+        {
+          class: "input",
+          ref: ref => {
+            this.input = ref;
+          }
+        },
         // This pre is replaced by CodeMirror if users have JavaScript enabled.
-        h("pre", { }, this.code),
+        h("pre", {}, this.code),
         deleteButton,
-        runButton,
+        runButton
       ),
-      h("div", { "class": "output-container" },
-        outputDiv,
-        insertButton,
-      )
+      h("div", { class: "output-container" }, outputDiv, insertButton)
     );
   }
 }
@@ -392,10 +412,10 @@ export interface FixedProps {
 export class FixedCell extends Component<FixedProps, CellState> {
   render() {
     // Render as a pre in case people don't have javascript turned on.
-    return h("div", { "class": "notebook-cell", },
-      h("div", { "class": "input" },
-        h("pre", { }, normalizeCode(this.props.code)),
-      )
+    return h(
+      "div",
+      { class: "notebook-cell" },
+      h("div", { class: "input" }, h("pre", {}, normalizeCode(this.props.code)))
     );
   }
 }
@@ -409,8 +429,10 @@ export interface NotebookRootState {
   nbId?: string;
 }
 
-export class NotebookRoot extends Component<NotebookRootProps,
-                                            NotebookRootState> {
+export class NotebookRoot extends Component<
+  NotebookRootProps,
+  NotebookRootState
+> {
   constructor(props) {
     super(props);
 
@@ -430,18 +452,24 @@ export class NotebookRoot extends Component<NotebookRootProps,
     if (this.state.nbId) {
       body = h(Notebook, {
         nbId: this.state.nbId,
-        userInfo: this.props.userInfo,
+        userInfo: this.props.userInfo
       });
     } else {
       body = h(MostRecent, null);
     }
 
-    return h("div", { "class": "notebook" },
-      h(GlobalHeader, {
-        subtitle: "Notebook",
-        subtitleLink: "/notebook",
-      }, h(UserMenu, { userInfo: this.props.userInfo })),
-      body,
+    return h(
+      "div",
+      { class: "notebook" },
+      h(
+        GlobalHeader,
+        {
+          subtitle: "Notebook",
+          subtitleLink: "/notebook"
+        },
+        h(UserMenu, { userInfo: this.props.userInfo })
+      ),
+      body
     );
   }
 }
@@ -464,7 +492,7 @@ export class MostRecent extends Component<any, MostRecentState> {
     // This is to avoiding calling into firebase during static HTML generation.
     if (IS_WEB) {
       const latest = await db.active.queryLatest();
-      this.setState({latest});
+      this.setState({ latest });
     }
   }
 
@@ -480,29 +508,47 @@ export class MostRecent extends Component<any, MostRecentState> {
       return h(Loading, null);
     }
     const notebookList = this.state.latest.map(info => {
-      const snippit = info.doc.cells.map(normalizeCode)
+      const snippit = info.doc.cells
+        .map(normalizeCode)
         .join("\n")
         .slice(0, 100);
       const href = nbUrl(info.nbId);
-      return h("a", { href },
-        h("li", null,
-          h("div", { "class": "code-snippit" }, snippit),
-          notebookBlurb(info.doc, false),
-        ),
+      return h(
+        "a",
+        { href },
+        h(
+          "li",
+          null,
+          h("div", { class: "code-snippit" }, snippit),
+          notebookBlurb(info.doc, false)
+        )
       );
     });
-    return h("div", { "class": "most-recent" },
-      h("div", {"class": "most-recent-header"},
-        h("div", {"class": "most-recent-header-title"},
-          h("h2", null, "Recently Updated"),
+    return h(
+      "div",
+      { class: "most-recent" },
+      h(
+        "div",
+        { class: "most-recent-header" },
+        h(
+          "div",
+          { class: "most-recent-header-title" },
+          h("h2", null, "Recently Updated")
         ),
-        h("div", {"class": "most-recent-header-cta"},
-          h("button", { "class": "create-notebook",
-                        "onClick": () => this.onCreate(),
-          }, "+ New Notebook"),
-        ),
+        h(
+          "div",
+          { class: "most-recent-header-cta" },
+          h(
+            "button",
+            {
+              class: "create-notebook",
+              onClick: () => this.onCreate()
+            },
+            "+ New Notebook"
+          )
+        )
       ),
-      h("ol", null, ...notebookList),
+      h("ol", null, ...notebookList)
     );
   }
 }
@@ -510,7 +556,7 @@ export class MostRecent extends Component<any, MostRecentState> {
 export interface NotebookProps {
   nbId: string;
   onReady?: () => void;
-  userInfo?: db.UserInfo;  // Info about the currently logged in user.
+  userInfo?: db.UserInfo; // Info about the currently logged in user.
 }
 
 export interface NotebookState {
@@ -536,9 +582,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   async componentWillMount() {
     try {
-      const doc = this.props.nbId === "anonymous"
-        ? anonDoc
-        : await db.active.getDoc(this.props.nbId);
+      const doc =
+        this.props.nbId === "anonymous"
+          ? anonDoc
+          : await db.active.getDoc(this.props.nbId);
       this.setState({ doc });
     } catch (e) {
       this.setState({ errorMsg: e.message });
@@ -569,11 +616,11 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     doc.title = this.state.typedTitle;
     this.setState({ ...doc, editingTitle: false });
     this.update(doc);
-   }
+  }
 
   async onTypedTitle(event) {
-     this.setState({ typedTitle: event.target.value });
-   }
+    this.setState({ typedTitle: event.target.value });
+  }
 
   async onDelete(i) {
     const doc = this.state.doc;
@@ -604,74 +651,103 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   renderCells(doc): JSX.Element {
-    return h("div", { "class": "cells" }, doc.cells.map((code, i) => {
-      return cell(code, {
-        onRun: (updatedCode) => { this.onRun(updatedCode, i); },
-        onDelete: () => { this.onDelete(i); },
-        onInsertCell: () => { this.onInsertCell(i); },
-      });
-    }));
+    return h(
+      "div",
+      { class: "cells" },
+      doc.cells.map((code, i) => {
+        return cell(code, {
+          onRun: updatedCode => {
+            this.onRun(updatedCode, i);
+          },
+          onDelete: () => {
+            this.onDelete(i);
+          },
+          onInsertCell: () => {
+            this.onInsertCell(i);
+          }
+        });
+      })
+    );
   }
 
   render() {
     let body;
 
     if (this.state.errorMsg) {
-      body = [
-        h("h1", null, "Error"),
-        h("b", null, this.state.errorMsg),
-      ];
-
+      body = [h("h1", null, "Error"), h("b", null, this.state.errorMsg)];
     } else if (this.state.doc == null) {
-      body = [
-        h(Loading, null)
-      ];
-
+      body = [h(Loading, null)];
     } else {
       const doc = this.state.doc;
 
-      const titleEdit = h("div", { class: "title" },
+      const titleEdit = h(
+        "div",
+        { class: "title" },
         h("input", {
           class: "title-input",
           onChange: event => this.onTypedTitle(event),
           value: doc.title
         }),
-        h("button", {
-          class: "edit-title green-button",
-          onClick: () => this.onSaveTitle(doc)
-        }, "Save"),
-        h("button", {
-          class: "edit-title",
-          onClick: () => this.setState({ editingTitle: false })
-        }, "Cancel")
+        h(
+          "button",
+          {
+            class: "edit-title green-button",
+            onClick: () => this.onSaveTitle(doc)
+          },
+          "Save"
+        ),
+        h(
+          "button",
+          {
+            class: "edit-title",
+            onClick: () => this.setState({ editingTitle: false })
+          },
+          "Cancel"
+        )
       );
 
-      const editButton = h("button", {
-        class: "edit-title",
-        onClick: () => this.setState({ editingTitle: true })
-      }, "Edit");
+      const editButton = h(
+        "button",
+        {
+          class: "edit-title",
+          onClick: () => this.setState({ editingTitle: true })
+        },
+        "Edit"
+      );
 
       const titleDisplay = h("div", { class: "title" }, [
-        h("h2", {
-          class: doc.title && doc.title.length ? "" : "untitled",
-          value: doc.title
-        }, doc.title || "Untitled Notebook"),
+        h(
+          "h2",
+          {
+            class: doc.title && doc.title.length ? "" : "untitled",
+            value: doc.title
+          },
+          doc.title || "Untitled Notebook"
+        ),
         db.ownsDoc(this.props.userInfo, doc) ? editButton : null
       ]);
 
       const title = this.state.editingTitle ? titleEdit : titleDisplay;
 
-      const cloneButton = this.props.userInfo == null ? ""
-        : h("button", {
-            "class": "green-button",
-            "onClick": () => this.onClone(),
-          }, "Clone");
+      const cloneButton =
+        this.props.userInfo == null
+          ? ""
+          : h(
+              "button",
+              {
+                class: "green-button",
+                onClick: () => this.onClone()
+              },
+              "Clone"
+            );
 
       body = [
-        h("div", { "class": "notebook-container" },
+        h(
+          "div",
+          { class: "notebook-container" },
           h("header", null, notebookBlurb(doc), title, cloneButton),
-          this.renderCells(doc),
-        ),
+          this.renderCells(doc)
+        )
       ];
     }
 
@@ -689,20 +765,26 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 }
 
 function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
-  const dates = !showDates ? [] : [
-    h("div", { "class": "date-created" },
-      h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
-    ),
-    h("div", { "class": "date-updated" },
-      h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
-    ),
-  ];
-  return h("div", { "class": "blurb" }, null, [
-    h("div", { "class": "blurb-avatar" },
-      h(Avatar, { userInfo: doc.owner }),
-    ),
-    h("div", { "class": "blurb-name" },
-      h("p", { "class": "displayName" }, doc.owner.displayName),
+  const dates = !showDates
+    ? []
+    : [
+        h(
+          "div",
+          { class: "date-created" },
+          h("p", { class: "created" }, `Created ${fmtDate(doc.created)}.`)
+        ),
+        h(
+          "div",
+          { class: "date-updated" },
+          h("p", { class: "updated" }, `Updated ${fmtDate(doc.updated)}.`)
+        )
+      ];
+  return h("div", { class: "blurb" }, null, [
+    h("div", { class: "blurb-avatar" }, h(Avatar, { userInfo: doc.owner })),
+    h(
+      "div",
+      { class: "blurb-name" },
+      h("p", { class: "displayName" }, doc.owner.displayName)
     ),
     ...dates
   ]);

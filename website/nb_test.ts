@@ -12,12 +12,14 @@ function resetPage() {
 testBrowser(function notebook_NotebookRoot() {
   const mdb = enableMock();
   resetPage();
-  const el = h(nb.NotebookRoot, { });
+  const el = h(nb.NotebookRoot, {});
   render(el, document.body);
   console.log("mdb.counts", mdb.counts);
-  assert(objectsEqual(mdb.counts, {
-    queryLatest: 1,
-  }));
+  assert(
+    objectsEqual(mdb.counts, {
+      queryLatest: 1
+    })
+  );
   const c = document.body.getElementsByTagName("div")[0];
   assert(c.className === "notebook");
 });
@@ -26,10 +28,10 @@ testBrowser(async function notebook_Notebook() {
   const mdb = enableMock();
   resetPage();
 
-  const readyPromise = new Promise((resolve) => {
+  const readyPromise = new Promise(resolve => {
     const el = h(nb.Notebook, {
       nbId: "default",
-      onReady: resolve,
+      onReady: resolve
     });
     render(el, document.body);
   });
@@ -61,10 +63,10 @@ testBrowser(async function notebook_focusNextCell() {
   const mdb = enableMock();
   resetPage();
 
-  const readyPromise = new Promise((resolve) => {
+  const readyPromise = new Promise(resolve => {
     const el = h(nb.Notebook, {
       nbId: "default",
-      onReady: resolve,
+      onReady: resolve
     });
     render(el, document.body);
   });
@@ -102,15 +104,15 @@ testBrowser(async function notebook_focusNextCell() {
 testBrowser(async function notebook_NotebookLoggedIn() {
   resetPage();
 
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     const el = h(nb.Notebook, {
       nbId: "default",
       onReady: resolve,
       userInfo: {
         displayName: "owner",
         photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
-        uid: "abc",
-      },
+        uid: "abc"
+      }
     });
     render(el, document.body);
   });
@@ -146,5 +148,4 @@ testBrowser(async function notebook_NotebookLoggedIn() {
   assert(1 === title.length);
   assert("New Title" === title[0].innerHTML);
   */
-
 });

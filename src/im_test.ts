@@ -28,9 +28,7 @@ const jpgPath = fetch2ArgManipulation("src/testdata/sample.jpg");
 function getPixel(channels, data, x, y, rgba = false) {
   // we know sample images are 64x64
   const idx = (rgba ? 4 : channels) * (y * 64 + x);
-  const pixel = new Array(channels)
-    .fill(null)
-    .map((x, i) => data[idx + i]);
+  const pixel = new Array(channels).fill(null).map((x, i) => data[idx + i]);
   return pixel;
 }
 

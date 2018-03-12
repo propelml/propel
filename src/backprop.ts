@@ -127,10 +127,9 @@ export function gradParams(f: ParamsFn, names?: string[]) {
 }
 
 export function multigradAndVal(f, argnums?: number[]) {
-  return function(...args: types.TensorLike[]):
-      [Tensor[], Tensor] {
+  return function(...args: types.TensorLike[]): [Tensor[], Tensor] {
     pushNewTape();
-    const targs: Tensor[] = args.map((tl) => convert(tl));
+    const targs: Tensor[] = args.map(tl => convert(tl));
     // Watch the specified argnums.
     if (argnums == null) {
       for (const t of targs) {
@@ -167,25 +166,29 @@ export function grad(f, argnum = 0) {
 
 export function gradAndVal(f, argnum = 0) {
   const g = multigradAndVal(f, [argnum]);
-  return function(...args: types.TensorLike[]):
-      [Tensor, Tensor] {
+  return function(...args: types.TensorLike[]): [Tensor, Tensor] {
     const [grad, val] = g(...args);
     return [grad[0], val];
   };
 }
 
-function imperativeGrad(target: Tensor,
-                        sources: Tensor[],
-                        tape: Tape): Tensor[] {
+function imperativeGrad(
+  target: Tensor,
+  sources: Tensor[],
+  tape: Tape
+): Tensor[] {
   const readyOps: number[] = [];
-  const sourceIds = new Set(sources.map((t) => t.id));
+  const sourceIds = new Set(sources.map(t => t.id));
 
   // We discard tape.oidLookup and instead use the oidLookup returned from
   // prepareBackprop, this potentially allows the VM to release all memory used
   // to keep traces that are irrelevant to the gradient computation we're
   // doing.
-  const [usageCounts, opMissingTensor, oidLookup] = prepareBackprop(target,
-    tape, sourceIds);
+  const [usageCounts, opMissingTensor, oidLookup] = prepareBackprop(
+    target,
+    tape,
+    sourceIds
+  );
   log("usageCounts", usageCounts);
   log("opMissingTensor", opMissingTensor);
 
@@ -214,21 +217,24 @@ function imperativeGrad(target: Tensor,
       // Non-tensor inputs have null shapeDType.
       if (shapeDType == null) return null;
       // Actually do the backward pass.
-      const t = bwFunc(i, outGrad, ...op.savedForBackward || []);
+      const t = bwFunc(i, outGrad, ...(op.savedForBackward || []));
       if (t != null) {
         return t;
       } else {
         // Null backwards function, return a zero tensor of the same shape and
         // dtype as the input.
         const [shape, dtype] = shapeDType;
-        const zero = convert(0, {dtype, device: outGrad.device});
+        const zero = convert(0, { dtype, device: outGrad.device });
         return fill(zero, shape);
       }
     });
 
-    log("- inGrad", inGrads.map((g) => {
-      return g ? [g.device, g.shape] : null;
-    }));
+    log(
+      "- inGrad",
+      inGrads.map(g => {
+        return g ? [g.device, g.shape] : null;
+      })
+    );
 
     for (let i = 0; i < op.inputIds.length; i++) {
       const tid: null | number = op.inputIds[i];
@@ -242,9 +248,11 @@ function imperativeGrad(target: Tensor,
 
       if (usageCounts.get(tid) > 0) {
         usageCounts.dec(tid);
-        if (tape.tensorToOp.has(tid) &&
-            usageCounts.get(tid) === 0 &&
-            !sourceIds.has(tid)) {
+        if (
+          tape.tensorToOp.has(tid) &&
+          usageCounts.get(tid) === 0 &&
+          !sourceIds.has(tid)
+        ) {
           const inOp = tape.tensorToOp.get(tid);
           if (inOp > 0) {
             if (opMissingTensor.get(inOp) > 0) {
@@ -288,7 +296,9 @@ function prepareBackprop(target, tape, sourceIds): PrepInfo {
 
     // oid is -1 if tensor is a source, continue
     // Or if we've already processed this op, continue.
-    if (oid === undefined || oid < 0 || oidLookup.has(oid)) { continue; }
+    if (oid === undefined || oid < 0 || oidLookup.has(oid)) {
+      continue;
+    }
 
     const op = tape.oidLookup.get(oid);
     oidLookup.set(oid, op);
@@ -300,8 +310,11 @@ function prepareBackprop(target, tape, sourceIds): PrepInfo {
       // - if this is the first usage of this tensor, and
       // - if the input tensor has a registered op, and
       // - it's not one of the source tensors,
-      if (usageCounts.get(inputId) === 1 && tape.tensorToOp.has(inputId) &&
-        !sourceIds.has(inputId)) {
+      if (
+        usageCounts.get(inputId) === 1 &&
+        tape.tensorToOp.has(inputId) &&
+        !sourceIds.has(inputId)
+      ) {
         tensorStack.push(inputId);
       }
     }

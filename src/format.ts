@@ -24,19 +24,26 @@ interface FormatOptions {
 }
 
 function split(s, precision): [string, string] {
-  return s.toFixed(precision).replace(/0+$/, "").split(".", 2);
+  return s
+    .toFixed(precision)
+    .replace(/0+$/, "")
+    .split(".", 2);
 }
 
-function preprocess(shape: types.Shape, data: types.TypedArray,
-                    precision: number): FormatOptions {
+function preprocess(
+  shape: types.Shape,
+  data: types.TypedArray,
+  precision: number
+): FormatOptions {
   const dtype = getDType(data);
   let maxBefore = 0;
   let maxAfter = 0;
   for (let i = 0; i < data.length; i++) {
-    const [before, after] = data[i].toFixed(precision)
-                                   .replace(/0+$/, "")
-                                   .replace(/^-/, "")
-                                   .split(".", 2);
+    const [before, after] = data[i]
+      .toFixed(precision)
+      .replace(/0+$/, "")
+      .replace(/^-/, "")
+      .split(".", 2);
     if (maxBefore < before.length) maxBefore = before.length;
     if (maxAfter < after.length) maxAfter = after.length;
   }
@@ -48,16 +55,16 @@ function preprocess(shape: types.Shape, data: types.TypedArray,
 
 function formatNumber(value: number, opts: FormatOptions): string {
   switch (opts.dtype) {
-      case "int32":
-      case "uint8":
-        return "" + value;
-      case "float32":
-        const [before, after] = split(value, opts.precision);
-        const b = opts.maxBefore - before.length;
-        const a = opts.maxAfter - after.length;
-        return " ".repeat(b) + before + "." + after + " ".repeat(a);
-      default:
-        throw new Error("Bad dtype.");
+    case "int32":
+    case "uint8":
+      return "" + value;
+    case "float32":
+      const [before, after] = split(value, opts.precision);
+      const b = opts.maxBefore - before.length;
+      const a = opts.maxAfter - after.length;
+      return " ".repeat(b) + before + "." + after + " ".repeat(a);
+    default:
+      throw new Error("Bad dtype.");
   }
 }
 
