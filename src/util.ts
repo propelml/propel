@@ -29,6 +29,12 @@ export const global = globalEval("this");
 export const IS_WEB = global.window !== undefined;
 export const IS_NODE = !IS_WEB;
 
+if (IS_NODE) {
+  process.on("unhandledRejection", (error) => {
+    throw error;
+  });
+}
+
 // This is to confuse parcel and prevent it from including node-only modules
 // in a browser-targeted bundle.
 // TODO: There may be a more elegant workaround in future versions.
