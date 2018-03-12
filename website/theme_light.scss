@@ -4,15 +4,19 @@
  */
 
 $bodyBackground: #fff;
-$cellBackground: rgba(88, 157, 239, 0.03);
+$lightGrey: #fafafa;
+$darkGrey: #666;
+$cellBackground: rgba(36, 126, 233, 0.03);
+$cellBackgroundFocus: rgba(36, 126, 233, 0.1);
 $textColor: #1d2936;
-$linkColor: #1163c2;
+$linkColor: #247ee9;
 $base03: #002b36;
 $base02: #073642;
 $base01: #636363;
 $base00: #657b83;
-$base0: #589def;
-$base1: #000;
+$base0: #247ee9;
+$base0Dark: #0C4E9C;
+$base1: #222;
 $base2: #eee8d5;
 $base3: #fdf6e3;
 $base4: #fd8d3c;

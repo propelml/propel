@@ -5,26 +5,28 @@
 @import './syntax.scss';
 @import url(https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono);
 
-$githubGreen: #39aa56;
+$githubGreen: #33ba1d;
 $size0: 8px;
 $size1: 16px;
 $size2: 32px;
 
 $borderColor: #eee;
-$accentColor: #589def;  // blue
-$shadow: 0 2px 2px 0 rgba(17, 99, 194, 0.3);
+$accentColor: #247ee9;  // blue
+$shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.3);
 
-@mixin shadowHover {
+@mixin buttonHover {
   -webkit-transform: perspective(1px) translateZ(0);
   transform: perspective(1px) translateZ(0);
   box-shadow: 0 0 1px transparent;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  -webkit-transition-property: box-shadow;
-  transition-property: box-shadow;
+  overflow: hidden;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: color, background-color;
+  transition-property: color, background-color;
 
   &:hover {
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    background-color: $base0Dark;
+    color: white;
   }
 }
 
@@ -46,12 +48,11 @@ body {
     'helvetica neue',
     arial,
     sans-serif;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   line-height: 1.6;
 }
 
 /* Centers and gives max-width to index, references, notebook pages */
-.splash,
 .use-it-inner,
 .flex-row,
 .references {
@@ -108,7 +109,7 @@ input[type=button] {
   text-align: center;
   text-transform: uppercase;
 
-  @include shadowHover;
+  @include buttonHover;
 }
 
 .name,
@@ -172,7 +173,7 @@ header {
 }
 
 .use-it {
-  background: #fafafa;
+  background: $lightGrey;
 
   .use-it-inner {
     padding: $size2 0;
@@ -182,8 +183,63 @@ header {
     margin: $size1 0 0 0;
   }
 
+  .snippit-title {
+    margin-left: 16px;
+  }
+
   pre {
     background: $bodyBackground;
+  }
+}
+//loading animation
+
+@-webkit-keyframes loadingScreen {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes loadingScreen {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+
+  & h1 {
+    font-size: 32px;
+    line-height: 40px;
+    color: #595959;
+    -webkit-animation-name: loadingScreen;
+    animation-name: loadingScreen;
+    -webkit-animation-duration: 3s;
+    animation-duration: 3s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
   }
 }
 
@@ -274,6 +330,7 @@ header {
     margin-bottom: 24px;
     border-bottom: $borderColor;
     border-right: $borderColor;
+    margin-left: 16px;
 
     .insert-button {
       /* Bottom right corner */
@@ -297,7 +354,7 @@ header {
   .flex-cell {
     flex-basis: 100%;
     flex-grow: 1;
-    padding: $size0;
+    padding: $size1;
   }
 
   .flex-cell.intro-notebook {
@@ -349,44 +406,50 @@ header {
 }
 
 .footer {
+  display: flex;
+  justify-content: center;
+  align-content: center;
   width: 100%;
-  margin-top: $size2;
-  padding: $size1 0;
-  background-color: #589def;
+  height: 8rem;
+  margin-top: $size1;
+  background-color: $bodyBackground;
   text-align: center;
+  border-top: 1px solid $borderColor;
 
   a {
-    color: $bodyBackground;
-    font-weight: bold;
+    font-size: 1.4rem;
+    line-height: 2.4rem;
+    font-weight: 200;
     text-transform: uppercase;
+    margin: auto 8px;
   }
 }
 
 .doc-entries {
   overflow-x: hidden;
-  background-color: #f0f0f7;
+  background-color: $lightGrey;
 }
 
 .doc-entry {
   padding: 0;
   height: auto;
   padding-left: 0;
+  border-radius: 2px;
   border-top: 1px solid $bodyBackground;
   border-bottom: 1px solid $bodyBackground;
-  margin-bottom: $size1;
-  margin-top: $size1;
+  margin: $size1 auto;
   box-shadow: $shadow;
-  background-color: #fff;
-  max-width: 60rem;
+  background-color: $bodyBackground;
+  max-width: 960px;
 
   .source-link {
     float: right;
-    font-size: 10px;
-    color: #666;
+    font-size: 1rem;
+    color: $darkGrey;
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 2rem;
     color: $linkColor;
     font-weight: 300;
   }
@@ -406,7 +469,7 @@ header {
   }
 
   &:target {
-    background-color: #fafaff;
+    background-color: $lightGrey;
     border-top: 1px solid $borderColor;
     border-bottom: 1px solid $borderColor;
     border-left: 2px solid $linkColor;
@@ -451,9 +514,7 @@ header {
       margin: auto 0;
 
       h1 {
-        display: inline;
-        font-size: 20pt;
-        line-height: 24px;
+        font-size: 2.4rem;
         font-weight: bold;
         letter-spacing: 0.2px;
       }
@@ -463,14 +524,36 @@ header {
       margin: auto 0;
 
       h2 {
-        display: inline;
         color: $accentColor;
-        font-size: 14pt;
-        line-height: 16px;
+        font-size: 1.6rem;
         letter-spacing: 0.2px;
         font-weight: 200;
       }
     }
+  }
+}
+
+.dropdown {
+  position: relative;
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    width: auto;
+    box-shadow: $shadow;
+    background: $bodyBackground;
+    z-index: 1;
+
+    & a {
+      display: block;
+      white-space: nowrap;
+      padding: $size0;
+    }
+  }
+
+  &:hover .dropdown-content {
+    display: block;
   }
 }
 
@@ -493,12 +576,17 @@ header {
       margin-left: 0;
     }
 
-    a {
-      font-size: 14pt;
+    & a {
+      font-size: 1.6rem;
+      line-height: 2rem;
       font-variant: all-small-caps;
       text-decoration: none;
       color: $accentColor;
       white-space: nowrap;
+
+      &:hover {
+        color: $base0Dark;
+      }
     }
   }
 
@@ -512,24 +600,7 @@ header {
   }
 }
 
-.panel {
-  background-color: $bodyBackground;
-
-  & .propel-logo {
-    border-bottom: 1px solid $base01;
-    margin-bottom: 8px;
-  }
-
-  ol.docindex {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  li {
-    margin: 0 4px;
-  }
-}
+//notebook section
 
 .snippet-global-header-title {
   font-weight: 500;
@@ -540,13 +611,13 @@ header {
   display: inline-block;
   margin: 0 10px 10px 0;
 
-  @include shadowHover;
+  @include buttonHover;
 }
 
 .blurb {
   background-color: #fff;
   box-shadow: inset 0 1px 0 #d8d8d8;
-  font-size: 13px;
+  font-size: 1.2rem;
   letter-spacing: 0.5px;
   display: flex;
   margin-top: 8px;
@@ -589,7 +660,7 @@ header {
       align-content: center;
 
       button {
-        @include shadowHover;
+        @include buttonHover;
       }
     }
   }
@@ -616,9 +687,11 @@ header {
       border: 1px solid $borderColor;
       min-height: 240px;
 
-      &:hover {
-        border: 1px solid $linkColor;
+      &:hover,
+      &:focus,
+      &:active {
         text-decoration: none;
+        background-color: $cellBackgroundFocus;
       }
 
       &:hover .displayName {
@@ -639,7 +712,8 @@ header {
       .blurb {
         background-color: #fff;
         box-shadow: inset 0 1px 0 $borderColor;
-        font-size: 13px;
+        font-size: 1.3rem;
+        line-height: 1.6rem;
         letter-spacing: 0.5px;
         display: flex;
         margin-top: 8px;
@@ -650,35 +724,6 @@ header {
       }
     }
   }
-}
-
-.dropdown {
-  position: relative;
-
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    width: auto;
-    box-shadow: $shadow;
-    background: $bodyBackground;
-    z-index: 1;
-
-    a {
-      display: block;
-      white-space: nowrap;
-      padding: $size0;
-    }
-  }
-
-  &:hover .dropdown-content {
-    display: block;
-  }
-}
-
-::selection {
-  background: #00f;
-  color: #fff;
 }
 
 .cells {
@@ -700,8 +745,73 @@ img.avatar {
   display: block;
 }
 
+//docs section
+//treats .global-header uniquely 
+.docs {
+  width: 100%;
+
+  & .global-header {
+    width: 100%;
+    padding: 0 16px;
+    background-color: #fff;
+    position: fixed;
+    z-index: 1001;
+    border-bottom: 1px solid $borderColor;
+    box-shadow: $shadow;
+
+    & > .global-header-inner {
+      max-width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      height: 64px;
+      margin: 0 auto;
+    }
+  }
+}
+
+.doc-wrapper {
+  width: 100%;
+  top: 64px;
+  bottom: 0;
+  left: 0;
+  height: calc(100vh - 64px);
+  position: fixed;
+  overflow-y: scroll;
+}
+
+.panel {
+  background-color: $bodyBackground;
+  padding-top: 24px;
+
+  & .propel-logo {
+    border-bottom: 1px solid $base01;
+    margin-bottom: 8px;
+  }
+
+  ol.docindex {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    & li {
+      margin: 0 4px;
+
+      &:last-child {
+        margin-bottom: 32px;
+      }
+    }
+  }
+}
+
 // Mobile first. No desktop related things above this line.
 @media (max-width: 1100px) {
+  .notebook-cell {
+    .output-container {
+      margin-left: 0;
+    }
+  }
+
   .most-recent {
     max-width: 640px;
   }
@@ -714,7 +824,7 @@ img.avatar {
   }
 
   h1 {
-    font-size: 5rem;
+    font-size: 3.2rem;
   }
 
   .nav-buttons {
@@ -725,20 +835,20 @@ img.avatar {
   $desktopPanelSize: 250px;
 
   .panel {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    height: auto;
     position: fixed;
-    overflow-y: auto;
+    overflow: auto;
     width: $desktopPanelSize;
     background-color: $bodyBackground;
+    height: inherit;
   }
 
   .doc-entries {
     margin-left: $desktopPanelSize;
-    padding-left: $size1;
     max-width: auto;
+    background-color: $lightGrey;
+    overflow: auto;
+    height: inherit;
+    padding-left: 8px;
   }
 
   .flex-row {
@@ -747,6 +857,10 @@ img.avatar {
 
     .flex-cell {
       flex-basis: 0;
+
+      p {
+        margin-bottom: 16px;
+      }
     }
   }
 }
