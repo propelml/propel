@@ -26,6 +26,10 @@
 
 #define BUFSIZE 512
 
+#ifndef NAPI_AUTO_LENGTH
+# define NAPI_AUTO_LENGTH static_cast<size_t>(-1)
+#endif
+
 enum AttrType {
   ATTR_STRING,
   ATTR_INT,
