@@ -20,11 +20,16 @@ import "./dl/math/backends/backend_cpu";
 import "./dl/math/backends/backend_webgl";
 
 import { ENV } from "./dl/environment";
-import { MathBackendWebGL }
- from "./dl/math/backends/backend_webgl";
+import { MathBackendWebGL } from "./dl/math/backends/backend_webgl";
 import { NDArrayMath } from "./dl/math/math";
-import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
-  from "./dl/math/ndarray";
+import {
+  Array1D,
+  Array2D,
+  Array3D,
+  Array4D,
+  NDArray,
+  Scalar
+} from "./dl/math/ndarray";
 import { MatrixOrientation } from "./dl/math/types";
 import { assert, getDType, makeTypedArray } from "./tensor_util";
 import * as types from "./types";
@@ -52,24 +57,22 @@ if (webglBackend) {
 type DTypeDL = "float32" | "int32" | "bool";
 function dtypeDL(propelDtype: types.DType): DTypeDL {
   switch (propelDtype) {
-      case "int32":
-      case "float32":
-      case "bool":
-        return propelDtype;
-      case "uint8":
-        return "int32";
+    case "int32":
+    case "float32":
+    case "bool":
+      return propelDtype;
+    case "uint8":
+      return "int32";
   }
 }
 
 export type TensorDL = NDArray; // Note NDArray implements Storage.
 
 export class OpsDL implements types.BackendOps {
-
   copyToDevice(x: TensorDL, device: string): TensorDL {
     const math = lookupMath(device);
     // TODO Don't use dataSync() here.
-    return NDArray.make(x.shape, {values: x.dataSync()},
-                        x.dtype, math);
+    return NDArray.make(x.shape, { values: x.dataSync() }, x.dtype, math);
   }
 
   getDevice(x: TensorDL): string {
@@ -84,8 +87,12 @@ export class OpsDL implements types.BackendOps {
     return d;
   }
 
-  fromTypedArray(values: types.TypedArray, shape: types.Shape,
-                 dtype?: types.DType, device?: string): TensorDL {
+  fromTypedArray(
+    values: types.TypedArray,
+    shape: types.Shape,
+    dtype?: types.DType,
+    device?: string
+  ): TensorDL {
     if (dtype == null) {
       dtype = getDType(values);
     }
@@ -131,12 +138,15 @@ export class OpsDL implements types.BackendOps {
     return x.math.log(x);
   }
 
-  matmul(x: TensorDL, y: TensorDL, transposeA = false,
-         transposeB = false): TensorDL {
+  matmul(
+    x: TensorDL,
+    y: TensorDL,
+    transposeA = false,
+    transposeB = false
+  ): TensorDL {
     ENV.setMath(x.math);
-    const f = (t) => t ?
-      MatrixOrientation.TRANSPOSED :
-      MatrixOrientation.REGULAR;
+    const f = t =>
+      t ? MatrixOrientation.TRANSPOSED : MatrixOrientation.REGULAR;
     assert(x.shape.length === 2 && y.shape.length === 2);
     const x2 = x as Array2D;
     const y2 = y as Array2D;
@@ -280,8 +290,12 @@ export class OpsDL implements types.BackendOps {
     const resultValues = makeTypedArray(a.size, x.dtype);
     const values = a.dataSync();
     const dtype = dtypeDL(x.dtype);
-    const result = NDArray.make(a.shape, {values: resultValues},
-                                dtype, x.math) as typeof x;
+    const result = NDArray.make(
+      a.shape,
+      { values: resultValues },
+      dtype,
+      x.math
+    ) as typeof x;
     for (let i = 0; i < a.size; ++i) {
       const loc = a.indexToLoc(i);
       // Reverse location.
@@ -307,20 +321,17 @@ export class OpsDL implements types.BackendOps {
     return x.math.argMin(x, axis);
   }
 
-  reduceSum(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceSum(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.sum(x, axes, keepDims);
   }
 
-  reduceMean(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceMean(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.mean(x, axes, keepDims);
   }
 
-  reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.max(x, axes, keepDims);
   }
@@ -360,7 +371,7 @@ export class OpsDL implements types.BackendOps {
   sign(x: TensorDL): TensorDL {
     ENV.setMath(x.math);
     const m = x.math;
-    const a = m.step(x);  // maps neg to 0 and pos to 1
+    const a = m.step(x); // maps neg to 0 and pos to 1
     // The following just does (2 * a - 1) which gives us sign.
     const dt = dtypeDL(x.dtype);
     const s2 = Scalar.new(2, dt);
@@ -388,23 +399,30 @@ export class OpsDL implements types.BackendOps {
         nd = x.math.slice1D(x.as1D(), begin[0], size[0]);
         break;
       case 2:
-        nd = x.math.slice2D(x as Array2D,
-                            [begin[0], begin[1]],
-                            [size[0], size[1]]);
+        nd = x.math.slice2D(
+          x as Array2D,
+          [begin[0], begin[1]],
+          [size[0], size[1]]
+        );
         break;
       case 3:
-        nd = x.math.slice3D(x as Array3D,
-                            [begin[0], begin[1], begin[2]],
-                            [size[0], size[1], size[2]]);
+        nd = x.math.slice3D(
+          x as Array3D,
+          [begin[0], begin[1], begin[2]],
+          [size[0], size[1], size[2]]
+        );
         break;
       case 4:
-        nd = x.math.slice4D(x as Array4D,
-                            [begin[0], begin[1], begin[2], begin[3]],
-                            [size[0], size[1], size[2], size[3]]);
+        nd = x.math.slice4D(
+          x as Array4D,
+          [begin[0], begin[1], begin[2], begin[3]],
+          [size[0], size[1], size[2], size[3]]
+        );
         break;
       default:
-        throw new Error("Slicing for tensors rank higher than " +
-                        "4 not yet supported.");
+        throw new Error(
+          "Slicing for tensors rank higher than " + "4 not yet supported."
+        );
     }
     return nd;
   }
@@ -453,8 +471,12 @@ export class OpsDL implements types.BackendOps {
     return x.math.cast(x, dtypeDL(dtype));
   }
 
-  oneHot(x: TensorDL, depth: number, onValue: number,
-         offValue: number): TensorDL {
+  oneHot(
+    x: TensorDL,
+    depth: number,
+    onValue: number,
+    offValue: number
+  ): TensorDL {
     ENV.setMath(x.math);
     const labels = x.math.cast(x, "float32").as1D();
     return x.math.oneHot(labels, depth, onValue, offValue);
@@ -462,13 +484,21 @@ export class OpsDL implements types.BackendOps {
 
   conv2d(input: TensorDL, filter: TensorDL, opts: types.ConvOpts): TensorDL {
     ENV.setMath(input.math);
-    return input.math.conv2d(input as Array4D, filter as Array4D,
-                             null, opts.stride, opts.padding);
+    return input.math.conv2d(
+      input as Array4D,
+      filter as Array4D,
+      null,
+      opts.stride,
+      opts.padding
+    );
   }
 
-  conv2dGradFilter(grad: TensorDL, input: TensorDL,
-                   filterShape: types.Shape,
-                   opts: types.ConvOpts): TensorDL {
+  conv2dGradFilter(
+    grad: TensorDL,
+    input: TensorDL,
+    filterShape: types.Shape,
+    opts: types.ConvOpts
+  ): TensorDL {
     const math = input.math;
     ENV.setMath(math);
     return math.conv2dDerFilter(
@@ -476,11 +506,16 @@ export class OpsDL implements types.BackendOps {
       grad as Array4D,
       filterShape as [number, number, number, number],
       opts.stride,
-      opts.padding);
+      opts.padding
+    );
   }
 
-  conv2dGradInput(grad: TensorDL, inputShape: types.Shape,
-                  filter: TensorDL, opts: types.ConvOpts): TensorDL {
+  conv2dGradInput(
+    grad: TensorDL,
+    inputShape: types.Shape,
+    filter: TensorDL,
+    opts: types.ConvOpts
+  ): TensorDL {
     const math = filter.math;
     ENV.setMath(math);
     return math.conv2dDerInput(
@@ -488,20 +523,34 @@ export class OpsDL implements types.BackendOps {
       grad as Array4D,
       filter as Array4D,
       opts.stride,
-      opts.padding);
+      opts.padding
+    );
   }
 
   maxPool(input: TensorDL, opts: types.PoolOpts): TensorDL {
     ENV.setMath(input.math);
-    return input.math.maxPool(input as Array4D, opts.size, opts.stride,
-                              opts.padding);
+    return input.math.maxPool(
+      input as Array4D,
+      opts.size,
+      opts.stride,
+      opts.padding
+    );
   }
 
-  maxPoolGrad(grad: TensorDL, origInput: TensorDL, origOutput: TensorDL,
-              opts: types.PoolOpts): TensorDL {
+  maxPoolGrad(
+    grad: TensorDL,
+    origInput: TensorDL,
+    origOutput: TensorDL,
+    opts: types.PoolOpts
+  ): TensorDL {
     const m = grad.math;
     ENV.setMath(m);
-    return m.maxPoolBackprop(grad, origInput, opts.size, opts.stride,
-                             opts.padding);
+    return m.maxPoolBackprop(
+      grad,
+      origInput,
+      opts.size,
+      opts.stride,
+      opts.padding
+    );
   }
 }

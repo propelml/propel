@@ -26,7 +26,7 @@ defineTests("fw", (c: ConvTestCase): Tensor => {
   const filter = testInput("float32", c.filterShape);
   return conv2d(input, filter, {
     stride: c.stride,
-    padding: c.padding,
+    padding: c.padding
   });
 });
 
@@ -36,10 +36,14 @@ defineTests("bwFilter", (c: ConvTestCase): Tensor => {
   const grad = testInput("float32", c.outputShape);
   const opts: ConvOpts = {
     stride: c.stride,
-    padding: c.padding,
+    padding: c.padding
   };
-  const b = bo.conv2dGradFilter(grad.storage, input.storage,
-                                c.filterShape, opts);
+  const b = bo.conv2dGradFilter(
+    grad.storage,
+    input.storage,
+    c.filterShape,
+    opts
+  );
   return new Tensor(b);
 });
 
@@ -49,15 +53,18 @@ defineTests("bwInput", (c: ConvTestCase): Tensor => {
   const grad = testInput("float32", c.outputShape);
   const opts: ConvOpts = {
     stride: c.stride,
-    padding: c.padding,
+    padding: c.padding
   };
-  const b = bo.conv2dGradInput(grad.storage, c.inputShape,
-                               filter.storage, opts);
+  const b = bo.conv2dGradInput(
+    grad.storage,
+    c.inputShape,
+    filter.storage,
+    opts
+  );
   return new Tensor(b);
 });
 
-function defineTests(suite: string,
-                     fn: (c: ConvTestCase) => Tensor) {
+function defineTests(suite: string, fn: (c: ConvTestCase) => Tensor) {
   for (const c of cases[suite]) {
     test({
       fn: () => {
@@ -68,13 +75,15 @@ function defineTests(suite: string,
         const actual = fn(c);
         assertAllClose(actual.dataSync(), c.expected);
       },
-      name: `conv_${suite}_${c.name}`,
+      name: `conv_${suite}_${c.name}`
     });
   }
 }
 
 function testInput(dtype: DType, shape: Shape): Tensor {
-  return range(1, prod(shape) + 1).cast(dtype).reshape(shape);
+  return range(1, prod(shape) + 1)
+    .cast(dtype)
+    .reshape(shape);
 }
 
 // Ideally this would be an api.ts function.

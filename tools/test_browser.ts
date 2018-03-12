@@ -49,7 +49,7 @@ const debug = !!process.env.PP_TEST_DEBUG;
 const testdl = !!process.env.PP_TEST_DL;
 
 // Run headless only if CI env var is set.
-const headless = (process.env.CI != null);
+const headless = process.env.CI != null;
 
 interface Test {
   path: string;
@@ -60,9 +60,9 @@ interface Test {
 // This special webpage runs the tests in the browser.
 // If a filter is supplied, it is the only page loaded.
 const propelTests: Test = {
-    path: "static/test.html#script=/test_website.js",
-    doneMsg: /DONE/,
-    timeout: 2 * 60 * 1000,
+  path: "static/test.html#script=/test_website.js",
+  doneMsg: /DONE/,
+  timeout: 2 * 60 * 1000
 };
 
 const TESTS: Test[] = [
@@ -70,7 +70,7 @@ const TESTS: Test[] = [
   // The test harness logs "DONE bla bla" to the console when done.
   // If this message doesn't appear, or an unhandled error is thrown on the
   // page, the test fails.
-  propelTests,
+  propelTests
 ];
 
 if (testdl) {
@@ -81,8 +81,9 @@ if (testdl) {
   });
 }
 
-(async() => {
-  let passed = 0, failed = 0;
+(async () => {
+  let passed = 0,
+    failed = 0;
 
   let server, port;
   if (useRenderFlag) {
@@ -95,7 +96,7 @@ if (testdl) {
 
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    headless,
+    headless
   });
 
   for (let i = 0; i < TESTS.length; i++) {
@@ -109,7 +110,7 @@ if (testdl) {
   }
 
   if (debug) {
-    await new Promise((res) => process.stdin.once("data", res));
+    await new Promise(res => process.stdin.once("data", res));
   }
 
   await browser.close();
@@ -133,7 +134,10 @@ function prefix(s: string, prefix: string): string {
 // time-out expires.
 async function runTest(browser, port, { path, doneMsg, timeout }: Test) {
   let pass, fail;
-  const promise = new Promise((res, rej) => { pass = res; fail = rej; });
+  const promise = new Promise((res, rej) => {
+    pass = res;
+    fail = rej;
+  });
   let timer = null;
 
   let url = `http://localhost:${port}/${path}`;

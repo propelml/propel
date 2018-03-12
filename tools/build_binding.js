@@ -2,10 +2,10 @@
 // build script for binding.cc
 // There are literally two compile commands to call. Just call them here.
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const run = require('./run');
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+const run = require("./run");
 
 const binDir = path.dirname(process.execPath);
 const nodeDir = path.dirname(binDir);
@@ -14,11 +14,11 @@ const buildDir = run.root + "/build";
 
 if (process.argv.includes("clean")) {
   run.rmrf(buildDir);
-  console.log('Deleted', buildDir);
+  console.log("Deleted", buildDir);
 }
 
 run.mkdir(buildDir);
-run.mkdir(buildDir + '/Release');
+run.mkdir(buildDir + "/Release");
 
 if (process.platform === "darwin" || process.platform === "linux") {
   run.sh(`node tools/extract_so.js ${buildDir}/Release`);
@@ -53,7 +53,7 @@ if (process.platform === "darwin" || process.platform === "linux") {
   `;
 
   // OS specific flags
-  if (process.platform === "darwin")  {
+  if (process.platform === "darwin") {
     cflags += `
       -stdlib=libc++
       -mmacosx-version-min=10.7
@@ -67,7 +67,7 @@ if (process.platform === "darwin" || process.platform === "linux") {
       -undefined dynamic_lookup
     `;
   } else {
-    cflags += `-m64 -fPIC -pthread`
+    cflags += `-m64 -fPIC -pthread`;
     ldflags += `
       -m64 -Wl,-rpath,\$ORIGIN -ltensorflow
       -shared -pthread -rdynamic

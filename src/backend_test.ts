@@ -14,8 +14,11 @@
  */
 import { test } from "../tools/tester";
 import { bo, convertStorage } from "./backend";
-import { assertAllClose, assertAllEqual, assertShapesEqual }
-  from "./tensor_util";
+import {
+  assertAllClose,
+  assertAllEqual,
+  assertShapesEqual
+} from "./tensor_util";
 
 const tensor = convertStorage;
 
@@ -50,17 +53,14 @@ test(async function backend_cosh() {
   const a = tensor([[1, 2], [3, 4]]);
   const actual = bo.cosh(a);
   assertAllEqual(actual.shape, [2, 2]);
-  const expected = [
-    [  1.54308063,   3.76219569],
-    [ 10.067662  ,  27.30823284],
-  ];
+  const expected = [[1.54308063, 3.76219569], [10.067662, 27.30823284]];
   assertAllClose(actual, expected);
 });
 
 test(async function backend_reluGrad() {
   const grad = tensor([[-1, 42], [-3, 4]]);
-  const ans = tensor([[-7, 4], [ 0.1, -9 ]]);
+  const ans = tensor([[-7, 4], [0.1, -9]]);
   const actual = bo.reluGrad(grad, ans);
   assertAllEqual(actual.shape, [2, 2]);
-  assertAllClose(actual, [[0, 42], [-3,  0]]);
+  assertAllClose(actual, [[0, 42], [-3, 0]]);
 });

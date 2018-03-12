@@ -36,7 +36,7 @@ test(async function format_2DInt32() {
 });
 
 test(async function format_1DFloat32() {
-  let d = [ 1.2,  0. ,  0. ,  0.123];
+  let d = [1.2, 0, 0, 0.123];
   let actual = toString([4], new Float32Array(d));
   let expected = "[ 1.2  ,  0.   ,  0.   ,  0.123]";
   console.log(actual);

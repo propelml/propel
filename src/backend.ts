@@ -18,8 +18,12 @@
 // the public API.
 
 import * as dl from "./dl";
-import { flatten, inferShape, isTypedArray, makeTypedArray }
-  from "./tensor_util";
+import {
+  flatten,
+  inferShape,
+  isTypedArray,
+  makeTypedArray
+} from "./tensor_util";
 import * as tf from "./tf";
 import * as types from "./types";
 import { deepCloneArray, IS_WEB } from "./util";
@@ -56,7 +60,7 @@ function preferTF(): boolean {
   //   PROPEL=web node myprogram.js
   // This is used in tools/test.js to run tests on both backends.
   if (!process.env.PROPEL || process.env.PROPEL === "tf") {
-     // continue
+    // continue
   } else if (process.env.PROPEL === "dl") {
     return false;
   } else {
@@ -65,8 +69,10 @@ function preferTF(): boolean {
   return true;
 }
 
-export function convertStorage(x: types.TensorLike,
-                               opts?: types.TensorOpts): types.Storage {
+export function convertStorage(
+  x: types.TensorLike,
+  opts?: types.TensorOpts
+): types.Storage {
   // Alias fromTypedArray for brevity.
   const create = bo.fromTypedArray;
 

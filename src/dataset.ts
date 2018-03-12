@@ -26,11 +26,11 @@ export function datasetFromSlices(tensors: NamedTensors): Dataset {
 }
 
 const datasets = {
-  "breast_cancer": () => new SliceDataset(loadBreastCancer()),
-  "iris": () => new SliceDataset(loadIris()),
+  breast_cancer: () => new SliceDataset(loadBreastCancer()),
+  iris: () => new SliceDataset(loadIris()),
   "mnist/test": () => new SliceDataset(mnist.loadSplit("test")),
   "mnist/train": () => new SliceDataset(mnist.loadSplit("train")),
-  "wine": () => new SliceDataset(loadWine()),
+  wine: () => new SliceDataset(loadWine())
 };
 
 /** Loads a dataset. The available datasets are:
@@ -51,7 +51,7 @@ export function dataset(name: string): Dataset {
 }
 
 abstract class Dataset {
-  constructor(protected parent?: Dataset) { }
+  constructor(protected parent?: Dataset) {}
 
   abstract async next(): Promise<NamedTensors>;
 
@@ -98,7 +98,7 @@ class SliceDataset extends Dataset {
     super(null);
     if ((tensorsOrPromise as any).then) {
       this.promise = tensorsOrPromise as Promise<NamedTensors>;
-      this.promise.then((tensors) => {
+      this.promise.then(tensors => {
         this.setup(tensors);
         this.promise = null;
       });
@@ -176,7 +176,6 @@ class BatchDataset extends Dataset {
     // tensors for each row.
     if (this.parent instanceof SliceDataset) {
       return this.parent.nextBatch(this.batchSize);
-
     } else {
       // normal
       const batchComponents = [];
@@ -250,10 +249,14 @@ class ShuffleDataset extends Dataset {
   }
 }
 
-async function loadData(fn: string):
-    Promise<{ features: Tensor, labels: Tensor }> {
+async function loadData(
+  fn: string
+): Promise<{ features: Tensor; labels: Tensor }> {
   const csv = await fetchStr(fn);
-  const lines = csv.trim().split("\n").map(line => line.split(","));
+  const lines = csv
+    .trim()
+    .split("\n")
+    .map(line => line.split(","));
   const header = lines.shift();
   const nSamples = Number(header.shift());
   const nFeatures = Number(header.shift());
@@ -269,7 +272,7 @@ async function loadData(fn: string):
 
   const tensors = {
     features: tensor(features, { dtype: "float32" }),
-    labels: tensor(labels, { dtype: "int32" }),
+    labels: tensor(labels, { dtype: "int32" })
   };
   return tensors;
 }
@@ -281,18 +284,24 @@ async function loadData(fn: string):
  * 2 petal length (cm)
  * 3 petal width (cm)
  */
-export async function loadIris():
-    Promise<{ features: Tensor, labels: Tensor }> {
+export async function loadIris(): Promise<{
+  features: Tensor;
+  labels: Tensor;
+}> {
   return loadData("deps/data/iris.csv");
 }
 
-export async function loadBreastCancer():
-    Promise<{ features: Tensor, labels: Tensor }> {
+export async function loadBreastCancer(): Promise<{
+  features: Tensor;
+  labels: Tensor;
+}> {
   return loadData("deps/data/breast_cancer.csv");
 }
 
-export async function loadWine():
-    Promise<{ features: Tensor, labels: Tensor }> {
+export async function loadWine(): Promise<{
+  features: Tensor;
+  labels: Tensor;
+}> {
   return loadData("deps/data/wine_data.csv");
 }
 

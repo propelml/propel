@@ -8,21 +8,21 @@
 const platform = require("./config").platform;
 
 const tarFn = {
-  'mac': 'libtensorflow-cpu-darwin-x86_64.tar.gz',
-  'linux': 'libtensorflow-cpu-linux-x86_64.tar.gz',
-  'linux_gpu': 'libtensorflow-gpu-linux-x86_64.tar.gz',
+  mac: "libtensorflow-cpu-darwin-x86_64.tar.gz",
+  linux: "libtensorflow-cpu-linux-x86_64.tar.gz",
+  linux_gpu: "libtensorflow-gpu-linux-x86_64.tar.gz"
 }[platform];
 
-const outDir = process.argv[2] || '';
-console.error('outDir %s', outDir);
+const outDir = process.argv[2] || "";
+console.error("outDir %s", outDir);
 
-const fs = require('fs');
-const http = require('http');
-const path = require('path');
-const tar = require('tar');
+const fs = require("fs");
+const http = require("http");
+const path = require("path");
+const tar = require("tar");
 
-let tarPath = path.join(__dirname, '..', 'deps', 'libtensorflow', tarFn);
-console.error('Extracting %s', tarPath);
+let tarPath = path.join(__dirname, "..", "deps", "libtensorflow", tarFn);
+console.error("Extracting %s", tarPath);
 
 tar.t({
   file: tarPath,
@@ -31,11 +31,11 @@ tar.t({
     let name = path.basename(entry.header.path);
     let ext = path.extname(name);
 
-    if (ext === '.so') {
-      console.error('Extracting %s', name);
+    if (ext === ".so") {
+      console.error("Extracting %s", name);
       let outPath = path.resolve(outDir, name);
-      console.log(outPath)
+      console.log(outPath);
       entry.pipe(fs.createWriteStream(outPath));
     }
   }
-})
+});

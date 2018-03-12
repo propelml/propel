@@ -31,10 +31,7 @@
 import * as ops from "./ops";
 import { Params } from "./params";
 import { Tensor } from "./tensor";
-import {
-  assert,
-  assertShapesEqual,
-} from "./tensor_util";
+import { assert, assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
 
 export interface LinearOpts {
@@ -54,7 +51,7 @@ const convDefaults: ConvOpts = {
   size: 3,
   stride: 1,
   padding: "same",
-  bias: true,
+  bias: true
 };
 
 export interface BatchNormOpts {
@@ -64,11 +61,15 @@ export interface BatchNormOpts {
 
 const bnDefaults = {
   decay: 0.997,
-  epsilon: 1e-5,
+  epsilon: 1e-5
 };
 
-export function linear(input: Tensor, params: Params, outDim: number,
-                       { bias = true, scale = 0.01 }: LinearOpts = {}): Tensor {
+export function linear(
+  input: Tensor,
+  params: Params,
+  outDim: number,
+  { bias = true, scale = 0.01 }: LinearOpts = {}
+): Tensor {
   assert(input.rank >= 2);
   const p = params;
   let x = input;
@@ -84,18 +85,18 @@ export function linear(input: Tensor, params: Params, outDim: number,
   return x;
 }
 
-export function conv2d(input: Tensor, params: Params, outChans,
-                       opts?: ConvOpts): Tensor {
+export function conv2d(
+  input: Tensor,
+  params: Params,
+  outChans,
+  opts?: ConvOpts
+): Tensor {
   let x = input;
   assert(x.rank === 4);
   opts = Object.assign(convDefaults, opts);
   const filter = params.define("filter", () =>
-    ops.randn([
-      opts.size,
-      opts.size,
-      x.shape[3],
-      outChans
-    ]));
+    ops.randn([opts.size, opts.size, x.shape[3], outChans])
+  );
   x = ops.conv2d(x, filter, opts);
   if (opts.bias) {
     const b = params.define("bias", () => ops.zeros([outChans]));
@@ -104,8 +105,11 @@ export function conv2d(input: Tensor, params: Params, outChans,
   return x;
 }
 
-export function batchNorm(input: Tensor, params: Params,
-                          opts?: BatchNormOpts): Tensor {
+export function batchNorm(
+  input: Tensor,
+  params: Params,
+  opts?: BatchNormOpts
+): Tensor {
   opts = Object.assign(bnDefaults, opts);
   const p = params;
   const x = input;

@@ -19,12 +19,12 @@ export function filenames(split: string): [string, string] {
   if (split === "train") {
     return [
       "deps/data/mnist/train-labels-idx1-ubyte.bin",
-      "deps/data/mnist/train-images-idx3-ubyte.bin",
+      "deps/data/mnist/train-images-idx3-ubyte.bin"
     ];
   } else if (split === "test") {
     return [
       "deps/data/mnist/t10k-labels-idx1-ubyte.bin",
-      "deps/data/mnist/t10k-images-idx3-ubyte.bin",
+      "deps/data/mnist/t10k-images-idx3-ubyte.bin"
     ];
   } else {
     throw new Error(`Bad split: ${split}`);
@@ -32,14 +32,17 @@ export function filenames(split: string): [string, string] {
 }
 
 function littleEndianToBig(val) {
-  return ((val & 0x00FF) << 24) |
-         ((val & 0xFF00) << 8) |
-         ((val >> 8) & 0xFF00) |
-         ((val >> 24) & 0x00FF);
+  return (
+    ((val & 0x00ff) << 24) |
+    ((val & 0xff00) << 8) |
+    ((val >> 8) & 0xff00) |
+    ((val >> 24) & 0x00ff)
+  );
 }
 
-export async function loadSplit(split: string):
-    Promise<{images: Tensor, labels: Tensor}> {
+export async function loadSplit(
+  split: string
+): Promise<{ images: Tensor; labels: Tensor }> {
   const [hrefLabels, hrefImages] = filenames(split);
   const imagesPromise = loadFile2(hrefImages);
   const labelsPromise = loadFile2(hrefLabels);
@@ -69,10 +72,10 @@ async function loadFile2(href: string) {
     assert(littleEndianToBig(i32[i++]) === 28);
     assert(littleEndianToBig(i32[i++]) === 28);
     const tensorData = new Int32Array(ui8.slice(4 * i));
-    t = tensor(tensorData, {dtype: "int32"});
+    t = tensor(tensorData, { dtype: "int32" });
   } else {
     const tensorData = new Int32Array(ui8.slice(4 * i));
-    t = tensor(tensorData, {dtype: "int32"});
+    t = tensor(tensorData, { dtype: "int32" });
   }
   const shape = isImages ? [numExamples, 28, 28] : [numExamples];
 

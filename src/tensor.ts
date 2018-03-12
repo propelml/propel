@@ -22,8 +22,7 @@ import { allFinite, assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
 import { assert, IS_NODE } from "./util";
 
-export function convert(t: types.TensorLike,
-                        opts?: types.TensorOpts): Tensor {
+export function convert(t: types.TensorLike, opts?: types.TensorOpts): Tensor {
   if (t instanceof Tensor) return t;
   return new Tensor(convertStorage(t, opts));
 }
@@ -112,7 +111,7 @@ export class Tensor implements types.Storage {
       // For now we stay silent.
       return new Tensor(bo.copyToDevice(t.storage, this.device));
     }
-    return new Tensor(convertStorage(t, {dtype, device: this.device}));
+    return new Tensor(convertStorage(t, { dtype, device: this.device }));
   }
 
   /** Returns a TypedArray containing the actual data of the tensor.
@@ -448,8 +447,10 @@ export class Tensor implements types.Storage {
   }
 
   /** Calculates mean and variance. */
-  moments(axes?: number[], keepDims = false):
-          { mean: Tensor, variance: Tensor } {
+  moments(
+    axes?: number[],
+    keepDims = false
+  ): { mean: Tensor; variance: Tensor } {
     const x = this.cast("float32");
     let mean = x.reduceMean(axes, true);
     const sqDiff = x.sub(mean.stopGradient()).square();
@@ -574,8 +575,11 @@ export class Tensor implements types.Storage {
    *    t = pr.tensor([[1, 2], [3, 4]]);
    *    t.concat(0, [[5, 6], [7, 8]]);
    */
-  concat(axis: number, t: types.TensorLike, ...rest: types.TensorLike[])
-      : Tensor {
+  concat(
+    axis: number,
+    t: types.TensorLike,
+    ...rest: types.TensorLike[]
+  ): Tensor {
     const tensors = [this, this.colocate(t)];
     for (const arg of rest) {
       assert(arg instanceof Tensor);
@@ -612,7 +616,7 @@ export class Tensor implements types.Storage {
    *    tensor([[[2, 3, 4]]]).squeeze();
    */
   squeeze(): Tensor {
-    const newShape = this.shape.filter((d) => d > 1);
+    const newShape = this.shape.filter(d => d > 1);
     return this.reshape(newShape);
   }
 
@@ -663,8 +667,9 @@ export class Tensor implements types.Storage {
     }
 
     if (!left || !right) {
-      throw new Error("dot with tensors of rank greater " +
-        "than 2 is not yet implemented.");
+      throw new Error(
+        "dot with tensors of rank greater " + "than 2 is not yet implemented."
+      );
     }
     const outShape = lShape.concat(rShape);
     return left.matmul(right).reshape(outShape);
@@ -744,10 +749,10 @@ export class Tensor implements types.Storage {
     assert(inScale[0] < inScale[1]);
     assert(outScale[0] < outScale[1]);
     return this.cast("float32")
-               .sub(inScale[0])
-               .div(inScale[1] - inScale[0])
-               .mul(outScale[1] - outScale[0])
-               .add(outScale[0]);
+      .sub(inScale[0])
+      .div(inScale[1] - inScale[0])
+      .mul(outScale[1] - outScale[0])
+      .add(outScale[0]);
   }
 
   /** Max pool.
@@ -762,7 +767,7 @@ export class Tensor implements types.Storage {
     const defaults: types.PoolOpts = {
       size: 2,
       stride: 2,
-      padding: "valid",
+      padding: "valid"
     };
     assert(this.rank === 4);
     return ops.maxPool(this, Object.assign(defaults, opts));
@@ -783,20 +788,27 @@ export class Tensor implements types.Storage {
    *    outputs = inputs.linear("L1", params, 10);
    *    params.has("L1/weights") && params.has("L1/bias");
    */
-  linear(name: string, params: Params, outDim: number,
-         opts?: layers.LinearOpts): Tensor {
+  linear(
+    name: string,
+    params: Params,
+    outDim: number,
+    opts?: layers.LinearOpts
+  ): Tensor {
     return layers.linear(this, params.scope(name), outDim, opts);
   }
 
   /** Convolutional Layer */
-  conv2d(name: string, params: Params, outChans: number,
-         opts?: layers.ConvOpts): Tensor {
+  conv2d(
+    name: string,
+    params: Params,
+    outChans: number,
+    opts?: layers.ConvOpts
+  ): Tensor {
     return layers.conv2d(this, params.scope(name), outChans, opts);
   }
 
   /** Batch Normalization. input must be rank 4. */
-  batchNorm(name: string, params: Params,
-            opts?: layers.BatchNormOpts): Tensor {
+  batchNorm(name: string, params: Params, opts?: layers.BatchNormOpts): Tensor {
     return layers.batchNorm(this, params.scope(name), opts);
   }
 }
@@ -859,7 +871,9 @@ export type GCScopeFn = (keep: (t: Tensor) => void) => void;
 export function gc(fn: GCScopeFn) {
   const s = new GCScope();
   scopes.push(s);
-  const keep = (t: Tensor): void => { s.keep(t); };
+  const keep = (t: Tensor): void => {
+    s.keep(t);
+  };
   try {
     fn(keep);
   } finally {

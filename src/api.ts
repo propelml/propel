@@ -27,8 +27,14 @@ export { backend } from "./backend";
 export { plot, imshow } from "./matplotlib";
 export { imread, imsave } from "./im";
 export { Tensor } from "./tensor";
-export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
-  from "./backprop";
+export {
+  grad,
+  multigrad,
+  multigradAndVal,
+  gradAndVal,
+  gradParams,
+  ParamsFn
+} from "./backprop";
 export { ones, zeros, randn } from "./ops";
 
 /** Turns a javascript array of numbers into a tensor. Like this:
@@ -64,8 +70,10 @@ export function listDevices(): string[] {
  *    import { eye } from "propel";
  *    eye(5);
  */
-export function eye(size: number,
-                    opts: types.TensorOpts = {dtype: "float32"}): Tensor {
+export function eye(
+  size: number,
+  opts: types.TensorOpts = { dtype: "float32" }
+): Tensor {
   const matrix = ops.zeros([size, size], opts);
   const diag = ops.ones([size], opts);
   return matrix.setDiag(diag);
@@ -151,8 +159,11 @@ export function float32(t: types.TensorLike): Tensor {
  *
  * Additional arguments are ConvOpts { stride, padding }.
  */
-export function conv2d(input: Tensor, filter: Tensor,
-                       opts?: types.ConvOpts): Tensor {
+export function conv2d(
+  input: Tensor,
+  filter: Tensor,
+  opts?: types.ConvOpts
+): Tensor {
   /* TODO gaussian blur example for conv2d.
    *    import * as pr from "propel"
    *    img = await pr.imread("/src/testdata/sample.png")
@@ -161,7 +172,7 @@ export function conv2d(input: Tensor, filter: Tensor,
    */
   const defaults: types.ConvOpts = {
     stride: 1,
-    padding: "valid",
+    padding: "valid"
   };
   assert(input.dtype === "float32");
   assert(filter.dtype === "float32");

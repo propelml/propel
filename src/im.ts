@@ -26,8 +26,12 @@ export interface Image {
   data: Uint8ClampedArray;
 }
 
-function toTensor(data: Uint8Array, height: number, width: number,
-                  mode: Mode): Tensor {
+function toTensor(
+  data: Uint8Array,
+  height: number,
+  width: number,
+  mode: Mode
+): Tensor {
   let image = convert(data).reshape([height, width, 4]);
   if (mode === "RGBA") {
     return image;
@@ -63,21 +67,18 @@ export function toUint8Image(image: Tensor): Image {
     }
     if (channels <= 3) {
       // RGB to RGBA
-      image = image.concat(2, fill(tensor(255, {dtype}), [height, width, 1]));
+      image = image.concat(2, fill(tensor(255, { dtype }), [height, width, 1]));
     }
     // Convert to 1D array
-    data = image
-      .reshape([height * width * 4])
-      .dataSync();
+    data = image.reshape([height * width * 4]).dataSync();
     data = Uint8ClampedArray.from(data);
     return { width, height, data };
   }
   throw new Error(`Unsupported image rank.`);
 }
 
-function webImageDecoder(filename: string, mode: Mode)
-    : Promise<Tensor> {
-  return new Promise((resolve) => {
+function webImageDecoder(filename: string, mode: Mode): Promise<Tensor> {
+  return new Promise(resolve => {
     try {
       const img = new Image();
       img.onload = function() {
@@ -115,8 +116,8 @@ export function createCanvas(image: Image) {
 }
 
 const imageSignatures: Array<[number[], string]> = [
-  [[0xFF, 0xD8], "image/jpeg"],
-  [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], "image/png"]
+  [[0xff, 0xd8], "image/jpeg"],
+  [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], "image/png"]
 ];
 const sigMaxLength: number = Math.max(...imageSignatures.map(x => x[0].length));
 
@@ -148,7 +149,8 @@ function pngReadHandler(filename: string, mode: Mode): Promise<Tensor> {
   const PNG = nodeRequire("pngjs").PNG;
   const fs = nodeRequire("fs");
   return new Promise(resolve => {
-    fs.createReadStream(filename)
+    fs
+      .createReadStream(filename)
       .pipe(new PNG())
       .on("parsed", function(this: any) {
         const data = new Uint8Array(this.data);
@@ -169,7 +171,8 @@ function pngSaveHandler(filename: string, image): Promise<void> {
   });
   file.data = image.data;
   return new Promise(resolve => {
-    file.pack()
+    file
+      .pack()
       .pipe(fs.createWriteStream(filename))
       .on("finish", resolve);
   });
@@ -186,15 +189,14 @@ function jpegReadHandler(filename: string, mode: Mode): Tensor {
 function jpegSaveHandler(filename: string, image): void {
   const JPEG = nodeRequire("jpeg-js");
   const fs = nodeRequire("fs");
-  const {data} = JPEG.encode(image);
+  const { data } = JPEG.encode(image);
   fs.writeFileSync(filename, data);
   return;
 }
 
-async function nodeImageDecoder(filename: string, mode: Mode)
-    : Promise<Tensor> {
+async function nodeImageDecoder(filename: string, mode: Mode): Promise<Tensor> {
   const MIME = readMIME(filename);
-  switch (MIME){
+  switch (MIME) {
     case "image/png":
       return await pngReadHandler(filename, mode);
     case "image/jpeg":
@@ -213,8 +215,10 @@ async function nodeImageDecoder(filename: string, mode: Mode)
  *    img = await imread("/src/testdata/sample.png")
  *    imshow(img.transpose([1, 0, 2]))
  */
-export async function imread(filename: string, mode: Mode = "RGBA")
-    : Promise<Tensor> {
+export async function imread(
+  filename: string,
+  mode: Mode = "RGBA"
+): Promise<Tensor> {
   if (IS_NODE) {
     return await nodeImageDecoder(filename, mode);
   }
@@ -228,14 +232,17 @@ export async function imread(filename: string, mode: Mode = "RGBA")
 
 /** Save a 3D tensor to disk as an image
  */
-export async function imsave(tensor: Tensor,
-                             filename: string,
-                             handler?: "PNG" | "JPEG"): Promise<void> {
+export async function imsave(
+  tensor: Tensor,
+  filename: string,
+  handler?: "PNG" | "JPEG"
+): Promise<void> {
   if (IS_NODE) {
     const image = toUint8Image(tensor);
     if (!handler) {
       const path = nodeRequire("path");
-      const ext = path.extname(filename)
+      const ext = path
+        .extname(filename)
         .toLowerCase()
         .replace(".jpg", ".jpeg");
       if (ext === ".png" || ext === ".jpeg") {

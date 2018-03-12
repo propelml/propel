@@ -1,4 +1,3 @@
-
 import { ones } from "./api";
 
 const t1 = ones([100, 100]);
@@ -24,5 +23,6 @@ for (let i = 0; i < 20; i++) {
   count = Math.round(total / (end - begin));
 
   console.log(
-    `time: ${elapsed}s  count: ${count}  throughput: ${throughput}/s`);
+    `time: ${elapsed}s  count: ${count}  throughput: ${throughput}/s`
+  );
 }

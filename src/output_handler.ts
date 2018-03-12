@@ -17,7 +17,7 @@
 import * as d3 from "d3";
 import { createCanvas, Image } from "./im";
 
-export type PlotData = Array<Array<{ x: number, y: number }>>;
+export type PlotData = Array<Array<{ x: number; y: number }>>;
 
 export interface OutputHandler {
   plot(data: PlotData): void;
@@ -33,27 +33,31 @@ export class OutputHandlerDOM implements OutputHandler {
   private makeAxis(svg, margin, xScale, yScale, width, height) {
     const axisBottom = d3.axisBottom(xScale);
     axisBottom.tickSizeOuter(0);
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(${margin.left},${height + margin.top})`)
       .call(axisBottom);
 
     const axisLeft = d3.axisLeft(yScale);
     axisLeft.tickSizeOuter(0);
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
       .call(axisLeft);
 
     const axisRight = d3.axisRight(yScale);
     axisRight.ticks(0);
     axisRight.tickSizeOuter(0);
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(${width + margin.left},${margin.top})`)
       .call(axisRight);
 
     const axisTop = d3.axisTop(xScale);
     axisTop.ticks(0);
     axisTop.tickSizeOuter(0);
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
       .call(axisTop);
   }
@@ -91,9 +95,14 @@ export class OutputHandlerDOM implements OutputHandler {
     let height = 300;
 
     // No append.
-    d3.select(outputId_).select("svg").remove();
+    d3
+      .select(outputId_)
+      .select("svg")
+      .remove();
 
-    const svg = d3.select(outputId_).append("svg")
+    const svg = d3
+      .select(outputId_)
+      .append("svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMinYMin meet")
       .attr("width", width)
@@ -102,7 +111,8 @@ export class OutputHandlerDOM implements OutputHandler {
     const margin = { top: m, right: m, bottom: m, left: m };
     width = +svg.attr("width") - margin.left - margin.right;
     height = +svg.attr("height") - margin.top - margin.bottom;
-    const g = svg.append("g")
+    const g = svg
+      .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     const [xMin, xMax, yMin, yMax] = this.getLimits(data);
@@ -111,21 +121,23 @@ export class OutputHandlerDOM implements OutputHandler {
     const xMargin = (xMax - xMin) * 0.02;
     const yMargin = (yMax - yMin) * 0.02;
 
-    const xScale = d3.scaleLinear()
+    const xScale = d3
+      .scaleLinear()
       .domain([xMin - xMargin, xMax + xMargin])
       .range([0, width]);
 
-    const yScale = d3.scaleLinear()
+    const yScale = d3
+      .scaleLinear()
       .domain([yMin - yMargin, yMax + yMargin])
       .range([height, 0]);
 
     this.makeAxis(svg, margin, xScale, yScale, width, height);
 
-    const line = (d3.line() as any)
-      .x(d => xScale(d.x))
-      .y(d => yScale(d.y));
+    const line = (d3.line() as any).x(d => xScale(d.x)).y(d => yScale(d.y));
 
-    g.selectAll("path").data(data)
+    g
+      .selectAll("path")
+      .data(data)
       .enter()
       .append("path")
       .attr("d", line as any)

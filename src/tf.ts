@@ -13,11 +13,7 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import {
-  AttrDef,
-  DTypeCode,
-  Handle,
-} from "./binding";
+import { AttrDef, DTypeCode, Handle } from "./binding";
 import { assert, assertEqual, getDType } from "./tensor_util";
 import * as types from "./types";
 
@@ -36,7 +32,7 @@ export function loadBinding(): boolean {
 
 // Sugar for single value ops.
 export function execute0(opName: string, inputs: TensorTF[], attrs): TensorTF {
-  const handles = inputs.map((t) => t.handle);
+  const handles = inputs.map(t => t.handle);
   const r = binding.execute(ctx, opName, attrs, handles);
   assertEqual(r.length, 1);
   return new TensorTF(r[0]);
@@ -46,11 +42,14 @@ export function execute0(opName: string, inputs: TensorTF[], attrs): TensorTF {
 // attribute T, and only returns a single value.
 // The returned tensor dtype will be same as first input, unless specified by
 // the dtype argument.
-export function execute1(opName: string, inputs: TensorTF[],
-                         dtype?: types.DType): TensorTF {
-  const handles = inputs.map((t) => t.handle);
-  const dtypeTF = dtype == null ? binding.getDType(handles[0])
-                                : dtypePropel2TF(dtype);
+export function execute1(
+  opName: string,
+  inputs: TensorTF[],
+  dtype?: types.DType
+): TensorTF {
+  const handles = inputs.map(t => t.handle);
+  const dtypeTF =
+    dtype == null ? binding.getDType(handles[0]) : dtypePropel2TF(dtype);
   const attrs = [["T", binding.ATTR_TYPE, dtypeTF]];
   const r = binding.execute(ctx, opName, attrs, handles);
   return new TensorTF(r[0]);
@@ -91,13 +90,25 @@ function colocateDevice(colocateWith?: TensorTF): string {
 }
 
 function int32Small(v: number | number[], colocateWith?: TensorTF): TensorTF {
-  return new TensorTF(binding.createSmallHandle(ctx, binding.TF_INT32,
-    colocateDevice(colocateWith), v));
+  return new TensorTF(
+    binding.createSmallHandle(
+      ctx,
+      binding.TF_INT32,
+      colocateDevice(colocateWith),
+      v
+    )
+  );
 }
 
 function floatSmall(v: number | number[], colocateWith?: TensorTF): TensorTF {
-  return new TensorTF(binding.createSmallHandle(ctx, binding.TF_FLOAT,
-    colocateDevice(colocateWith), v));
+  return new TensorTF(
+    binding.createSmallHandle(
+      ctx,
+      binding.TF_FLOAT,
+      colocateDevice(colocateWith),
+      v
+    )
+  );
 }
 
 export class TensorTF implements types.Storage {
@@ -158,11 +169,13 @@ export class TensorTF implements types.Storage {
 // '/job:localhost/replica:0/task:0/device:GPU:0'. Until Propel starts thinking
 // about multi-replica configurations, we simplify this string to just "GPU:0".
 function simplifyDeviceName(device: string): string {
-  return device.split("/").pop().replace("device:", "");
+  return device
+    .split("/")
+    .pop()
+    .replace("device:", "");
 }
 
 export class OpsTF implements types.BackendOps {
-
   copyToDevice(x: TensorTF, device: string): TensorTF {
     const h = binding.copyToDevice(ctx, x.handle, device);
     return new TensorTF(h);
@@ -178,8 +191,12 @@ export class OpsTF implements types.BackendOps {
     });
   }
 
-  fromTypedArray(data: types.TypedArray, shape: types.Shape,
-                 dtype?: types.DType, device?: string): TensorTF {
+  fromTypedArray(
+    data: types.TypedArray,
+    shape: types.Shape,
+    dtype?: types.DType,
+    device?: string
+  ): TensorTF {
     if (dtype == null) {
       dtype = getDType(data);
     }
@@ -298,7 +315,7 @@ export class OpsTF implements types.BackendOps {
       ["dtype", binding.ATTR_TYPE, binding.TF_FLOAT], // output
       ["T", binding.ATTR_TYPE, binding.TF_INT32], // shape
       ["seed", binding.ATTR_INT, seed],
-      ["seed2", binding.ATTR_INT, seed],
+      ["seed2", binding.ATTR_INT, seed]
     ];
     return execute0("RandomStandardNormal", [shapeT], attrs);
   }
@@ -307,10 +324,14 @@ export class OpsTF implements types.BackendOps {
     const startT = floatSmall(start);
     const stopT = floatSmall(stop);
     const numT = int32Small(num);
-    return execute0("LinSpace", [startT, stopT, numT], [
-      ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-    ]);
+    return execute0(
+      "LinSpace",
+      [startT, stopT, numT],
+      [
+        ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32]
+      ]
+    );
   }
 
   range(start: number, limit: number, delta: number): TensorTF {
@@ -319,15 +340,19 @@ export class OpsTF implements types.BackendOps {
     const deltaT = int32Small(delta);
     const args = [startT, limitT, deltaT];
     return execute0("Range", args, [
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32]
     ]);
   }
 
   transpose(x: TensorTF, perm: TensorTF): TensorTF {
-    return execute0("Transpose", [x, perm], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tperm", binding.ATTR_TYPE, binding.getDType(perm.handle)],
-    ]);
+    return execute0(
+      "Transpose",
+      [x, perm],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tperm", binding.ATTR_TYPE, binding.getDType(perm.handle)]
+      ]
+    );
   }
 
   reverse(x: TensorTF, dims: TensorTF): TensorTF {
@@ -335,48 +360,66 @@ export class OpsTF implements types.BackendOps {
     return execute1("Reverse", [x, dims]);
   }
 
-  matmul(x: TensorTF, y: TensorTF, transposeA = false,
-         transposeB = false): TensorTF {
-    return execute0("MatMul", [x, y], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["transpose_a", binding.ATTR_BOOL, transposeA],
-      ["transpose_b", binding.ATTR_BOOL, transposeB],
-    ]);
+  matmul(
+    x: TensorTF,
+    y: TensorTF,
+    transposeA = false,
+    transposeB = false
+  ): TensorTF {
+    return execute0(
+      "MatMul",
+      [x, y],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["transpose_a", binding.ATTR_BOOL, transposeA],
+        ["transpose_b", binding.ATTR_BOOL, transposeB]
+      ]
+    );
   }
 
   argmax(x: TensorTF, axis: number): TensorTF {
     // axisT is expected to be on CPU.
     const axisT = int32Small(axis);
-    return execute0("ArgMax", [x, axisT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-      ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
-    ]);
+    return execute0(
+      "ArgMax",
+      [x, axisT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+        ["output_type", binding.ATTR_TYPE, binding.TF_INT32]
+      ]
+    );
   }
 
   argmin(x: TensorTF, axis: number): TensorTF {
     // axisT is expected to be on CPU.
     const axisT = int32Small(axis);
-    return execute0("ArgMin", [x, axisT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-      ["output_type", binding.ATTR_TYPE, binding.TF_INT32],
-    ]);
+    return execute0(
+      "ArgMin",
+      [x, axisT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+        ["output_type", binding.ATTR_TYPE, binding.TF_INT32]
+      ]
+    );
   }
 
-  reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
-    return execute0("Sum", [x, axesT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-      ["keep_dims", binding.ATTR_BOOL, keepDims],
-    ]);
+    return execute0(
+      "Sum",
+      [x, axesT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+        ["keep_dims", binding.ATTR_BOOL, keepDims]
+      ]
+    );
   }
 
-  reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // reduceMean should always return float32 tensor but TF doesn't
     // handled that conversion.
     if (x.dtype !== "float32") {
@@ -384,22 +427,29 @@ export class OpsTF implements types.BackendOps {
     }
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
-    return execute0("Mean", [x, axesT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-      ["keep_dims", binding.ATTR_BOOL, keepDims],
-    ]);
+    return execute0(
+      "Mean",
+      [x, axesT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+        ["keep_dims", binding.ATTR_BOOL, keepDims]
+      ]
+    );
   }
 
-  reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
-    return execute0("Max", [x, axesT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-      ["keep_dims", binding.ATTR_BOOL, keepDims],
-    ]);
+    return execute0(
+      "Max",
+      [x, axesT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+        ["keep_dims", binding.ATTR_BOOL, keepDims]
+      ]
+    );
   }
 
   equal(x: TensorTF, y: TensorTF): TensorTF {
@@ -434,8 +484,7 @@ export class OpsTF implements types.BackendOps {
     let handle;
     // It seems that if x.dtype is int32 this must be done on CPU:
     // https://git.io/vNTSv
-    if (x.dtype === "int32" &&
-        !binding.getDevice(x.handle).endsWith("CPU:0")) {
+    if (x.dtype === "int32" && !binding.getDevice(x.handle).endsWith("CPU:0")) {
       console.warn("Slice on GPU not supported for int32. Copying to CPU.");
       handle = binding.copyToDevice(ctx, x.handle, "CPU:0");
     } else {
@@ -449,7 +498,7 @@ export class OpsTF implements types.BackendOps {
     const handles = [handle, beginT.handle, sizeT.handle];
     const attrs = [
       ["T", binding.ATTR_TYPE, binding.getDType(handle)],
-      ["Index", binding.ATTR_TYPE, binding.TF_INT32],
+      ["Index", binding.ATTR_TYPE, binding.TF_INT32]
     ];
     const r = binding.execute(ctx, "Slice", attrs, handles);
     assertEqual(r.length, 1);
@@ -462,7 +511,7 @@ export class OpsTF implements types.BackendOps {
     handles.unshift(int32Small(axis).handle);
     const attrs = [
       ["T", binding.ATTR_TYPE, dtype],
-      ["N", binding.ATTR_INT, inputs.length],
+      ["N", binding.ATTR_INT, inputs.length]
     ];
     const r = binding.execute(ctx, "Concat", attrs, handles);
     assertEqual(r.length, 1);
@@ -473,8 +522,7 @@ export class OpsTF implements types.BackendOps {
     // Reshape, like Slice, does not have an int32 GPU implementation
     // https://git.io/vNTd5
     let handle;
-    if (x.dtype === "int32" &&
-        !binding.getDevice(x.handle).endsWith("CPU:0")) {
+    if (x.dtype === "int32" && !binding.getDevice(x.handle).endsWith("CPU:0")) {
       console.warn("Reshape on GPU not supported for int32. Copying to CPU.");
       handle = binding.copyToDevice(ctx, x.handle, "CPU:0");
     } else {
@@ -487,7 +535,7 @@ export class OpsTF implements types.BackendOps {
     const handles = [handle, shapeT.handle];
     const attrs = [
       ["T", binding.ATTR_TYPE, binding.getDType(handle)],
-      ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
+      ["Tshape", binding.ATTR_TYPE, binding.TF_INT32]
     ];
     const r = binding.execute(ctx, "Reshape", attrs, handles);
     assertEqual(r.length, 1);
@@ -503,14 +551,22 @@ export class OpsTF implements types.BackendOps {
   }
 
   cast(x: TensorTF, dtype: types.DType): TensorTF {
-    return execute0("Cast", [x], [
-      ["SrcT", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["DstT", binding.ATTR_TYPE, dtypePropel2TF(dtype)],
-    ]);
+    return execute0(
+      "Cast",
+      [x],
+      [
+        ["SrcT", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["DstT", binding.ATTR_TYPE, dtypePropel2TF(dtype)]
+      ]
+    );
   }
 
-  oneHot(x: TensorTF, depth: number, onValue: number,
-         offValue: number): TensorTF {
+  oneHot(
+    x: TensorTF,
+    depth: number,
+    onValue: number,
+    offValue: number
+  ): TensorTF {
     if (x.dtype === "float32") {
       throw new Error("Must use integer type with oneHot.");
     }
@@ -519,32 +575,47 @@ export class OpsTF implements types.BackendOps {
     const depthT = int32Small(depth);
     const onT = floatSmall(onValue, x);
     const offT = floatSmall(offValue, x);
-    return execute0("OneHot", [x, depthT, onT, offT], [
-      ["T", binding.ATTR_TYPE, binding.getDType(onT.handle)],
-      ["TI", binding.ATTR_TYPE, binding.getDType(x.handle)],
-      ["axis", binding.ATTR_INT, -1],
-    ]);
+    return execute0(
+      "OneHot",
+      [x, depthT, onT, offT],
+      [
+        ["T", binding.ATTR_TYPE, binding.getDType(onT.handle)],
+        ["TI", binding.ATTR_TYPE, binding.getDType(x.handle)],
+        ["axis", binding.ATTR_INT, -1]
+      ]
+    );
   }
 
   conv2d(input: TensorTF, filter: TensorTF, opts: types.ConvOpts): TensorTF {
     return execute0("Conv2D", [input, filter], convAttrs(opts));
   }
 
-  conv2dGradFilter(grad: TensorTF, input: TensorTF,
-                   filterShape: types.Shape,
-                   opts: types.ConvOpts): TensorTF {
+  conv2dGradFilter(
+    grad: TensorTF,
+    input: TensorTF,
+    filterShape: types.Shape,
+    opts: types.ConvOpts
+  ): TensorTF {
     const filterShapeT = int32Small(filterShape);
-    return execute0("Conv2DBackpropFilter",
-                    [input, filterShapeT, grad],
-                    convAttrs(opts));
+    return execute0(
+      "Conv2DBackpropFilter",
+      [input, filterShapeT, grad],
+      convAttrs(opts)
+    );
   }
 
-  conv2dGradInput(grad: TensorTF, inputShape: types.Shape,
-                  filter: TensorTF, opts: types.ConvOpts): TensorTF {
+  conv2dGradInput(
+    grad: TensorTF,
+    inputShape: types.Shape,
+    filter: TensorTF,
+    opts: types.ConvOpts
+  ): TensorTF {
     const inputShapeT = int32Small(inputShape);
-    return execute0("Conv2DBackpropInput",
-                    [inputShapeT, filter, grad],
-                    convAttrs(opts));
+    return execute0(
+      "Conv2DBackpropInput",
+      [inputShapeT, filter, grad],
+      convAttrs(opts)
+    );
   }
 
   maxPool(input: TensorTF, opts: types.PoolOpts): TensorTF {
@@ -552,8 +623,12 @@ export class OpsTF implements types.BackendOps {
     return execute0("MaxPool", [input], attrs);
   }
 
-  maxPoolGrad(grad: TensorTF, origInput: TensorTF, origOutput: TensorTF,
-              opts: types.PoolOpts): TensorTF {
+  maxPoolGrad(
+    grad: TensorTF,
+    origInput: TensorTF,
+    origOutput: TensorTF,
+    opts: types.PoolOpts
+  ): TensorTF {
     const attrs = poolAttrs(opts, binding.getDType(origInput.handle));
     return execute0("MaxPoolGrad", [origInput, origOutput, grad], attrs);
   }
@@ -565,12 +640,12 @@ function poolAttrs(opts: types.PoolOpts, dtypeCode: DTypeCode): AttrDef[] {
     ["ksize", binding.ATTR_INT_LIST, tfStrides(opts.size)],
     ["strides", binding.ATTR_INT_LIST, tfStrides(opts.stride)],
     ["padding", binding.ATTR_STRING, opts.padding.toUpperCase()],
-    ["data_format", binding.ATTR_STRING, "NHWC"],
+    ["data_format", binding.ATTR_STRING, "NHWC"]
   ];
 }
 
 function convAttrs(opts: types.ConvOpts): AttrDef[] {
-  const dilations = [1, 1, 1, 1];  // TODO
+  const dilations = [1, 1, 1, 1]; // TODO
   const padding = opts.padding.toUpperCase();
   return [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
@@ -578,12 +653,13 @@ function convAttrs(opts: types.ConvOpts): AttrDef[] {
     ["use_cudnn_on_gpu", binding.ATTR_BOOL, false],
     ["padding", binding.ATTR_STRING, padding],
     ["data_format", binding.ATTR_STRING, "NHWC"],
-    ["dilations", binding.ATTR_INT_LIST, dilations],
+    ["dilations", binding.ATTR_INT_LIST, dilations]
   ];
 }
 
-function tfStrides(s: number | [number, number]):
-                   [number, number, number, number] {
+function tfStrides(
+  s: number | [number, number]
+): [number, number, number, number] {
   if (typeof s === "number") {
     return [1, s, s, 1];
   } else {

@@ -66,7 +66,7 @@ class RootParams implements Params {
   // Note TS doesn't allow extending Map:
   // https://github.com/Microsoft/TypeScript/issues/10853
   private store = new Map<string, Tensor>();
-  isTraining = false;  // TODO users shouldn't be able to change this.
+  isTraining = false; // TODO users shouldn't be able to change this.
 
   has(name: string): boolean {
     return this.store.has(name);
@@ -109,7 +109,7 @@ class RootParams implements Params {
 }
 
 class ScopedParams implements Params {
-  constructor(readonly parent: Params, readonly prefix: string) { }
+  constructor(readonly parent: Params, readonly prefix: string) {}
 
   private resolve(name: string): string {
     return this.prefix + "/" + name;

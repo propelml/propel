@@ -110,8 +110,9 @@ export function genJSON(): DocEntry[] {
   }
 
   function skipAlias(symbol: ts.Symbol, checker: ts.TypeChecker) {
-    return symbol.flags & ts.SymbolFlags.Alias ?
-      checker.getAliasedSymbol(symbol) : symbol;
+    return symbol.flags & ts.SymbolFlags.Alias
+      ? checker.getAliasedSymbol(symbol)
+      : symbol;
   }
 
   /** Generate documentation for all classes in a set of .ts files */
@@ -147,7 +148,6 @@ export function genJSON(): DocEntry[] {
 
   // visit nodes finding exported classes
   function visit(node: ts.Node) {
-
     if (ts.isClassDeclaration(node) && node.name) {
       // This is a top level class, get its symbol
       visitClass(node);
@@ -170,36 +170,33 @@ export function genJSON(): DocEntry[] {
     } else if (ts.isFunctionDeclaration(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       visitMethod(node, symbol.getName());
-
     } else if (ts.isFunctionTypeNode(node)) {
       log("- FunctionTypeNode.. ?");
-
     } else if (ts.isFunctionExpression(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       const name = symbol ? symbol.getName() : "<unknown>";
       log("- FunctionExpression", name);
-
     } else if (ts.isInterfaceDeclaration(node)) {
       const symbol = checker.getSymbolAtLocation(node.name);
       const name = symbol.getName();
       log("- Interface", name);
-
     } else if (ts.isObjectLiteralExpression(node)) {
       // TODO Ignoring for now.
       log("- ObjectLiteralExpression");
-
     } else if (ts.isTypeLiteralNode(node)) {
       // TODO Ignoring for now.
       log("- TypeLiteral");
-
     } else {
       log("Unknown node", node.kind);
       assert(false);
     }
   }
 
-  function visitMethod(methodNode: ts.FunctionLike,
-                       methodName: string, className?: string) {
+  function visitMethod(
+    methodNode: ts.FunctionLike,
+    methodName: string,
+    className?: string
+  ) {
     // Get the documentation string.
     const sym = checker.getSymbolAtLocation(methodNode.name);
     const docstr = getFlatDocstr(sym);
@@ -219,14 +216,16 @@ export function genJSON(): DocEntry[] {
     // Print each of the parameters.
     const argEntries: ArgEntry[] = [];
     for (const paramSymbol of sig.parameters) {
-      const paramType = checker.getTypeOfSymbolAtLocation(paramSymbol,
-        paramSymbol.valueDeclaration!);
+      const paramType = checker.getTypeOfSymbolAtLocation(
+        paramSymbol,
+        paramSymbol.valueDeclaration!
+      );
       requestVisitType(paramType);
 
       argEntries.push({
         name: paramSymbol.getName(),
         typestr: checker.typeToString(paramType),
-        docstr: getFlatDocstr(paramSymbol),
+        docstr: getFlatDocstr(paramSymbol)
       });
     }
 
@@ -255,10 +254,9 @@ export function genJSON(): DocEntry[] {
     const sourceFile = node.getSourceFile();
     const docNodes = (node as any).jsDoc; // No public API for this?
     const startNode = (docNodes && docNodes[0]) || node;
-    const [startLine, endLine] = [
-      startNode.getStart(),
-      node.getEnd()
-    ].map(pos => sourceFile.getLineAndCharacterOfPosition(pos).line + 1);
+    const [startLine, endLine] = [startNode.getStart(), node.getEnd()].map(
+      pos => sourceFile.getLineAndCharacterOfPosition(pos).line + 1
+    );
     const sourceRange =
       endLine > startLine ? `L${startLine}-L${endLine}` : `L${startLine}`;
     const githubUrl = getGithubUrlForFile(sourceFile.fileName);
@@ -291,10 +289,8 @@ export function genJSON(): DocEntry[] {
 
       if (ts.isConstructorDeclaration(m)) {
         visitMethod(m, "constructor", className);
-
       } else if (ts.isMethodDeclaration(m)) {
         visitMethod(m, name, className);
-
       } else if (ts.isPropertyDeclaration(m)) {
         if (ts.isFunctionLike(m.initializer)) {
           visitMethod(m.initializer, name, className);
@@ -303,7 +299,6 @@ export function genJSON(): DocEntry[] {
         }
       } else if (ts.isGetAccessorDeclaration(m)) {
         visitProp(m, name, className);
-
       } else {
         log("member", className, name);
       }

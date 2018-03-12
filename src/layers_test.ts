@@ -16,11 +16,7 @@
 import { test } from "../tools/tester";
 import * as api from "./api";
 import * as layers from "./layers";
-import {
-  assert,
-  assertAllClose,
-  assertShapesEqual,
-} from "./tensor_util";
+import { assert, assertAllClose, assertShapesEqual } from "./tensor_util";
 
 test(async function layer_conv2d() {
   const x = api.ones([1, 4, 4, 1]);
@@ -44,8 +40,14 @@ test(async function layer_linear() {
 
 test(async function layer_batchNorm() {
   const p = api.params();
-  const c0 = api.randn([2, 50, 50, 1]).mul(3).sub(7);
-  const c1 = api.randn([2, 50, 50, 1]).mul(13).add(2);
+  const c0 = api
+    .randn([2, 50, 50, 1])
+    .mul(3)
+    .sub(7);
+  const c1 = api
+    .randn([2, 50, 50, 1])
+    .mul(13)
+    .add(2);
   const x = c0.concat(3, c1);
   const out = layers.batchNorm(x, p.scope("bn"));
   assert(p.has("bn/mean"));

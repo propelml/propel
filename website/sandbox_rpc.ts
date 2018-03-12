@@ -38,7 +38,7 @@ interface ReturnMessage extends Message {
 
 export class SandboxRPC {
   // TODO: better solution for filtering messages intended for other frames.
-  private unique = Math.floor(Math.random() * 1 << 30).toString(16);
+  private unique = Math.floor((Math.random() * 1) << 30).toString(16);
   private counter = 0;
   private ready = createResolvable();
   private returnHandlers = new Map<string, Resolvable<any>>();
@@ -46,7 +46,7 @@ export class SandboxRPC {
   constructor(private remote: Window, private handlers: RpcHandlers) {
     // TODO: remove event listener when remote window disappears.
     window.addEventListener("message", event => this.onMessage(event));
-    this.remote.postMessage({type: "syn"}, "*");
+    this.remote.postMessage({ type: "syn" }, "*");
   }
 
   async call(handler: string, ...args: any[]): Promise<any> {
@@ -88,7 +88,7 @@ export class SandboxRPC {
   }
 
   private onHandshake(event: MessageEvent) {
-    const {type} = event.data;
+    const { type } = event.data;
     if (type === "syn") {
       this.remote.postMessage({ type: "ack" }, "*");
     }
@@ -96,7 +96,7 @@ export class SandboxRPC {
   }
 
   private async onCall(event: MessageEvent) {
-    const {id, handler, args} = event.data;
+    const { id, handler, args } = event.data;
     const ret: ReturnMessage = {
       type: "return",
       id
@@ -119,14 +119,15 @@ export class SandboxRPC {
     const id = message.id;
     const resolver = this.returnHandlers.get(id);
     if (resolver === undefined) {
-        return; // Not for us.
+      return; // Not for us.
     }
     if (message.hasOwnProperty("exception")) {
       let { exception } = message;
       if (exception.__error__) {
         // Convert to Error object.
-        exception = Object.assign(new Error(exception.message),
-                                  { stack: exception.stack });
+        exception = Object.assign(new Error(exception.message), {
+          stack: exception.stack
+        });
       }
       resolver.reject(exception);
     } else {

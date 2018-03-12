@@ -11,7 +11,7 @@ let path = require("path");
 let { format } = require("util");
 let puppeteer = require("puppeteer");
 const { devWebsiteServer } = require("./dev_website");
-require("../src/util");  // So it throws on unhandled promises.
+require("../src/util"); // So it throws on unhandled promises.
 
 const headless = process.env.CI != null;
 

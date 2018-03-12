@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // To just run the linter: ./tools/stylelint.js
 // To auto-format code:    ./tools/stylelint.js --fix
-const run = require('./run');
+const run = require("./run");
 const extra = process.argv.slice(2).join(" ");
 // TODO use *.scss here.
 run.sh(`node ./node_modules/stylelint/bin/stylelint.js

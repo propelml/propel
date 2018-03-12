@@ -5,7 +5,7 @@ if (process.argv.indexOf("clean") >= 0) {
   run.rmrf("./build");
 }
 
-(async() => {
+(async () => {
   run.sh("node ./tools/build_binding.js");
   run.sh("node ./tools/website_render.js");
 })();

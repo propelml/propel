@@ -29,9 +29,7 @@ test(async function binding_equals() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
   const b = new binding.Handle(new Float32Array([2, 4]), [2], binding.TF_FLOAT);
 
-  const opAttrs = [
-    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-  ];
+  const opAttrs = [["T", binding.ATTR_TYPE, binding.TF_FLOAT]];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, a])[0];
   assert(binding.getDevice(r) === "CPU:0");
   assertAllEqual(binding.getShape(r), [2]);
@@ -58,7 +56,7 @@ test(async function binding_matMul() {
   const opAttrs = [
     ["transpose_a", binding.ATTR_BOOL, false],
     ["transpose_b", binding.ATTR_BOOL, false],
-    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
+    ["T", binding.ATTR_TYPE, binding.TF_FLOAT]
   ];
   const retvals = binding.execute(ctx, "MatMul", opAttrs, [a, b]);
   const r = retvals[0];
@@ -77,9 +75,7 @@ test(async function binding_mul() {
   assert(binding.getDType(a) === binding.TF_FLOAT);
   assert(binding.getDType(b) === binding.TF_FLOAT);
 
-  const opAttrs = [
-    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-  ];
+  const opAttrs = [["T", binding.ATTR_TYPE, binding.TF_FLOAT]];
   const retvals = binding.execute(ctx, "Mul", opAttrs, [a, b]);
   const r = retvals[0];
   assert(binding.getDevice(r) === "CPU:0");
@@ -92,18 +88,19 @@ test(async function binding_chaining() {
   const a = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
   const b = new binding.Handle(new Float32Array([2, 5]), [2], binding.TF_FLOAT);
 
-  const opAttrs = [
-    ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-  ];
+  const opAttrs = [["T", binding.ATTR_TYPE, binding.TF_FLOAT]];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, b])[0];
   assert(binding.getDType(r) === binding.TF_BOOL);
   assertAllEqual(binding.getShape(r), [2]);
 
-  const reductionIndices = new binding.Handle(new Int32Array([0]), [1],
-                                              binding.TF_INT32);
+  const reductionIndices = new binding.Handle(
+    new Int32Array([0]),
+    [1],
+    binding.TF_INT32
+  );
   const opAttrs2 = [
     ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
-    ["keep_dims", binding.ATTR_BOOL, false],
+    ["keep_dims", binding.ATTR_BOOL, false]
   ];
   const r2 = binding.execute(ctx, "All", opAttrs2, [r, reductionIndices])[0];
   const result2 = Array.from(new Uint8Array(binding.asArrayBuffer(r2)));
@@ -113,11 +110,14 @@ test(async function binding_chaining() {
 test(async function binding_reshape() {
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
   const t = new binding.Handle(typedArray, [2, 3], binding.TF_FLOAT);
-  const shape = new binding.Handle(new Int32Array([3, 2]), [2],
-                                   binding.TF_INT32);
+  const shape = new binding.Handle(
+    new Int32Array([3, 2]),
+    [2],
+    binding.TF_INT32
+  );
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
-    ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
+    ["Tshape", binding.ATTR_TYPE, binding.TF_INT32]
   ];
   const r = binding.execute(ctx, "Reshape", opAttrs, [t, shape])[0];
   assertAllEqual(binding.getShape(r), [3, 2]);
@@ -219,7 +219,7 @@ test(async function testDispose() {
 
   let didThrow = false;
   try {
-  binding.dispose(null);
+    binding.dispose(null);
   } catch (e) {
     didThrow = true;
   }

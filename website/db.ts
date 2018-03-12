@@ -67,7 +67,7 @@ const firebaseConfig = {
   databaseURL: "https://propel-ml.firebaseio.com",
   messagingSenderId: "587486455356",
   projectId: "propel-ml",
-  storageBucket: "propel-ml.appspot.com",
+  storageBucket: "propel-ml.appspot.com"
 };
 
 class DatabaseFB implements Database {
@@ -94,7 +94,7 @@ class DatabaseFB implements Database {
     await docRef.update({
       cells: doc.cells,
       title: doc.title || "",
-      updated: firebase.firestore.FieldValue.serverTimestamp(),
+      updated: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
 
@@ -116,12 +116,12 @@ class DatabaseFB implements Database {
       owner: {
         displayName: u.displayName,
         photoURL: u.photoURL,
-        uid: u.uid,
+        uid: u.uid
       },
       title: "",
-      updated: firebase.firestore.FieldValue.serverTimestamp(),
+      updated: firebase.firestore.FieldValue.serverTimestamp()
     };
-    console.log({newDoc});
+    console.log({ newDoc });
     const docRef = await nbCollection.add(newDoc);
     return docRef.id;
   }
@@ -132,17 +132,17 @@ class DatabaseFB implements Database {
     if (!u) return "anonymous";
 
     const newDoc = {
-      cells: [ "// New Notebook. Insert code here." ],
+      cells: ["// New Notebook. Insert code here."],
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,
         photoURL: u.photoURL,
-        uid: u.uid,
+        uid: u.uid
       },
       title: "",
-      updated: firebase.firestore.FieldValue.serverTimestamp(),
+      updated: firebase.firestore.FieldValue.serverTimestamp()
     };
-    console.log({newDoc});
+    console.log({ newDoc });
     const docRef = await nbCollection.add(newDoc);
     return docRef.id;
   }
@@ -271,28 +271,28 @@ function lazyInit() {
 const defaultOwner: UserInfo = {
   displayName: "default owner",
   photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
-  uid: "abc",
+  uid: "abc"
 };
 
 const defaultDocCells: string[] = [
-`
+  `
 import { tensor } from "propel";
 t = tensor([[2, 3], [30, 20]])
 t.mul(5)
 `,
-`
+  `
 import { grad, linspace, plot } from "propel";
 f = (x) => tensor(x).mul(x);
 x = linspace(-4, 4, 200);
 plot(x, f(x),
      x, grad(f)(x));
 `,
-`
+  `
 f = await fetch('/data/mnist/README');
 t = await f.text();
 t;
 `,
-`
+  `
 import { tensor } from "propel";
 function f(x) {
   let y = x.sub(1);
@@ -311,5 +311,5 @@ const defaultDoc: NotebookDoc = {
   owner: defaultOwner,
   title: "Sample Notebook",
   updated: new Date(),
-  created: new Date(),
+  created: new Date()
 };
