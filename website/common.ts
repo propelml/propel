@@ -2,7 +2,9 @@ import { h } from "preact";
 import * as db from "./db";
 
 export function Loading(props) {
-  return h("h1", null, "Loading");
+  return h("div", { "class": "loading-screen"},
+    h("h1", null, "Loading"),
+    );
 }
 
 export function PropelLogo(props) {
@@ -31,6 +33,23 @@ export function PropelLogo(props) {
     ),
 
   );
+}
+
+export function Footer(props) {
+  return h("div", { "class": "footer" }
+    h("a", {
+          "href": "/references",
+        }, "References"),
+    h("a", {
+          "href": "/docs",
+        }, "Documentation"),
+    h("a", {
+          "href": "https://github.com/propelml/propel",
+        }, "GitHub"),
+    h("a", {
+          "href": "mailto:propelml@gmail.com",
+        }, "Contact"),
+    );
 }
 
 export function GlobalHeader(props) {

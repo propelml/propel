@@ -14,7 +14,7 @@
  */
 // tslint:disable:variable-name
 import { h } from "preact";
-import { div, p, PropelLogo } from "./common";
+import { div, GlobalHeader, p } from "./common";
 import * as nb from "./nb";
 
 export interface DocEntry {
@@ -137,10 +137,12 @@ export function Docs(props) {
   });
 
   return div("docs",
-    div("panel",
-      h(PropelLogo, { subtitle: "Docs" }),
-      h(DocIndex, { docs }),
-    ),
-    h(DocEntries, { docs }),
-  );
+    h(GlobalHeader, { subtitle: "Docs" }),
+      div("doc-wrapper",
+        div("panel",
+          h(DocIndex, { docs }),
+        ),
+        h(DocEntries, { docs }),
+    );
+  )
 }
