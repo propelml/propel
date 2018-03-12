@@ -17,7 +17,7 @@
 // client-side for generating HTML.
 import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
-import { div, GlobalHeader, p, UserMenu } from "./common";
+import { div, Footer, GlobalHeader, p, UserMenu } from "./common";
 import * as db from "./db";
 import { Docs } from "./docs";
 import * as nb from "./nb";
@@ -62,6 +62,7 @@ export const References = (props) => {
     h("div", {
       dangerouslySetInnerHTML: { __html: refhtml },
     }),
+    h(Footer, null),
   );
 };
 
@@ -71,12 +72,9 @@ export const PropelIndex = (props) => {
     h(Intro, null),
     h(UseIt, null),
     h(Perks, null),
-    h(ReferencesFooter, null),
+    h(Footer, null),
   );
 };
-
-const ReferencesFooter = () =>
-  div("footer", link("references.html", "References"));
 
 const Splash = (props) =>
   div("splash",
@@ -111,9 +109,9 @@ const Intro = () =>
 const UseIt = () =>
   div("use-it",
     div("use-it-inner",
-      h("p", { "class": "snippet-title" }, "Use it in Node:"),
+      h("p", { "class": "snippit-title" }, "Use it in Node:"),
       fixed("npm install propel\nimport { grad } from \"propel\";"),
-      h("p", { "class": "snippet-title" }, "Use it in a browser:"),
+      h("p", { "class": "snippit-title" }, "Use it in a browser:"),
       fixed(`<script src="https://unpkg.com/propel@${version}"></script>`)
     )
   );
