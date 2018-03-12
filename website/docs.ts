@@ -143,6 +143,6 @@ export function Docs(props) {
           h(DocIndex, { docs }),
         ),
         h(DocEntries, { docs }),
-    );
-  )
+    ),
+  );
 }
