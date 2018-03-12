@@ -807,10 +807,6 @@ if (IS_NODE) {
   Tensor.prototype[s] = function(depth: number, opts: {}) {
     return this.toString();
   };
-
-  process.on("unhandledRejection", (error) => {
-    throw error;
-  });
 }
 
 export type NamedTensors = { [name: string]: Tensor };
