@@ -16,6 +16,7 @@
 // This file contains routines for accessing the firebase database (firestore).
 // This is used to save and restore notebooks.
 // These routines are run only on the browser.
+import { assert } from "../src/util";
 
 // tslint:disable:no-reference
 /// <reference path="firebase.d.ts" />
@@ -28,7 +29,6 @@ export interface Database {
   queryLatest(): Promise<NbInfo[]>;
   signIn(): void;
   signOut(): void;
-  ownsDoc(doc: NotebookDoc): boolean;
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb;
 }
 
@@ -96,7 +96,7 @@ class DatabaseFB implements Database {
   // Caller must catch errors.
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
     if (nbId === "default") return; // Don't save the default doc.
-    if (!this.ownsDoc(doc)) return;
+    if (!ownsDoc(auth.currentUser, doc)) return;
     const docRef = nbCollection.doc(nbId);
     await docRef.update({
       cells: doc.cells,
@@ -178,11 +178,6 @@ class DatabaseFB implements Database {
     auth.signOut();
   }
 
-  ownsDoc(d: NotebookDoc): boolean {
-    const u = auth.currentUser;
-    return u && d && u.uid === d.owner.uid;
-  }
-
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
     lazyInit();
     return auth.onAuthStateChanged(cb);
@@ -190,6 +185,8 @@ class DatabaseFB implements Database {
 }
 
 export class DatabaseMock implements Database {
+  private currentUser: UserInfo = null;
+  private docs: { [key: string]: NotebookDoc };
   counts = {};
   inc(method) {
     if (method in this.counts) {
@@ -199,13 +196,22 @@ export class DatabaseMock implements Database {
     }
   }
 
+  constructor() {
+    assert(defaultDoc != null);
+    this.docs = { "default": Object.assign({}, defaultDoc) };
+  }
+
   async getDoc(nbId: string): Promise<NotebookDoc> {
     this.inc("getDoc");
-    return defaultDoc;
+    if (this.docs[nbId] === null) {
+      throw Error("getDoc called with bad nbId " + nbId);
+    }
+    return this.docs[nbId];
   }
 
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
     this.inc("updateDoc");
+    this.docs[nbId] = Object.assign(this.docs[nbId], doc);
   }
 
   async clone(existingDoc: NotebookDoc): Promise<string> {
@@ -225,30 +231,33 @@ export class DatabaseMock implements Database {
 
   signIn(): void {
     this.inc("signIn");
+    this.currentUser = defaultOwner;
+    this.makeAuthChangeCallbacks();
   }
 
   signOut(): void {
     this.inc("signOut");
+    this.currentUser = null;
+    this.makeAuthChangeCallbacks();
   }
 
-  ownsDoc(doc: NotebookDoc): boolean {
-    this.inc("ownsDoc");
-    return false;
+  private authChangeCallbacks = [];
+  private makeAuthChangeCallbacks() {
+    for (const cb of this.authChangeCallbacks) {
+      cb(this.currentUser);
+    }
   }
 
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
     this.inc("subscribeAuthChange");
-    return null;
+    this.authChangeCallbacks.push(cb);
+    return () => {
+      this.authChangeCallbacks = [];
+    };
   }
 }
 
-// Default to a mock, so none of the functions errors out during operation in
-// Node. Firebase cannot be loaded in Node.
-// We cannot load Firebase in Node because grpc has an unreasonable
-// amount of dependencies, included a whole copy of OpenSSL.
-// The firebase web client is very difficult to get working in Node
-// even when trying to use the grpc-web-client library.
-export let active: Database = new DatabaseMock();
+export let active: Database = null;
 
 export function enableFirebase() {
   active = new DatabaseFB();
@@ -275,13 +284,13 @@ function lazyInit() {
   return true;
 }
 
-const defaultOwner: UserInfo = {
+export const defaultOwner: UserInfo = Object.freeze({
   displayName: "default owner",
   photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
   uid: "abc",
-};
+});
 
-const defaultDocCells: string[] = [
+const defaultDocCells: ReadonlyArray<string> = Object.freeze([
 `
 import { tensor } from "propel";
 t = tensor([[2, 3], [30, 20]])
@@ -311,15 +320,15 @@ plot(x, f(x))
 plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 `
-];
+]);
 
-const defaultDoc: NotebookDoc = {
-  cells: defaultDocCells,
-  owner: defaultOwner,
+export const defaultDoc: NotebookDoc = Object.freeze({
+  cells: defaultDocCells.slice(0),
+  created: new Date(),
+  owner: Object.assign({}, defaultOwner),
   title: "Sample Notebook",
   updated: new Date(),
-  created: new Date(),
-};
+});
 
 // To bridge the old and new NotebookDoc scheme.
 // In the old NotebookDoc we only had `doc.cells`, in the new
