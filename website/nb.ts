@@ -234,10 +234,20 @@ export class Cell extends Component<CellProps, CellState> {
     }
   }
 
-  // Never update the component, because CodeMirror has complex state.
+  // Because CodeMirror has complex internal state, we only update the
+  // component if the props have changed (e.g. if props.onDelete has been
+  // changed as demoed in the notebook_DeleteLastCell test).
   // Code updates are done in componentWillReceiveProps.
-  shouldComponentUpdate() {
-    return false;
+  // TODO This is very hacky. Ideally we wouldn't have to mange CM's
+  // state like this.
+  shouldComponentUpdate(nextProps, nextState) {
+    const propChanged = (name) =>
+      (this.props[name] == null) !== (nextProps[name] == null);
+    if (propChanged("onDelete") || propChanged("onInsertCell")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   componentDidMount() {
@@ -528,11 +538,12 @@ export interface NotebookState {
   errorMsg?: string;
   isCloningInProgress: boolean;
   editingTitle: boolean;
-  typedTitle: string;
 }
 
 // This defines the Notebook cells component.
 export class Notebook extends Component<NotebookProps, NotebookState> {
+  private titleInput: HTMLInputElement;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -540,7 +551,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       errorMsg: null,
       isCloningInProgress: false,
       editingTitle: false,
-      typedTitle: ""
     };
   }
 
@@ -576,13 +586,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   async onSaveTitle(doc) {
-    doc.title = this.state.typedTitle;
-    this.setState({ ...doc, editingTitle: false });
+    this.setState({ editingTitle: false });
+    doc.title = this.titleInput.value;
     this.update(doc);
-   }
-
-  async onTypedTitle(event) {
-     this.setState({ typedTitle: event.target.value });
    }
 
   async onDelete(i) {
@@ -616,10 +622,14 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   renderCells(doc): JSX.Element {
     const codes = db.getInputCodes(doc);
     return h("div", { "class": "cells" }, codes.map((code, i) => {
+      // Only display the delete button if there is more than one
+      // cell.
+      const onDelete = doc.cells.length > 1 ? () => this.onDelete(i)
+                                            : null;
       return cell(code, {
-        onRun: (updatedCode) => { this.onRun(updatedCode, i); },
-        onDelete: () => { this.onDelete(i); },
-        onInsertCell: () => { this.onInsertCell(i); },
+        onRun: (updatedCode) => this.onRun(updatedCode, i),
+        onDelete,
+        onInsertCell: () => this.onInsertCell(i),
       });
     }));
   }
@@ -648,15 +658,15 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       const titleEdit = h("div", { class: "title" },
         h("input", {
           class: "title-input",
-          onChange: event => this.onTypedTitle(event),
-          value: doc.title
+          ref: ref => { this.titleInput = ref as HTMLInputElement; },
+          value: doc.title,
         }),
         h("button", {
-          class: "edit-title green-button",
+          class: "save-title green-button",
           onClick: () => this.onSaveTitle(doc)
         }, "Save"),
         h("button", {
-          class: "edit-title",
+          class: "cancel-edit-title",
           onClick: () => this.setState({ editingTitle: false })
         }, "Cancel")
       );
