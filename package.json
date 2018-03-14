@@ -12,6 +12,7 @@
     "url": "git+https://github.com/propelml/propel.git"
   },
   "devDependencies": {
+    "@types/acorn": "^4.0.3",
     "@types/codemirror": "0.0.51",
     "@types/d3": "^4.13.0",
     "@types/node": "^8.9.4",
