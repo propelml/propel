@@ -249,6 +249,7 @@ header {
   border-left: 1px solid $borderColor;
 
   button {
+    position: relative;
     z-index: 1000;
     padding: 0;
     border: 0;
