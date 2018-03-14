@@ -83,6 +83,8 @@ function createIframe(): Window {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("sandbox", "allow-scripts");
   iframe.setAttribute("srcdoc", `${html}`);
+  // Edge doesn't support "srcdoc", it'll use a data url instead.
+  iframe.setAttribute("src", `data:text/html,${html}`);
   iframe.style.display = "none";
   document.body.appendChild(iframe);
 
@@ -243,12 +245,12 @@ export class Cell extends Component<CellProps, CellState> {
       const CodeMirror = require("codemirror");
       require("codemirror/mode/javascript/javascript.js");
 
-      // Delete existing pre.
+      // Find pre to replace by codemirror instance.
       const pres = this.input.getElementsByTagName("pre");
       assert(pres.length === 1);
-      this.input.removeChild(pres[0]);
 
-      this.editor = CodeMirror(this.input, options);
+      this.editor =
+        CodeMirror(div => this.input.replaceChild(div, pres[0]), options);
       this.editor.setOption("extraKeys", {
         "Ctrl-Enter": () =>  {
           this.run();
