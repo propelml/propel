@@ -44,5 +44,8 @@
   },
   "browserslist": [
     ">5%"
-  ]
+  ],
+  "dependencies": {
+    "ws": "^5.0.0"
+  }
 }

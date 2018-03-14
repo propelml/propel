@@ -13,40 +13,43 @@
    limitations under the License.
  */
 
-import { createResolvable, Resolvable } from "../src/util";
+import { createResolvable, nodeRequire, IS_NODE, Resolvable } from "../src/util";
+
+const WebSocket = IS_NODE ? nodeRequire("ws") : window.WebSocket;
 
 export type RpcHandler = (...args: any[]) => any;
 export type RpcHandlers = { [name: string]: RpcHandler };
 
-interface Message {
-  type: "syn" | "ack" | "call" | "return";
+export interface HandshakeMessage {
+  type: "syn" | "ack";
 }
 
-interface CallMessage extends Message {
+export interface CallMessage {
   type: "call";
   id: string;
   handler: string;
   args: any[];
 }
 
-interface ReturnMessage extends Message {
+export interface ReturnMessage {
   type: "return";
   id: string;
   result?: any;
   exception?: any;
 }
 
-export class SandboxRPC {
+export type Message = HandshakeMessage | CallMessage | ReturnMessage;
+
+export abstract class SandboxRPCBase {
   // TODO: better solution for filtering messages intended for other frames.
   private unique = Math.floor(Math.random() * 1 << 30).toString(16);
   private counter = 0;
   private ready = createResolvable();
   private returnHandlers = new Map<string, Resolvable<any>>();
 
-  constructor(private remote: Window, private handlers: RpcHandlers) {
-    // TODO: remove event listener when remote window disappears.
-    window.addEventListener("message", event => this.onMessage(event));
-    this.remote.postMessage({type: "syn"}, "*");
+  protected abstract send(message: Message);
+
+  constructor(private handlers: RpcHandlers) {
   }
 
   async call(handler: string, ...args: any[]): Promise<any> {
@@ -64,58 +67,61 @@ export class SandboxRPC {
     this.returnHandlers.set(id, resolver);
 
     try {
-      this.remote.postMessage(message, "*");
+      this.send(message);
       return await resolver;
     } finally {
       this.returnHandlers.delete(id);
     }
   }
 
-  private onMessage(event: MessageEvent): void {
-    const { type } = event.data;
+  protected onMessage(message: Message): void {
+    const { type } = message;
     switch (type) {
       case "syn":
       case "ack":
-        this.onHandshake(event);
+        this.onHandshake(message as HandshakeMessage);
         break;
       case "call":
-        this.onCall(event);
+        this.onCall(message as CallMessage);
         break;
       case "return":
-        this.onReturn(event);
+        this.onReturn(message as ReturnMessage);
         break;
     }
   }
 
-  private onHandshake(event: MessageEvent) {
-    const {type} = event.data;
+  protected sendHandshake() {
+    this.send({ type: "syn" });
+  }
+
+  private onHandshake(message: HandshakeMessage) {
+    const {type} = message;
     if (type === "syn") {
-      this.remote.postMessage({ type: "ack" }, "*");
+      this.send({ type: "ack" });
     }
     this.ready.resolve();
   }
 
-  private async onCall(event: MessageEvent) {
-    const {id, handler, args} = event.data;
+  private async onCall(message: CallMessage) {
+    const {id, handler, args} = message;
     const ret: ReturnMessage = {
       type: "return",
       id
     };
     try {
       const result = await this.handlers[handler](...args);
-      this.remote.postMessage({ result, ...ret }, "*");
+      this.send({ result, ...ret });
     } catch (exception) {
       if (exception instanceof Error) {
         // Convert to a normal object.
         const { message, stack } = exception;
         exception = { message, stack, __error__: true };
       }
-      this.remote.postMessage({ exception, ...ret }, "*");
+      this.send({ exception, ...ret });
     }
   }
 
-  private onReturn(event: MessageEvent) {
-    const message: ReturnMessage = event.data;
+  private onReturn(message: ReturnMessage) {
     const id = message.id;
     const resolver = this.returnHandlers.get(id);
     if (resolver === undefined) {
@@ -132,5 +138,34 @@ export class SandboxRPC {
     } else {
       resolver.resolve(message.result);
     }
+  }
+}
+
+export class SandboxRPC extends SandboxRPCBase {
+  constructor(private remote: Window, handlers: RpcHandlers) {
+    super(handlers);
+    // TODO: remove event listener when remote window disappears.
+    window.addEventListener("message", event => this.onMessage(event.data));
+    this.sendHandshake();
+  }
+
+  protected send(message: Message) {
+    this.remote.postMessage(message, "*");
+  }
+}
+
+export class SandboxRPCWebSocket extends SandboxRPCBase {
+  constructor(private remote: WebSocket, handlers: RpcHandlers) {
+    super(handlers);
+    remote.addEventListener("message", event => this.onMessage(JSON.parse(event.data)));
+    if (remote.readyState === WebSocket.CONNECTING) {
+      remote.addEventListener("open", () => this.sendHandshake());
+    } else {
+      this.sendHandshake();
+    }
+  }
+
+  protected send(message: Message) {
+    this.remote.send(JSON.stringify(message));
   }
 }

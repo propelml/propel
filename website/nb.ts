@@ -27,7 +27,7 @@ import { OutputHandlerDOM } from "../src/output_handler";
 import { assert, delay, IS_WEB, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
-import { SandboxRPC } from "./sandbox_rpc";
+import { SandboxRPC, SandboxRPCWebSocket } from "./sandbox_rpc";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -89,8 +89,9 @@ function createIframe(): Window {
   return iframe.contentWindow;
 }
 
-function createSandbox(context: Window): SandboxRPC {
-  const sandbox = new SandboxRPC(context, {
+function createSandbox(context: Window) {
+  const ws = new WebSocket("ws://127.0.0.1:12345");
+  const sandbox = new SandboxRPCWebSocket(ws, {
     console(cellId: number, ...args: string[]): void {
       const cell = lookupCell(cellId);
       cell.console(...args);
@@ -110,7 +111,7 @@ function createSandbox(context: Window): SandboxRPC {
   return sandbox;
 }
 
-let sandbox_: SandboxRPC = null;
+let sandbox_: any = null;
 
 export function initSandbox(context?: Window): void {
   if (context == null) {
