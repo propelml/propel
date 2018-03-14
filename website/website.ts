@@ -110,7 +110,7 @@ const UseIt = () =>
   div("use-it",
     div("use-it-inner",
       h("p", { "class": "snippit-title" }, "Use it in Node:"),
-      fixed("npm install propel\nimport { grad } from \"propel\";"),
+      fixed("npm install propel\nlet pr = require(\"propel\");"),
       h("p", { "class": "snippit-title" }, "Use it in a browser:"),
       fixed(`<script src="https://unpkg.com/propel@${version}"></script>`)
     )
