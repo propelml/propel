@@ -128,6 +128,66 @@ testBrowser(async function notebook_deleteLastCell() {
   assert(deleteButton == null);
 });
 
+// Issue #325.
+testBrowser(async function notebook_issue325() {
+  const mdb = db.enableMock();
+  mdb.signIn();
+  await renderOwnerNotebook();
+  // Check that when we load the notebook, we see non-empty outputs.
+  const origOutputs = Array.from(document.querySelectorAll(".output")).map(o =>
+    o.innerHTML.trim();
+  assert(origOutputs.length > 2);
+  for (const outputHTML of origOutputs) {
+    assert(outputHTML.length > 0);
+  }
+  // Edit the first cell.
+  const cells = getCellsFromDom();
+  const origInputs = cells.map(c => c.code);
+  const first = cells[0];
+  first.editor.setValue("1 + 2");
+  await first.run();
+  // Now check that the outputs are what we expect.
+  const newOutputs = document.querySelectorAll(".output");
+  assert(newOutputs.length === origOutputs.length);
+  for (let i = 0; i < newOutputs.length; i++) {
+    const innerHTML = newOutputs[i].innerHTML.trim();
+    if (i === 0) {
+      assert(innerHTML === "3");
+    } else {
+      assert(innerHTML === origOutputs[i]);
+    }
+  }
+  // Now if we click the insert cell button, on the first cell,
+  // we should maintain state.
+  const insertButton: HTMLButtonElement =
+      document.querySelector(".insert-button");
+  assert(insertButton != null);
+  insertButton.click();
+  await flush();
+  const newCells = getCellsFromDom();
+  assert(newCells.length === cells.length + 1);
+  // Check that the inputs and outputs are what we expect them to be.
+  for (let i = 0; i < newCells.length; i++) {
+    const newInput = newCells[i].code;
+    const newOutputInnerHTML = newCells[i].output.innerHTML.trim();
+    if (i === 0) {
+      assert(newInput === "1 + 2");
+      assert(newOutputInnerHTML === "3");
+    } else if (i === 1) {
+      assert(newInput === "");
+      assert(newOutputInnerHTML === "");
+    } else {
+      assert(newInput === origInputs[i - 1]);
+      assert(newOutputInnerHTML === origOutputs[i - 1]);
+    }
+  }
+});
+
+function getCellsFromDom(): nb.Cell[] {
+  const els = Array.from(document.querySelectorAll(".notebook-cell"));
+  return els.map(el => nb.lookupCell(el.id));
+}
+
 // Call this to ensure that the DOM has been updated after events.
 function flush() {
   rerender();
