@@ -480,9 +480,7 @@ export class MostRecent extends Component<any, MostRecentState> {
       return h(Loading, null);
     }
     const notebookList = this.state.latest.map(info => {
-      const snippit = info.doc.cells.map(normalizeCode)
-        .join("\n")
-        .slice(0, 100);
+      const snippit = db.getInputCodes(info.doc).join("\n").slice(0, 100);
       const href = nbUrl(info.nbId);
       return h("a", { href },
         h("li", null,
@@ -604,7 +602,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   renderCells(doc): JSX.Element {
-    return h("div", { "class": "cells" }, doc.cells.map((code, i) => {
+    const codes = db.getInputCodes(doc);
+    return h("div", { "class": "cells" }, codes.map((code, i) => {
       return cell(code, {
         onRun: (updatedCode) => { this.onRun(updatedCode, i); },
         onDelete: () => { this.onDelete(i); },

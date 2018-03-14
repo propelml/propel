@@ -38,10 +38,17 @@ export interface UserInfo {
   uid: string;
 }
 
+export interface CellDoc {
+  id: string;
+  input: string;
+  outputHTML: null | string;
+}
+
 // Defines the scheme of the notebooks collection.
 export interface NotebookDoc {
   anonymous?: boolean;
-  cells: string[];
+  cells?: string[];
+  cellDocs?: CellDoc[];  // Coming soon.
   owner: UserInfo;
   title: string;
   updated: Date;
@@ -313,3 +320,16 @@ const defaultDoc: NotebookDoc = {
   updated: new Date(),
   created: new Date(),
 };
+
+// To bridge the old and new NotebookDoc scheme.
+// In the old NotebookDoc we only had `doc.cells`, in the new
+// scheme we have `cellDocs`.
+export function getInputCodes(doc: NotebookDoc): string[] {
+  if (doc.cells != null) {
+    return doc.cells;
+  } else if (doc.cellDocs != null) {
+    return doc.cellDocs.map(cellDoc => cellDoc.input);
+  } else {
+    return [];
+  }
+}
