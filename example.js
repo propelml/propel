@@ -1,19 +1,13 @@
-// Run this program from the command-line using ts-node
-//
-//   npm install -g ts-node
-//   ts-node example.ts
-//
-import * as pr from "./src/api";
-import { IS_NODE } from "./src/util";
-export async function train(maxSteps = 0) {
+const { dataset, experiment } = require("propel");
 
+async function train(maxSteps) {
   // Load mnist asynchronously, with a batch size of 128 and
   // repeat the dataset for 100 epochs.
-  const ds = pr.dataset("mnist/train").batch(128).repeat(100);
+  const ds = dataset("mnist/train").batch(128).repeat(100);
   // Create or restore an experiment called exp001.
   // experiments manage checkpoints and logs. It's stored at
   // $HOME/.propel/exp001
-  const exp = await pr.experiment("exp001");
+  const exp = await experiment("exp001");
   // Loop over the elements of the dataset.
   // Alternatively use for await () here.
   for (const batchPromise of ds) {
@@ -30,26 +24,26 @@ export async function train(maxSteps = 0) {
       // from [0, 255] to [-1, 1]. Zero centered tensors are usually the
       // easiest for the network to consume.
       images.rescale([0, 255], [-1, 1])
-        // Apply three linear (densely connected) layers with a relu after each
-        // except the last. The shape of the activations are:
-        // [128, 28, 28] -> [128, 200] -> [128, 100] -> [128, 10] -> []
-        // Note the final loss is a scalar.
-        .linear("L1", params, 200).relu()
-        .linear("L2", params, 100).relu()
-        .linear("L3", params, 10)
-        // Using the logits, calculate a classification loss between the
-        // labels. Labels's shape is [128]. This value is returned, and will be
-        // backpropagated thru.
-        .softmaxLoss(labels));
+      // Apply three linear (densely connected) layers with a relu after each
+      // except the last. The shape of the activations are:
+      // [128, 28, 28] -> [128, 200] -> [128, 100] -> [128, 10] -> []
+      // Note that the params object is explicitly passed to
+      // every layer, and each layer is explicitly scoped. We contend that 
+      // this explicitness makes for much saner models.
+      .linear("L1", params, 200).relu()
+      .linear("L2", params, 100).relu()
+      .linear("L3", params, 10)
+      // Using the logits, calculate a classification loss between the
+      // labels. Labels's shape is [128]. This value is returned, and will be
+      // backpropagated thru.
+      // Note the final loss is a scalar.
+      .softmaxLoss(labels));
+
     // Stop after maxSteps.
     // Note the step counter is stored with the experiment.
     if (maxSteps && exp.step >= maxSteps) break;
   }
-  // Before the process exits, Propel will ensure that the parameters are saved
-  // to disk in the experiment's directory.
-
 }
 
-if (IS_NODE && require.main === module) {
-  train(3000);
-}
+train(3000);
+
