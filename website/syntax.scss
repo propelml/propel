@@ -4,18 +4,14 @@
 
 /* Main background color */
 .cm-s-syntax,
-pre {
-  background-color: $cellBackground;
+.pre {
+  background-color: transparent;
   color: $base1;
 }
 
-.cm-s-syntax.cm-s-dark {
-  color: $base0;
-  background-color: $base03;
-}
-
+.cm-s-syntax.cm-s-dark,
 .cm-s-syntax.cm-s-light {
-  background-color: #fdf6e3;
+  background-color: transparent;
   color: $base00;
 }
 

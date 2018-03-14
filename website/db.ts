@@ -38,10 +38,17 @@ export interface UserInfo {
   uid: string;
 }
 
+export interface CellDoc {
+  id: string;
+  input: string;
+  outputHTML: null | string;
+}
+
 // Defines the scheme of the notebooks collection.
 export interface NotebookDoc {
   anonymous?: boolean;
-  cells: string[];
+  cells?: string[];  // Deprecated in favor of cellDocs.
+  cellDocs: CellDoc[];
   owner: UserInfo;
   title: string;
   updated: Date;
@@ -75,7 +82,7 @@ class DatabaseFB implements Database {
     // We have one special doc that is loaded from memory, used for testing and
     // debugging.
     if (nbId === "default") {
-      return defaultDoc;
+      return defaultDoc();
     }
     const docRef = nbCollection.doc(nbId);
     const snap = await docRef.get();
@@ -91,8 +98,10 @@ class DatabaseFB implements Database {
     if (nbId === "default") return; // Don't save the default doc.
     if (!ownsDoc(auth.currentUser, doc)) return;
     const docRef = nbCollection.doc(nbId);
+    console.log("update doc", doc);
+    console.trace();
     await docRef.update({
-      cells: doc.cells,
+      cellDocs: doc.cellDocs,
       title: doc.title || "",
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     });
@@ -106,12 +115,13 @@ class DatabaseFB implements Database {
     const u = auth.currentUser;
     if (!u) throw Error("Cannot clone. User must be logged in.");
 
-    if (existingDoc.cells.length === 0) {
+    if (existingDoc.cellDocs.length === 0) {
       throw Error("Cannot clone empty notebook.");
     }
-
+    // cells is deprecated in favor of cellDocs.
+    assert(existingDoc.cells == null);
     const newDoc = {
-      cells: existingDoc.cells,
+      cellDocs: existingDoc.cellDocs,
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,
@@ -132,7 +142,7 @@ class DatabaseFB implements Database {
     if (!u) return "anonymous";
 
     const newDoc = {
-      cells: [ "// New Notebook. Insert code here." ],
+      cellDocss: blankCells([ "// New Notebook. Insert code here." ]),
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,
@@ -190,8 +200,7 @@ export class DatabaseMock implements Database {
   }
 
   constructor() {
-    assert(defaultDoc != null);
-    this.docs = { "default": Object.assign({}, defaultDoc) };
+    this.docs = { "default": defaultDoc() };
   }
 
   async getDoc(nbId: string): Promise<NotebookDoc> {
@@ -283,7 +292,7 @@ export const defaultOwner: UserInfo = Object.freeze({
   uid: "abc",
 });
 
-const defaultDocCells: ReadonlyArray<string> = Object.freeze([
+const defaultDocCells: ReadonlyArray<CellDoc> = Object.freeze(blankCells([
 `
 import { tensor } from "propel";
 t = tensor([[2, 3], [30, 20]])
@@ -313,12 +322,25 @@ plot(x, f(x))
 plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 `
-]);
+]));
 
-export const defaultDoc: NotebookDoc = Object.freeze({
-  cells: defaultDocCells.slice(0),
-  created: new Date(),
-  owner: Object.assign({}, defaultOwner),
-  title: "Sample Notebook",
-  updated: new Date(),
-});
+export function defaultDoc(): NotebookDoc {
+  return {
+    anonymous: false,
+    cellDocs: defaultDocCells.slice(0),
+    owner: Object.assign({}, defaultOwner),
+    title: "Sample Notebook",
+    updated: new Date(),
+    created: new Date(),
+  };
+}
+
+export function blankCells(inputs: string[]): CellDoc[] {
+  return inputs.map(input => {
+    return {
+      id: "BlankCell" + Math.random().toFixed(5).slice(2),
+      input,
+      outputHTML: null,
+    };
+  });
+}

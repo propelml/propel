@@ -47,6 +47,7 @@ testBrowser(async function notebook_focusNextCell() {
   const second = nb.lookupCell(cellEls[1].id);
   assert(second != null);
   first.focus();
+  await flush();
   assert(cellEls[0].classList.contains("notebook-cell-focus"));
   assert(!cellEls[1].classList.contains("notebook-cell-focus"));
   /* FIXME Flaky....
@@ -63,10 +64,10 @@ testBrowser(async function notebook_titleEdit() {
   const mdb = db.enableMock();
   mdb.signIn();
   await renderOwnerNotebook();
-  assert(db.defaultDoc.title.length > 1);
+  assert(db.defaultDoc().title.length > 1);
   // Check that we rendered the title.
   let title: HTMLElement = document.querySelector(".title > h2");
-  assert(db.defaultDoc.title === title.innerText);
+  assert(db.defaultDoc().title === title.innerText);
   // Because we are logged in, we should see an edit button for the title.
   const editButton: HTMLButtonElement = document.querySelector(".edit-title");
   assert(editButton != null);
@@ -80,7 +81,7 @@ testBrowser(async function notebook_titleEdit() {
   // The edit button has been clicked, so we should see the title-input.
   titleInput = document.querySelector(".title-input");
   assert(null !== titleInput);
-  assert(titleInput.value === db.defaultDoc.title);
+  assert(titleInput.value === db.defaultDoc().title);
   // The save button should be shown.
   const saveTitle: HTMLButtonElement = document.querySelector(".save-title");
   assert(saveTitle != null);
@@ -105,7 +106,7 @@ testBrowser(async function notebook_titleEdit() {
 
 testBrowser(async function notebook_deleteLastCell() {
   await renderOwnerNotebook();
-  const numCells = db.defaultDoc.cells.length;
+  const numCells = db.defaultDoc().cellDocs.length;
   assert(numCells > 2);
   // Should have same number of delete buttons, as we have cells in the
   // default doc.
@@ -129,13 +130,13 @@ testBrowser(async function notebook_deleteLastCell() {
 });
 
 // Issue #325.
-testBrowser(async function notebook_issue325() {
+testBrowser(async function notebook_maintainOutputState() {
   const mdb = db.enableMock();
   mdb.signIn();
   await renderOwnerNotebook();
   // Check that when we load the notebook, we see non-empty outputs.
   const origOutputs = Array.from(document.querySelectorAll(".output")).map(o =>
-    o.innerHTML.trim();
+    o.innerHTML.trim());
   assert(origOutputs.length > 2);
   for (const outputHTML of origOutputs) {
     assert(outputHTML.length > 0);
@@ -144,8 +145,10 @@ testBrowser(async function notebook_issue325() {
   const cells = getCellsFromDom();
   const origInputs = cells.map(c => c.code);
   const first = cells[0];
-  first.editor.setValue("1 + 2");
+  first.setValue("1 + 2");
+  window.rundb = true;
   await first.run();
+  await flush();
   // Now check that the outputs are what we expect.
   const newOutputs = document.querySelectorAll(".output");
   assert(newOutputs.length === origOutputs.length);
@@ -157,6 +160,7 @@ testBrowser(async function notebook_issue325() {
       assert(innerHTML === origOutputs[i]);
     }
   }
+  console.log("XXXXXXXXX");
   // Now if we click the insert cell button, on the first cell,
   // we should maintain state.
   const insertButton: HTMLButtonElement =

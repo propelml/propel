@@ -112,6 +112,12 @@ input[type=button] {
   @include buttonHover;
 }
 
+.input {
+  background-color: $cellBackground;
+  background-color: $cellBackground;
+  color: $base1;
+}
+
 .name,
 .typestr,
 .retType,
@@ -263,16 +269,9 @@ header {
     }
   }
 
-  &.notebook-cell-focus {
-    border-left: 1px solid $accentColor;
-
-    button {
-      opacity: 1;
-    }
-  }
 
   /* Margins for CodeMirror, pre and output should be same. */
-  .CodeMirror,
+  .cm-parent,
   .input > pre,
   .output {
     margin: 0;
@@ -301,6 +300,10 @@ header {
     border: 1px solid $borderColor;
     border-left: 0; // because the border is on notebook-cell.
     margin-bottom: 8px;
+
+    button {
+      z-index: 1;
+    }
 
     button.delete-button {
       /* Top right corner */
@@ -343,6 +346,20 @@ header {
   .notebook-cell-updating svg,
   .notebook-cell-updating .output {
     background-color: #cbcbd0;
+  }
+
+  .input {
+    border-left: 1px solid transparent;
+  }
+}
+
+.notebook-cell-focus {
+  .input {
+    border-left: 1px solid $accentColor;
+  }
+
+  button {
+    opacity: 1;
   }
 }
 

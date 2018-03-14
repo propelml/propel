@@ -10,7 +10,6 @@ service cloud.firestore {
           && request.resource.data.owner.uid == request.auth.uid
           && request.resource.data.owner.photoURL is string
           && request.resource.data.owner.displayName is string
-          && request.resource.data.cells.size() > 0
           && request.resource.data.updated == request.time;
     }
 
