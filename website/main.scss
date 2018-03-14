@@ -27,6 +27,7 @@ $shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.3);
   &:hover {
     background-color: $base0Dark;
     color: white;
+    text-decoration: none;
   }
 }
 
@@ -419,9 +420,14 @@ header {
   a {
     font-size: 1.4rem;
     line-height: 2.4rem;
-    font-weight: 200;
+    font-weight: 400;
     text-transform: uppercase;
     margin: auto 8px;
+    text-decoration: none;
+
+    &:hover {
+      color: $base0Dark;
+    }
   }
 }
 
