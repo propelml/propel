@@ -13,36 +13,36 @@
    limitations under the License.
  */
 
-// Propel Notebooks.
+// Propel Notebooks. nb = notebook.
 // Note that this is rendered and executed server-side using JSDOM and then is
 // re-rendered client-side. The Propel code in the cells are executed
 // server-side so the results can be displayed even if javascript is disabled.
 
-// tslint:disable:no-reference
-/// <reference path="../node_modules/@types/codemirror/index.d.ts" />
-
 import { escape } from "he";
 import { Component, h } from "preact";
 import { OutputHandlerDOM } from "../src/output_handler";
-import { assert, delay, IS_WEB, URL } from "../src/util";
-import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
+import { assert, IS_WEB, URL } from "../src/util";
+import { CMComponent } from "./codemirror";
+import { Avatar, GlobalHeader, Loading, normalizeCode, UserMenu }
+  from "./common";
 import * as db from "./db";
 import { SandboxRPC } from "./sandbox_rpc";
 
-const cellTable = new Map<number, Cell>(); // Maps id to Cell.
-let nextCellId = 1;
+const cellTable = new Map<string, Cell>(); // Maps id to Cell.
+const nextCellId = 1;
 
-const prerenderedOutputs = new Map<number, string>();
+// Maps cellId to outputHTML. See website/main.ts.
+const prerenderedOutputs = new Map<string, string>();
 
 export function registerPrerenderedOutput(output) {
-  const cellId = Number(output.id.replace("output", ""));
+  const cellId = output.id.replace("output", "");
   prerenderedOutputs.set(cellId, output.innerHTML);
 }
 
 // An anonymous notebook doc for when users aren't logged in
 const anonDoc = {
   anonymous: true,
-  cells: [ "// New Notebook. Insert code here." ],
+  cellDocs: db.blankCells([ "// New Notebook. Insert code here." ]),
   created: new Date(),
   owner: {
     displayName: "Anonymous",
@@ -56,14 +56,10 @@ const anonDoc = {
 // Given a cell's id, which can either be an integer or
 // a string of the form "cell5" (where 5 is the id), look up
 // the component in the global table.
-export function lookupCell(id: string | number) {
-  let numId;
-  if (typeof id === "string") {
-    numId = Number(id.replace("cell", ""));
-  } else {
-    numId = id;
-  }
-  return cellTable.get(numId);
+export function lookupCell(id: string) {
+  const cell = cellTable.get(id);
+  if (!cell) console.log("lookupCell failed for", id);
+  return cell;
 }
 
 function createIframe(): Window {
@@ -91,17 +87,17 @@ function createIframe(): Window {
 
 function createSandbox(context: Window): SandboxRPC {
   const sandbox = new SandboxRPC(context, {
-    console(cellId: number, ...args: string[]): void {
+    console(cellId: string, ...args: string[]): void {
       const cell = lookupCell(cellId);
       cell.console(...args);
     },
 
-    plot(cellId: number, data: any): void {
+    plot(cellId: string, data: any): void {
       const cell = lookupCell(cellId);
       cell.plot(data);
     },
 
-    imshow(cellId: number, data: any): void {
+    imshow(cellId: string, data: any): void {
       const cell = lookupCell(cellId);
       cell.imshow(data);
     }
@@ -128,7 +124,11 @@ function sandbox(): SandboxRPC {
 
 // Convenience function to create Notebook JSX element.
 export function cell(code: string, props: CellProps = {}): JSX.Element {
-  props.code = code;
+  props.doc = {
+    id: "StaticCell" + hash(code),
+    input: code,
+    outputHTML: null,
+  };
   return h(Cell, props);
 }
 
@@ -144,50 +144,59 @@ export async function drainExecuteQueue() {
   }
 }
 
-const codemirrorOptions = {
-  lineNumbers: false,
-  lineWrapping: true,
-  mode: "javascript",
-  scrollbarStyle: null,
-  theme: "syntax",
-  viewportMargin: Infinity,
-};
-
 export interface CellProps {
-  code?: string;
-  onRun?: (code: null | string) => void;
+  doc?: db.CellDoc;
+  onRun?: (cellDoc: db.CellDoc) => void;
   // If onDelete or onInsertCell is null, it hides the button.
   onDelete?: () => void;
   onInsertCell?: () => void;
 }
-export interface CellState { }
+
+export interface CellState {
+  outputHTML: string;
+  focused: boolean;
+}
 
 export class Cell extends Component<CellProps, CellState> {
-  parentDiv: Element;
-  input: Element;
+  parentDiv: HTMLElement;
   output: Element;
-  editor: CodeMirror.Editor;
-  readonly id: number;
-  outputHTML?: string;
+  cm: CMComponent;
 
   constructor(props) {
     super(props);
-    this.id = nextCellId++;
     if (prerenderedOutputs.has(this.id)) {
-      this.outputHTML = prerenderedOutputs.get(this.id);
+      this.state.outputHTML = prerenderedOutputs.get(this.id);
+    } else {
+      this.state.outputHTML = props.doc.outputHTML;
     }
-    cellTable.set(this.id, this);
   }
 
   componentWillMount() {
-    if (!this.outputHTML) {
+    console.log("register cell", this.id);
+    cellTable.set(this.id, this);
+    if (!this.state.outputHTML) {
+      console.log("cellExecuteQueue", this.id);
       cellExecuteQueue.push(this);
     }
   }
 
+  setValue(code: string): void {
+    this.cm.setValue(code);
+  }
+
+  get id(): string {
+    return this.props.doc.id;
+  }
+
+  // TODO rename this getter to cell.input.
   get code(): string {
-    return normalizeCode(this.editor ? this.editor.getValue()
-                                     : this.props.code);
+    return normalizeCode(this.cm ? this.cm.code
+                                 : this.props.doc.input);
+  }
+
+  saveOutputState() {
+    this.props.doc.outputHTML = this.output.innerHTML;
+    this.setState({ outputHTML: this.output.innerHTML });
   }
 
   console(...args: string[]) {
@@ -197,79 +206,23 @@ export class Cell extends Component<CellProps, CellState> {
     s += args.join(" ") + "\n";
     const el = document.createTextNode(s);
     output.appendChild(el);
+    this.saveOutputState();
   }
 
   plot(data) {
     const o = new OutputHandlerDOM(this.output);
     o.plot(data);
+    this.saveOutputState();
   }
 
   imshow(data) {
     const o = new OutputHandlerDOM(this.output);
     o.imshow(data);
+    this.saveOutputState();
   }
 
   clearOutput() {
-    this.output.innerHTML = "";
-  }
-
-  // Because CodeMirror has a lot of state that is not managed through
-  // React, manually apply prop changes.
-  componentWillReceiveProps(nextProps: CellProps) {
-    const nextCode = normalizeCode(nextProps.code);
-    if (nextCode !== this.code) {
-      this.editor.setValue(nextCode);
-      this.clearOutput();
-    }
-  }
-
-  // Never update the component, because CodeMirror has complex state.
-  // Code updates are done in componentWillReceiveProps.
-  shouldComponentUpdate() {
-    return false;
-  }
-
-  componentDidMount() {
-    const options = Object.assign({}, codemirrorOptions, {
-      mode: "javascript",
-      value: this.code,
-    });
-
-    // If we're in node, doing server-side rendering, we don't enable
-    // CodeMirror as its not clear if it can re-initialize its state after
-    // being serialized.
-    if (IS_WEB) {
-      // tslint:disable:variable-name
-      const CodeMirror = require("codemirror");
-      require("codemirror/mode/javascript/javascript.js");
-
-      // Delete existing pre.
-      const pres = this.input.getElementsByTagName("pre");
-      assert(pres.length === 1);
-      this.input.removeChild(pres[0]);
-
-      this.editor = CodeMirror(this.input, options);
-      this.editor.setOption("extraKeys", {
-        "Ctrl-Enter": () =>  {
-          this.run();
-          return true;
-        },
-        "Shift-Enter": () => {
-          this.run();
-          this.editor.getInputField().blur();
-          this.focusNext();
-          return true;
-        },
-      });
-
-      this.editor.on("focus", () => {
-        this.parentDiv.classList.add("notebook-cell-focus");
-      });
-
-      this.editor.on("blur", () => {
-        this.parentDiv.classList.remove("notebook-cell-focus");
-      });
-    }
+    this.setState({ outputHTML: "" });
   }
 
   focusNext() {
@@ -293,8 +246,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   focus() {
-    this.editor.focus();
-    this.parentDiv.classList.add("notebook-cell-focus");
+    this.cm.focus();
     this.parentDiv.scrollIntoView();
   }
 
@@ -302,26 +254,30 @@ export class Cell extends Component<CellProps, CellState> {
   // the result. The onRun callback is called if provided.
   async run() {
     this.clearOutput();
-    const classList = (this.input.parentNode as HTMLElement).classList;
+    const classList = this.parentDiv.classList;
     classList.add("notebook-cell-running");
 
     await sandbox().call("runCell", this.code, this.id);
 
     classList.add("notebook-cell-updating");
-    await delay(100);
-    classList.remove("notebook-cell-updating");
-    classList.remove("notebook-cell-running");
+    // Use setTimeout instead of delay here to not block
+    // onRun and drainExecuteQueue.
+    setTimeout(() => {
+      classList.remove("notebook-cell-updating");
+      classList.remove("notebook-cell-running");
+    }, 100);
 
-    if (this.props.onRun) this.props.onRun(this.code);
+    const cellDoc = Object.assign(this.props.doc, {
+      outputHTML: this.state.outputHTML
+    });
+    if (this.props.onRun) this.props.onRun(cellDoc);
   }
 
   clickedDelete() {
-    console.log("Delete was clicked.");
     if (this.props.onDelete) this.props.onDelete();
   }
 
   clickedInsertCell() {
-    console.log("NewCell was clicked.");
     if (this.props.onInsertCell) this.props.onInsertCell();
   }
 
@@ -348,31 +304,41 @@ export class Cell extends Component<CellProps, CellState> {
     }
 
     // If supplied outputHTML, use that in the output div.
-    const outputDivAttr = {
+    const outputDiv = h("div", {
       "class": "output",
+      "dangerouslySetInnerHTML": {
+        __html: this.state.outputHTML,
+      },
       "id": "output" + this.id,
-      "ref": (ref => { this.output = ref; }),
-    };
-    if (this.outputHTML) {
-      outputDivAttr["dangerouslySetInnerHTML"] = {
-        __html: this.outputHTML,
-      };
+      "ref": ref => { this.output = ref; },
+    });
+
+    let className = "notebook-cell";
+    if (this.state.focused) {
+      className += " notebook-cell-focus";
     }
-    const outputDiv = h("div", outputDivAttr);
 
     return h("div", {
-        "class": "notebook-cell",
-        "id": `cell${this.id}`,
-        "ref": (ref => { this.parentDiv = ref; }),
+        "class": className,
+        "id": this.id,
+        "ref": (ref => { this.parentDiv = ref as HTMLElement; }),
       },
       h("div", {
         "class": "input",
-        "ref": (ref => { this.input = ref; }),
       },
-        // This pre is replaced by CodeMirror if users have JavaScript enabled.
-        h("pre", { }, this.code),
         deleteButton,
         runButton,
+        h(CMComponent, {
+          code: this.code,
+          onCtrlEnter: () => this.run(),
+          onFocusChange: (focused) => this.setState({ focused }),
+          onShiftEnter: async() => {
+            this.cm.blur();
+            await this.run();
+            this.focusNext();
+          },
+          ref: (ref => { this.cm = ref as CMComponent; }),
+        }),
       ),
       h("div", { "class": "output-container" },
         outputDiv,
@@ -469,7 +435,6 @@ export class MostRecent extends Component<any, MostRecentState> {
   }
 
   async onCreate() {
-    console.log("Click new");
     const nbId = await db.active.create();
     // Redirect to new notebook.
     window.location.href = nbUrl(nbId);
@@ -479,16 +444,20 @@ export class MostRecent extends Component<any, MostRecentState> {
     if (!this.state.latest) {
       return h(Loading, null);
     }
-    const notebookList = this.state.latest.map(info => {
-      const snippit = info.doc.cells.map(normalizeCode)
-        .join("\n")
-        .slice(0, 100);
+    const notebookList = this.state.latest.map((info) => {
+      let snippit = "";
+      if (info.doc.cellDocs != null) {
+        snippit = info.doc.cellDocs
+          .map(({input}) => normalizeCode(input))
+          .join("\n")
+          .slice(0, 100);
+      }
       const href = nbUrl(info.nbId);
       return h("a", { href },
         h("li", null,
           h("div", { "class": "code-snippit" }, snippit),
           notebookBlurb(info.doc, false),
-        ),
+        )
       );
     });
     return h("div", { "class": "most-recent" },
@@ -518,11 +487,12 @@ export interface NotebookState {
   errorMsg?: string;
   isCloningInProgress: boolean;
   editingTitle: boolean;
-  typedTitle: string;
 }
 
 // This defines the Notebook cells component.
 export class Notebook extends Component<NotebookProps, NotebookState> {
+  private titleInput: HTMLInputElement;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -530,22 +500,28 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       errorMsg: null,
       isCloningInProgress: false,
       editingTitle: false,
-      typedTitle: ""
     };
   }
 
   async componentWillMount() {
     try {
-      const doc = this.props.nbId === "anonymous"
-        ? anonDoc
-        : await db.active.getDoc(this.props.nbId);
-      this.setState({ doc });
+      if (this.props.nbId === "anonymous") {
+        this.setState({ doc: anonDoc });
+      } else {
+        const doc = await db.active.getDoc(this.props.nbId);
+        if (doc.cellDocs == null) {
+          doc.cellDocs = db.blankCells(doc.cells);
+          delete doc.cells;
+        }
+        this.setState({ doc });
+      }
     } catch (e) {
       this.setState({ errorMsg: e.message });
     }
   }
 
-  private async update(doc): Promise<void> {
+  // TODO Rename to Save to database.
+  private async update(doc: db.NotebookDoc): Promise<void> {
     this.setState({ doc });
     if (doc.anonymous) return; // don't persist anonymous notebooks
     try {
@@ -555,43 +531,42 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     }
   }
 
-  async onRun(updatedCode: string, i: number) {
-    const doc = this.state.doc;
-    updatedCode = normalizeCode(updatedCode);
-    // Save updated code in database if different.
-    if (normalizeCode(doc.cells[i]) !== updatedCode) {
-      doc.cells[i] = updatedCode;
-      this.update(doc);
-    }
+  async onSave(updatedCode: string, i: number) {
+    this.update(this.state.doc);
   }
 
-  async onSaveTitle(doc) {
-    doc.title = this.state.typedTitle;
-    this.setState({ ...doc, editingTitle: false });
-    this.update(doc);
-   }
+  async onRun(cellDoc: db.CellDoc, i: number) {
+    const doc = this.state.doc;
+    doc.cellDocs[i] = cellDoc;
+    this.setState({ doc });
+  }
 
-  async onTypedTitle(event) {
-     this.setState({ typedTitle: event.target.value });
-   }
+  async onSaveTitle() {
+    this.setState({ editingTitle: false });
+    this.state.doc.title = this.titleInput.value;
+    this.update(this.state.doc);
+  }
 
   async onDelete(i) {
     const doc = this.state.doc;
-    doc.cells.splice(i, 1);
-    this.update(doc);
+    doc.cellDocs.splice(i, 1);
+    this.update(this.state.doc);
   }
 
   async onInsertCell(i) {
     const doc = this.state.doc;
-    doc.cells.splice(i + 1, 0, "");
-    this.update(doc);
+    doc.cellDocs.splice(i + 1, 0, {
+      id: "ViaInsert" + Math.random().toFixed(5).slice(2),
+      input: "",
+      outputHTML: "",
+    });
+    this.update(this.state.doc);
   }
 
   async onClone() {
     if (this.state.isCloningInProgress) {
       return;
     }
-    console.log("Click clone");
     this.setState({ isCloningInProgress: true });
     const clonedId = await db.active.clone(this.state.doc);
     this.setState({ isCloningInProgress: false });
@@ -604,11 +579,17 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   renderCells(doc): JSX.Element {
-    return h("div", { "class": "cells" }, doc.cells.map((code, i) => {
-      return cell(code, {
-        onRun: (updatedCode) => { this.onRun(updatedCode, i); },
-        onDelete: () => { this.onDelete(i); },
-        onInsertCell: () => { this.onInsertCell(i); },
+    assert(doc.cellDocs.length > 0);
+    return h("div", { "class": "cells" }, doc.cellDocs.map((cellDoc, i) => {
+      // Only display the delete button if there is more than one
+      // cell.
+      const onDelete = doc.cellDocs.length > 1 ? () => this.onDelete(i)
+                                                : null;
+      return h(Cell, {
+        doc: cellDoc,
+        onDelete,
+        onInsertCell: () => this.onInsertCell(i),
+        onRun: () => this.onRun(cellDoc, i),
       });
     }));
   }
@@ -632,17 +613,17 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
       const titleEdit = h("div", { class: "title" },
         h("input", {
-          class: "title-input",
-          onChange: event => this.onTypedTitle(event),
-          value: doc.title
+          "class": "title-input",
+          "ref": ref => { this.titleInput = ref as HTMLInputElement; },
+          "value": doc.title,
         }),
         h("button", {
-          class: "edit-title green-button",
-          onClick: () => this.onSaveTitle(doc)
+          "class": "save-title green-button",
+          "onClick": () => this.onSaveTitle()
         }, "Save"),
         h("button", {
-          class: "edit-title",
-          onClick: () => this.setState({ editingTitle: false })
+          "class": "cancel-edit-title",
+          "onClick": () => this.setState({ editingTitle: false })
         }, "Cancel")
       );
 
@@ -661,15 +642,22 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
       const title = this.state.editingTitle ? titleEdit : titleDisplay;
 
-      const cloneButton = this.props.userInfo == null ? ""
-        : h("button", {
-            "class": "green-button",
-            "onClick": () => this.onClone(),
-          }, "Clone");
+      let cloneButton, saveButton;
+      if (db.ownsDoc(this.props.userInfo, doc)) {
+        saveButton = h("button", {
+          "class": "save-notebook",
+          "onClick": () => this.onSave(),
+        }, "Save");
+      } else {
+        cloneButton = h("button", {
+          "class": "green-button",
+          "onClick": () => this.onClone(),
+        }, "Clone");
+      }
 
       body = [
         h("div", { "class": "notebook-container" },
-          h("header", null, notebookBlurb(doc), title, cloneButton),
+          h("header", null, notebookBlurb(doc), title, cloneButton, saveButton),
           this.renderCells(doc),
         ),
       ];
@@ -712,7 +700,15 @@ function fmtDate(d: Date): string {
   return d.toISOString();
 }
 
-// Trims whitespace.
-function normalizeCode(code: string): string {
-  return code.trim();
+function hash(s: string): number {
+    let hash = 0;
+    if (s.length === 0) {
+        return hash;
+    }
+    for (let i = 0; i < s.length; i++) {
+        const char = s.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
 }

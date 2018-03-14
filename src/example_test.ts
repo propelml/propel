@@ -12,9 +12,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-import { train } from "../example";
 import { test } from "../tools/tester";
+import { train } from "./example";
 
-test(async function testNewExample() {
+test(async function example_train2() {
   train(2);
 });

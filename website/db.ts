@@ -16,6 +16,7 @@
 // This file contains routines for accessing the firebase database (firestore).
 // This is used to save and restore notebooks.
 // These routines are run only on the browser.
+import { assert } from "../src/util";
 
 // tslint:disable:no-reference
 /// <reference path="firebase.d.ts" />
@@ -28,7 +29,6 @@ export interface Database {
   queryLatest(): Promise<NbInfo[]>;
   signIn(): void;
   signOut(): void;
-  ownsDoc(doc: NotebookDoc): boolean;
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb;
 }
 
@@ -38,10 +38,17 @@ export interface UserInfo {
   uid: string;
 }
 
+export interface CellDoc {
+  id: string;
+  input: string;
+  outputHTML: null | string;
+}
+
 // Defines the scheme of the notebooks collection.
 export interface NotebookDoc {
   anonymous?: boolean;
-  cells: string[];
+  cells?: string[];  // Deprecated in favor of cellDocs.
+  cellDocs: CellDoc[];
   owner: UserInfo;
   title: string;
   updated: Date;
@@ -75,7 +82,7 @@ class DatabaseFB implements Database {
     // We have one special doc that is loaded from memory, used for testing and
     // debugging.
     if (nbId === "default") {
-      return defaultDoc;
+      return defaultDoc();
     }
     const docRef = nbCollection.doc(nbId);
     const snap = await docRef.get();
@@ -89,10 +96,12 @@ class DatabaseFB implements Database {
   // Caller must catch errors.
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
     if (nbId === "default") return; // Don't save the default doc.
-    if (!this.ownsDoc(doc)) return;
+    if (!ownsDoc(auth.currentUser, doc)) return;
     const docRef = nbCollection.doc(nbId);
+    console.log("update doc", doc);
+    console.trace();
     await docRef.update({
-      cells: doc.cells,
+      cellDocs: doc.cellDocs,
       title: doc.title || "",
       updated: firebase.firestore.FieldValue.serverTimestamp(),
     });
@@ -106,12 +115,13 @@ class DatabaseFB implements Database {
     const u = auth.currentUser;
     if (!u) throw Error("Cannot clone. User must be logged in.");
 
-    if (existingDoc.cells.length === 0) {
+    if (existingDoc.cellDocs.length === 0) {
       throw Error("Cannot clone empty notebook.");
     }
-
+    // cells is deprecated in favor of cellDocs.
+    assert(existingDoc.cells == null);
     const newDoc = {
-      cells: existingDoc.cells,
+      cellDocs: existingDoc.cellDocs,
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,
@@ -132,7 +142,7 @@ class DatabaseFB implements Database {
     if (!u) return "anonymous";
 
     const newDoc = {
-      cells: [ "// New Notebook. Insert code here." ],
+      cellDocss: blankCells([ "// New Notebook. Insert code here." ]),
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,
@@ -171,11 +181,6 @@ class DatabaseFB implements Database {
     auth.signOut();
   }
 
-  ownsDoc(d: NotebookDoc): boolean {
-    const u = auth.currentUser;
-    return u && d && u.uid === d.owner.uid;
-  }
-
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
     lazyInit();
     return auth.onAuthStateChanged(cb);
@@ -183,6 +188,8 @@ class DatabaseFB implements Database {
 }
 
 export class DatabaseMock implements Database {
+  private currentUser: UserInfo = null;
+  private docs: { [key: string]: NotebookDoc };
   counts = {};
   inc(method) {
     if (method in this.counts) {
@@ -192,13 +199,21 @@ export class DatabaseMock implements Database {
     }
   }
 
+  constructor() {
+    this.docs = { "default": defaultDoc() };
+  }
+
   async getDoc(nbId: string): Promise<NotebookDoc> {
     this.inc("getDoc");
-    return defaultDoc;
+    if (this.docs[nbId] === null) {
+      throw Error("getDoc called with bad nbId " + nbId);
+    }
+    return this.docs[nbId];
   }
 
   async updateDoc(nbId: string, doc: NotebookDoc): Promise<void> {
     this.inc("updateDoc");
+    this.docs[nbId] = Object.assign(this.docs[nbId], doc);
   }
 
   async clone(existingDoc: NotebookDoc): Promise<string> {
@@ -218,30 +233,33 @@ export class DatabaseMock implements Database {
 
   signIn(): void {
     this.inc("signIn");
+    this.currentUser = defaultOwner;
+    this.makeAuthChangeCallbacks();
   }
 
   signOut(): void {
     this.inc("signOut");
+    this.currentUser = null;
+    this.makeAuthChangeCallbacks();
   }
 
-  ownsDoc(doc: NotebookDoc): boolean {
-    this.inc("ownsDoc");
-    return false;
+  private authChangeCallbacks = [];
+  private makeAuthChangeCallbacks() {
+    for (const cb of this.authChangeCallbacks) {
+      cb(this.currentUser);
+    }
   }
 
   subscribeAuthChange(cb: (user: UserInfo) => void): UnsubscribeCb {
     this.inc("subscribeAuthChange");
-    return null;
+    this.authChangeCallbacks.push(cb);
+    return () => {
+      this.authChangeCallbacks = [];
+    };
   }
 }
 
-// Default to a mock, so none of the functions errors out during operation in
-// Node. Firebase cannot be loaded in Node.
-// We cannot load Firebase in Node because grpc has an unreasonable
-// amount of dependencies, included a whole copy of OpenSSL.
-// The firebase web client is very difficult to get working in Node
-// even when trying to use the grpc-web-client library.
-export let active: Database = new DatabaseMock();
+export let active: Database = null;
 
 export function enableFirebase() {
   active = new DatabaseFB();
@@ -268,13 +286,13 @@ function lazyInit() {
   return true;
 }
 
-const defaultOwner: UserInfo = {
+export const defaultOwner: UserInfo = Object.freeze({
   displayName: "default owner",
   photoURL: "https://avatars1.githubusercontent.com/u/80?v=4",
   uid: "abc",
-};
+});
 
-const defaultDocCells: string[] = [
+const defaultDocCells: ReadonlyArray<CellDoc> = Object.freeze(blankCells([
 `
 import { tensor } from "propel";
 t = tensor([[2, 3], [30, 20]])
@@ -304,12 +322,25 @@ plot(x, f(x))
 plot(x, grad(f)(x))
 grad(f)([-3, -0.5, 0.5, 3])
 `
-];
+]));
 
-const defaultDoc: NotebookDoc = {
-  cells: defaultDocCells,
-  owner: defaultOwner,
-  title: "Sample Notebook",
-  updated: new Date(),
-  created: new Date(),
-};
+export function defaultDoc(): NotebookDoc {
+  return {
+    anonymous: false,
+    cellDocs: defaultDocCells.slice(0),
+    owner: Object.assign({}, defaultOwner),
+    title: "Sample Notebook",
+    updated: new Date(),
+    created: new Date(),
+  };
+}
+
+export function blankCells(inputs: string[]): CellDoc[] {
+  return inputs.map(input => {
+    return {
+      id: "BlankCell" + Math.random().toFixed(5).slice(2),
+      input,
+      outputHTML: null,
+    };
+  });
+}

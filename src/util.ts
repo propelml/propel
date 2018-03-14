@@ -52,6 +52,8 @@ export function log(...args: any[]) {
 
 export function assert(expr: boolean, msg = "") {
   if (!expr) {
+    // tslint:disable-next-line:no-debugger
+    debugger;
     throw new Error(msg);
   }
 }
@@ -118,7 +120,7 @@ export function createResolvable<T>(): Resolvable<T> {
   return Object.assign(promise, methods) as Resolvable<T>;
 }
 
-export function objectsEqual(a, b) {
+export function objectsEqual(a: any, b: any): boolean {
   const aProps = Object.getOwnPropertyNames(a);
   const bProps = Object.getOwnPropertyNames(b);
   if (aProps.length !== bProps.length) return false;

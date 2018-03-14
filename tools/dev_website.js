@@ -46,11 +46,11 @@ async function bundler(build) {
     watch: !build
   };
 
-  let b = new Bundler("website/sandbox.ts", opts);
-  await b.bundle();
+  //let b = new Bundler("website/sandbox.ts", opts);
+  //await b.bundle();
 
-  b = new Bundler("tools/test_dl.ts", opts);
-  await b.bundle();
+  //b = new Bundler("tools/test_dl.ts", opts);
+  //await b.bundle();
 
   b = new Bundler("tools/test_website.ts", opts);
   await b.bundle();
