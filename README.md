@@ -22,12 +22,7 @@ http://propelml.org/docs
 ## How to run TF examples
 
     ./tools/build.js
-    ts-node ./example.ts
-
-(Our example program is in TypeScript because it is used in our
-tests, however the example can be easily modified to work with normal
-JavaScript. `ts-node` is a simple wrapper around `node` for executing
-TypeScript files, it can be installed with `npm install -g ts-node`)
+    node example.js
 
 If you're on Linux and would like to build a CUDA version of
 Propel set the environmental variable `PROPEL_BUILD_GPU=1`.
