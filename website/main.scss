@@ -417,17 +417,12 @@ header {
   text-align: center;
   border-top: 1px solid $borderColor;
 
-  a {
+  * {
     font-size: 1.4rem;
     line-height: 2.4rem;
     font-weight: 400;
     text-transform: uppercase;
     margin: auto 8px;
-    text-decoration: none;
-
-    &:hover {
-      color: $base0Dark;
-    }
   }
 }
 
