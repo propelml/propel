@@ -310,9 +310,13 @@ export class Cell extends Component<CellProps, CellState> {
     await sandbox().call("runCell", this.code, this.id);
 
     classList.add("notebook-cell-updating");
-    await delay(100);
-    classList.remove("notebook-cell-updating");
-    classList.remove("notebook-cell-running");
+
+    // Use setTimeout instead of delay here to not block
+    // onRun and drainExecuteQueue.
+    setTimeout(() => {
+      classList.remove("notebook-cell-updating");
+      classList.remove("notebook-cell-running");
+    }, 100);
 
     if (this.props.onRun) this.props.onRun(this.code);
   }
