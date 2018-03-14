@@ -239,7 +239,7 @@ export class Cell extends Component<CellProps, CellState> {
     // CodeMirror as its not clear if it can re-initialize its state after
     // being serialized.
     if (IS_WEB) {
-      // tslint:disable:variable-name
+      // tslint:disable-next-line:variable-name
       const CodeMirror = require("codemirror");
       require("codemirror/mode/javascript/javascript.js");
 

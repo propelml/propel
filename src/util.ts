@@ -52,6 +52,8 @@ export function log(...args: any[]) {
 
 export function assert(expr: boolean, msg = "") {
   if (!expr) {
+    // tslint:disable-next-line:no-debugger
+    debugger;
     throw new Error(msg);
   }
 }
