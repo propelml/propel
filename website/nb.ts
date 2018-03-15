@@ -130,7 +130,7 @@ function sandbox(): SandboxRPC {
 
 // Convenience function to create Notebook JSX element.
 export function cell(code: string, props: CellProps = {}): JSX.Element {
-  props.code = code;
+  props.code = code.trim();
   return h(Cell, props);
 }
 
@@ -715,5 +715,5 @@ function fmtDate(d: Date): string {
 
 // Trims whitespace.
 function normalizeCode(code: string): string {
-  return code.trim();
+  return code.trimRight();
 }
