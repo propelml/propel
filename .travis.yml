@@ -8,7 +8,7 @@ branches:
 language: node_js
 os:
 - linux
-- osx
+# - osx -- disabled because of Travis CI downtime/backlog
 git:
   submodules_depth: 1
 node_js:
