@@ -772,9 +772,7 @@ img.avatar {
   top: 64px;
   bottom: 0;
   left: 0;
-  height: calc(100vh - 64px);
-  position: fixed;
-  overflow-y: scroll;
+  position: absolute;
 }
 
 .panel {
@@ -854,6 +852,11 @@ img.avatar {
     width: $desktopPanelSize;
     background-color: $bodyBackground;
     height: inherit;
+  }
+
+  .doc-wrapper {
+    position: fixed;
+    height: calc(100vh - 64px);
   }
 
   .doc-entries {
