@@ -314,7 +314,7 @@ grad(f)([-3, -0.5, 0.5, 3])
 ];
 
 const defaultDoc: NotebookDoc = {
-  cells: defaultDocCells,
+  cells: defaultDocCells.map(code => code.trim()),
   owner: defaultOwner,
   title: "Sample Notebook",
   updated: new Date(),
