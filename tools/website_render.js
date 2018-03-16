@@ -5,7 +5,7 @@
 // Use ./tools/dev_website.js for fast incremental builds.
 let ncp = require("ncp");
 let run = require("./run");
-const { pages } = require("../website/website");
+const { pages } = require("../website/pages");
 let fs = require("fs");
 let path = require("path");
 let { format } = require("util");
