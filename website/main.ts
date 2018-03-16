@@ -2,7 +2,7 @@ import { h, render, rerender } from "preact";
 import { assert, IS_WEB } from "../src/util";
 import { enableFirebase } from "./db";
 import { drainExecuteQueue, registerPrerenderedOutput } from "./nb";
-import { Router } from "./website";
+import { Router } from "./pages";
 
 assert(IS_WEB);
 
