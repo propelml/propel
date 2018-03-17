@@ -19,7 +19,7 @@ import * as mnist from "../src/mnist";
 
 import { global, globalEval } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
-import { SandboxRPC } from "./sandbox_rpc";
+import { SandboxRPC, WindowRPC } from "./sandbox_rpc";
 
 async function importModule(target) {
   const m = {
@@ -37,28 +37,31 @@ let lastExecutedCellId: number = null;
 
 const transpiler = new Transpiler();
 
-const rpc = new SandboxRPC(window.parent, {
-  async runCell(source: string, cellId: number): Promise<void> {
-    lastExecutedCellId = cellId;
-    try {
-      const console = new Console(rpc, cellId);
-      const transpiledSource = transpiler.transpile(source, `cell${cellId}`);
-      const fn = globalEval(transpiledSource);
-      const result = await fn(global, importModule, console);
-      if (result !== undefined) {
-        console.log(result);
-      }
-    } catch (e) {
-      const message = transpiler.formatException(e);
-      rpc.call("console", cellId, message);
-      // When running tests, rethrow any errors. This ensures that errors
-      // occurring during notebook cell evaluation result in test failure.
-      if (window.navigator.webdriver) {
-        throw e;
-      }
+const channelId =
+    document.querySelector("meta[name=rpc-channel-id").getAttribute("content");
+const rpc: SandboxRPC = new WindowRPC(window.parent, channelId);
+rpc.start({ runCell });
+
+async function runCell(source: string, cellId: number): Promise<void> {
+  lastExecutedCellId = cellId;
+  try {
+    const console = new Console(rpc, cellId);
+    const transpiledSource = transpiler.transpile(source, `cell${cellId}`);
+    const fn = globalEval(transpiledSource);
+    const result = await fn(global, importModule, console);
+    if (result !== undefined) {
+      console.log(result);
+    }
+  } catch (e) {
+    const message = transpiler.formatException(e);
+    rpc.call("console", cellId, message);
+    // When running tests, rethrow any errors. This ensures that errors
+    // occurring during notebook cell evaluation result in test failure.
+    if (window.navigator.webdriver) {
+      throw e;
     }
   }
-});
+}
 
 function guessCellId(error?: Error): number {
   const name = transpiler.getEntryPoint(error);

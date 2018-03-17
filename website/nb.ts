@@ -27,7 +27,7 @@ import { OutputHandlerDOM } from "../src/output_handler";
 import { assert, delay, IS_WEB, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
-import { SandboxRPC } from "./sandbox_rpc";
+import { SandboxRPC, WindowRPC } from "./sandbox_rpc";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -66,13 +66,31 @@ export function lookupCell(id: string | number) {
   return cellTable.get(numId);
 }
 
-function createIframe(): Window {
+const rpcHandlers = {
+  console(cellId: number, ...args: string[]): void {
+    const cell = lookupCell(cellId);
+    cell.console(...args);
+  },
+
+  plot(cellId: number, data: any): void {
+    const cell = lookupCell(cellId);
+    cell.plot(data);
+  },
+
+  imshow(cellId: number, data: any): void {
+    const cell = lookupCell(cellId);
+    cell.imshow(data);
+  }
+};
+
+function createIframe(rpcChannelId): HTMLIFrameElement {
   const base = new URL("/sandbox", window.document.baseURI).href;
   const html = `<!DOCTYPE html>
     <html lang="en">
       <head>
-        <meta charset="utf-8">
-        <base href="${escape(base, { isAttributeValue: true })}">
+        <meta charset="utf-8"/>
+        <meta name="rpc-channel-id" content="${escape(rpcChannelId)}"/>
+        <base href="${escape(base)}">
         <script async type="text/javascript" src="/sandbox.js">
         </script>
       </head>
@@ -88,44 +106,35 @@ function createIframe(): Window {
   iframe.style.display = "none";
   document.body.appendChild(iframe);
 
-  return iframe.contentWindow;
+  return iframe;
 }
 
-function createSandbox(context: Window): SandboxRPC {
-  const sandbox = new SandboxRPC(context, {
-    console(cellId: number, ...args: string[]): void {
-      const cell = lookupCell(cellId);
-      cell.console(...args);
-    },
+let sandboxIframe: HTMLIFrameElement = null;
+let sandboxRpc: SandboxRPC = null;
 
-    plot(cellId: number, data: any): void {
-      const cell = lookupCell(cellId);
-      cell.plot(data);
-    },
-
-    imshow(cellId: number, data: any): void {
-      const cell = lookupCell(cellId);
-      cell.imshow(data);
-    }
-  });
-
-  return sandbox;
+function createSandbox(): void {
+  const rpcChannelId = (Math.random() + 1).toString(36).slice(2);
+  sandboxIframe = createIframe(rpcChannelId);
+  sandboxRpc = new WindowRPC(sandboxIframe.contentWindow, rpcChannelId);
+  sandboxRpc.start(rpcHandlers);
 }
 
-let sandbox_: SandboxRPC = null;
+export function destroySandbox(): void {
+  if (!sandboxRpc) return;
 
-export function initSandbox(context?: Window): void {
-  if (context == null) {
-    context = createIframe();
+  sandboxRpc.stop();
+  if (sandboxIframe.parentNode) {
+    sandboxIframe.parentNode.removeChild(sandboxIframe);
   }
-  sandbox_ = createSandbox(context);
+  sandboxRpc = null;
+  sandboxIframe = null;
 }
 
 function sandbox(): SandboxRPC {
-  if (sandbox_ === null) {
-    initSandbox();
+  if (sandboxRpc === null) {
+    createSandbox();
   }
-  return sandbox_;
+  return sandboxRpc;
 }
 
 // Convenience function to create Notebook JSX element.
