@@ -973,6 +973,12 @@ testDevices(async function api_concat(tensor, device) {
                           [[2, 2, 2], [2, 2, 2]]]);
 });
 
+testDevices(async function api_stack(tensor, device) {
+  const a = tensor([1, 2, 3]);
+  const b = tensor([4, 5, 6]);
+  assertAllEqual(a.stack(0, b), [[1, 2, 3], [4, 5, 6]]);
+});
+
 test(async function api_cast() {
   const a = tensor([255, 127, 0], {dtype: "uint8"});
   assert(a.dtype === "uint8");
