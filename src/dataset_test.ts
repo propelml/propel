@@ -144,3 +144,20 @@ test(async function dataset_iterableEndCondition() {
   console.log("count", count);
   assert(count === 12);
 });
+
+test(async function dataset_shuffleSmoke() {
+  const labels = pr.tensor([
+    [ 0, 1, 0 ],
+    [ 1, 0, 0 ],
+    [ 0, 0, 1 ],
+  ]);
+  const ds = dataset.datasetFromSlices({ labels }).shuffle(2);
+  const el0 = await ds.next();
+  assert(el0 != null);
+  const el1 = await ds.next();
+  assert(el1 != null);
+  const el2 = await ds.next();
+  assert(el2 != null);
+  const el3 = await ds.next();
+  assert(el3 == null);
+});
