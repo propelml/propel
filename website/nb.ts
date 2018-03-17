@@ -621,7 +621,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       body = [
         h("div", { "class": "notification-screen"},
           h("div", { "class": "notification-container"},
-            h("h1", null, "Error"),
+            h("p", { "class": "error-header"}, null, "Error"),
             h("p", null, this.state.errorMsg),
           ),
         ),

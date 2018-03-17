@@ -234,11 +234,20 @@ header {
   .notification-container {
     background-color: $bodyBackground;
     border: 1px solid $borderColor;
-    margin: 24px auto;
+    margin: 16px auto;
     padding: 12px 40px;
     max-width: 420px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    .error-header {
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 600;
+      color: $base6;
+    }
   }
 
   & h1 {
@@ -256,7 +265,7 @@ header {
   }
 
   & p {
-    margin-top: 16px;
+    margin: 4px auto;
   }
 }
 
