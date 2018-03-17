@@ -937,6 +937,23 @@ testDevices(async function api_slice(tensor, device) {
   // TODO figure out backwards pass.
 });
 
+testDevices(async function api_gather(tensor, device) {
+  const t = tensor([
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+  ]);
+  assertAllEqual(t.gather([2, 0]), [
+    [9, 10, 11, 12],
+    [1, 2, 3, 4],
+  ]);
+  assertAllEqual(t.gather([2, 0], 1), [
+    [ 3,  1],
+    [ 7,  5],
+    [11,  9]
+  ]);
+});
+
 testDevices(async function api_concat(tensor, device) {
   const a = tensor([[[1, 1, 1], [2, 2, 2]],
                     [[3, 3, 3], [4, 4, 4]]]);

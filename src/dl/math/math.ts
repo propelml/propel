@@ -287,6 +287,10 @@ export class NDArrayMath implements NDArrayManager {
     }
   }
 
+  gather(x: NDArray, indices: Array1D<"int32">, axis: number): NDArray {
+    return this.backend.gather(x, indices, axis);
+  }
+
   /**
    * Extracts a 1D slice from 1D array starting at coordinates `begin` and is
    * of length `size`.

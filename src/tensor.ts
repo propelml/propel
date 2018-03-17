@@ -638,6 +638,24 @@ export class Tensor implements types.Storage {
     return ops.slice(this, begin_, size_);
   }
 
+  /** Gathers the rows of at the given indicies into a new tensor.
+   * If axis is specified, columns or other axis can be gathered.
+   * Here we are gathering rows two and zero:
+   *
+   *    import { tensor } from "propel"
+   *    t = tensor([
+   *      [1, 2, 3, 4],
+   *      [5, 6, 7, 8],
+   *      [9, 10, 11, 12],
+   *    ])
+   *    t.gather([2, 0])
+   */
+  gather(indices: types.TensorLike, axis = 0): Tensor {
+    const indicesT = this.colocate(indices, "int32");
+    assert(indicesT.rank === 1, "indices must be rank1 int32");
+    return ops.gather(this, indicesT, axis);
+  }
+
   /** Concatenates tensors along the specified axis:
    *
    *    import * as pr from "propel";

@@ -21,6 +21,7 @@ import * as backprop from "./backprop";
 import { convert, Tensor } from "./tensor";
 import { assert, bcastGradientArgs, shapesEqual } from "./tensor_util";
 import * as types from "./types";
+import { Storage } from "./types";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
 // never use Tensors, only Storage objects. These forward pass functions
@@ -489,6 +490,15 @@ export let slice = defFW("slice", (x, begin, size) => {
   return bo.slice(x, begin, size);
 });
 defBW("slice", (g, sx, begin, size) => {
+  throw new Error("Not Implemented.");
+});
+
+export const gather = defFW("gather", (x: Storage, indices: Storage,
+                                       axis: number): Storage => {
+  saveForBackward(indices, axis);
+  return bo.gather(x, indices, axis);
+});
+defBW("gather", (g: Tensor, indices: number[], axis: number) => {
   throw new Error("Not Implemented.");
 });
 

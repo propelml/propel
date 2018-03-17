@@ -409,6 +409,11 @@ export class OpsDL implements types.BackendOps {
     return nd;
   }
 
+  gather(x: TensorDL, indices: TensorDL, axis: number): TensorDL {
+    ENV.setMath(x.math);
+    return x.math.gather(x, indices as Array1D<"int32">, axis);
+  }
+
   concat(axis: number, inputs: TensorDL[]): TensorDL {
     const m = inputs[0].math;
     ENV.setMath(m);
