@@ -156,11 +156,6 @@ class SliceDataset extends Dataset {
   }
 }
 
-// TODO
-function stack(tensors: Tensor[], axis = 0): Tensor {
-  throw Error("not implemented");
-}
-
 class BatchDataset extends Dataset {
   constructor(parent: Dataset, readonly batchSize: number) {
     super(parent);
@@ -187,7 +182,8 @@ class BatchDataset extends Dataset {
       const out: NamedTensors = {};
       for (const name of Object.keys(batchComponents[0])) {
         const batch = batchComponents.map(tensors => tensors[name]);
-        out[name] = stack(batch, 0);
+        const first = batch.shift();
+        out[name] = first.stack(0, ...batch);
       }
       return out;
     }

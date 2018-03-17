@@ -654,6 +654,19 @@ export class Tensor implements types.Storage {
     return ops.concat(axis, ...tensors);
   }
 
+  /** Concatenates tensors along a new axis:
+   *
+   *    import { tensor } from "propel"
+   *    a = tensor([1, 2, 3])
+   *    b = tensor([4, 5, 6])
+   *    a.stack(0, b)
+   */
+  stack(axis: number, t: types.TensorLike, ...rest: types.TensorLike[]): Tensor
+  {
+    const tensors = [t, ...rest].map(t => this.colocate(t).expandDims(axis));
+    return this.expandDims(axis).concat(axis, tensors.shift(), ...tensors);
+  }
+
   /** Reshapes the tensor without changing its data. O(1).
    *
    *    import { range } from "propel";
