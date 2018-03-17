@@ -683,6 +683,14 @@ testDevices(async function api_reshape(tensor, device) {
   ]);
 });
 
+testDevices(async function api_expandDims(tensor, device) {
+  const a = tensor([[1, 2, 3], [4, 5, 6]]);
+  assertAllEqual(a.expandDims(0), [[[1, 2, 3], [4, 5, 6]]]);
+  assertAllEqual(a.expandDims(1), [[[1, 2, 3]], [[4, 5, 6]]]);
+  assertAllEqual(a.expandDims(2), [[[1], [2], [3]], [[4], [5], [6]]]);
+  assertAllEqual(a.expandDims(-1), [[[1], [2], [3]], [[4], [5], [6]]]);
+});
+
 test(async function api_flatten() {
   const a = tensor([[1, 2], [3, 4]]);
   assertAllEqual(a.flatten(), [1, 2, 3, 4]);

@@ -667,6 +667,19 @@ export class Tensor implements types.Storage {
     return ops.reshape(this, newShape);
   }
 
+  /** Insert a new axis of dimension 1.
+   *
+   *    import { tensor } from "propel"
+   *    a = tensor([1, 2, 3])
+   *    a.expandDims(1)
+   */
+  expandDims(axis: number): Tensor {
+    const newShape = this.shape.slice();
+    axis = axis >= 0 ? axis : this.rank + axis + 1;
+    newShape.splice(axis, 0, 1);  // Insert 1.
+    return this.reshape(newShape);
+  }
+
   /** Return a copy of the tensor collapsed into one dimension.
    *
    *    import { tensor } from "propel";
