@@ -32,7 +32,12 @@ async function puppetRender(browser, url) {
 
       if (text.match(/Propel onload/)) {
         let html = await page.evaluate(
-          () => document.documentElement.innerHTML
+          () => {
+            // Remove sandbox iframes.
+            Array.from(document.getElementsByTagName("iframe"))
+                 .forEach(el => el.parentNode.removeChild(el));
+            return document.documentElement.innerHTML;
+          }
         );
         resolve(html);
       }
