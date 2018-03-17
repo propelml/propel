@@ -99,7 +99,7 @@ changes.
 To run the website tests, point your browser to
 http://localhost:8080/static/test.html#script=/test_website.js
 
-To build the production website, `./tools/render_website.js prod` must be run.
+To build the production website, `./tools/website_render.js prod` must be run.
 
 
 ### Adding An Op
@@ -118,7 +118,7 @@ ops. Here is a rough outline of how to add an op
      respectively.
 
   5. Add a test demonstrating the desired behavior in `src/api_test.ts`.
-     The tensorflow binding can be built using `./tools/build_binding.js`
+     The tensorflow binding can be built using `./tools/build_tf_binding.js`
      and the test can be run by doing `ts-node src/api_test.ts MyTest`.
      The DL test can be run by setting an environmental variable:
      `PROPEL=dl ts-node src/api_test.ts MyTest`

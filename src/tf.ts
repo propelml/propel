@@ -13,19 +13,19 @@
    limitations under the License.
  */
 // TensorFlow backend.
+import { assert, assertEqual, getDType } from "./tensor_util";
 import {
   AttrDef,
   DTypeCode,
   Handle,
-} from "./binding";
-import { assert, assertEqual, getDType } from "./tensor_util";
+} from "./tf_binding";
 import * as types from "./types";
 
 export let binding;
 export let ctx;
 
 export function loadBinding(): boolean {
-  binding = require("./load_binding");
+  binding = require("./load_tf_binding");
   if (binding) {
     ctx = new binding.Context(); // Auto create context for now.
     return true;

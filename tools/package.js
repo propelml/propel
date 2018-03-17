@@ -17,8 +17,8 @@ if (clean) {
 const v = run.version();
 console.log("version", v);
 
-// Build the binding.
-run.sh("node tools/build_binding.js");
+// Build the tensorflow binding.
+run.sh("node tools/build_tf_binding.js");
 
 function createPackageJson(src, dst, packageJson = {}) {
   let p = JSON.parse(fs.readFileSync(src, "utf8"));
@@ -90,7 +90,7 @@ async function buildAndTest() {
   });
 
   const tfPkgFn = await npmPack(config.tfPkg, async distDir => {
-    fs.copyFileSync("src/load_binding.js", distDir + "/load_binding.js");
+    fs.copyFileSync("src/load_tf_binding.js", distDir + "/load_tf_binding.js");
     // Copy over the TF binding.
     fs.copyFileSync("build/Release/tensorflow-binding.node",
                     distDir + "/tensorflow-binding.node"
@@ -106,7 +106,7 @@ async function buildAndTest() {
     }
     createPackageJson("package.json", distDir + "/package.json", {
       name: config.tfPkg,
-      main: "load_binding.js",
+      main: "load_tf_binding.js",
       dependencies: { propel: v }
     });
   });

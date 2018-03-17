@@ -2,8 +2,8 @@ import "./test_isomorphic";
 
 import "../src/disk_experiment_test";
 
-// Only on Node/TF should we run the binding_test.
+// Only on Node/TF should we run the tf_binding_test.
 import { backend } from "../src/api";
 if (backend === "tf") {
-  import("../src/binding_test");
+  import("../src/tf_binding_test");
 }
