@@ -141,7 +141,10 @@ const std::map<std::string, int> attrNameMap = {
     {"SrcT", 0},
     {"T", 0},
     {"TI", 0},
+    {"Taxis", 0},
     {"Tidx", 0},
+    {"Tindices", 0},
+    {"Tparams", 0},
     {"Tperm", 0},
     {"Tshape", 0},
     {"axis", 0},
@@ -158,6 +161,7 @@ const std::map<std::string, int> attrNameMap = {
     {"transpose_a", 0},
     {"transpose_b", 0},
     {"use_cudnn_on_gpu", 0},
+    {"validate_indices", 0},
 };
 
 const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {

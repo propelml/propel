@@ -19,10 +19,10 @@ import * as seedrandom from "seedrandom";
 
 import { ENV } from "../../environment";
 import * as util from "../../util";
+import { TypedArray } from "../../util";
 import * as broadcast_util from "../broadcast_util";
 import * as concat_util from "../concat_util";
 import { Conv2DInfo } from "../conv_util";
-// tslint:disable-next-line:max-line-length
 import { Array1D, Array2D, Array3D, Array4D, DataId, DataType, DataTypeMap,
   IntDType, NDArray, Rank, Scalar } from "../ndarray";
 import * as types from "../types";
@@ -129,6 +129,45 @@ export class MathBackendCPU implements MathBackend {
   clone<T extends NDArray>(x: T): T {
     const values = x.dataSync().slice();
     return NDArray.make(x.shape, {values}, x.dtype) as T;
+  }
+
+  // Optimized version of gather for the case where axis = 0.
+  // writes into outData.
+  private gather0(indices: Int32Array, strideSize: number, inData: TypedArray,
+                  outData: TypedArray): void {
+    const s = strideSize;
+    for (let outIndex = 0; outIndex < indices.length; ++outIndex) {
+      const inIndex = indices[outIndex];
+      const inSlice = inData.subarray(s * inIndex, s * (1 + inIndex));
+      const outSlice = outData.subarray(s * outIndex, s * (1 + outIndex));
+      outSlice.set(inSlice);
+    }
+  }
+
+  gather(x: NDArray, indices: Array1D<"int32">, axis: number): NDArray {
+    const outShape = x.shape.slice();
+    outShape[axis] = indices.shape[0];
+    const indicesA = indices.dataSync();
+    const inData = x.dataSync();
+    const result = NDArray.zeros(outShape, x.dtype);
+    const outData = result.dataSync();
+
+    const s = x.strides.length > axis ? x.strides[axis] : 1;
+    if (axis === 0) {
+      this.gather0(indicesA, s, inData, outData);
+    } else if (axis === 1) {
+      for (let i = 0; i < x.shape[0]; i++) {
+        const outSlice = outData.subarray(i * result.strides[0],
+                                          (i + 1) * result.strides[0]);
+        const inSlice = inData.subarray(i * x.strides[0],
+                                        (i + 1) * x.strides[0]);
+        this.gather0(indicesA, s, inSlice, outSlice);
+      }
+    } else {
+      throw Error("Not implemented dl/cpu/gather axis > 1");
+    }
+
+    return result;
   }
 
   slice1D(x: Array1D, begin: number, size: number): Array1D {

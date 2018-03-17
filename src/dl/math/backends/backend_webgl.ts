@@ -36,6 +36,7 @@ import { Conv2DDerBiasProgram, Conv2DDerFilterProgram, Conv2DDerInputProgram } f
 import { Conv2DProgram } from "./webgl/conv_gpu";
 import { DepthwiseConv2DProgram } from "./webgl/conv_gpu_depthwise";
 import { Copy2DProgram } from "./webgl/copy_gpu";
+import { GatherProgram } from "./webgl/gather_gpu";
 import { GPGPUContext } from "./webgl/gpgpu_context";
 import { ArrayData, GPGPUBinary, GPGPUProgram } from "./webgl/gpgpu_math";
 import * as gpgpu_math from "./webgl/gpgpu_math";
@@ -240,6 +241,11 @@ export class MathBackendWebGL implements MathBackend {
     this.copy2D(source, [0, 0], textureShape, output, [0, 0], textureShape);
     // Get back to the original logical shape.
     return output.reshape(x.shape) as T;
+  }
+
+  gather(x: NDArray, indices: Array1D<"int32">, axis: number): NDArray {
+    const program = new GatherProgram(x.shape, indices.shape[0], axis);
+    return this.compileAndRun(program, [x, indices]);
   }
 
   slice1D(x: Array1D, begin: number, size: number): Array1D {

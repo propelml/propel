@@ -456,6 +456,19 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r[0]);
   }
 
+  gather(x: TensorTF, indices: TensorTF, axis: number): TensorTF {
+    const axisT = int32Small(axis);
+    const attrs = [
+      ["Tparams", binding.ATTR_TYPE, dtypePropel2TF(x.dtype)],
+      ["Tindices", binding.ATTR_TYPE, dtypePropel2TF(indices.dtype)],
+      ["Taxis", binding.ATTR_TYPE, binding.TF_INT32],
+    ];
+    const handles = [x.handle, indices.handle, axisT.handle];
+    const r = binding.execute(ctx, "GatherV2", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
+  }
+
   concat(axis: number, inputs: TensorTF[]): TensorTF {
     const dtype = dtypePropel2TF(inputs[0].dtype);
     const handles = inputs.map(t => t.handle);

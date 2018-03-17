@@ -92,6 +92,7 @@ export interface BackendOps {
   reduceMean(x: Storage, axes: number[], keepDims: boolean): Storage;
   reduceMax(x: Storage, axes: number[], keepDims: boolean): Storage;
   slice(x: Storage, begin: number[], size: number[]): Storage;
+  gather(x: Storage, indices: Storage, axis: number): Storage;
   concat(axis: number, inputs: Storage[]): Storage;
   reshape(x: Storage, newShape: Shape): Storage;
   equal(x: Storage, y: Storage): Storage;
