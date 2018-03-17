@@ -22,7 +22,7 @@
   'targets': [
     {
       'target_name': 'tensorflow-binding',
-      'sources': [ 'src/binding.cc' ],
+      'sources': [ 'src/tf_binding.cc' ],
       'include_dirs': [
         '<(tensorflow_include_dir)',
         '<(module_root_dir)',

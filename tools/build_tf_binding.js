@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// build script for binding.cc
+// build script for tf_binding.cc
 // There are literally two compile commands to call. Just call them here.
 
 const { execSync } = require('child_process');
@@ -26,8 +26,8 @@ if (process.platform === "darwin" || process.platform === "linux") {
   // Flags for both linux and mac.
   let cflags = `
     -c
-    -o Release/binding.o 
-    ../src/binding.cc
+    -o Release/tf_binding.o
+    ../src/tf_binding.cc
     -I${nodeInclude}
     -I${run.root}
     -I${run.root}/deps/libtensorflow/include
@@ -47,7 +47,7 @@ if (process.platform === "darwin" || process.platform === "linux") {
   let ldflags = `
     -L./Release
     -o Release/tensorflow-binding.node
-    Release/binding.o
+    Release/tf_binding.o
     -ltensorflow
     -m64
   `;
