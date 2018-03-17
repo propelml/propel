@@ -62,8 +62,9 @@ async function bundler(build) {
 }
 
 const port = 8080;
-async function devWebsiteServer(build) {
+async function devWebsiteServer(build = false) {
   const b = await bundler(build);
+  if (build) await b.bundle();
   return await b.serve(port);
 }
 exports.devWebsiteServer = devWebsiteServer;
