@@ -78,7 +78,7 @@ async function writePages(browser, dir) {
 (async () => {
   let dir = "build/website_render";
   run.rmrf(dir);
-  let server = await devWebsiteServer();
+  let server = await devWebsiteServer(true);
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     headless
