@@ -18,41 +18,70 @@ import { createResolvable, Resolvable } from "../src/util";
 export type RpcHandler = (...args: any[]) => any;
 export type RpcHandlers = { [name: string]: RpcHandler };
 
-interface Message {
-  type: "syn" | "ack" | "call" | "return";
+export interface HandshakeMessage {
+  type: "syn" | "ack";
 }
 
-interface CallMessage extends Message {
+export interface CallMessage {
   type: "call";
-  id: string;
+  id: number;
   handler: string;
   args: any[];
 }
 
-interface ReturnMessage extends Message {
+export interface ReturnMessage {
   type: "return";
-  id: string;
+  id: number;
   result?: any;
   exception?: any;
 }
 
-export class SandboxRPC {
-  // TODO: better solution for filtering messages intended for other frames.
-  private unique = Math.floor(Math.random() * 1 << 30).toString(16);
-  private counter = 0;
-  private ready = createResolvable();
-  private returnHandlers = new Map<string, Resolvable<any>>();
+export type Message = HandshakeMessage | CallMessage | ReturnMessage;
 
-  constructor(private remote: Window, private handlers: RpcHandlers) {
-    // TODO: remove event listener when remote window disappears.
-    window.addEventListener("message", event => this.onMessage(event));
-    this.remote.postMessage({type: "syn"}, "*");
+export interface SandboxRPC {
+  start(handlers: RpcHandlers): void;
+  stop(): void;
+  call(handler: string, ...args: any[]): Promise<any>;
+}
+
+export abstract class SandboxRPCBase implements SandboxRPC {
+  private active = false;
+  private counter = 0;
+  private handlers: RpcHandlers;
+  private ready = createResolvable();
+  private returnHandlers = new Map<number, Resolvable<any>>();
+
+  protected abstract send(message: Message);
+
+  start(handlers: RpcHandlers): void {
+    if (this.active) {
+      throw new Error("RPC channel already active");
+    }
+    this.active = true;
+
+    this.handlers = handlers;
+    this.send({ type: "syn" });
+  }
+
+  stop(): void {
+    if (!this.active) {
+      throw new Error("RPC channel not active");
+    }
+    this.active = false;
+
+    for (const [_, res] of this.returnHandlers) {
+      res.reject(new Error("RPC channel stopped"));
+    }
   }
 
   async call(handler: string, ...args: any[]): Promise<any> {
+    if (!this.active) {
+      throw new Error("RPC channel not active");
+    }
+
     await this.ready;
 
-    const id = `${this.unique}_${this.counter++}`;
+    const id = this.counter++;
     const message: CallMessage = {
       type: "call",
       id,
@@ -64,63 +93,58 @@ export class SandboxRPC {
     this.returnHandlers.set(id, resolver);
 
     try {
-      this.remote.postMessage(message, "*");
+      this.send(message);
       return await resolver;
     } finally {
       this.returnHandlers.delete(id);
     }
   }
 
-  private onMessage(event: MessageEvent): void {
-    const { type } = event.data;
-    switch (type) {
+  protected onMessage(message: Message): void {
+    switch (message.type) {
       case "syn":
       case "ack":
-        this.onHandshake(event);
+        this.onHandshake(message as HandshakeMessage);
         break;
       case "call":
-        this.onCall(event);
+        this.onCall(message as CallMessage);
         break;
       case "return":
-        this.onReturn(event);
+        this.onReturn(message as ReturnMessage);
         break;
     }
   }
 
-  private onHandshake(event: MessageEvent) {
-    const {type} = event.data;
+  private onHandshake(message: HandshakeMessage) {
+    const { type } = message;
     if (type === "syn") {
-      this.remote.postMessage({ type: "ack" }, "*");
+      this.send({ type: "ack" });
     }
     this.ready.resolve();
   }
 
-  private async onCall(event: MessageEvent) {
-    const {id, handler, args} = event.data;
+  private async onCall(message: CallMessage) {
+    const { id, handler, args } = message;
     const ret: ReturnMessage = {
       type: "return",
       id
     };
     try {
       const result = await this.handlers[handler](...args);
-      this.remote.postMessage({ result, ...ret }, "*");
+      this.send({ result, ...ret });
     } catch (exception) {
       if (exception instanceof Error) {
         // Convert to a normal object.
         const { message, stack } = exception;
         exception = { message, stack, __error__: true };
       }
-      this.remote.postMessage({ exception, ...ret }, "*");
+      this.send({ exception, ...ret });
     }
   }
 
-  private onReturn(event: MessageEvent) {
-    const message: ReturnMessage = event.data;
-    const id = message.id;
+  private onReturn(message: ReturnMessage) {
+    const { id } = message;
     const resolver = this.returnHandlers.get(id);
-    if (resolver === undefined) {
-        return; // Not for us.
-    }
     if (message.hasOwnProperty("exception")) {
       let { exception } = message;
       if (exception.__error__) {
@@ -132,5 +156,34 @@ export class SandboxRPC {
     } else {
       resolver.resolve(message.result);
     }
+  }
+}
+
+export class WindowRPC extends SandboxRPCBase {
+  constructor(private readonly remote: Window, private readonly channelId) {
+    super();
+  }
+
+  protected send(message: Message) {
+    this.remote.postMessage(
+        { rpcChannelId: this.channelId, ...message }, "*");
+  }
+
+  // Use an arrow function to make this function have a bound `this`.
+  private receive = (ev: MessageEvent) => {
+    if (ev.data instanceof Object &&
+        ev.data.rpcChannelId === this.channelId) {
+      super.onMessage(ev.data);
+    }
+  }
+
+  start(handlers: RpcHandlers): void {
+    super.start(handlers);
+    window.addEventListener("message", this.receive);
+  }
+
+  stop(): void {
+    super.stop();
+    window.removeEventListener("message", this.receive);
   }
 }

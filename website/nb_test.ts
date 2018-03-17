@@ -5,8 +5,8 @@ import { enableMock } from "./db";
 import * as nb from "./nb";
 
 function resetPage() {
+  nb.destroySandbox();
   document.body.innerHTML = "";
-  nb.initSandbox();
 }
 
 testBrowser(function notebook_NotebookRoot() {
