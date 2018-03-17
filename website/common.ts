@@ -2,8 +2,10 @@ import { h } from "preact";
 import * as db from "./db";
 
 export function Loading(props) {
-  return h("div", { "class": "loading-screen"},
-    h("h1", null, "Loading"),
+  return h("div", { "class": "notification-screen"},
+    h("div", { "class": "notification-container"},
+      h("h1", null, "Loading"),
+    ),
   );
 }
 

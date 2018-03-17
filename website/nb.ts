@@ -619,8 +619,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     if (this.state.errorMsg) {
       body = [
-        h("h1", null, "Error"),
-        h("b", null, this.state.errorMsg),
+        h("div", { "class": "notification-screen"},
+          h("div", { "class": "notification-container"},
+            h("h1", null, "Error"),
+            h("p", null, this.state.errorMsg),
+          ),
+        ),
       ];
 
     } else if (this.state.doc == null) {
