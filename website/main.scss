@@ -222,17 +222,29 @@ header {
   }
 }
 
-.loading-screen {
+.notification-screen {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100vh;
   width: 100vw;
+  background-color: $lightGrey;
+
+  .notification-container {
+    background-color: $bodyBackground;
+    border: 1px solid $borderColor;
+    margin: 24px auto;
+    padding: 12px 40px;
+    max-width: 420px;
+    align-items: center;
+    justify-content: center;
+  }
 
   & h1 {
-    font-size: 32px;
-    line-height: 40px;
-    color: #595959;
+    font-size: 24px;
+    line-height: 32px;
+    color: $base01;
     -webkit-animation-name: loadingScreen;
     animation-name: loadingScreen;
     -webkit-animation-duration: 3s;
@@ -241,6 +253,10 @@ header {
     animation-fill-mode: both;
     -webkit-animation-iteration-count: infinite;
     animation-iteration-count: infinite;
+  }
+
+  & p {
+    margin-top: 16px;
   }
 }
 
