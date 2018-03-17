@@ -177,8 +177,15 @@ class BatchDataset extends Dataset {
       const batchComponents = [];
       for (let i = 0; i < this.batchSize; i++) {
         const tensors = await this.parent.next();
+        if (tensors === null) {
+          break;
+        }
         batchComponents.push(tensors);
       }
+      if (batchComponents.length === 0) {
+        return null;
+      }
+
       const out: NamedTensors = {};
       for (const name of Object.keys(batchComponents[0])) {
         const batch = batchComponents.map(tensors => tensors[name]);
@@ -231,18 +238,34 @@ class RepeatDataset extends Dataset {
 }
 
 class ShuffleDataset extends Dataset {
-  bufferSize: number;
+  private buffer: NamedTensors[] = [];
 
-  constructor(parent: Dataset, readonly bufSize?: number) {
+  constructor(parent: Dataset, readonly bufSize: number = 1) {
     super(parent);
   }
 
   get done(): boolean {
-    return this.parent.done;
+    return this.buffer.length === 0 && this.parent.done;
   }
 
   async next(): Promise<NamedTensors> {
-    throw Error("not implemented.");
+    // Re-populate the buffer
+    while (!this.parent.done && this.buffer.length < this.bufSize) {
+      const tensors = await this.parent.next();
+      if (tensors !== null) {
+        this.buffer.push(tensors);
+      }
+    }
+
+    // Still nothing to read
+    if (this.buffer.length === 0) {
+      return null;
+    }
+
+    const index = Math.floor(Math.random() * this.buffer.length);
+    const out = this.buffer[index];
+    this.buffer.splice(index, 1);
+    return out;
   }
 }
 
