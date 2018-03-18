@@ -1,8 +1,8 @@
 import { assert, IS_NODE, nodeRequire, objectsEqual } from "../src/util";
 import { test } from "../tools/tester";
-import { SandboxRPC, WebSocketRPC } from "./sandbox_rpc";
+import { RPC, WebSocketRPC } from "./rpc";
 
-type ChannelInfo = { rpc1: SandboxRPC; rpc2: SandboxRPC; cleanup: () => void };
+type ChannelInfo = { rpc1: RPC; rpc2: RPC; cleanup: () => void };
 let makeChannel: () => Promise<ChannelInfo>;
 
 if (IS_NODE) {
@@ -31,7 +31,7 @@ if (IS_NODE) {
     return { rpc1, rpc2, cleanup };
   };
 
-  test(async function sandbox_rpc_return() {
+  test(async function rpc_return() {
     const { rpc1, rpc2, cleanup } = await makeChannel();
     rpc1.start({
       getNumber() {
@@ -57,7 +57,7 @@ if (IS_NODE) {
     cleanup();
   });
 
-  test(async function sandbox_rpc_recursiveCalls() {
+  test(async function rpc_recursiveCalls() {
     const { rpc1, rpc2, cleanup } = await makeChannel();
     rpc1.start({
       async addOne(val: number) {
