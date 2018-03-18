@@ -191,3 +191,10 @@ export function fetch2ArgManipulation(p: string): string {
   }
   return p;
 }
+
+export function randomString(): string {
+  // 10 characters are returned:
+  //   2log(36^10)                 ~= 51.7 bits
+  //   mantisssa of IEEE754 double == 52 bits
+  return (Math.random() + 1).toString(36).padEnd(12, "0").slice(2, 12);
+}

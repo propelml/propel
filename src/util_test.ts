@@ -47,3 +47,14 @@ test(async function util_deepCloneArray() {
   assert(arr1[0][1] === arr2[0][1]);
   assert(arr1[1][1] === arr2[1][1]);
 });
+
+test(async function util_randomString() {
+  const seen = new Set<string>();
+  for (let i = 0; i < 100; i++) {
+    const s = util.randomString();
+    assert(s.length === 10, "should be 10 chars long");
+    assert(/^[a-z0-9]+$/.test(s), "should contain letters and numbers only");
+    assert(!seen.has(s), "should be unique");
+    seen.add(s);
+  }
+});
