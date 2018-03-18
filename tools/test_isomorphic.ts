@@ -10,3 +10,4 @@ import "../src/npy_test";
 import "../src/params_test";
 import "../src/tensor_util_test";
 import "../src/util_test";
+import "../website/sandbox_rpc_test";
