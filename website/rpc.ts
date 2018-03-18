@@ -38,13 +38,13 @@ export interface ReturnMessage {
 
 export type Message = HandshakeMessage | CallMessage | ReturnMessage;
 
-export interface SandboxRPC {
+export interface RPC {
   start(handlers: RpcHandlers): void;
   stop(): void;
   call(handler: string, ...args: any[]): Promise<any>;
 }
 
-export abstract class SandboxRPCBase implements SandboxRPC {
+export abstract class RPCBase implements RPC {
   private active = false;
   private counter = 0;
   private handlers: RpcHandlers;
@@ -159,7 +159,7 @@ export abstract class SandboxRPCBase implements SandboxRPC {
   }
 }
 
-export class WindowRPC extends SandboxRPCBase {
+export class WindowRPC extends RPCBase {
   constructor(private readonly remote: Window, private readonly channelId) {
     super();
   }
@@ -188,7 +188,7 @@ export class WindowRPC extends SandboxRPCBase {
   }
 }
 
-export class WebSocketRPC extends SandboxRPCBase {
+export class WebSocketRPC extends RPCBase {
   constructor(private socket: WebSocket) {
     super();
   }

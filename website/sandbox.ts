@@ -19,7 +19,7 @@ import * as mnist from "../src/mnist";
 
 import { global, globalEval } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
-import { SandboxRPC, WindowRPC } from "./sandbox_rpc";
+import { RPC, WindowRPC } from "./rpc";
 
 async function importModule(target) {
   const m = {
@@ -39,7 +39,7 @@ const transpiler = new Transpiler();
 
 const channelId =
     document.querySelector("meta[name=rpc-channel-id").getAttribute("content");
-const rpc: SandboxRPC = new WindowRPC(window.parent, channelId);
+const rpc: RPC = new WindowRPC(window.parent, channelId);
 rpc.start({ runCell });
 
 async function runCell(source: string, cellId: number): Promise<void> {
@@ -73,7 +73,7 @@ function guessCellId(error?: Error): number {
 }
 
 class Console {
-  constructor(private rpc: SandboxRPC, private cellId: number) { }
+  constructor(private rpc: RPC, private cellId: number) { }
 
   private inspect(value): string {
     if (value instanceof propel.Tensor) {

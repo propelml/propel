@@ -27,7 +27,7 @@ import { OutputHandlerDOM } from "../src/output_handler";
 import { assert, delay, IS_WEB, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
-import { SandboxRPC, WindowRPC } from "./sandbox_rpc";
+import { RPC, WindowRPC } from "./rpc";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -110,7 +110,7 @@ function createIframe(rpcChannelId): HTMLIFrameElement {
 }
 
 let sandboxIframe: HTMLIFrameElement = null;
-let sandboxRpc: SandboxRPC = null;
+let sandboxRpc: RPC = null;
 
 function createSandbox(): void {
   const rpcChannelId = (Math.random() + 1).toString(36).slice(2);
@@ -130,7 +130,7 @@ export function destroySandbox(): void {
   sandboxIframe = null;
 }
 
-function sandbox(): SandboxRPC {
+function sandbox(): RPC {
   if (sandboxRpc === null) {
     createSandbox();
   }
