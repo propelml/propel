@@ -170,6 +170,62 @@ export class MathBackendCPU implements MathBackend {
     return result;
   }
 
+  pad(x: NDArray, paddings: Array<[number, number]>,
+      padValue: number): NDArray {
+    const xData = x.dataSync();
+    const shape = x.shape.slice();
+    const off = [];
+    for (let i = 0; i < paddings.length; ++i) {
+      const before = paddings[i][0];
+      const after = paddings[i][1];
+      shape[i] += before + after;
+      off.push(before);
+    }
+
+    const size = shape.reduce((a, b) => a * b);
+    const values = new Float32Array(size);
+    values.fill(padValue);
+    const result = NDArray.make(shape, {values});
+
+    switch (x.rank) {
+      case 1: {
+        values.subarray(off[0]).set(xData);
+        break;
+      }
+      case 2: {
+        for (let i = 0; i < x.shape[0]; ++i) {
+          const xRow = xData.subarray(x.strides[0] * i, x.strides[0] * (i + 1));
+          const valuesBegin = result.strides[0] * (i + off[0]) + off[1];
+          const valuesEnd = valuesBegin + x.strides[0];
+          const valuesRow = values.subarray(valuesBegin, valuesEnd);
+          valuesRow.set(xRow);
+        }
+        break;
+      }
+      case 3: {
+        for (let i = 0; i < x.shape[0]; ++i) {
+          for (let j = 0; j < x.shape[1]; ++j) {
+            const xRow = xData.subarray(
+              x.strides[0] * i + x.strides[1] * j,
+              x.strides[0] * i + x.strides[1] * (j + 1));
+            const valuesBegin =
+              result.strides[0] * (i + off[0]) +
+              result.strides[1] * (j + off[1]) +
+              off[2];
+            const valuesEnd = valuesBegin + x.strides[1];
+            const valuesRow = values.subarray(valuesBegin, valuesEnd);
+            valuesRow.set(xRow);
+          }
+        }
+        break;
+      }
+      default: {
+        throw Error("pad for rank > 2 not yet implemented.");
+      }
+    }
+    return result;
+  }
+
   slice1D(x: Array1D, begin: number, size: number): Array1D {
     const newVals = x.dataSync().slice(begin, begin + size);
     return Array1D.new(newVals, x.dtype);

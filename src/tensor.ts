@@ -685,6 +685,22 @@ export class Tensor implements types.Storage {
     return this.expandDims(axis).concat(axis, tensors.shift(), ...tensors);
   }
 
+  /** Adds zeros (or other value) the the boundaries of a tensor.
+   * paddings should be an array of 2 element arrays, specifying the
+   * number of all zero "rows" to add before and after each axis of
+   * input tensor. An example is more illustrative:
+   *
+   *    import { tensor } from "propel"
+   *    tensor([[1, 2, 3], [4, 5, 6]]).pad([[0, 1], [2, 0]])
+   */
+  pad(paddings: Array<[number, number]>, padValue = 0): Tensor {
+    if (paddings.length !== this.rank) {
+      throw Error("paddings argument must be shape [N, 2] where N is the " +
+                  "input rank.");
+    }
+    return ops.pad(this, paddings, padValue);
+  }
+
   /** Reshapes the tensor without changing its data. O(1).
    *
    *    import { range } from "propel";

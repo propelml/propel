@@ -437,6 +437,12 @@ export class OpsDL implements types.BackendOps {
     });
   }
 
+  pad(x: TensorDL, paddings: Array<[number, number]>,
+      padValue: number): TensorDL {
+    ENV.setMath(x.math);
+    return x.math.pad(x, paddings, padValue);
+  }
+
   reshape(x: TensorDL, newShape: types.Shape): TensorDL {
     ENV.setMath(x.math);
     return x.reshape(newShape);

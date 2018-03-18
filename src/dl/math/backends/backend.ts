@@ -48,6 +48,8 @@ export interface MathBackend extends NDArrayStorage {
   clone<T extends NDArray>(ndarray: T): T;
 
   gather(x: NDArray, indices: Array1D<"int32">, axis: number): NDArray;
+  pad(x: NDArray, paddings: Array<[number, number]>,
+      padValue: number): NDArray;
 
   slice1D(x: Array1D, begin: number, size: number): Array1D;
   slice2D(x: Array2D, begin: [number, number], size: [number, number]): Array2D;

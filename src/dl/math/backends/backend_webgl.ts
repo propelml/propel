@@ -27,8 +27,8 @@ import * as types from "../types";
 import { SumTypes, SumTypesMap } from "../types";
 import { MathBackend } from "./backend";
 import { ArgMinMaxProgram } from "./webgl/argminmax_gpu";
-import { BinaryOpProgram } from "./webgl/binaryop_gpu";
 import * as binaryop_gpu from "./webgl/binaryop_gpu";
+import { BinaryOpProgram } from "./webgl/binaryop_gpu";
 import { ClipProgram } from "./webgl/clip_gpu";
 import { ConcatProgram } from "./webgl/concat_gpu";
 // tslint:disable-next-line:max-line-length
@@ -45,6 +45,7 @@ import { MaxPool2DBackpropProgram } from "./webgl/max_pool_backprop_gpu";
 import { MatMulProgram } from "./webgl/mulmat_gpu";
 import { MultinomialProgram } from "./webgl/multinomial_gpu";
 import { OneHotProgram } from "./webgl/onehot_gpu";
+import { PadProgram } from "./webgl/pad_gpu";
 import { Pool2DProgram } from "./webgl/pool_gpu";
 import { ReduceProgram } from "./webgl/reduce_gpu";
 import { ResizeBilinear3DProgram } from "./webgl/resize_bilinear_gpu";
@@ -246,6 +247,12 @@ export class MathBackendWebGL implements MathBackend {
   gather(x: NDArray, indices: Array1D<"int32">, axis: number): NDArray {
     const program = new GatherProgram(x.shape, indices.shape[0], axis);
     return this.compileAndRun(program, [x, indices]);
+  }
+
+  pad(x: NDArray, paddings: Array<[number, number]>,
+      padValue: number): NDArray {
+    const program = new PadProgram(x.shape, paddings, padValue);
+    return this.compileAndRun(program, [x]);
   }
 
   slice1D(x: Array1D, begin: number, size: number): Array1D {
