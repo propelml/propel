@@ -94,6 +94,7 @@ export interface BackendOps {
   slice(x: Storage, begin: number[], size: number[]): Storage;
   gather(x: Storage, indices: Storage, axis: number): Storage;
   concat(axis: number, inputs: Storage[]): Storage;
+  pad(x: Storage, paddings: Array<[number, number]>, padValue: number): Storage;
   reshape(x: Storage, newShape: Shape): Storage;
   equal(x: Storage, y: Storage): Storage;
   greater(x: Storage, y: Storage): Storage;

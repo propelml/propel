@@ -144,6 +144,7 @@ const std::map<std::string, int> attrNameMap = {
     {"Taxis", 0},
     {"Tidx", 0},
     {"Tindices", 0},
+    {"Tpaddings", 0},
     {"Tparams", 0},
     {"Tperm", 0},
     {"Tshape", 0},

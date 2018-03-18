@@ -291,6 +291,11 @@ export class NDArrayMath implements NDArrayManager {
     return this.backend.gather(x, indices, axis);
   }
 
+  pad(x: NDArray, paddings: Array<[number, number]>,
+      padValue: number): NDArray {
+    return this.backend.pad(x, paddings, padValue);
+  }
+
   /**
    * Extracts a 1D slice from 1D array starting at coordinates `begin` and is
    * of length `size`.

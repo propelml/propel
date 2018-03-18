@@ -482,6 +482,28 @@ export class OpsTF implements types.BackendOps {
     return new TensorTF(r[0]);
   }
 
+  pad(x: TensorTF, paddings: Array<[number, number]>,
+      padValue: number): TensorTF {
+    const dtype = dtypePropel2TF(x.dtype);
+    const cv = binding.createSmallHandle(ctx, dtype, "CPU:0", padValue);
+    const flatPad = new Int32Array(2 * paddings.length);
+    for (let i = 0; i < paddings.length; i++) {
+      flatPad[2 * i] = paddings[i][0];
+      flatPad[2 * i + 1] = paddings[i][1];
+    }
+    const p = new binding.Handle(flatPad, [paddings.length, 2],
+                                 binding.TF_INT32);
+    const handles = [x.handle, p, cv];
+    const attrs = [
+      ["T", binding.ATTR_TYPE, dtype],
+      ["Tpaddings", binding.ATTR_TYPE, binding.TF_INT32],
+    ];
+    const r = binding.execute(ctx, "PadV2", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
+
+  }
+
   reshape(x: TensorTF, newShape: types.Shape): TensorTF {
     // Reshape, like Slice, does not have an int32 GPU implementation
     // https://git.io/vNTd5
