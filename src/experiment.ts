@@ -13,7 +13,7 @@
    limitations under the License.
  */
 
-// Experiement abstracts the concept of saved parameters.
+// Experiment abstracts the concept of saved parameters.
 // The scope of this module include
 //  - saving parameters to disk
 //  - restoring parameters from disk
