@@ -24,7 +24,7 @@
 import { escape } from "he";
 import { Component, h } from "preact";
 import { OutputHandlerDOM } from "../src/output_handler";
-import { assert, delay, IS_WEB, URL } from "../src/util";
+import { assert, delay, IS_WEB, randomString, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
 import { RPC, WindowRPC } from "./rpc";
@@ -113,7 +113,7 @@ let sandboxIframe: HTMLIFrameElement = null;
 let sandboxRpc: RPC = null;
 
 function createSandbox(): void {
-  const rpcChannelId = (Math.random() + 1).toString(36).slice(2);
+  const rpcChannelId = randomString();
   sandboxIframe = createIframe(rpcChannelId);
   sandboxRpc = new WindowRPC(sandboxIframe.contentWindow, rpcChannelId);
   sandboxRpc.start(rpcHandlers);
