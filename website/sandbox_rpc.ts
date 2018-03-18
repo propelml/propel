@@ -187,3 +187,30 @@ export class WindowRPC extends SandboxRPCBase {
     window.removeEventListener("message", this.receive);
   }
 }
+
+export class WebSocketRPC extends SandboxRPCBase {
+  constructor(private socket: WebSocket) {
+    super();
+  }
+
+  protected send(message: Message): void {
+    // TODO: use a better serialization prototcol than JSON.
+    this.socket.send(JSON.stringify(message));
+  }
+
+  // Use an arrow function to make this function have a bound `this`.
+  private receive = (ev: MessageEvent): void => {
+    const message: Message = JSON.parse(ev.data);
+    super.onMessage(message);
+  }
+
+  start(handlers: RpcHandlers): void {
+    super.start(handlers);
+    this.socket.addEventListener("message", this.receive);
+  }
+
+  stop(): void {
+    super.stop();
+    this.socket.removeEventListener("message", this.receive);
+  }
+}
