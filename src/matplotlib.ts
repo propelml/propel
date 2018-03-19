@@ -26,6 +26,15 @@ export function setOutputHandler(h: OutputHandler) {
   currentOutputHandler = h;
 }
 
+export function imshow(tensor: Tensor): void {
+  if (!currentOutputHandler) {
+    console.warn("imshow: no output handler");
+    return;
+  }
+  const image = toUint8Image(tensor);
+  currentOutputHandler.imshow(image);
+}
+
 export function plot(...args) {
   if (!currentOutputHandler) {
     console.warn("plot: no output handler");
@@ -65,13 +74,4 @@ export function plot(...args) {
   }
 
   currentOutputHandler.plot(data);
-}
-
-export function imshow(tensor: Tensor): void {
-  if (!currentOutputHandler) {
-    console.warn("imshow: no output handler");
-    return;
-  }
-  const image = toUint8Image(tensor);
-  currentOutputHandler.imshow(image);
 }
