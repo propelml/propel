@@ -56,7 +56,7 @@ const anonDoc = {
 // Given a cell's id, which can either be an integer or
 // a string of the form "cell5" (where 5 is the id), look up
 // the component in the global table.
-export function lookupCell(id: string | number) {
+export function lookupCell(id: string | number): Cell {
   let numId;
   if (typeof id === "string") {
     numId = Number(id.replace("cell", ""));
@@ -66,21 +66,23 @@ export function lookupCell(id: string | number) {
   return cellTable.get(numId);
 }
 
+export function lookupOutputHandler(id: string | number) {
+  const cell = lookupCell(id);
+  return cell.getOutputHandler();
+}
+
 const rpcHandlers = {
-  console(cellId: number, ...args: string[]): void {
-    const cell = lookupCell(cellId);
-    cell.console(...args);
+  plot(cellId: number, data: any): any {
+    lookupOutputHandler(cellId).plot(data);
   },
 
-  plot(cellId: number, data: any): void {
-    const cell = lookupCell(cellId);
-    cell.plot(data);
+  print(cellId: number, data: any): any {
+    return lookupOutputHandler(cellId).print(data);
   },
 
-  imshow(cellId: number, data: any): void {
-    const cell = lookupCell(cellId);
-    cell.imshow(data);
-  }
+  imshow(cellId: number, data: any): any {
+    return lookupOutputHandler(cellId).imshow(data);
+  },
 };
 
 function createIframe(rpcChannelId): HTMLIFrameElement {
@@ -177,6 +179,7 @@ export class Cell extends Component<CellProps, CellState> {
   parentDiv: Element;
   input: Element;
   output: Element;
+  private outputHandler: OutputHandlerDOM;
   editor: CodeMirror.Editor;
   readonly id: number;
   outputHTML?: string;
@@ -201,23 +204,11 @@ export class Cell extends Component<CellProps, CellState> {
                                      : this.props.code);
   }
 
-  console(...args: string[]) {
-    const output = this.output;
-    const last = output.lastChild;
-    let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
-    s += args.join(" ") + "\n";
-    const el = document.createTextNode(s);
-    output.appendChild(el);
-  }
-
-  plot(data) {
-    const o = new OutputHandlerDOM(this.output);
-    o.plot(data);
-  }
-
-  imshow(data) {
-    const o = new OutputHandlerDOM(this.output);
-    o.imshow(data);
+  getOutputHandler() {
+    if (!this.outputHandler) {
+      this.outputHandler = new OutputHandlerDOM(this.output);
+    }
+    return this.outputHandler;
   }
 
   clearOutput() {
