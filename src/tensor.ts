@@ -141,6 +141,12 @@ export class Tensor implements types.Storage {
     return this._id;
   }
 
+  /** Returns rank of the tensor
+   *
+   *    import * as pr from "propel";
+   *    const t = pr.zeros([20]).reshape([2, 2, 5]);
+   *    t.rank
+   */
   get rank(): number {
     return this.shape.length;
   }
@@ -153,10 +159,21 @@ export class Tensor implements types.Storage {
     return this.storage.dtype;
   }
 
+  /** Returns shape of the tensor
+   *
+   *    import * as pr from "propel";
+   *    const t = pr.zeros([10]).reshape([5, 2])
+   *    t.concat(1, pr.ones([5]).reshape([5, 1])).shape
+   */
   get shape(): types.Shape {
     return this.storage.shape;
   }
 
+  /** Returns the tensor as a printable string.
+   *
+   *    import * as pr from "propel";
+   *    console.log(pr.eye(5).toString());
+   */
   toString(): string {
     return format.toString(this.shape, this.dataSync());
   }
@@ -170,6 +187,8 @@ export class Tensor implements types.Storage {
     return new Tensor(r);
   }
 
+  /** Copies the tensor to the GPU ("GPU:0")
+   */
   gpu(): Tensor {
     if (this.device === "GPU:0") return this;
     // TODO: support different GPUs.
@@ -177,6 +196,8 @@ export class Tensor implements types.Storage {
     return new Tensor(r);
   }
 
+  /** Copies the tensor to the CPU ("CPU:0")
+   */
   cpu(): Tensor {
     if (this.device === "CPU:0") return this;
     // TODO: support different CPUs? Is that even possible?
@@ -184,35 +205,81 @@ export class Tensor implements types.Storage {
     return new Tensor(r);
   }
 
+  /** Casts the tensor to a new type.
+   *
+   *    import * as pr from "propel";
+   *    const t = pr.uint8([2, 3, 4])
+   *    t.cast("int32").dtype
+   */
   cast(dtype: types.DType): Tensor {
     return ops.cast(this, dtype);
   }
 
+  /** Adds x to the tensor element-wise
+   *
+   *    import * as pr from "propel";
+   *    const x = pr.linspace(-10, 10, 100);
+   *    pr.plot(x, x,
+   *            x, x.add(x.onesLike()))
+   */
   add(x: types.TensorLike): Tensor {
     return ops.add(this, this.colocate(x));
   }
 
+  /** Element-wise substracts of x from the tensor
+   *
+   *    import * as pr from "propel";
+   *    const x = pr.linspace(-10, 10, 100);
+   *    pr.plot(x, x,
+   *            x, x.sub(x.onesLike()))
+   */
   sub(x: types.TensorLike): Tensor {
     return ops.sub(this, this.colocate(x));
   }
 
+  /** Computes element-wise multiplication of the current tensor by x
+   *
+   *    import * as pr from "propel";
+   *    const x = pr.linspace(-10, 10, 100);
+   *    pr.plot(x, x.square(),
+   *            x, x.mul(x).add(x.onesLike()));
+   */
   mul(x: types.TensorLike): Tensor {
     return ops.mul(this, this.colocate(x));
   }
 
+  /** Computes element-wise division of the current tensor by x
+   *
+   *    import * as pr from "propel";
+   *    const x = pr.linspace(-10, 10, 100);
+   *    const y = x.square();
+   *    plot(x, y.div(x));
+   */
   div(x: types.TensorLike): Tensor {
     return ops.div(this, this.colocate(x));
   }
 
+  /** Computes matrix-multiplication of x by current tensor
+   */
   matmul(x: types.TensorLike): Tensor {
     return ops.matmul(this, this.colocate(x));
   }
 
+  /** Returns a new tensor with the same shape as current tensor filled by 1.
+   *
+   *    import * as pr from "propel";
+   *    pr.randn([2, 4]).onesLike()
+   */
   onesLike(): Tensor {
     const b = bo.onesLike(this.storage);
     return new Tensor(b);
   }
 
+  /** Returns a new tensor with the same shape as current tensor filled by 0.
+   *
+   *    import * as pr from "propel";
+   *    pr.randn([2, 4]).zerosLike()
+   */
   zerosLike(): Tensor {
     const b = bo.zerosLike(this.storage);
     return new Tensor(b);
@@ -372,6 +439,9 @@ export class Tensor implements types.Storage {
     return ops.abs(this);
   }
 
+  /**
+   * Transposes the tensor. Permutes the dimensions according to perm.
+   */
   transpose(perm?: types.TensorLike): Tensor {
     if (perm === undefined) {
       perm = range(this.rank).reverse();
