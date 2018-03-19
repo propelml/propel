@@ -115,6 +115,10 @@ matplotlib.setOutputHandler({
 
   print(data: any): void {
     rpc.call("print", guessCellId(), data);
+  },
+
+  vega(data: any, config: any): void {
+    rpc.call("vega", guessCellId(), data, config);
   }
 });
 

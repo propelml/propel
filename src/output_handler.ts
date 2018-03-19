@@ -15,14 +15,18 @@
 // handler can be loaded without pulling in the entire math library.
 
 import * as d3 from "d3";
+import * as vega from "vega-lib";
 import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
+export type VegaConfig = vega.Config;
+export type VegaSpec = vega.Spec;
 
 export interface OutputHandler {
   imshow(image: Image): void;
   plot(data: PlotData): void;
   print(text: string): void;
+  vega(spec: VegaSpec, config: VegaConfig): void;
 }
 
 export class OutputHandlerDOM implements OutputHandler {
@@ -149,5 +153,15 @@ export class OutputHandlerDOM implements OutputHandler {
     s += text + "\n";
     const el = document.createTextNode(s);
     element.appendChild(el);
+  }
+
+  vega(spec: VegaSpec, config: VegaConfig = {}): void {
+    const runtime = vega.parse(spec, config);
+    const view = new vega.View(runtime, {
+      loader: vega.loader(),
+      logLevel: vega.Warn,
+      renderer: "svg"
+    }).initialize(this.element);
+    view.run();
   }
 }

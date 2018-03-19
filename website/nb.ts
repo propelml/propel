@@ -83,6 +83,10 @@ const rpcHandlers = {
   imshow(cellId: number, data: any): any {
     return lookupOutputHandler(cellId).imshow(data);
   },
+
+  vega(cellId: number, data: any, config: any): any {
+    return lookupOutputHandler(cellId).vega(data, config);
+  }
 };
 
 function createIframe(rpcChannelId): HTMLIFrameElement {
