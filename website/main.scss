@@ -445,12 +445,23 @@ header {
   text-align: center;
   border-top: 1px solid $borderColor;
 
-  * {
-    font-size: 1.4rem;
-    line-height: 2.4rem;
-    font-weight: 400;
-    text-transform: uppercase;
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: center;
+    background-color: $bodyBackground;
+    text-align: center;
+    padding: 12px;
     margin: auto 8px;
+
+    .footer-link {
+      font-size: 1.4rem;
+      line-height: 2.4rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      margin: 8px 8px;
+    }
   }
 }
 
@@ -512,22 +523,13 @@ header {
   margin-right: $size0;
   margin-left: $size0;
 
-  a,
-  a:hover,
-  a:visited,
-  a:active {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  * {
-    margin: auto 0;
-    margin-right: $size0;
-  }
-
   .logo {
     display: flex;
-    height: 64px;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    height: 48px;
+    margin: auto;
 
     svg {
       margin: auto auto;
@@ -537,26 +539,43 @@ header {
   .global-title {
     display: flex;
     flex-direction: column;
+    align-content: center;
+    justify-content: space-around;
     margin: auto 0;
 
     .global-main-title {
-      margin: auto 0;
+      color: $base1;
+      height: 28px;
+    }
 
-      h1 {
-        font-size: 2.4rem;
-        font-weight: bold;
-        letter-spacing: 0.2px;
+    .global-main-title-link {
+      font-size: 2.4rem;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+      margin-left: $size0;
+      color: inherit;
+      line-height: 3.2rem;
+
+      &:hover {
+        text-decoration: none;
       }
     }
 
     .global-sub-title {
-      margin: auto 0;
+      color: $accentColor;
+      justify-content: flex-start;
+    }
 
-      h2 {
-        color: $accentColor;
-        font-size: 1.6rem;
-        letter-spacing: 0.2px;
-        font-weight: 200;
+    .global-sub-title-link {
+      color: $accentColor;
+      font-size: 1.3rem;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin-left: $size0;
+
+      &:hover {
+        text-decoration: none;
       }
     }
   }
@@ -574,7 +593,7 @@ header {
     background: $bodyBackground;
     z-index: 1;
 
-    & a {
+    & * {
       display: block;
       white-space: nowrap;
       padding: $size0;
@@ -595,27 +614,24 @@ header {
     display: flex;
     flex-direction: row;
     margin-right: 16px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 1.4rem;
+    line-height: 2rem;
+    letter-spacing: 0.05rem;
 
     > * {
       display: block;
       margin: auto 0 auto 36px;
+
+      &:hover {
+        color: $base0Dark;
+        text-decoration: none;
+      }
     }
 
     > :first-child {
       margin-left: 0;
-    }
-
-    & a {
-      font-size: 1.6rem;
-      line-height: 2rem;
-      font-variant: all-small-caps;
-      text-decoration: none;
-      color: $accentColor;
-      white-space: nowrap;
-
-      &:hover {
-        color: $base0Dark;
-      }
     }
   }
 
@@ -699,6 +715,10 @@ header {
     margin: 0 auto;
     max-width: 960px;
 
+    .notebook-list-item {
+      text-decoration: inherit;
+    }
+
     li {
       grid-column-start: auto;
       grid-column-end: auto;
@@ -714,11 +734,13 @@ header {
       &:hover,
       &:focus,
       &:active {
-        text-decoration: none;
         background-color: $cellBackgroundFocus;
+        text-decoration: none;
       }
 
-      &:hover .displayName {
+      &:hover .display-name,
+      &:focus .display-name,
+      &:active .display-name {
         color: $linkColor;
         text-decoration: underline;
       }
@@ -857,6 +879,37 @@ img.avatar {
 }
 
 @media (min-width: 600px) {
+  .footer {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    height: 8rem;
+    margin-top: $size1;
+    background-color: $bodyBackground;
+    text-align: center;
+    border-top: 1px solid $borderColor;
+
+    .footer-links {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-content: center;
+      background-color: $bodyBackground;
+      text-align: center;
+      padding: 12px;
+      margin: auto 8px;
+
+      .footer-link {
+        font-size: 1.4rem;
+        line-height: 2.4rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        margin: 8px 8px;
+      }
+    }
+  }
+
   .most-recent,
   .notebook-container {
     padding: 0 16px;

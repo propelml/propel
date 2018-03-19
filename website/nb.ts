@@ -19,7 +19,7 @@
 // server-side so the results can be displayed even if javascript is disabled.
 
 // tslint:disable:no-reference
-/// <reference path="../node_modules/@types/codemirror/index.d.ts" />
+/// <reference path="../node_modules/@type/codemirror/index.d.ts" />
 
 import { escape } from "he";
 import { Component, h } from "preact";
@@ -484,7 +484,7 @@ export class MostRecent extends Component<any, MostRecentState> {
     const notebookList = this.state.latest.map(info => {
       const snippit = db.getInputCodes(info.doc).join("\n").slice(0, 100);
       const href = nbUrl(info.nbId);
-      return h("a", { href },
+      return h("a", { href, "class": "notebook-list-item" },
         h("li", null,
           h("div", { "class": "code-snippit" }, snippit),
           notebookBlurb(info.doc, false),
@@ -707,7 +707,7 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
       h(Avatar, { userInfo: doc.owner }),
     ),
     h("div", { "class": "blurb-name" },
-      h("p", { "class": "displayName" }, doc.owner.displayName),
+      h("p", { "class": "display-name" }, doc.owner.displayName),
     ),
     ...dates
   ]);
