@@ -968,9 +968,12 @@ testDevices(async function api_slice(tensor, device) {
   const s2 = tensor([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
   assert(s2.dtype === "int32");
   assertAllEqual(s2, [2]);
+  // Backwards pass.
   const f = (x) => tensor(x).slice([1, 0, 0], [2, 1, 3]);
-  grad(f);
-  // TODO figure out backwards pass.
+  const g = grad(f);
+  assertAllEqual(g(a), [[[0, 0, 0], [0, 0, 0]],
+                        [[1, 1, 1], [0, 0, 0]],
+                        [[1, 1, 1], [0, 0, 0]]]);
 });
 
 testDevices(async function api_gather(tensor, device) {

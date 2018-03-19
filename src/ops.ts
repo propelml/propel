@@ -485,13 +485,21 @@ defBW("select", null,
 export const sign = defFW("sign", (x) => bo.sign(x));
 defBW("sign", null); // Not differentiable.
 
-export let slice = defFW("slice", (x, begin, size) => {
-  saveForBackward(x.shape, begin, size);
-  return bo.slice(x, begin, size);
-});
-defBW("slice", (g, sx, begin, size) => {
-  throw new Error("Not Implemented.");
-});
+export let slice = defFW("slice",
+  (x: Storage, begin: number[], size: number[]) => {
+    saveForBackward(x.shape, begin, size);
+    return bo.slice(x, begin, size);
+  });
+defBW("slice",
+  (g: Tensor, sx: types.Shape, begin: number[], size: number[]) => {
+    const paddings = [];
+    for (let i = 0; i < begin.length; ++i) {
+      const before = begin[i];
+      const after = sx[i] - begin[i] - size[i];
+      paddings.push([before, after]);
+    }
+    return g.pad(paddings);
+  });
 
 export const gather = defFW("gather", (x: Storage, indices: Storage,
                                        axis: number): Storage => {
