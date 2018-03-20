@@ -54,7 +54,7 @@ async function runCell(source: string, cellId: number): Promise<void> {
     }
   } catch (e) {
     const message = transpiler.formatException(e);
-    rpc.call("console", cellId, message);
+    rpc.call("print", cellId, message);
     // When running tests, rethrow any errors. This ensures that errors
     // occurring during notebook cell evaluation result in test failure.
     if (window.navigator.webdriver) {
@@ -87,30 +87,38 @@ class Console {
     return value + ""; // Convert to string.
   }
 
-  private send(...args) {
-    return this.rpc.call("console", this.cellId, ...args.map(this.inspect));
+  private print(...args: any[]) {
+    this.rpc.call("print", this.cellId, args.map(this.inspect).join(" "));
   }
 
-  log(...args) {
-    return this.send(...args);
+  log(...args: any[]): void {
+    this.print(...args);
   }
 
-  warn(...args) {
-    return this.send(...args);
+  warn(...args: any[]): void {
+    this.print(...args);
   }
 
-  error(...args) {
-    return this.send(...args);
+  error(...args: any[]): void {
+    this.print(...args);
   }
 }
 
 matplotlib.setOutputHandler({
+  imshow(data: any): void {
+    rpc.call("imshow", guessCellId(), data);
+  },
+
   plot(data: any): void {
     rpc.call("plot", guessCellId(), data);
   },
 
-  imshow(data: any): void {
-    rpc.call("imshow", guessCellId(), data);
+  print(data: any): void {
+    rpc.call("print", guessCellId(), data);
+  },
+
+  vega(data: any, config: any): void {
+    rpc.call("vega", guessCellId(), data, config);
   }
 });
 
@@ -123,7 +131,7 @@ window.addEventListener("error", (ev: ErrorEvent) => {
     cellId = guessCellId();
     message = ev.message;
   }
-  rpc.call("console", cellId, message);
+  rpc.call("print", cellId, message);
 });
 
 // TODO: also handle unhandledrejection. This should work in theory, in Chrome

@@ -15,7 +15,8 @@
 
 import { Tensor } from "./api";
 import { toUint8Image } from "./im";
-import { OutputHandler, PlotData } from "./output_handler";
+import { OutputHandler, PlotData, VegaConfig, VegaSpec }
+  from "./output_handler";
 import { assertEqual } from "./tensor_util";
 
 let currentOutputHandler: OutputHandler = null;
@@ -24,6 +25,15 @@ export function setOutputHandler(h: OutputHandler) {
     console.warn("Warning: replacing existing OutputHandler");
   }
   currentOutputHandler = h;
+}
+
+export function imshow(tensor: Tensor): void {
+  if (!currentOutputHandler) {
+    console.warn("imshow: no output handler");
+    return;
+  }
+  const image = toUint8Image(tensor);
+  currentOutputHandler.imshow(image);
 }
 
 export function plot(...args) {
@@ -67,11 +77,10 @@ export function plot(...args) {
   currentOutputHandler.plot(data);
 }
 
-export function imshow(tensor: Tensor): void {
+export function vega(spec: VegaSpec, config?: VegaConfig): void {
   if (!currentOutputHandler) {
-    console.warn("imshow: no output handler");
+    console.warn("vega: no output handler");
     return;
   }
-  const image = toUint8Image(tensor);
-  currentOutputHandler.imshow(image);
+  currentOutputHandler.vega(spec, config);
 }

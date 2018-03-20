@@ -15,13 +15,18 @@
 // handler can be loaded without pulling in the entire math library.
 
 import * as d3 from "d3";
+import * as vega from "vega-lib";
 import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
+export type VegaConfig = vega.Config;
+export type VegaSpec = vega.Spec;
 
 export interface OutputHandler {
-  plot(data: PlotData): void;
   imshow(image: Image): void;
+  plot(data: PlotData): void;
+  print(text: string): void;
+  vega(spec: VegaSpec, config: VegaConfig): void;
 }
 
 export class OutputHandlerDOM implements OutputHandler {
@@ -83,6 +88,11 @@ export class OutputHandlerDOM implements OutputHandler {
     return [xMin, xMax, yMin, yMax];
   }
 
+  imshow(image: Image): void {
+    const canvas = createCanvas(image);
+    this.element.appendChild(canvas);
+  }
+
   plot(data: PlotData): void {
     const outputId_ = "#" + this.element.id;
 
@@ -136,8 +146,22 @@ export class OutputHandlerDOM implements OutputHandler {
       });
   }
 
-  imshow(image: Image): void {
-    const canvas = createCanvas(image);
-    this.element.appendChild(canvas);
+  print(text: string): void {
+    const element = this.element;
+    const last = element.lastChild;
+    let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
+    s += text + "\n";
+    const el = document.createTextNode(s);
+    element.appendChild(el);
+  }
+
+  vega(spec: VegaSpec, config: VegaConfig = {}): void {
+    const runtime = vega.parse(spec, config);
+    const view = new vega.View(runtime, {
+      loader: vega.loader(),
+      logLevel: vega.Warn,
+      renderer: "svg"
+    }).initialize(this.element);
+    view.run();
   }
 }
