@@ -350,7 +350,8 @@ header {
     }
 
     /* Auto-resizing cells. */
-    .CodeMirror {
+    .CodeMirror,
+    .CodeMirror-scroll {
       height: auto;
     }
   }
