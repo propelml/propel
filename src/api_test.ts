@@ -455,16 +455,16 @@ testDevices(async function api_reduceMean(tensor, device) {
     [6, 5, 4],
   ]);
   assert(a.device === device);
-  assertAllEqual(a.reduceMean([0]), [7.5, 6.5, 5.5]);
-  assertAllEqual(a.reduceMean([1]), [8, 5]);
-  assertAllEqual(a.reduceMean(), 6.5);
+  assertAllClose(a.reduceMean([0]), [7.5, 6.5, 5.5]);
+  assertAllClose(a.reduceMean([1]), [8, 5]);
+  assertAllClose(a.reduceMean(), 6.5);
 
-  assertAllEqual(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
-  assertAllEqual(a.reduceMean([1], true), [[8], [5]]);
+  assertAllClose(a.reduceMean([0], true), [[7.5, 6.5, 5.5]]);
+  assertAllClose(a.reduceMean([1], true), [[8], [5]]);
 
   const f = (x) => tensor(x).mul(2).reduceMean([0]);
   const g = grad(f);
-  assertAllEqual(g(a), [[1, 1, 1], [1, 1, 1]]);
+  assertAllClose(g(a), [[1, 1, 1], [1, 1, 1]]);
 
   const b = tensor([
     [9, 8, 7],
@@ -482,7 +482,7 @@ testDevices(async function api_reduceMean(tensor, device) {
     [t, t, t],
     [t, t, t],
   ]);
-  assertAllEqual(api.uint8([255, 255, 255]).reduceMean(), 255);
+  assertAllClose(api.uint8([255, 255, 255]).reduceMean(), 255);
 });
 
 testDevices(async function api_reduceMax(tensor, device) {
