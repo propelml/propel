@@ -38,7 +38,7 @@ let lastExecutedCellId: number = null;
 const transpiler = new Transpiler();
 
 const channelId =
-    document.querySelector("meta[name=rpc-channel-id").getAttribute("content");
+    document.querySelector("meta[name=rpc-channel-id]").getAttribute("content");
 const rpc: RPC = new WindowRPC(window.parent, channelId);
 rpc.start({ runCell });
 
