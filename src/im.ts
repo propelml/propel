@@ -19,6 +19,7 @@ import { fill, Tensor, tensor } from "./api";
 import { convert } from "./tensor";
 import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
+import { createResolvable, fetchArrayBuffer, fetchBuffer } from "./util";
 
 export interface Image {
   width: number;
@@ -75,32 +76,32 @@ export function toUint8Image(image: Tensor): Image {
   throw new Error(`Unsupported image rank.`);
 }
 
-function webImageDecoder(filename: string, mode: Mode)
+async function webImageDecoder(filename: string, mode: Mode)
     : Promise<Tensor> {
-  return new Promise((resolve) => {
-    try {
-      const img = new Image();
-      img.onload = function() {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const image: Tensor = toTensor(
-          Uint8Array.from(pixels.data),
-          canvas.height,
-          canvas.width,
-          mode
-        );
-        resolve(image);
-      };
-      img.crossOrigin = "Anonymous";
-      img.src = filename;
-    } catch (e) {
-      resolve();
-    }
-  });
+  const buffer = await fetchArrayBuffer(filename);
+  const blob = new Blob( [ buffer ], { type: "image/jpeg" } );
+  const dataURI = window.URL.createObjectURL(blob);
+
+  const img = new Image();
+  const onLoad = createResolvable();
+  img.onload = onLoad.resolve;
+  img.src = dataURI;
+  await onLoad;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const image: Tensor = toTensor(
+    Uint8Array.from(pixels.data),
+    canvas.height,
+    canvas.width,
+    mode
+  );
+  window.URL.revokeObjectURL(dataURI);
+  return image;
 }
 
 export function createCanvas(image: Image) {
@@ -118,21 +119,14 @@ const imageSignatures: Array<[number[], string]> = [
   [[0xFF, 0xD8], "image/jpeg"],
   [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], "image/png"]
 ];
-const sigMaxLength: number = Math.max(...imageSignatures.map(x => x[0].length));
 
-function readMIME(filename: string): string {
-  const fs = nodeRequire("fs");
-  // read file header
-  const header = new Buffer(sigMaxLength);
-  const fd = fs.openSync(filename, "r");
-  fs.readSync(fd, header, 0, sigMaxLength);
-  fs.closeSync(fd);
+function readMIME(data: Buffer): string {
   // find matched MIME type
   for (let i = 0; i < imageSignatures.length; ++i) {
     const [sig, type] = imageSignatures[i];
     let ret = true;
     for (let j = 0; j < sig.length; ++j) {
-      if (header[j] !== sig[j]) {
+      if (data[j] !== sig[j]) {
         ret = false;
         break;
       }
@@ -144,20 +138,14 @@ function readMIME(filename: string): string {
   return null;
 }
 
-function pngReadHandler(filename: string, mode: Mode): Promise<Tensor> {
+async function pngReadHandler(data: Buffer, mode: Mode): Promise<Tensor> {
   const PNG = nodeRequire("pngjs").PNG;
-  const fs = nodeRequire("fs");
-  return new Promise(resolve => {
-    fs.createReadStream(filename)
-      .pipe(new PNG())
-      .on("parsed", function(this: any) {
-        const data = new Uint8Array(this.data);
-        resolve(toTensor(data, this.height, this.width, mode));
-      })
-      .on("error", function() {
-        resolve();
-      });
+  const promise = createResolvable<Tensor>();
+  new PNG().parse(data).on("parsed", function(this: any) {
+    const data = new Uint8Array(this.data);
+    promise.resolve(toTensor(data, this.height, this.width, mode));
   });
+  return await promise;
 }
 
 function pngSaveHandler(filename: string, image): Promise<void> {
@@ -175,11 +163,9 @@ function pngSaveHandler(filename: string, image): Promise<void> {
   });
 }
 
-function jpegReadHandler(filename: string, mode: Mode): Tensor {
+function jpegReadHandler(data: Buffer, mode: Mode): Tensor {
   const JPEG = require("jpeg-js");
-  const fs = nodeRequire("fs");
-  const jpegData = fs.readFileSync(filename);
-  const img = JPEG.decode(jpegData, true);
+  const img = JPEG.decode(data, true);
   return toTensor(img.data, img.height, img.width, mode);
 }
 
@@ -193,12 +179,13 @@ function jpegSaveHandler(filename: string, image): void {
 
 async function nodeImageDecoder(filename: string, mode: Mode)
     : Promise<Tensor> {
-  const MIME = readMIME(filename);
+  const data = await fetchBuffer(filename);
+  const MIME = readMIME(data);
   switch (MIME){
     case "image/png":
-      return await pngReadHandler(filename, mode);
+      return await pngReadHandler(data, mode);
     case "image/jpeg":
-      return jpegReadHandler(filename, mode);
+      return jpegReadHandler(data, mode);
     default:
       throw new Error("This file is not a valid PNG/JPEG image.");
   }
