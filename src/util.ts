@@ -12,9 +12,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { OutputHandler } from "./output_handler";
 import { RegularArray } from "./types";
 
 const debug = false;
+export let attachedHandler: OutputHandler = null;
 
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
@@ -241,6 +243,14 @@ export async function fetchBuffer(path: string): Promise<Buffer> {
 
 export async function fetchStr(path: string): Promise<string> {
   return await fetch2(path, "utf8") as string;
+}
+
+export function setOutputHandler(handler: OutputHandler) {
+  attachedHandler = handler;
+}
+
+export function getOutputHandler(): OutputHandler {
+  return attachedHandler;
 }
 
 export function randomString(): string {
