@@ -91,6 +91,7 @@ export interface BackendOps {
   reduceSum(x: Storage, axes: number[], keepDims: boolean): Storage;
   reduceMean(x: Storage, axes: number[], keepDims: boolean): Storage;
   reduceMax(x: Storage, axes: number[], keepDims: boolean): Storage;
+  reduceMin(x: Storage, axes: number[], keepDims: boolean): Storage;
   slice(x: Storage, begin: number[], size: number[]): Storage;
   gather(x: Storage, indices: Storage, axis: number): Storage;
   concat(axis: number, inputs: Storage[]): Storage;
