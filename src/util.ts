@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+import { OutputHandler } from "./output_handler";
 import { RegularArray } from "./types";
 
 const debug = false;
@@ -133,6 +134,13 @@ export function objectsEqual(a, b) {
 
 const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 
+export interface FetchEncodingMap {
+  "arraybuffer": ArrayBuffer;
+  "buffer": Buffer;
+  "utf8": string;
+}
+export type FetchEncoding = keyof FetchEncodingMap;
+
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
 //
@@ -141,22 +149,44 @@ const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(p: string,
-                      encoding: "binary" | "utf8" = "binary")
-                      : Promise<string | ArrayBuffer> {
+async function fetch2<E extends FetchEncoding>(
+    p: string, encoding: E): Promise<FetchEncodingMap[E]> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
-  p = fetch2ArgManipulation(p);
   if (IS_WEB) {
-    const res = await fetch(p, { mode: "cors" });
-    if (encoding === "binary") {
-      return res.arrayBuffer();
+    const job = randomString();
+    const host = document.location.hostname;
+    if (propelHosts.has(host)) {
+      p = p.replace("deps/", "/");
+      p = p.replace(/^src\//, "/src/");
     } else {
-      return res.text();
+      p = p.replace("deps/", "http://propelml.org/");
+      p = p.replace(/^src\//, "http://propelml.org/src/");
     }
+    const req = new XMLHttpRequest();
+    const onLoad = createResolvable();
+    req.onload = onLoad.resolve;
+    req.onprogress = ev => downloadProgress(job, ev.loaded, ev.total);
+    req.open("GET", p, true);
+    req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
+    if (encoding === "utf8") {
+      req.overrideMimeType("text/plain; charset=utf-8");
+    }
+    req.send();
+    await onLoad;
+    return req.response;
   } else {
+    if (p.match(/^http(s)*:\/\//)) {
+      return fetchRemoteFile(p, encoding);
+    }
+    const path = nodeRequire("path");
     const { readFileSync } = nodeRequire("fs");
-    if (encoding === "binary") {
+    if (!path.isAbsolute(p)) {
+      p = path.join(__dirname, "..", p);
+    }
+    if (encoding === "buffer") {
+      return readFileSync(p, null);
+    } else if (encoding === "arraybuffer") {
       const b = readFileSync(p, null);
       return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
     } else {
@@ -165,31 +195,77 @@ async function fetch2(p: string,
   }
 }
 
+async function fetchRemoteFile<E extends FetchEncoding>(
+    url: string, encoding: E): Promise<FetchEncodingMap[E]> {
+  const protocol = new URL(url).protocol;
+  const http = nodeRequire(protocol === "https:" ? "https" : "http");
+  const chunks = new Array<Buffer>();
+
+  await new Promise((res, rej) => {
+    http.get(url, res => {
+      const job = randomString();
+      const total = Number(res.headers["content-length"]);
+      let loaded = 0;
+      res.on("data", (chunk) => {
+        chunks.push(chunk);
+        loaded += chunk.length;
+        downloadProgress(job, loaded, total);
+      });
+      res.on("end", res);
+      res.on("error", rej);
+    }).on("error", rej);
+  });
+
+  const buffer = Buffer.concat(chunks);
+  if (encoding === "utf8") {
+    return buffer.toString("utf8");
+  } else {
+    return buffer;
+  }
+}
+
 export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
-  return fetch2(path, "binary") as any;
+  return await fetch2(path, "arraybuffer");
+}
+
+export async function fetchBuffer(path: string): Promise<Buffer> {
+  if (IS_WEB) {
+    throw new Error("`fetchBuffer` is not implemented to work on browser.");
+  }
+  return await fetch2(path, "buffer");
 }
 
 export async function fetchStr(path: string): Promise<string> {
-  return fetch2(path, "utf8") as any;
+  return await fetch2(path, "utf8");
 }
 
-export function fetch2ArgManipulation(p: string): string {
-  if (IS_WEB) {
-    const host = document.location.host.split(":")[0];
-    if (propelHosts.has(host)) {
-      p = p.replace("deps/", "/");
-      p = p.replace(/^src\//, "/src/");
-    } else {
-      p = p.replace("deps/", "http://propelml.org/");
-      p = p.replace(/^src\//, "http://propelml.org/src/");
-    }
-  } else {
-    const path = nodeRequire("path");
-    if (!path.isAbsolute(p)) {
-      p = path.join(__dirname, "..", p);
-    }
+export let activeOutputHandler: OutputHandler | null = null;
+
+export function getOutputHandler(): OutputHandler | null {
+  return activeOutputHandler;
+}
+
+export function setOutputHandler(handler: OutputHandler): void {
+  activeOutputHandler = handler;
+}
+
+let lastProgress = 0;
+
+export function downloadProgress(job: string, loaded: number,
+                                 total: number): void {
+  if (activeOutputHandler) {
+    activeOutputHandler.downloadProgress({ job, loaded, total });
+    return;
   }
-  return p;
+
+  const now = Date.now();
+  if (now - lastProgress > 500) {
+    // TODO: when multiple downloads are active, percentages currently
+    // write over one another.
+    const p = (loaded / total * 100).toFixed(2);
+    process.stdout.write(`${p}% \r`);
+    lastProgress = now;
+  }
 }
 
 export function randomString(): string {

@@ -17,13 +17,13 @@ import { test } from "../tools/tester";
 import { imread, toUint8Image } from "./im";
 import { assertAllEqual } from "./tensor_util";
 import { assert, assertShapesEqual } from "./tensor_util";
-import { fetch2ArgManipulation, IS_NODE } from "./util";
+import { IS_NODE } from "./util";
 
 // The tests use these files:
 // fa57d083e48e999ed3f210aefd92e5f7  testdata/sample.png
-const pngPath = fetch2ArgManipulation("src/testdata/sample.png");
+const pngPath = "src/testdata/sample.png";
 // d37ff170a58223de46152ce837b8e0c4  testdata/sample.jpg
-const jpgPath = fetch2ArgManipulation("src/testdata/sample.jpg");
+const jpgPath = "src/testdata/sample.jpg";
 
 function getPixel(channels, data, x, y, rgba = false) {
   // we know sample images are 64x64

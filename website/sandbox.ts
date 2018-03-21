@@ -16,6 +16,7 @@
 import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
+import { setOutputHandler } from "../src/util";
 
 import { global, globalEval } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
@@ -104,7 +105,7 @@ class Console {
   }
 }
 
-matplotlib.setOutputHandler({
+setOutputHandler({
   imshow(data: any): void {
     rpc.call("imshow", guessCellId(), data);
   },
@@ -115,6 +116,10 @@ matplotlib.setOutputHandler({
 
   print(data: any): void {
     rpc.call("print", guessCellId(), data);
+  },
+
+  downloadProgress(data: any): void {
+    rpc.call("downloadProgress", guessCellId(), data);
   }
 });
 
