@@ -169,6 +169,15 @@ export class Tensor implements types.Storage {
     return this.storage.shape;
   }
 
+  /** Returns the total number of elements
+   *
+   *    import { range } from "propel";
+   *    range(200).reshape([100, 2]).size
+   */
+  get size(): number {
+    return this.shape.reduce((a, b) => a * b);
+  }
+
   /** Returns the tensor as a printable string.
    *
    *    import * as pr from "propel";
