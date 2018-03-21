@@ -1303,3 +1303,8 @@ test(async function api_sin_cos_tan() {
   assertAllClose(grad(cos)(v), [0, a, 0]);
   assertAllClose(grad(tan)(v), [1, 2, 1]);
 });
+
+test(async function api_size() {
+  assert(api.range(20).size === 20);
+  assert(api.range(20).reshape([4, 5]).size === 20);
+});
