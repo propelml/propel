@@ -856,7 +856,6 @@ img.avatar {
   display: none;
   border-top: 1px solid $accentColor;
   margin-top: -$size0;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // Mobile first. No desktop related things above this line.

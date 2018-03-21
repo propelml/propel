@@ -16,7 +16,6 @@ import { OutputHandler } from "./output_handler";
 import { RegularArray } from "./types";
 
 const debug = false;
-export let attachedHandler: OutputHandler = null;
 
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
@@ -134,9 +133,13 @@ export function objectsEqual(a, b) {
 }
 
 const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
-export type FetchEncoding = "utf8" | "arraybuffer" | "buffer";
-// We return an ArrayBuffer on Web but a Buffer on Node.js
-export type BinaryData = Buffer | ArrayBuffer;
+
+export interface FetchEncodingMap {
+  "arraybuffer": ArrayBuffer;
+  "buffer": Buffer;
+  "utf8": string;
+}
+export type FetchEncoding = keyof FetchEncodingMap;
 
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
@@ -146,13 +149,13 @@ export type BinaryData = Buffer | ArrayBuffer;
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(p: string, encoding: FetchEncoding)
-                      : Promise<string | BinaryData> {
+async function fetch2<E extends FetchEncoding>(
+    p: string, encoding: E): Promise<FetchEncodingMap[E]> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
   if (IS_WEB) {
     const job = randomString();
-    const host = document.location.host.split(":")[0];
+    const host = document.location.hostname;
     if (propelHosts.has(host)) {
       p = p.replace("deps/", "/");
       p = p.replace(/^src\//, "/src/");
@@ -160,22 +163,22 @@ async function fetch2(p: string, encoding: FetchEncoding)
       p = p.replace("deps/", "http://propelml.org/");
       p = p.replace(/^src\//, "http://propelml.org/src/");
     }
-    const req = new XMLHttpRequest();
-    const onLoad = createResolvable();
-    req.onload = onLoad.resolve;
-    if (attachedHandler) {
-      req.onprogress = function({loaded, total}) {
-        attachedHandler.downloadProgress({ job, loaded, total });
-      };
+    try {
+      const req = new XMLHttpRequest();
+      const onLoad = createResolvable();
+      req.onload = onLoad.resolve;
+      req.onprogress = ev => downloadProgress(job, ev.loaded, ev.total);
+      req.open("GET", p, true);
+      req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
+      if (encoding === "utf8") {
+        req.overrideMimeType("text/plain; charset=utf-8");
+      }
+      req.send();
+      await onLoad;
+      return req.response;
+    } finally {
+      downloadProgress(job, null, null);
     }
-    req.open("GET", p, true);
-    req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
-    if (encoding === "utf8") {
-      req.overrideMimeType("text/plain; charset=utf-8");
-    }
-    req.send();
-    await onLoad;
-    return req.response;
   } else {
     if (p.match(/^http(s)*:\/\//)) {
       return fetchRemoteFile(p, encoding);
@@ -196,67 +199,96 @@ async function fetch2(p: string, encoding: FetchEncoding)
   }
 }
 
-async function fetchRemoteFile(url: string, encoding: FetchEncoding)
-                               : Promise<string | BinaryData> {
-  const promise = createResolvable();
-  const isBinary = encoding === "arraybuffer" || encoding === "buffer";
-  const schema = url.split(":")[0];
-  const http = nodeRequire(schema === "https" ? "https" : "http");
-  let body: string | Buffer[] = "";
-  if (isBinary) {
-    body = [];
-  }
-  http.get(url, (res) => {
-    const total = Number(res.headers["content-length"]);
-    const start = Date.now();
-    let loaded = 0;
-    res.setEncoding = isBinary ? null : "utf8";
-    res.on("data", (chunk) => {
-      if (isBinary) {
-        (body as Buffer[]).push(chunk);
-      } else {
-        body += chunk;
-      }
-      loaded += chunk.length;
-      if (Date.now() - start > 1000) {
-        const p = (loaded / total * 100).toFixed(2);
-        process.stdout.write(`${p}%\r`);
-      }
+async function fetchRemoteFile<E extends FetchEncoding>(
+    url: string, encoding: E): Promise<FetchEncodingMap[E]> {
+  const protocol = new URL(url).protocol;
+  const http = nodeRequire(protocol === "https:" ? "https" : "http");
+  const job = randomString();
+
+  downloadProgress(job, 0, null); // Start download job with unknown size.
+
+  const chunks: Buffer[] = [];
+
+  try {
+    await new Promise((res, rej) => {
+      http.get(url, res => {
+        const total = Number(res.headers["content-length"]);
+        let loaded = 0;
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+          loaded += chunk.length;
+          downloadProgress(job, loaded, total);
+        });
+        res.on("end", res);
+        res.on("error", rej);
+      }).on("error", rej);
     });
-    res.on("end", promise.resolve);
-  });
-  await promise;
-  if (isBinary) {
-    const b = Buffer.concat(body as Buffer[]);
-    if (encoding === "arraybuffer") {
-      return b.buffer as ArrayBuffer;
-    }
-    return b;
+
+  } finally {
+    downloadProgress(job, null, null); // End download job.
   }
-  return body as string;
+
+  const buffer = Buffer.concat(chunks);
+  if (encoding === "utf8") {
+    return buffer.toString("utf8");
+  } else {
+    return buffer;
+  }
 }
 
 export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
-  return await fetch2(path, "arraybuffer") as ArrayBuffer;
+  return await fetch2(path, "arraybuffer");
 }
 
 export async function fetchBuffer(path: string): Promise<Buffer> {
   if (IS_WEB) {
     throw new Error("`fetchBuffer` is not implemented to work on browser.");
   }
-  return await fetch2(path, "buffer") as Buffer;
+  return await fetch2(path, "buffer");
 }
 
 export async function fetchStr(path: string): Promise<string> {
-  return await fetch2(path, "utf8") as string;
+  return await fetch2(path, "utf8");
 }
 
-export function setOutputHandler(handler: OutputHandler) {
-  attachedHandler = handler;
+export let activeOutputHandler: OutputHandler | null = null;
+
+export function getOutputHandler(): OutputHandler | null {
+  return activeOutputHandler;
 }
 
-export function getOutputHandler(): OutputHandler {
-  return attachedHandler;
+export function setOutputHandler(handler: OutputHandler): void {
+  activeOutputHandler = handler;
+}
+
+let lastProgress = 0;
+
+export function downloadProgress(job: string, loaded: number | null,
+                                 total: number | null): void {
+  if (activeOutputHandler) {
+    activeOutputHandler.downloadProgress({ job, loaded, total });
+    return;
+  }
+
+  if (IS_NODE) {
+    if (loaded === null && total === null) {
+      // Write 7 spaces, so we can cover "100.00%".
+      process.stdout.write(" ".repeat(7) + " \r");
+    } else if (!total) {
+      // Don't divide by zero.
+      return;
+    }
+
+    const now = Date.now();
+
+    if (now - lastProgress > 500) {
+      // TODO: when multiple downloads are active, percentages currently
+      // write over one another.
+      const p = (loaded / total * 100).toFixed(2);
+      process.stdout.write(`${p}% \r`);
+      lastProgress = now;
+    }
+  }
 }
 
 export function randomString(): string {
