@@ -16,9 +16,14 @@
 
 import * as d3 from "d3";
 import { createCanvas, Image } from "./im";
-import { Progress } from "./types";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
+
+export interface Progress {
+  job: string;
+  loaded: number | null;
+  total: number | null;
+}
 
 export interface OutputHandler {
   imshow(image: Image): void;
@@ -27,11 +32,12 @@ export interface OutputHandler {
   downloadProgress(progress: Progress);
 }
 
-const progresses = {};
+const progressOutputHandlerMap = new Map<string, OutputHandler>();
 
 export class OutputHandlerDOM implements OutputHandler {
   // TODO colors should match those used by the syntax highlighting.
   private color = d3.scaleOrdinal(d3.schemeCategory10);
+  private progresses = new Map<string, Progress>();
 
   constructor(private element: Element) {}
 
@@ -156,30 +162,54 @@ export class OutputHandlerDOM implements OutputHandler {
   }
 
   downloadProgress(progress: Progress) {
+    const job = progress.job;
+
+    // Ensure that the progress handler jobs are always handled by the same
+    // output handler, even when the notebook guesses the cell wrong.
+    // TODO: this is really hacky and should not be the responsibility of the
+    // output handler at all.
+    const outputHandler = progressOutputHandlerMap.get(job);
+    if (outputHandler === undefined) {
+      progressOutputHandlerMap.set(job, this);
+    } else if (outputHandler !== this) {
+      return outputHandler.downloadProgress(progress);
+    }
+
+    if (progress.loaded === null) {
+      // When loaded equals null, this indicates that the job is done.
+      // TODO: this isn't really correct - the progress bar might go backwards
+      // when multiple parallel jobs are present and one completes before
+      // the other.
+      this.progresses.delete(job);
+      progressOutputHandlerMap.delete(job);
+    } else {
+      this.progresses.set(job, progress);
+    }
+
     const outputContainer = this.element.parentNode as HTMLElement;
     const progressBar = outputContainer.previousElementSibling as HTMLElement;
-    const {job, loaded, total} = progress;
-    progresses[job] = {
-      cell: this.element.id,
-      loaded,
-      total
-    };
-    if (loaded === total) {
-      delete progresses[job];
-    }
-    let totalLoaded = 0;
-    let totalTotal = 0;
-    for (const key in progresses) {
-      if (progresses[key].cell === this.element.id) {
-        totalLoaded += progresses[key].loaded;
-        totalTotal += progresses[key].total;
-      }
-    }
-    if (totalLoaded === totalTotal) {
+
+    if (this.progresses.size === 0) {
+      // If there are no more downloads in progress, hide the progress bar.
+      progressBar.style.width = "0"; // Prevent it from going backwards.
       progressBar.style.display = "none";
-    } else {
-      progressBar.style.display = "block";
-      progressBar.style.width = (totalLoaded / totalTotal * 100) + "%";
+      return;
     }
+
+    let sumLoaded = 0;
+    let sumTotal = 0;
+    for (const [_, {loaded, total}] of this.progresses) {
+      // Total may be null if the size of the download isn't known yet.
+      if (total === null) {
+        continue;
+      }
+      sumLoaded += loaded;
+      sumTotal += total;
+    }
+
+    // Avoid division by zero.
+    const percent = sumTotal > 0 ? sumLoaded / sumTotal * 100 : 0;
+    progressBar.style.display = "block";
+    progressBar.style.width = `${percent}%`;
   }
 }
