@@ -325,6 +325,12 @@ export class OpsDL implements types.BackendOps {
     return x.math.max(x, axes, keepDims);
   }
 
+  reduceMin(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
+  {
+    ENV.setMath(x.math);
+    return x.math.min(x, axes, keepDims);
+  }
+
   equal(x: TensorDL, y: TensorDL): TensorDL {
     ENV.setMath(x.math);
     return x.math.equal(x, y);

@@ -402,6 +402,17 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
+  reduceMin(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
+  {
+    // axesT is expected to be on CPU.
+    const axesT = int32Small(axes);
+    return execute0("Min", [x, axesT], [
+      ["T", binding.ATTR_TYPE, binding.getDType(x.handle)],
+      ["Tidx", binding.ATTR_TYPE, binding.TF_INT32],
+      ["keep_dims", binding.ATTR_BOOL, keepDims],
+    ]);
+  }
+
   equal(x: TensorTF, y: TensorTF): TensorTF {
     return execute1("Equal", [x, y]);
   }

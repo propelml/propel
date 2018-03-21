@@ -458,6 +458,13 @@ defBW("reduceMax", (g, axes, keepDims) => {
   throw new Error("Not Implemented.");
 });
 
+export let reduceMin = defFW("reduceMin", (x, axes, keepDims) => {
+  return bo.reduceMin(x, axes, keepDims);
+});
+defBW("reduceMin", (g, axes, keepDims) => {
+  throw new Error("Not Implemented.");
+});
+
 export let equal = defFW("equal", (x, y) => bo.equal(x, y));
 defBW("equal", null, null); // Not differentiable.
 

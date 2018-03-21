@@ -505,6 +505,14 @@ export class Tensor implements types.Storage {
     return ops.reduceMax(this, axes, keepDims);
   }
 
+  /** Take the minimum value over the given axes.
+   * @param axes defaults to all.
+   */
+  reduceMin(axes?: number[], keepDims = false): Tensor {
+    if (!axes) axes = rangeJS(this.rank);
+    return ops.reduceMin(this, axes, keepDims);
+  }
+
   reduceLogSumExp(axes?: number[], keepDims = false): Tensor {
     if (!axes) axes = rangeJS(this.rank);
     return ops.reduceLogSumExp(this, axes, keepDims);

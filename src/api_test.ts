@@ -503,6 +503,18 @@ testDevices(async function api_reduceMax(tensor, device) {
   */
 });
 
+testDevices(async function api_reduceMin(tensor, device) {
+  const a = tensor([
+    [9, 5, 7],
+    [6, 8, 4],
+  ]);
+  assertAllEqual(a.reduceMin([0]), [6, 5, 4]);
+  assertAllEqual(a.reduceMin([1]), [5, 4]);
+  assertAllEqual(a.reduceMin(), 4);
+  assertAllEqual(a.reduceMin([0], true), [[6, 5, 4]]);
+  assertAllEqual(a.reduceMin([1], true), [[5], [4]]);
+});
+
 testDevices(async function api_onesAndZerosLike(tensor, device) {
   const a = tensor([
     [9, 5, 7],
