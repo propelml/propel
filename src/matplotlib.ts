@@ -15,28 +15,12 @@
 
 import { Tensor } from "./api";
 import { toUint8Image } from "./im";
-import { OutputHandler, PlotData } from "./output_handler";
+import { PlotData } from "./output_handler";
 import { assertEqual } from "./tensor_util";
-
-let currentOutputHandler: OutputHandler = null;
-export function setOutputHandler(h: OutputHandler) {
-  if (currentOutputHandler !== null) {
-    console.warn("Warning: replacing existing OutputHandler");
-  }
-  currentOutputHandler = h;
-}
-
-export function imshow(tensor: Tensor): void {
-  if (!currentOutputHandler) {
-    console.warn("imshow: no output handler");
-    return;
-  }
-  const image = toUint8Image(tensor);
-  currentOutputHandler.imshow(image);
-}
+import { getOutputHandler } from "./util";
 
 export function plot(...args) {
-  if (!currentOutputHandler) {
+  if (!getOutputHandler()) {
     console.warn("plot: no output handler");
     return;
   }
@@ -73,5 +57,14 @@ export function plot(...args) {
     data.push(line);
   }
 
-  currentOutputHandler.plot(data);
+  getOutputHandler().plot(data);
+}
+
+export function imshow(tensor: Tensor): void {
+  if (!getOutputHandler()) {
+    console.warn("imshow: no output handler");
+    return;
+  }
+  const image = toUint8Image(tensor);
+  getOutputHandler().imshow(image);
 }
