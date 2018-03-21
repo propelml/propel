@@ -140,3 +140,9 @@ export interface TensorOpts {
 }
 
 export type Mode = "RGBA" | "RGB" | "L";
+
+export interface Progress {
+  job: string;
+  loaded: number;
+  total: number;
+}

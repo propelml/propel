@@ -83,6 +83,10 @@ const rpcHandlers = {
   imshow(cellId: number, data: any): any {
     return lookupOutputHandler(cellId).imshow(data);
   },
+
+  downloadProgress(cellId: number, data: any): void {
+    return lookupOutputHandler(cellId).downloadProgress(data);
+  }
 };
 
 function createIframe(rpcChannelId): HTMLIFrameElement {
@@ -209,6 +213,11 @@ export class Cell extends Component<CellProps, CellState> {
       this.outputHandler = new OutputHandlerDOM(this.output);
     }
     return this.outputHandler;
+  }
+
+  downloadProgress(data) {
+    const o = new OutputHandlerDOM(this.output);
+    o.downloadProgress(data);
   }
 
   clearOutput() {
@@ -376,6 +385,7 @@ export class Cell extends Component<CellProps, CellState> {
         deleteButton,
         runButton,
       ),
+      h("div", { "class": "progress-bar" }),
       h("div", { "class": "output-container" },
         outputDiv,
         insertButton,

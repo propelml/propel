@@ -16,6 +16,7 @@
 
 import * as d3 from "d3";
 import { createCanvas, Image } from "./im";
+import { Progress } from "./types";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
 
@@ -23,7 +24,10 @@ export interface OutputHandler {
   imshow(image: Image): void;
   plot(data: PlotData): void;
   print(text: string): void;
+  downloadProgress(progress: Progress);
 }
+
+const progresses = {};
 
 export class OutputHandlerDOM implements OutputHandler {
   // TODO colors should match those used by the syntax highlighting.
@@ -149,5 +153,33 @@ export class OutputHandlerDOM implements OutputHandler {
     s += text + "\n";
     const el = document.createTextNode(s);
     element.appendChild(el);
+  }
+
+  downloadProgress(progress: Progress) {
+    const outputContainer = this.element.parentNode as HTMLElement;
+    const progressBar = outputContainer.previousElementSibling as HTMLElement;
+    const {job, loaded, total} = progress;
+    progresses[job] = {
+      cell: this.element.id,
+      loaded,
+      total
+    };
+    if (loaded === total) {
+      delete progresses[job];
+    }
+    let totalLoaded = 0;
+    let totalTotal = 0;
+    for (const key in progresses) {
+      if (progresses[key].cell === this.element.id) {
+        totalLoaded += progresses[key].loaded;
+        totalTotal += progresses[key].total;
+      }
+    }
+    if (totalLoaded === totalTotal) {
+      progressBar.style.display = "none";
+    } else {
+      progressBar.style.display = "block";
+      progressBar.style.width = (totalLoaded / totalTotal * 100) + "%";
+    }
   }
 }

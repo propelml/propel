@@ -839,9 +839,24 @@ img.avatar {
       transparent 75%,
       #efefef 75%,
       #efefef
+    ),
+    linear-gradient(
+      45deg,
+      #efefef 25%,
+      transparent 25%,
+      transparent 75%,
+      #efefef 75%,
+      #efefef
     );
   background-position: 0 0, 10px 10px;
   background-size: 21px 21px;
+}
+
+.progress-bar {
+  display: none;
+  border-top: 1px solid $accentColor;
+  margin-top: -$size0;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // Mobile first. No desktop related things above this line.

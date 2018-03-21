@@ -151,6 +151,7 @@ async function fetch2(p: string, encoding: FetchEncoding)
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
   if (IS_WEB) {
+    const job = randomString();
     const host = document.location.host.split(":")[0];
     if (propelHosts.has(host)) {
       p = p.replace("deps/", "/");
@@ -162,6 +163,11 @@ async function fetch2(p: string, encoding: FetchEncoding)
     const req = new XMLHttpRequest();
     const onLoad = createResolvable();
     req.onload = onLoad.resolve;
+    if (attachedHandler) {
+      req.onprogress = function({loaded, total}) {
+        attachedHandler.downloadProgress({ job, loaded, total });
+      };
+    }
     req.open("GET", p, true);
     req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
     if (encoding === "utf8") {

@@ -116,6 +116,10 @@ setOutputHandler({
 
   print(data: any): void {
     rpc.call("print", guessCellId(), data);
+  },
+
+  downloadProgress(data: any): void {
+    rpc.call("downloadProgress", guessCellId(), data);
   }
 });
 
