@@ -117,6 +117,8 @@ export interface BackendOps {
   maxPool(input: Storage, opts: PoolOpts): Storage;
   maxPoolGrad(grad: Storage, origInput: Storage, origOutput: Storage,
               opts: PoolOpts): Storage;
+  unsortedSegmentSum(x: Storage, segmentIds: Storage,
+                     segmentNum: number): Storage;
 }
 
 // A TapeEntry is created every time an op is executed. It is the bookkeeping

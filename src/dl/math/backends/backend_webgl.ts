@@ -755,6 +755,11 @@ export class MathBackendWebGL implements MathBackend {
     throw new Error("setDiag GPU not yet implemented!");
   }
 
+  unsortedSegmentSum(x: NDArray, segmentIds: Array1D<"int32">,
+                     segmentNum: number): NDArray {
+    throw new Error("unsortedSegmentSum GPU not yet implemented!");
+  }
+
   private makeOutputArray<D extends DataType, T extends NDArray<D>>(
       shape: number[], dtype: D): T {
     return NDArray.make(shape, {}, dtype) as T;

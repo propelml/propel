@@ -152,6 +152,13 @@ export class OpsDL implements types.BackendOps {
     return cpuMath.setDiag(x as Array2D, diag as Array1D);
   }
 
+  unsortedSegmentSum(x: TensorDL, segmentIds: TensorDL, segmentNum: number):
+      TensorDL {
+    ENV.setMath(x.math);
+    return x.math.unsortedSegmentSum(x, segmentIds as Array1D<"int32">,
+      segmentNum);
+  }
+
   onesLike(x: TensorDL): TensorDL {
     ENV.setMath(x.math);
     const ones = NDArray.zerosLike(x);
