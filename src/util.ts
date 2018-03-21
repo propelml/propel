@@ -132,6 +132,9 @@ export function objectsEqual(a, b) {
 }
 
 const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
+export type FetchEncoding = "utf8" | "arraybuffer" | "buffer";
+// We return an ArrayBuffer on Web but a Buffer on Node.js
+export type BinaryData = Buffer | ArrayBuffer;
 
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
@@ -141,39 +144,10 @@ const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2(p: string,
-                      encoding: "binary" | "utf8" = "binary")
-                      : Promise<string | ArrayBuffer> {
+async function fetch2(p: string, encoding: FetchEncoding)
+                      : Promise<string | BinaryData> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
-  p = fetch2ArgManipulation(p);
-  if (IS_WEB) {
-    const res = await fetch(p, { mode: "cors" });
-    if (encoding === "binary") {
-      return res.arrayBuffer();
-    } else {
-      return res.text();
-    }
-  } else {
-    const { readFileSync } = nodeRequire("fs");
-    if (encoding === "binary") {
-      const b = readFileSync(p, null);
-      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-    } else {
-      return readFileSync(p, "utf8");
-    }
-  }
-}
-
-export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
-  return fetch2(path, "binary") as any;
-}
-
-export async function fetchStr(path: string): Promise<string> {
-  return fetch2(path, "utf8") as any;
-}
-
-export function fetch2ArgManipulation(p: string): string {
   if (IS_WEB) {
     const host = document.location.host.split(":")[0];
     if (propelHosts.has(host)) {
@@ -183,13 +157,90 @@ export function fetch2ArgManipulation(p: string): string {
       p = p.replace("deps/", "http://propelml.org/");
       p = p.replace(/^src\//, "http://propelml.org/src/");
     }
+    const req = new XMLHttpRequest();
+    const onLoad = createResolvable();
+    req.onload = onLoad.resolve;
+    req.open("GET", p, true);
+    req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
+    if (encoding === "utf8") {
+      req.overrideMimeType("text/plain; charset=utf-8");
+    }
+    req.send();
+    await onLoad;
+    return req.response;
   } else {
+    if (p.match(/^http(s)*:\/\//)) {
+      return fetchRemoteFile(p, encoding);
+    }
     const path = nodeRequire("path");
+    const { readFileSync } = nodeRequire("fs");
     if (!path.isAbsolute(p)) {
       p = path.join(__dirname, "..", p);
     }
+    if (encoding === "buffer") {
+      return readFileSync(p, null);
+    } else if (encoding === "arraybuffer") {
+      const b = readFileSync(p, null);
+      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+    } else {
+      return readFileSync(p, "utf8");
+    }
   }
-  return p;
+}
+
+async function fetchRemoteFile(url: string, encoding: FetchEncoding)
+                               : Promise<string | BinaryData> {
+  const promise = createResolvable();
+  const isBinary = encoding === "arraybuffer" || encoding === "buffer";
+  const schema = url.split(":")[0];
+  const http = nodeRequire(schema === "https" ? "https" : "http");
+  let body: string | Buffer[] = "";
+  if (isBinary) {
+    body = [];
+  }
+  http.get(url, (res) => {
+    const total = Number(res.headers["content-length"]);
+    const start = Date.now();
+    let loaded = 0;
+    res.setEncoding = isBinary ? null : "utf8";
+    res.on("data", (chunk) => {
+      if (isBinary) {
+        (body as Buffer[]).push(chunk);
+      } else {
+        body += chunk;
+      }
+      loaded += chunk.length;
+      if (Date.now() - start > 1000) {
+        const p = (loaded / total * 100).toFixed(2);
+        process.stdout.write(`${p}%\r`);
+      }
+    });
+    res.on("end", promise.resolve);
+  });
+  await promise;
+  if (isBinary) {
+    const b = Buffer.concat(body as Buffer[]);
+    if (encoding === "arraybuffer") {
+      return b.buffer as ArrayBuffer;
+    }
+    return b;
+  }
+  return body as string;
+}
+
+export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
+  return await fetch2(path, "arraybuffer") as ArrayBuffer;
+}
+
+export async function fetchBuffer(path: string): Promise<Buffer> {
+  if (IS_WEB) {
+    throw new Error("`fetchBuffer` is not implemented to work on browser.");
+  }
+  return await fetch2(path, "buffer") as Buffer;
+}
+
+export async function fetchStr(path: string): Promise<string> {
+  return await fetch2(path, "utf8") as string;
 }
 
 export function randomString(): string {
