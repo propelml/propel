@@ -15,11 +15,13 @@
 
 // This module is inspired by TensorFlow's tf.data.Dataset.
 // https://www.tensorflow.org/api_docs/python/tf/data/Dataset
+import { TextDecoder } from "text-encoding";
 import { isUndefined } from "util";
 import { stack, tensor, Tensor } from "./api";
+import * as cache from "./cache";
 import * as mnist from "./mnist";
 import { NamedTensors } from "./tensor";
-import { assert, delay, fetchStr } from "./util";
+import { assert, delay } from "./util";
 
 export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);
@@ -271,7 +273,10 @@ class ShuffleDataset extends Dataset {
 
 async function loadData(fn: string):
     Promise<{ features: Tensor, labels: Tensor }> {
-  const csv = await fetchStr(fn);
+  const ab = await cache.fetchWithCache(fn);
+  const dec = new TextDecoder("ascii");
+  const csv = dec.decode(new Uint8Array(ab));
+
   const lines = csv.trim().split("\n").map(line => line.split(","));
   const header = lines.shift();
   const nSamples = Number(header.shift());
@@ -302,17 +307,17 @@ async function loadData(fn: string):
  */
 export async function loadIris():
     Promise<{ features: Tensor, labels: Tensor }> {
-  return loadData("deps/data/iris.csv");
+  return loadData("http://propelml.org/data/iris.csv");
 }
 
 export async function loadBreastCancer():
     Promise<{ features: Tensor, labels: Tensor }> {
-  return loadData("deps/data/breast_cancer.csv");
+  return loadData("http://propelml.org/data/breast_cancer.csv");
 }
 
 export async function loadWine():
     Promise<{ features: Tensor, labels: Tensor }> {
-  return loadData("deps/data/wine_data.csv");
+  return loadData("http://propelml.org/data/wine_data.csv");
 }
 
 // TODO

@@ -24,17 +24,7 @@ import { Experiment, ExperimentOpts, print }  from "./experiment";
 import * as npy from "./npy";
 import { Params, params as createParams } from "./params";
 import { assert } from "./util";
-
-/** Returns "$HOME/.propel/" or PROPEL_DIR env var. */
-function propelDir(): string {
-  if (process.env.PROPEL_DIR) {
-    return process.env.PROPEL_DIR;
-  } else {
-    const homeDir = process.platform === "win32" ? process.env.USERPROFILE
-                                                 : process.env.HOME;
-    return path.join(homeDir, ".propel/");
-  }
-}
+import { isDir, propelDir } from "./util_node";
 
 export class DiskExperiment extends Experiment {
   constructor(readonly name: string, opts?: ExperimentOpts) {
@@ -123,15 +113,6 @@ export class DiskExperiment extends Experiment {
     }
     const megs = (totalSize / (1024 * 1024)).toFixed(2);
     await print(`Checkpoint saved ${megs} mb`, checkpointPath);
-  }
-}
-
-export function isDir(p: string): boolean {
-  try {
-    return fs.statSync(p).isDirectory();
-  } catch (e) {
-    if (e.code === "ENOENT") return false;
-    throw e;
   }
 }
 
