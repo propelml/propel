@@ -1,5 +1,5 @@
 import { h, render, rerender } from "preact";
-import { assert, objectsEqual } from "../src/util";
+import { assert, createResolvable, objectsEqual } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import * as db from "./db";
 import * as nb from "./nb";
@@ -128,6 +128,79 @@ testBrowser(async function notebook_deleteLastCell() {
   assert(deleteButton == null);
 });
 
+testBrowser(async function notebook_progressBar() {
+  resetPage();
+
+  let notebook: nb.Notebook;
+  const promise = createResolvable();
+  const el = h(nb.Notebook, {
+    nbId: "anonymous",
+    onReady: promise.resolve,
+    ref: ref => notebook = ref,
+  });
+  render(el, document.body);
+  await promise;
+
+  // We need at least two cells for this test (which have cellId 1 and 2).
+  notebook.onInsertCell(0);
+  notebook.onInsertCell(0);
+
+  const progressBar =
+      document.querySelector(".notebook-cell .progress-bar") as HTMLElement;
+  assert(progressBar != null);
+
+  // tslint:disable-next-line:ban
+  const percent = () => parseFloat(progressBar.style.width);
+  const visible = () => progressBar.style.display === "block";
+
+  // Call util.downloadProgress in the notebook sandbox.
+  const downloadProgress = async(job, loaded, total, cellId = 1) => {
+    const sandbox = nb.sandbox();
+    await sandbox.call(
+      "runCell",
+      `import { downloadProgress } from "test_internals";
+       downloadProgress(...${JSON.stringify([job, loaded, total])});`,
+      cellId);
+    await flush();
+  };
+
+  // Should not be visible initially.
+  assert(!visible());
+  // Start one download job, size not specified yet, will be 10kb.
+  await downloadProgress("job1", 0, null);
+  assert(visible());
+  assert(percent() === 0);
+  // Start another, size 30k bytes.
+  await downloadProgress("job2", 0, 30e3);
+  assert(visible());
+  assert(percent() === 0);
+  // Make progress on both jobs.
+  await downloadProgress("job1", 1e3, 10e3);
+  assert(percent() === 100 * 1e3 / 40e3);
+  await downloadProgress("job2", 1e3, 30e3);
+  assert(percent() === 100 * 2e3 / 40e3);
+  await downloadProgress("job2", 15e3, 30e3);
+  assert(percent() === 100 * 16e3 / 40e3);
+  // Set job1 to 100% from cellId 2.
+  await downloadProgress("job1", 10e3, 10e3, 2);
+  assert(percent() === 100 * 25e3 / 40e3);
+  // Finish job1.
+  await downloadProgress("job1", null, null);
+  // Since job1 is no longer active, and job2 is half done, the progress bar
+  // is now back at 50%.
+  // TODO: this is kinda weird.
+  assert(visible());
+  assert(percent() === 50);
+  // Set job2 to 100%.
+  await downloadProgress("job2", 30e3, 30e3);
+  assert(visible());
+  assert(percent() === 100);
+  // Remove job2 from cell 2.
+  await downloadProgress("job2", null, null, 2);
+  assert(!visible());
+  assert(percent() === 0);
+});
+
 // Call this to ensure that the DOM has been updated after events.
 function flush(): Promise<void> {
   rerender();
@@ -135,7 +208,7 @@ function flush(): Promise<void> {
 }
 
 function resetPage() {
-  nb.destroySandbox();
+  nb.resetNotebook();
   document.body.innerHTML = "";
 }
 

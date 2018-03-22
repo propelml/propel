@@ -16,6 +16,7 @@
 import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
+import * as test_internals from "./test_internals";
 
 import { global, globalEval, setOutputHandler } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
