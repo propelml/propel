@@ -16,7 +16,7 @@
 // This module is inspired by TensorFlow's tf.data.Dataset.
 // https://www.tensorflow.org/api_docs/python/tf/data/Dataset
 import { isUndefined } from "util";
-import { tensor, Tensor } from "./api";
+import { stack, tensor, Tensor } from "./api";
 import * as mnist from "./mnist";
 import { NamedTensors } from "./tensor";
 import { assert, delay, fetchStr } from "./util";
@@ -190,7 +190,7 @@ class BatchDataset extends Dataset {
       for (const name of Object.keys(batchComponents[0])) {
         const batch = batchComponents.map(tensors => tensors[name]);
         const first = batch.shift();
-        out[name] = first.stack(0, ...batch);
+        out[name] = stack([first, ...batch], 0);
       }
       return out;
     }

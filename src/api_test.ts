@@ -13,8 +13,9 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
-import { fill, grad, linspace, listDevices, multigrad, ones,
-  Params, randn, range, tensor, Tensor, TensorLike, zeros } from "./api";
+import { concat, fill, grad, linspace, listDevices, multigrad,
+  ones, Params, randn, range, stack, tensor, Tensor,
+  TensorLike, zeros } from "./api";
 import * as api from "./api";
 import { assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./tensor_util";
@@ -1010,29 +1011,29 @@ testDevices(async function api_concat(tensor, device) {
                     [[3, 3, 3], [4, 4, 4]]]);
   const b = tensor([[[5, 5, 5], [6, 6, 6]],
                     [[7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(0, b),
+  assertAllEqual(concat([a, b], 0),
       [[[1, 1, 1], [2, 2, 2]],
        [[3, 3, 3], [4, 4, 4]],
        [[5, 5, 5], [6, 6, 6]],
        [[7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(1, b),
+  assertAllEqual(concat([a, b], 1),
       [[[1, 1, 1], [2, 2, 2], [5, 5, 5], [6, 6, 6]],
        [[3, 3, 3], [4, 4, 4], [7, 7, 7], [8, 8, 8]]]);
-  assertAllEqual(a.concat(2, b),
+  assertAllEqual(concat([a, b], 2),
       [[[1, 1, 1, 5, 5, 5],
         [2, 2, 2, 6, 6, 6]],
        [[3, 3, 3, 7, 7, 7],
         [4, 4, 4, 8, 8, 8]]]);
-  assertAllEqual(a.concat(2, b, b),
+  assertAllEqual(concat([a, b, b], 2),
       [[[1, 1, 1, 5, 5, 5, 5, 5, 5],
         [2, 2, 2, 6, 6, 6, 6, 6, 6]],
        [[3, 3, 3, 7, 7, 7, 7, 7, 7],
         [4, 4, 4, 8, 8, 8, 8, 8, 8]]]);
   const t = tensor([[1, 2], [3, 4]]);
-  const s = t.concat(0, [[5, 6]]);
+  const s = concat([t, [[5, 6]]], 0);
   assertAllEqual(s, [[1, 2], [3, 4], [5, 6]]);
   // Backwards pass.
-  const f = (x, y) => x.concat(0, y.mul(2));
+  const f = (x, y) => concat([x, y.mul(2)], 0);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
   assertAllEqual(gab[0], [[[1, 1, 1], [1, 1, 1]],
@@ -1044,7 +1045,7 @@ testDevices(async function api_concat(tensor, device) {
 testDevices(async function api_stack(tensor, device) {
   const a = tensor([1, 2, 3]);
   const b = tensor([4, 5, 6]);
-  assertAllEqual(a.stack(0, b), [[1, 2, 3], [4, 5, 6]]);
+  assertAllEqual(stack([a, b], 0), [[1, 2, 3], [4, 5, 6]]);
 });
 
 test(async function api_cast() {

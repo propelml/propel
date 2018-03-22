@@ -46,7 +46,7 @@ test(async function layer_batchNorm() {
   const p = api.params();
   const c0 = api.randn([2, 50, 50, 1]).mul(3).sub(7);
   const c1 = api.randn([2, 50, 50, 1]).mul(13).add(2);
-  const x = c0.concat(3, c1);
+  const x = api.concat([c0, c1], 3);
   const out = layers.batchNorm(x, p.scope("bn"));
   assert(p.has("bn/mean"));
   assert(p.has("bn/variance"));

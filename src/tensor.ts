@@ -101,10 +101,11 @@ export class Tensor implements types.Storage {
     };
   }
 
-  // This is similar convert() - it turns TensorLike objects into Tensors - but
-  // the function further ensures that the returned tensor is on the same
-  // devices as this tensor.
-  private colocate(t: types.TensorLike, dtype?: types.DType): Tensor {
+  /** This is similar convert() - it turns TensorLike objects into Tensors - but
+   * the function further ensures that the returned tensor is on the same
+   * devices as this tensor.
+   */
+  colocate(t: types.TensorLike, dtype?: types.DType): Tensor {
     if (t instanceof Tensor) {
       if (t.device === this.device) return t;
       // TODO Warning! This might be an unnecessary copy. Maybe we should
@@ -163,7 +164,7 @@ export class Tensor implements types.Storage {
    *
    *    import * as pr from "propel";
    *    const t = pr.zeros([10]).reshape([5, 2])
-   *    t.concat(1, pr.ones([5]).reshape([5, 1])).shape
+   *    pr.concat([t, pr.ones([5]).reshape([5, 1])], 1).shape
    */
   get shape(): types.Shape {
     return this.storage.shape;
@@ -671,35 +672,6 @@ export class Tensor implements types.Storage {
     const indicesT = this.colocate(indices, "int32");
     assert(indicesT.rank === 1, "indices must be rank1 int32");
     return ops.gather(this, indicesT, axis);
-  }
-
-  /** Concatenates tensors along the specified axis:
-   *
-   *    import * as pr from "propel";
-   *    t = pr.tensor([[1, 2], [3, 4]]);
-   *    t.concat(0, [[5, 6], [7, 8]]);
-   */
-  concat(axis: number, t: types.TensorLike, ...rest: types.TensorLike[])
-      : Tensor {
-    const tensors = [this, this.colocate(t)];
-    for (const arg of rest) {
-      assert(arg instanceof Tensor);
-      tensors.push(this.colocate(arg as Tensor));
-    }
-    return ops.concat(axis, ...tensors);
-  }
-
-  /** Concatenates tensors along a new axis:
-   *
-   *    import { tensor } from "propel"
-   *    a = tensor([1, 2, 3])
-   *    b = tensor([4, 5, 6])
-   *    a.stack(0, b)
-   */
-  stack(axis: number, t: types.TensorLike, ...rest: types.TensorLike[]): Tensor
-  {
-    const tensors = [t, ...rest].map(t => this.colocate(t).expandDims(axis));
-    return this.expandDims(axis).concat(axis, tensors.shift(), ...tensors);
   }
 
   /** Adds zeros (or other value) the the boundaries of a tensor.
