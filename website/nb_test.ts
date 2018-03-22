@@ -1,5 +1,6 @@
 import { h, render } from "preact";
-import { assert, objectsEqual } from "../src/util";
+import { assert, createResolvable, downloadProgress, objectsEqual }
+  from "../src/util";
 import { testBrowser } from "../tools/tester";
 import { enableMock } from "./db";
 import * as nb from "./nb";
@@ -147,4 +148,63 @@ testBrowser(async function notebook_NotebookLoggedIn() {
   assert("New Title" === title[0].innerHTML);
   */
 
+});
+
+testBrowser(async function notebook_progressBar() {
+  resetPage();
+
+  const ready = createResolvable();
+  const el = h(nb.Notebook, {
+    nbId: "default",
+    onReady: ready.resolve,
+  });
+  render(el, document.body);
+  await ready;
+
+  const progressBar =
+      document.querySelector(".notebook-cell .progress-bar") as HTMLElement;
+  assert(progressBar != null);
+
+  const outputHandler = nb.lookupOutputHandler(0);
+  assert(outputHandler != null);
+
+  // tslint:disable-next-line:ban
+  const percent = () => parseInt(progressBar.style.width, 10);
+  const visible = () => progressBar.style.display !== "none";
+
+  // Should not be visible initially.
+  assert(!visible());
+  // Start one download job, size unknown.
+  downloadProgress("job1", 0, null);
+  assert(visible());
+  assert(percent() === 0);
+  // Start another, size 10k bytes.
+  downloadProgress("job2", 0, 10e3);
+  assert(visible());
+  assert(percent() === 0);
+  // Make progress on both jobs.
+  downloadProgress("job1", 1e3, 10e3);
+  assert(percent() === 5);
+  downloadProgress("job2", 1e3, 10e3);
+  assert(percent() === 10);
+  downloadProgress("job2", 5e3, 10e3);
+  assert(percent() === 25);
+  // Set job1 to 100%.
+  downloadProgress("job1", 10e3, 10e3);
+  assert(percent() === 75);
+  // Finish job1.
+  downloadProgress("job1", null, null);
+  // Since job1 is no longer active, and job2 is half done, the progress bar
+  // is now back at 50%.
+  // TODO: this is kinda weird.
+  assert(visible());
+  assert(percent() === 50);
+  // Set job2 to 100%.
+  downloadProgress("job2", 10e3, 10e3);
+  assert(visible());
+  assert(percent() === 100);
+  // Remove job2.
+  downloadProgress("job2", null, null);
+  assert(!visible());
+  assert(percent() === 0);
 });

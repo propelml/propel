@@ -32,6 +32,8 @@ export interface OutputHandler {
   downloadProgress(progress: Progress);
 }
 
+const progressOutputHandlerMap = new Map<string, OutputHandler>();
+
 export class OutputHandlerDOM implements OutputHandler {
   // TODO colors should match those used by the syntax highlighting.
   private color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -160,15 +162,32 @@ export class OutputHandlerDOM implements OutputHandler {
   }
 
   downloadProgress(progress: Progress) {
-    const outputContainer = this.element.parentNode as HTMLElement;
-    const progressBar = outputContainer.previousElementSibling as HTMLElement;
+    const job = progress.job;
+
+    // Ensure that the progress handler jobs are always handled by the same
+    // output handler, even when the notebook guesses the cell wrong.
+    // TODO: this is really hacky and should not be the responsibility of the
+    // output handler at all.
+    const outputHandler = progressOutputHandlerMap.get(job);
+    if (outputHandler === undefined) {
+      progressOutputHandlerMap.set(job, this);
+    } else if (outputHandler !== this) {
+      return outputHandler.downloadProgress(progress);
+    }
 
     if (progress.loaded === null) {
       // When loaded equals null, this indicates that the job is done.
-      this.progresses.delete(progress.job);
+      // TODO: this isn't really correct - the progress bar might go backwards
+      // when multiple parallel jobs are present and one completes before
+      // the other.
+      this.progresses.delete(job);
+      progressOutputHandlerMap.delete(job);
     } else {
-      this.progresses.set(progress.job, progress);
+      this.progresses.set(job, progress);
     }
+
+    const outputContainer = this.element.parentNode as HTMLElement;
+    const progressBar = outputContainer.previousElementSibling as HTMLElement;
 
     if (this.progresses.size === 0) {
       // If there are no more downloads in progress, hide the progress bar.
@@ -190,7 +209,6 @@ export class OutputHandlerDOM implements OutputHandler {
 
     // Avoid division by zero.
     const percent = sumTotal > 0 ? sumLoaded / sumTotal * 100 : 0;
-    console.log(percent);
     progressBar.style.display = "block";
     progressBar.style.width = `${percent}%`;
   }

@@ -136,7 +136,7 @@ export function destroySandbox(): void {
   sandboxIframe = null;
 }
 
-function sandbox(): RPC {
+export function sandbox(): RPC {
   if (sandboxRpc === null) {
     createSandbox();
   }

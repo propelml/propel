@@ -16,9 +16,9 @@
 import * as propel from "../src/api";
 import * as matplotlib from "../src/matplotlib";
 import * as mnist from "../src/mnist";
-import { setOutputHandler } from "../src/util";
+import * as test_internals from "./test_internals";
 
-import { global, globalEval } from "../src/util";
+import { global, globalEval, setOutputHandler } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
 import { RPC, WindowRPC } from "./rpc";
 
@@ -27,6 +27,7 @@ async function importModule(target) {
     matplotlib,
     mnist,
     propel,
+    test_internals
   }[target];
   if (m) {
     return m;
