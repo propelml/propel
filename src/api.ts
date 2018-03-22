@@ -169,3 +169,27 @@ export function conv2d(input: Tensor, filter: Tensor,
   assert(filter.rank === 4);
   return ops.conv2d(input, filter, Object.assign(defaults, opts));
 }
+
+/** Concatenates tensors along the specified axis:
+ *
+ *    import * as pr from "propel";
+ *    t = pr.tensor([[1, 2], [3, 4]]);
+ *    pr.concat([t, [[5, 6], [7, 8]]], 0);
+ */
+export function concat(tensors: types.TensorLike[], axis = 0): Tensor {
+  const first = tensors.shift() as Tensor;
+  tensors = tensors.map(t => first.colocate(t));
+  return ops.concat(axis, first, ...tensors);
+}
+
+/** Concatenates tensors along a new axis:
+ *
+ *    import * as pr from "propel"
+ *    a = pr.tensor([1, 2, 3])
+ *    b = pr.tensor([4, 5, 6])
+ *    pr.stack([a, b], 0)
+ */
+export function stack(tensors: types.TensorLike[], axis = 0): Tensor {
+  tensors = tensors.map(t => convert(t).expandDims(axis));
+  return concat(tensors, axis);
+}

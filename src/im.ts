@@ -15,7 +15,7 @@
 
 // This module allows Propel to read PNG and JPG images.
 
-import { fill, Tensor, tensor } from "./api";
+import { concat, fill, Tensor, tensor } from "./api";
 import { convert } from "./tensor";
 import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
@@ -60,11 +60,12 @@ export function toUint8Image(image: Tensor): Image {
     }
     if (channels === 1) {
       // Grayscale to RGB
-      image = image.concat(2, image, image);
+      image = concat([image, image, image], 2);
     }
     if (channels <= 3) {
       // RGB to RGBA
-      image = image.concat(2, fill(tensor(255, {dtype}), [height, width, 1]));
+      const alpha = fill(tensor(255, {dtype}), [height, width, 1]);
+      image = concat([image, alpha], 2);
     }
     // Convert to 1D array
     data = image
