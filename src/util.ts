@@ -201,8 +201,17 @@ async function fetch2<E extends FetchEncoding>(
 
 async function fetchRemoteFile<E extends FetchEncoding>(
     url: string, encoding: E): Promise<FetchEncodingMap[E]> {
-  const protocol = new URL(url).protocol;
-  const http = nodeRequire(protocol === "https:" ? "https" : "http");
+  const u = new URL(url);
+
+  // If we're in a testing environment, and trying to request
+  // something from propelml.org, skip the download and get it from the repo.
+  if (global.PROPEL_TESTER && u.hostname === "propelml.org") {
+    const path = nodeRequire("path");
+    url = path.join(__dirname, "../deps/", u.pathname);
+    return fetch2(url, encoding);
+  }
+
+  const http = nodeRequire(u.protocol === "https:" ? "https" : "http");
   const job = randomString();
 
   downloadProgress(job, 0, null); // Start download job with unknown size.
