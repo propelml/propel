@@ -32,6 +32,12 @@ import { RPC, WindowRPC } from "./rpc";
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
 
+export function resetNotebook() {
+  destroySandbox();
+  cellTable.clear();
+  nextCellId = 1;
+}
+
 const prerenderedOutputs = new Map<number, string>();
 
 export function registerPrerenderedOutput(output) {
@@ -125,7 +131,7 @@ function createSandbox(): void {
   sandboxRpc.start(rpcHandlers);
 }
 
-export function destroySandbox(): void {
+function destroySandbox(): void {
   if (!sandboxRpc) return;
 
   sandboxRpc.stop();
@@ -136,7 +142,7 @@ export function destroySandbox(): void {
   sandboxIframe = null;
 }
 
-function sandbox(): RPC {
+export function sandbox(): RPC {
   if (sandboxRpc === null) {
     createSandbox();
   }
@@ -556,9 +562,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   async componentWillMount() {
     try {
-      const doc = this.props.nbId === "anonymous"
-        ? anonDoc
-        : await db.active.getDoc(this.props.nbId);
+      const doc = await (this.props.nbId === "anonymous"
+                         ? Promise.resolve(anonDoc)
+                         : db.active.getDoc(this.props.nbId));
       this.setState({ doc });
     } catch (e) {
       this.setState({ errorMsg: e.message });

@@ -37,7 +37,7 @@ const progressOutputHandlerMap = new Map<string, OutputHandler>();
 export class OutputHandlerDOM implements OutputHandler {
   // TODO colors should match those used by the syntax highlighting.
   private color = d3.scaleOrdinal(d3.schemeCategory10);
-  private progresses = new Map<string, Progress>();
+  private progressJobs = new Map<string, Progress>();
 
   constructor(private element: Element) {}
 
@@ -180,16 +180,16 @@ export class OutputHandlerDOM implements OutputHandler {
       // TODO: this isn't really correct - the progress bar might go backwards
       // when multiple parallel jobs are present and one completes before
       // the other.
-      this.progresses.delete(job);
+      this.progressJobs.delete(job);
       progressOutputHandlerMap.delete(job);
     } else {
-      this.progresses.set(job, progress);
+      this.progressJobs.set(job, progress);
     }
 
     const outputContainer = this.element.parentNode as HTMLElement;
     const progressBar = outputContainer.previousElementSibling as HTMLElement;
 
-    if (this.progresses.size === 0) {
+    if (this.progressJobs.size === 0) {
       // If there are no more downloads in progress, hide the progress bar.
       progressBar.style.width = "0"; // Prevent it from going backwards.
       progressBar.style.display = "none";
@@ -198,7 +198,7 @@ export class OutputHandlerDOM implements OutputHandler {
 
     let sumLoaded = 0;
     let sumTotal = 0;
-    for (const [_, {loaded, total}] of this.progresses) {
+    for (const [_, {loaded, total}] of this.progressJobs) {
       // Total may be null if the size of the download isn't known yet.
       if (total === null) {
         continue;
