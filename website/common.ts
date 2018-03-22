@@ -12,8 +12,9 @@ export function Loading(props) {
 export function PropelLogo(props) {
   let subtitle = null;
   if (props.subtitle) {
-    subtitle = h("h2", null,
-      h("a", { href: props.subtitleLink || "/" }, props.subtitle));
+    subtitle = h("a", { "class": "global-sub-title-link",
+                        href: props.subtitleLink || "/" },
+      props.subtitle);
   }
   return h("div", { "class": "propel-logo" },
     h("div", { "class": "logo" },
@@ -27,22 +28,24 @@ export function PropelLogo(props) {
     ),
     h("div", { "class": "global-title" },
       h("div", { "class": "global-main-title" },
-        h("h1", null, h("a", { href: "/"  }, "Propel")),
-      ),
-      h("div", { "class": "global-sub-title" },
+        h("a", { href: "/", "class": "global-main-title-link" }, "Propel")),
+        h("div", { "class": "global-sub-title" },
         subtitle,
       ),
     ),
-
   );
 }
 
 export function Footer(props) {
   return h("div", { "class": "footer" },
-    h("a", { "href": "/references" }, "References"),
-    h("a", { "href": "/docs" }, "Documentation"),
-    h("a", { "href": "https://github.com/propelml/propel" }, "GitHub"),
-    h("a", { "href": "mailto:propelml@gmail.com" }, "Contact"),
+    h("div", { "class": "footer-links" }
+      h("a", { "href": "/references", "class": "footer-link" }, "References"),
+      h("a", { "href": "/docs", "class": "footer-link" }, "Documentation"),
+      h("a", { "class": "footer-link",
+               "href": "https://github.com/propelml/propel" }, "GitHub"),
+      h("a", { "href": "mailto:propelml@gmail.com", "class": "footer-link" },
+      "Contact"),
+    ),
   );
 }
 
