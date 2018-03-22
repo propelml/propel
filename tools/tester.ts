@@ -13,7 +13,14 @@
    limitations under the License.
  */
 
-import { IS_NODE } from "../src/util";
+import { global, IS_NODE } from "../src/util";
+
+// There are a few situations where we would like to branch based on if its a
+// test environment, particularly when it comes to datasets. We'd rather use
+// the local repo version than downloading a new copy each time. This should be
+// used extreme caution, as by definition it will introduce discrepancies
+// between runtime and test-time behavior.
+global.PROPEL_TESTER = true;
 
 export type TestFunction = () => void | Promise<void>;
 
