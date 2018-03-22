@@ -17,8 +17,9 @@ import * as os from "os";
 import * as path from "path";
 import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
-import { DiskExperiment, isDir } from "./disk_experiment";
+import { DiskExperiment } from "./disk_experiment";
 import { assert, assertAllEqual } from "./tensor_util";
+import { isDir } from "./util_node";
 
 function setup() {
   process.env.PROPEL_DIR = path.join(os.tmpdir(), "propel_test");

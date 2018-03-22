@@ -13,18 +13,19 @@
    limitations under the License.
  */
 import { tensor, Tensor } from "./api";
-import { assert, fetchArrayBuffer } from "./util";
+import * as cache from "./cache";
+import { assert } from "./util";
 
 export function filenames(split: string): [string, string] {
   if (split === "train") {
     return [
-      "deps/data/mnist/train-labels-idx1-ubyte.bin",
-      "deps/data/mnist/train-images-idx3-ubyte.bin",
+      "http://propelml.org/data/mnist/train-labels-idx1-ubyte.bin",
+      "http://propelml.org/data/mnist/train-images-idx3-ubyte.bin",
     ];
   } else if (split === "test") {
     return [
-      "deps/data/mnist/t10k-labels-idx1-ubyte.bin",
-      "deps/data/mnist/t10k-images-idx3-ubyte.bin",
+      "http://propelml.org/data/mnist/t10k-labels-idx1-ubyte.bin",
+      "http://propelml.org/data/mnist/t10k-images-idx3-ubyte.bin",
     ];
   } else {
     throw new Error(`Bad split: ${split}`);
@@ -48,7 +49,7 @@ export async function loadSplit(split: string):
 }
 
 async function loadFile2(href: string) {
-  const ab = await fetchArrayBuffer(href);
+  const ab = await cache.fetchWithCache(href);
   const i32 = new Int32Array(ab);
   const ui8 = new Uint8Array(ab);
 
