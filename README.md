@@ -13,7 +13,7 @@ We do intend to make a Promise of Compatibility in in the future; but
 it can't be done yet.
 
 Please have a look at our example neural network here
-https://github.com/propelml/propel/blob/master/example.ts
+https://github.com/propelml/propel/blob/master/example.js
 
 Also the documentation has many examples:
 http://propelml.org/docs
