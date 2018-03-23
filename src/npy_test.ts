@@ -38,6 +38,15 @@ test(async function npy_load() {
   util.assertAllClose(t, [0.1, 0.2]);
   util.assertShapesEqual(t.shape, [2]);
   util.assert(t.dtype === "float32");
+
+  /*
+   python -c "import numpy as np; np.save('uint8.npy', \
+          np.array([0, 127], 'uint8'))"
+  */
+  t = await npy.load("src/testdata/uint8.npy");
+  util.assertAllClose(t, [0, 127]);
+  util.assertShapesEqual(t.shape, [2]);
+  util.assert(t.dtype === "uint8");
 });
 
 test(async function npy_serialize() {
