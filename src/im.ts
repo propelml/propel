@@ -44,19 +44,18 @@ function toTensor(data: Uint8Array, height: number, width: number,
 }
 
 export function toUint8Image(image: Tensor): Image {
-  const shape = image.shape;
   const dtype = image.dtype;
-  const height = shape[0] as number;
-  const width = shape[1] as number;
+  const height = image.shape[0] as number;
+  const width = image.shape[1] as number;
   let data;
-  if (shape.length === 2) {
+  if (image.shape.length === 2) {
     // convert to a 3D tensor
     image = image.reshape([height, width, 1]);
   }
-  if (shape.length === 3) {
-    const channels = shape[2];
+  if (image.shape.length === 3) {
+    const channels = image.shape[2];
     if (channels > 4 || channels === 2) {
-      throw new Error(`${shape} does not match any valid image mode.`);
+      throw new Error(`${image.shape} does not match any valid image mode.`);
     }
     if (channels === 1) {
       // Grayscale to RGB
