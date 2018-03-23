@@ -54,6 +54,7 @@ body {
 }
 
 /* Centers and gives max-width to index, references, notebook pages */
+.training-example-inner,
 .use-it-inner,
 .flex-row,
 .references {
@@ -170,6 +171,14 @@ header {
     flex: 1 0 auto;
     align-self: center;
     height: $size1;
+  }
+}
+
+.training-example {
+  background: $lightGrey;
+
+  .training-example-inner {
+    padding: $size2 0;
   }
 }
 
