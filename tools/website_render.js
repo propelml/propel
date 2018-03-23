@@ -36,6 +36,16 @@ async function puppetRender(browser, url) {
             // Remove sandbox iframes.
             Array.from(document.getElementsByTagName("iframe"))
                  .forEach(el => el.parentNode.removeChild(el));
+
+            // Replace canvas images with dataURLs
+            const canvases = Array.from(document.querySelectorAll("canvas"));
+            for (const c of canvases) {
+              const dataURL = c.toDataURL();
+              const img = document.createElement("img");
+              img.setAttribute("src", dataURL);
+              c.parentNode.replaceChild(img, c);
+            }
+
             return document.documentElement.innerHTML;
           }
         );
