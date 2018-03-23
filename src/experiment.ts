@@ -27,7 +27,7 @@ import { gradParams } from "./backprop";
 import * as format from "./format";
 import { Params, params as createParams } from "./params";
 import { gc, NamedTensors, Tensor } from "./tensor";
-import { assert, IS_NODE } from "./util";
+import { assert, getOutputHandler, IS_NODE } from "./util";
 
 export interface ExperimentOpts {
   checkpointsToKeep?: number;
@@ -68,7 +68,15 @@ let lastPrint: Promise<void> = Promise.resolve();
 export async function print(...args: PrintArgs): Promise<void> {
   // All this is to make sure that log items are in the order they came.
   lastPrint = lastPrint.then(async() => {
-    console.log(await printHelper(...args));
+    // TODO this is a hack to get cell output working on the homepage. A better
+    // solution would be to globally replace the console object in sandbox.ts.
+    const oh = getOutputHandler();
+    const msg = await printHelper(...args);
+    if (oh) {
+      oh.print(msg);
+    } else {
+      console.log(msg);
+    }
   });
   await lastPrint;
 }
