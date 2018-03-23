@@ -68,6 +68,8 @@ test(async function api_range() {
   assertAllEqual(r2, [0, 1, 2, 3]);
   const r3 = range(4, 10, 2);
   assertAllEqual(r3, [4, 6, 8]);
+  const r4 = range(1, 10, 2);
+  assertAllEqual(r4, [1, 3, 5, 7, 9]);
 });
 
 test(async function api_randn() {
