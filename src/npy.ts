@@ -141,6 +141,13 @@ export function parse(ab: ArrayBuffer): Tensor {
     const ta = new Int32Array(s).filter((val, i) => i % 2 === 0);
     return fromTypedArrayAndShape(ta, header.shape);
 
+  } else if (header["descr"] === "|u1") {
+    // uint8.
+    util.assert(bytesLeft === size);
+    const s = ab.slice(pos, pos + size);
+    const ta = new Uint8Array(s);
+    return fromTypedArrayAndShape(ta, header.shape);
+
   } else {
     throw Error(`Unknown dtype "${header["descr"]}". Implement me.`);
   }
