@@ -60,6 +60,12 @@ export function plot(...args) {
   getOutputHandler().plot(data);
 }
 
+/** Displays a tensor as an image.
+ *
+ *    import { randn, imshow } from "propel"
+ *    img = randn([300, 300]).relu().mul(255);
+ *    imshow(img)
+ */
 export function imshow(tensor: Tensor): void {
   if (!getOutputHandler()) {
     console.warn("imshow: no output handler");
