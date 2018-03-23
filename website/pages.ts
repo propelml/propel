@@ -72,6 +72,7 @@ export const PropelIndex = (props) => {
     h(Intro, null),
     h(UseIt, null),
     h(Perks, null),
+    h(TrainingExample, null),
     h(Footer, null),
   );
 };
@@ -105,6 +106,18 @@ const Intro = () =>
     ),
     div("intro-notebook flex-cell", nb.cell(tanhGrads))
   );
+
+const tanhGrads = `
+import { grad, linspace, plot } from "propel";
+
+f = x => x.tanh();
+x = linspace(-4, 4, 200);
+plot(x, f(x),
+     x, grad(f)(x),
+     x, grad(grad(f))(x),
+     x, grad(grad(grad(f)))(x),
+     x, grad(grad(grad(grad(f))))(x))
+`;
 
 const UseIt = () =>
   div("use-it",
@@ -169,17 +182,51 @@ const Perks = () =>
     )
   );
 
-const tanhGrads = `
-import { grad, linspace, plot } from "propel";
+// TODO Use require instead of import in the trainingExampleCode.
+// So people can copy and past the code into the terminal.
+const trainingExampleCode = `
+import * as pr from "propel"
 
-f = x => x.tanh();
-x = linspace(-4, 4, 200);
-plot(x, f(x),
-     x, grad(f)(x),
-     x, grad(grad(f))(x),
-     x, grad(grad(grad(f)))(x),
-     x, grad(grad(grad(grad(f))))(x))
+let exp = await pr.experiment("exp001")
+let ds = pr.dataset("iris").batch(150)
+                           .repeat(1000)
+
+for (const batch of ds) {
+  let { features, labels } = await batch
+  exp.sgd({ lr: 0.01 }, (params) =>
+    features
+    .linear("L1", params, 4).relu()
+    .linear("L2", params, 3)
+    .softmaxLoss(labels))
+  // Delete to train.
+  break;
+}
 `;
+
+const TrainingExample = () =>
+  div("training-example",
+    div("training-example-inner",
+      h("h2", null, "Neural Networks"),
+      div("flex-row",
+        div("flex-cell", nb.cell(trainingExampleCode)),
+        div("flex-cell",
+          p(b("What are NNs anyway?"), `The terminology is a bit misleading. Any
+            number of operations and architectures can be considered a neural
+            network. The primary thing in common is that NN models use
+            differentiable operations to allow gradient decent to improve their
+            fitness.`),
+
+          p(`Propel provides a concise API for specifying, training, and
+            making inference in neural networks. In the example, a two layer
+            fully-connected ReLU network is being trained on the iris dataset.
+            Iris is a very small dataset where each training example is only
+            4 floating point features. There are three possible labels to apply.
+            As with all classification problems, we apply softmaxLoss to the
+            labels.`),
+        ),
+      )
+    )
+  );
 
 export let firebaseUrls = [
   "https://www.gstatic.com/firebasejs/4.9.0/firebase.js",
