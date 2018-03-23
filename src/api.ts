@@ -105,7 +105,7 @@ export function range(...args: number[]): Tensor {
 
     case 3:
       start = args[0];
-      limit = args[1];
+      limit = Math.ceil((args[1] - args[0]) / args[2]) * args[2] + args[0];
       delta = args[2];
       break;
 
