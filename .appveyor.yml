@@ -7,6 +7,7 @@ branches:
 cache:
  - "%APPDATA%\\npm"
  - "%USERPROFILE%\\.node-gyp"
+ - "%USERPROFILE%\\.propel\\cache"
  - .cache
  - .git\objects
 

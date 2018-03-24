@@ -16,10 +16,30 @@
 // Node-only test. Browsers have caching built-in.
 
 import * as fs from "fs";
+import * as path from "path";
+import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import * as cache from "./cache";
-import { assert, IS_NODE, nodeRequire } from "./util";
+import { assert, IS_NODE, nodeRequire, tmpdir } from "./util";
 import { isDir } from "./util_node";
+
+// Some large datasets are external to the repository, and we would like
+// to cache the downloads during CI. Only in these tests do we use
+// an alternative cache dir, in the tmp dir.
+function setup() {
+  if (IS_NODE) {
+    const d = path.join(tmpdir(), "propel_cache_test");
+    process.env.PROPEL_DIR = d;
+    rimraf.sync(d);
+    fs.mkdirSync(d);
+  }
+}
+
+function teardown() {
+  if (IS_NODE) {
+    delete process.env["PROPEL_DIR"];
+  }
+}
 
 // Helper function to start a local web server.
 // TODO should be moved to tools/tester eventually.
@@ -60,6 +80,7 @@ if (IS_NODE) {
 }
 
 test(async function cache_fetchWithCache() {
+  setup();
   cache.clearAll();
   await localServer(async function(url: string) {
     url += "/data/mnist/train-images-idx3-ubyte.bin";
@@ -69,4 +90,5 @@ test(async function cache_fetchWithCache() {
       assert(fs.existsSync(cache.url2Filename(url)));
     }
   });
+  teardown();
 });

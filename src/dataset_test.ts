@@ -17,6 +17,7 @@ import * as pr from "./api";
 import * as dataset from "./dataset";
 import { assert, assertAllClose, assertAllEqual, assertShapesEqual }
   from "./tensor_util";
+import { IS_NODE } from "./util";
 
 test(async function dataset_datasetFromSlices() {
   const labels = pr.tensor([
@@ -141,7 +142,6 @@ test(async function dataset_iterableEndCondition() {
     const { features } = await p;
     count += features.shape[0];
   }
-  console.log("count", count);
   assert(count === 12);
 });
 
@@ -160,4 +160,19 @@ test(async function dataset_shuffleSmoke() {
   assert(el2 != null);
   const el3 = await ds.next();
   assert(el3 == null);
+});
+
+test(async function dataset_cifar10() {
+  // Only test on Node because we have no cache in the browser
+  // and so it will download the whole cifar10 train set each
+  // time.
+  if (IS_NODE) {
+    const ds = await dataset.dataset("cifar10/train").batch(4);
+    const { images, labels } = await ds.next();
+    assertShapesEqual(images.shape, [4, 32, 32, 3]);
+    assertShapesEqual(labels.shape, [4]);
+    assertAllEqual(images.slice([0, 0, 0, 0], [1, 5, 1, 1]).squeeze(),
+      [59, 33, 97, 154, 142]);
+    assertAllEqual(labels, [6, 9, 9, 4]);
+  }
 });

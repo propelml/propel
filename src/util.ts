@@ -308,3 +308,7 @@ export function randomString(): string {
   //   mantisssa of IEEE754 double == 52 bits
   return (Math.random() + 1).toString(36).padEnd(12, "0").slice(2, 12);
 }
+
+export function tmpdir(): string {
+  return process.env.TEMP || process.env.TMPDIR || "/tmp";
+}
