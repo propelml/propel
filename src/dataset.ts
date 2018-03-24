@@ -20,6 +20,7 @@ import { isUndefined } from "util";
 import { stack, tensor, Tensor } from "./api";
 import * as cache from "./cache";
 import * as mnist from "./mnist";
+import * as npy from "./npy";
 import { NamedTensors } from "./tensor";
 import { assert, delay } from "./util";
 
@@ -29,6 +30,8 @@ export function datasetFromSlices(tensors: NamedTensors): Dataset {
 
 const datasets = {
   "breast_cancer": () => new SliceDataset(loadBreastCancer()),
+  "cifar10/test": () => new SliceDataset(cifar10Load("test")),
+  "cifar10/train": () => new SliceDataset(cifar10Load("train")),
   "iris": () => new SliceDataset(loadIris()),
   "mnist/test": () => new SliceDataset(mnist.loadSplit("test")),
   "mnist/train": () => new SliceDataset(mnist.loadSplit("train")),
@@ -36,7 +39,10 @@ const datasets = {
 };
 
 /** Loads a dataset. The available datasets are:
- * breast_cancer, iris, mnist/test, mnist/train, wine.
+ * breast_cancer, iris, wine,
+ * mnist/test, mnist/train,
+ * cifar10/train, cifar10/test.
+ *
  * Example:
  *
  *    import * as pr from "propel";
@@ -324,5 +330,25 @@ export async function loadWine():
 // boston_house_prices.csv
 // diabetes_data.csv.gz diabetes_target.csv.gz
 // digits.csv.gz
-// iris.csv
 // linnerud_exercise.csv linnerud_physiological.csv
+
+const cifar10URLs = {
+  test: {
+    images: "http://ar.propelml.org/cifar10_test_images.npy",
+    labels: "http://ar.propelml.org/cifar10_test_labels.npy",
+  },
+  train: {
+    images: "http://ar.propelml.org/cifar10_train_images.npy",
+    labels: "http://ar.propelml.org/cifar10_train_labels.npy",
+  },
+};
+
+export async function cifar10Load(splitName: string):
+    Promise<{images: Tensor, labels: Tensor}> {
+  const load = async(url) => npy.parse(await cache.fetchWithCache(url));
+  const [images, labels] = await Promise.all([
+    await load(cifar10URLs[splitName].images),
+    await load(cifar10URLs[splitName].labels),
+  ]);
+  return { images, labels };
+}

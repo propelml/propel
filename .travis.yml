@@ -2,6 +2,7 @@ cache:
   directories:
    - .cache
    - deps/node_modules/puppeteer/.local-chromium
+   - $HOME/.propel/cache
 branches:
   only:
   - master
