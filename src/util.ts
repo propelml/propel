@@ -233,7 +233,9 @@ async function fetchRemoteFile<E extends FetchEncoding>(
   if (encoding === "utf8") {
     return buffer.toString("utf8");
   } else {
-    return buffer;
+    const b = buffer;
+    return b.buffer.slice(b.byteOffset,
+      b.byteOffset + b.byteLength) as ArrayBuffer;
   }
 }
 
