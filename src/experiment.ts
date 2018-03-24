@@ -76,7 +76,7 @@ export async function print(...args: PrintArgs): Promise<void> {
 async function printHelper(...args: PrintArgs): Promise<string> {
   const strings = await Promise.all(args.map(async(arg) => {
     if (arg instanceof Tensor) {
-      return format.toString(arg.shape, await arg.data());
+      return format.toString(arg);
     } else {
       return arg;
     }
