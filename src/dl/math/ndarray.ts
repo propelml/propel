@@ -786,6 +786,11 @@ function copyTypedArray<D extends DataType>(
       }
     }
     return vals;
+  } else if (dtype === "uint8") {
+    const vals = new Uint8Array(array.length);
+    vals.set(array as DataTypeMap[D] | number[]);
+    return vals;
+
   } else if (dtype === "bool") {
     const bool = new Uint8Array(array.length);
     for (let i = 0; i < bool.length; ++i) {
