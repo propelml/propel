@@ -13,102 +13,229 @@
    limitations under the License.
  */
 // This module is just to implement tensor.toString.
-import { getDType } from "./tensor_util";
-import * as types from "./types";
+import { Tensor } from "./tensor";
 
-interface FormatOptions {
-  precision: number;
-  dtype: types.DType;
-  maxBefore: number;
-  maxAfter: number;
+export type FormatterFunction = (arg: any) => string;
+
+export interface Formatter {
+  int?: FormatterFunction;
+  float?: FormatterFunction;
 }
 
-function split(s, precision): [string, string] {
-  return s.toFixed(precision).replace(/0+$/, "").split(".", 2);
+export interface FormatOptions {
+  edgeitems?: number;
+  threshold?: number;
+  precision?: number;
+  linewidth?: number;
+  formatter?:  FormatterFunction | Formatter;
+  // TODO
+  // floatmode?: "fixed" | "unique" | "maxprec" | "maxprec_equal";
+  // nanstr?: string;
+  // infstr?: string;
+  // sign?: string;
+  // suppress?: boolean;
 }
 
-function preprocess(shape: types.Shape, data: types.TypedArray,
-                    precision: number): FormatOptions {
-  const dtype = getDType(data);
+let defaultFormatOptions: FormatOptions = {
+  // repr N leading and trailing items of each dimension
+  "edgeitems": 3,
+  // total items > triggers array summarization
+  "threshold": 1000,
+  // Precision of floating point representations.
+  "precision": 7,
+  "linewidth": 75,
+  "formatter": undefined,
+};
+
+export function setPrintoptions(options: FormatOptions) {
+  defaultFormatOptions = {
+    ...defaultFormatOptions,
+    ...options
+  };
+}
+
+export function getPrintoptions(): FormatOptions {
+  return { ...defaultFormatOptions };
+}
+
+function FloatFormatter(tensor, precision): FormatterFunction {
+  // TODO - This function needs some optimizations
+  // Also it does not generate same output as NumPy in somecases
+  const format = x => String(Number(x).toFixed(precision)).replace(/0+$/, "");
+  const data = tensor.dataSync();
   let maxBefore = 0;
   let maxAfter = 0;
-  for (let i = 0; i < data.length; i++) {
-    const [before, after] = data[i].toFixed(precision)
-                                   .replace(/0+$/, "")
-                                   .replace(/^-/, "")
-                                   .split(".", 2);
+  for (let i = 0; i < data.length; ++i) {
+    const [before, after] = format(data[i]).replace(/^-/, "").split(".", 2);
     if (maxBefore < before.length) maxBefore = before.length;
     if (maxAfter < after.length) maxAfter = after.length;
   }
-  // We removed the negative sign. We always want to leave room for it, even if
-  // there are no negative values. So add one more here.
   maxBefore += 1;
-  return { precision, dtype, maxBefore, maxAfter };
+  return function(x) {
+    const [before, after] = format(x).split(".", 2);
+    return " ".repeat(Math.max(maxBefore - before.length, 0)) + before +
+           "." + after + " ".repeat(Math.max(maxAfter - after.length, 0));
+  };
 }
 
-function formatNumber(value: number, opts: FormatOptions): string {
-  switch (opts.dtype) {
-      case "int32":
-      case "uint8":
-        return "" + value;
-      case "float32":
-        const [before, after] = split(value, opts.precision);
-        const b = opts.maxBefore - before.length;
-        const a = opts.maxAfter - after.length;
-        return " ".repeat(b) + before + "." + after + " ".repeat(a);
-      default:
-        throw new Error("Bad dtype.");
+function IntegerFormatter(tensor: Tensor): FormatterFunction {
+  let maxStrLen = 0;
+  if (tensor.size > 0) {
+    maxStrLen = Math.max(String(tensor.reduceMax()).replace(/^-/, "").length,
+                         String(tensor.reduceMin()).replace(/^-/, "").length);
   }
+  return function(x) {
+    x = String(x);
+    return (" ").repeat(Math.max(maxStrLen - x.length, 0)) + x;
+  };
 }
 
-export function toString(shape: types.Shape, data: types.TypedArray): string {
-  const PRECISION = 3;
-  let s;
-  const opts = preprocess(shape, data, PRECISION);
-  switch (shape.length) {
-    case 0:
-      return formatNumber(data[0], opts);
+// This function provides a way to get an element from a tensor by it's index.
+// indexableTensor(pr.range(200).reshape(2, 100))([1, 5])
+function indexableTensor(tensor: Tensor) {
+  const data = tensor.dataSync();
+  return function(index: number[]) {
+    const shape = [...tensor.shape];
+    shape.shift();
+    let flatIndex = 0;
+    for (let i = 0; i < index.length; ++i) {
+      flatIndex += shape.reduce((a, b) => a * b, 1) * index[i];
+      shape.shift();
+    }
+    return data[flatIndex];
+  };
+}
 
-    case 1:
-      s = "[";
-      for (let i = 0; i < shape[0]; i++) {
-        s += i === 0 ? "" : ", ";
-        s += formatNumber(data[i], opts);
-      }
-      s += "]";
-      return s;
-
-    case 2:
-      let w = 1;
-      for (let y = 0; y < shape[0]; y++) {
-        for (let x = 0; x < shape[1]; x++) {
-          const off = y * shape[1] + x;
-          const val = formatNumber(data[off], opts);
-          if (val.length > w) {
-            w = val.length;
-          }
-        }
-      }
-
-      s = "[";
-      for (let y = 0; y < shape[0]; y++) {
-        s += y === 0 ? "[" : "\n [";
-        for (let x = 0; x < shape[1]; x++) {
-          const off = y * shape[1] + x;
-          const val = formatNumber(data[off], opts);
-          s += x === 0 ? "" : ", ";
-          s += (val as any).padStart(w);
-        }
-        s += "]";
-        // Add trailing comma to row.
-        if (y !== shape[0] - 1) {
-          s += ",";
-        }
-      }
-      s += "]";
-      return s;
-
-    default:
-      return "Tensor([" + shape + "])";
+function extendLine(s, line, word, lineWidth, nextLinePrefix) {
+  const needsWrap = (line.length + word.length) > lineWidth;
+  if (needsWrap) {
+    s += line.trimRight() + "\n";
+    line = nextLinePrefix;
   }
+  line += word;
+  return [s, line];
+}
+
+function formatTensor(t: Tensor, formatFunction: FormatterFunction,
+                      lineWidth: number, nextLinePrefix: string,
+                      separator: string, edgeItems: number,
+                      summaryInsert: string): string {
+  const get = indexableTensor(t);
+  const recurser = (index: number[], hangingIndent: string,
+                    currWidth: number) => {
+    const axis = index.length;
+    const axesLeft = t.rank - axis;
+
+    if (axesLeft === 0) {
+      return formatFunction(get(index));
+    }
+
+    // When recursing, add a space to align with the [ added, and reduce the
+    // length of the line by 1.
+    const nextHangingIndent = hangingIndent + " ";
+    const nextWidth = currWidth - ("]").length;
+    const tLen = t.shape[axis];
+    const showSummary = summaryInsert.length > 0 && 2 * edgeItems < tLen;
+
+    let leadingItems = 0;
+    let trailingItems = tLen;
+    if (showSummary) {
+      leadingItems = edgeItems;
+      trailingItems = edgeItems;
+    }
+
+    // Stringify the array with the hanging indent on the first line too.
+    let s = "";
+
+    // Last axis (rows) - wrap elements if they would not fit on one line.
+    if (axesLeft === 1) {
+      // 1 for (']').length
+      const elemWidth = currWidth - Math.max(separator.trimRight().length, 1);
+      let line = hangingIndent;
+      for (let i = 0; i < leadingItems; ++i) {
+        const word = recurser([...index, i], nextHangingIndent, nextWidth);
+        [s, line] = extendLine(s, line, word, elemWidth, hangingIndent);
+        line += separator;
+      }
+      if (showSummary) {
+        [s, line] = extendLine(s, line, summaryInsert,
+                               elemWidth, hangingIndent);
+        line += separator;
+      }
+      for (let i = trailingItems; i > 1; --i) {
+        const word = recurser([...index, (t.shape[axis] - i)],
+                              nextHangingIndent, nextWidth);
+        [s, line] = extendLine(s, line, word, elemWidth, hangingIndent);
+        line += separator;
+      }
+      const word = recurser([...index, (t.shape[axis] - 1)],
+                            nextHangingIndent, nextWidth);
+      [s, line] = extendLine(s, line, word, elemWidth, hangingIndent);
+      s += line;
+    } else {
+      // Other axes - insert newlines between rows.
+      const lineSep = separator.trimRight() + "\n".repeat(axesLeft - 1);
+      for (let i = 0; i < leadingItems; ++i) {
+        const nested = recurser([...index, i], nextHangingIndent, nextWidth);
+        s += hangingIndent + nested + lineSep;
+      }
+      if (showSummary) {
+        s += hangingIndent + summaryInsert + lineSep;
+      }
+      for (let i = trailingItems; i > 1; --i) {
+        const nested = recurser([...index, (t.shape[axis] - i)],
+                                nextHangingIndent, nextWidth);
+        s += hangingIndent + nested + lineSep;
+      }
+      const nested = recurser([...index, (t.shape[axis] - 1)],
+                              nextHangingIndent, nextWidth);
+      s += hangingIndent + nested;
+    }
+    // Remove the hanging indent, and wrap in [].
+    return `[${s.slice(hangingIndent.length)}]`;
+  };
+  return recurser([], nextLinePrefix, lineWidth);
+}
+
+function getFormatFunction(tensor: Tensor, opts: FormatOptions)
+    : FormatterFunction {
+  if (opts.formatter && opts.formatter[tensor.dtype]) {
+    return opts.formatter[tensor.dtype];
+  }
+  switch (tensor.dtype){
+    case "int32":
+    case "uint8":
+      return IntegerFormatter(tensor);
+    case "float32":
+      return FloatFormatter(tensor, opts.precision);
+  }
+  throw new Error("Unsupported dtype.");
+}
+
+export function toString(tensor: Tensor, opts: FormatOptions = {},
+                         separator = ", ", prefix = ""): string {
+  // The str of 0d arrays is a special case: It should appear like a scalar.
+  if (tensor.rank === 0) {
+    return tensor.dataSync()[0] + "";
+  }
+  opts = {
+    ...defaultFormatOptions,
+    ...opts
+  };
+
+  let summaryInsert;
+  if (tensor.size > opts.threshold) {
+    // TODO summarize the output.
+    summaryInsert = "...";
+  } else {
+    summaryInsert = "";
+  }
+
+  // Get formatter for this dtype.
+  const formatFunction = getFormatFunction(tensor, opts);
+
+  const nextLinePrefix =  " ";
+  return formatTensor(tensor, formatFunction, opts.linewidth,
+                      nextLinePrefix, separator, opts.edgeitems,
+                      summaryInsert);
 }

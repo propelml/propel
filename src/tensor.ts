@@ -176,7 +176,7 @@ export class Tensor implements types.Storage {
    *    range(200).reshape([100, 2]).size
    */
   get size(): number {
-    return this.shape.reduce((a, b) => a * b);
+    return this.shape.reduce((a, b) => a * b, 1);
   }
 
   /** Returns the tensor as a printable string.
@@ -184,8 +184,8 @@ export class Tensor implements types.Storage {
    *    import * as pr from "propel";
    *    console.log(pr.eye(5).toString());
    */
-  toString(): string {
-    return format.toString(this.shape, this.dataSync());
+  toString(opts?: format.FormatOptions): string {
+    return format.toString(this, opts);
   }
 
   /** Copies the tensor to the specified device (usually "CPU:0" or "GPU:0").
