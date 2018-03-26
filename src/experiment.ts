@@ -137,7 +137,7 @@ export abstract class Experiment {
   }
 
   /** Performs SGD given the loss and current parameters. */
-  sgd(opts: SGDOpts, lossFn: LossFn) {
+  sgd(opts: SGDOpts, lossFn: LossFn): void {
     return this.minimize(sgd, opts, lossFn);
   }
 
@@ -171,7 +171,7 @@ export abstract class Experiment {
   }
 
   /** Modifies the current parameters given the loss and optimizer. */
-  async minimize(optimizer: Optimizer, opts: SGDOpts, lossFn: LossFn) {
+  minimize(optimizer: Optimizer, opts: SGDOpts, lossFn: LossFn): void {
     this.step_++;
     let loss;
     gc((keep) => {
