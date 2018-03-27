@@ -29,7 +29,7 @@ import { isDir } from "./util_node";
 function setup() {
   if (IS_NODE) {
     const d = path.join(tmpdir(), "propel_cache_test");
-    process.env.PROPEL_DIR = d;
+    process.env.PROPEL_ROOT = d;
     rimraf.sync(d);
     fs.mkdirSync(d);
   }
@@ -37,7 +37,7 @@ function setup() {
 
 function teardown() {
   if (IS_NODE) {
-    delete process.env["PROPEL_DIR"];
+    delete process.env["PROPEL_ROOT"];
   }
 }
 

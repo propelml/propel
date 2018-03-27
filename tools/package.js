@@ -130,6 +130,9 @@ async function buildAndTest() {
   const testDir = path.join(tmpDir, "propel_npm_test");
   run.rmrf(testDir);
   run.mkdir(testDir);
+  run.mkdir(testDir);
+  const propelRoot = path.join(testDir, "propel_root");
+  run.mkdir(propelRoot);
 
   // Pretend we're the tar module. Copy package.json into the npm directory so it
   // doesn't warn about not having description or repository fields.
@@ -149,7 +152,7 @@ async function buildAndTest() {
   }
   exampleCode = exampleCode.replace("train(3000)", "train(2)");
   fs.writeFileSync("test.js", exampleCode);
-  run.sh("node test.js", { PROPEL_DIR: testDir });
+  run.sh("node test.js", { PROPEL_ROOT: propelRoot });
 
   console.log("npm publish %s", propelPkgFn);
   console.log("npm publish %s", tfPkgFn);
