@@ -22,7 +22,7 @@ import { flatten, inferShape, isTypedArray, makeTypedArray }
   from "./tensor_util";
 import * as tf from "./tf";
 import * as types from "./types";
-import { deepCloneArray, IS_WEB } from "./util";
+import { deepCloneArray, IS_WEB, process } from "./util";
 
 // These globals will be set by onLoad
 export let backend: string;

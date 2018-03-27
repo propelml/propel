@@ -13,12 +13,11 @@
    limitations under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { assert } from "./util";
+import { assert, nodeRequire, process } from "./util";
 
 export function isDir(p: string): boolean {
   try {
+    const fs = nodeRequire("fs");
     return fs.statSync(p).isDirectory();
   } catch (e) {
     if (e.code === "ENOENT") return false;
@@ -33,16 +32,16 @@ export function propelDir(): string {
   } else {
     const homeDir = process.platform === "win32" ? process.env.USERPROFILE
                                                  : process.env.HOME;
-    return path.join(homeDir, ".propel/");
+    return nodeRequire("path").join(homeDir, ".propel/");
   }
 }
 
 /** Recursive mkdir. */
 export function mkdirp(dirname: string): void {
   if (!isDir(dirname)) {
-    const parentDir = path.dirname(dirname);
+    const parentDir = nodeRequire("path").dirname(dirname);
     assert(parentDir !== dirname && parentDir.length > 1);
     mkdirp(parentDir);
-    fs.mkdirSync(dirname);
+    nodeRequire("fs").mkdirSync(dirname);
   }
 }

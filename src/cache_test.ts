@@ -20,7 +20,7 @@ import * as path from "path";
 import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import * as cache from "./cache";
-import { assert, IS_NODE, nodeRequire, tmpdir } from "./util";
+import { assert, IS_NODE, nodeRequire, process, tmpdir } from "./util";
 import { isDir } from "./util_node";
 
 // Some large datasets are external to the repository, and we would like

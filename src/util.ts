@@ -30,6 +30,11 @@ export const global = globalEval("this");
 export const IS_WEB = global.window !== undefined;
 export const IS_NODE = !IS_WEB;
 
+// Parcel tries to be smart and replaces the process and Buffer object.
+export const process = IS_NODE ? globalEval("process") : null;
+// tslint:disable-next-line:variable-name
+export const Buffer = IS_NODE ? globalEval("Buffer") : null;
+
 if (IS_NODE) {
   process.on("unhandledRejection", (error) => {
     throw error;

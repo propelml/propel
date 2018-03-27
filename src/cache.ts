@@ -18,9 +18,9 @@
 // a training program, we provide a local cache of these datasets.
 // The $HOME/.propel/cache directory is where these files will be stored.
 
-import * as path from "path";
 import * as rimraf from "rimraf";
-import { assert, fetchArrayBuffer, IS_WEB, nodeRequire, URL } from "./util";
+import { assert, Buffer, fetchArrayBuffer, IS_WEB, nodeRequire, URL }
+  from "./util";
 import { mkdirp, propelDir } from "./util_node";
 
 export interface Cache {
@@ -47,7 +47,7 @@ export function clearAll(): Promise<void> {
 }
 
 function cacheBase(): string {
-  return path.resolve(propelDir(), "cache");
+  return nodeRequire("path").resolve(propelDir(), "cache");
 }
 
 // Maps a URL to a cache filename. Example:
@@ -68,6 +68,7 @@ export function url2Filename(url: string): string {
   const p = encodeURI(u.pathname);
   assert(p.indexOf("..") < 0, "Safety sanity check");
   assert(h.indexOf("..") < 0, "Safety sanity check");
+  const path = nodeRequire("path");
   // Note we purposely leave the port out of the cache path because
   // Windows doesn't allow colons in filenames. This is probably fine
   // in 99% of cases and is the simplest solution.
@@ -89,6 +90,7 @@ if (IS_WEB) {
 } else {
   // Node caching uses the disk.
   const fs = nodeRequire("fs");
+  const path = nodeRequire("path");
 
   cacheImpl = {
     async clearAll(): Promise<void> {

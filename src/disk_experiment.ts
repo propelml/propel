@@ -17,14 +17,15 @@
 // This is included in a separate file so it doesn't get included in
 // the browser bundle.
 
-import * as fs from "fs";
-import * as path from "path";
 import * as rimraf from "rimraf";
 import { Experiment, ExperimentOpts, print }  from "./experiment";
 import * as npy from "./npy";
 import { Params, params as createParams } from "./params";
-import { assert } from "./util";
+import { assert, Buffer, nodeRequire, process } from "./util";
 import { isDir, propelDir } from "./util_node";
+
+const fs = nodeRequire("fs");
+const path = nodeRequire("path");
 
 export class DiskExperiment extends Experiment {
   constructor(readonly name: string, opts?: ExperimentOpts) {
@@ -92,7 +93,7 @@ export class DiskExperiment extends Experiment {
 
   async deleteCheckpoint(step: number): Promise<void> {
     const p = this.checkpointPath(step);
-    rimraf.sync(p);
+    rimraf.sync(p, { unlinkSync: fs.unlinkSync });
     await print("Checkpoint deleted", p);
   }
 
