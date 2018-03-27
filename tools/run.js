@@ -90,7 +90,7 @@ function parcel(inFile, outDir, debug) {
   const bundler = new Bundler(inFile, {
     cache: true,
     logLevel: process.env.CI ? 1 : null,
-    minify: !debug,
+    minify: false,
     outDir,
     production: !debug,
     watch: false
