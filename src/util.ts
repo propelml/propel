@@ -163,6 +163,9 @@ async function fetch2<E extends FetchEncoding>(
       p = p.replace("deps/", "http://propelml.org/");
       p = p.replace(/^src\//, "http://propelml.org/src/");
     }
+    if (global.PROPEL_TESTER) {
+      p = p.replace("http://propelml.org/", "/");
+    }
     try {
       const req = new XMLHttpRequest();
       const onLoad = createResolvable();
