@@ -25,10 +25,10 @@ export function isDir(p: string): boolean {
   }
 }
 
-/** Returns "$HOME/.propel/" or PROPEL_DIR env var. */
+/** Returns "$HOME/.propel/" or PROPEL_ROOT env var. */
 export function propelDir(): string {
-  if (process.env.PROPEL_DIR) {
-    return process.env.PROPEL_DIR;
+  if (process.env.PROPEL_ROOT) {
+    return process.env.PROPEL_ROOT;
   } else {
     const homeDir = process.platform === "win32" ? process.env.USERPROFILE
                                                  : process.env.HOME;

@@ -23,12 +23,12 @@ import { process } from "./util";
 import { isDir } from "./util_node";
 
 function setup() {
-  process.env.PROPEL_DIR = path.join(os.tmpdir(), "propel_test");
-  console.log("PROPEL_DIR", process.env.PROPEL_DIR);
-  if (fs.existsSync(process.env.PROPEL_DIR)) {
-    console.log("rm -rf PROPEL_DIR", process.env.PROPEL_DIR);
-    rimraf.sync(process.env.PROPEL_DIR);
-    fs.mkdirSync(process.env.PROPEL_DIR);
+  process.env.PROPEL_ROOT = path.join(os.tmpdir(), "propel_test");
+  console.log("PROPEL_ROOT", process.env.PROPEL_ROOT);
+  if (fs.existsSync(process.env.PROPEL_ROOT)) {
+    console.log("rm -rf PROPEL_ROOT", process.env.PROPEL_ROOT);
+    rimraf.sync(process.env.PROPEL_ROOT);
+    fs.mkdirSync(process.env.PROPEL_ROOT);
   }
 }
 
@@ -36,7 +36,7 @@ test(async function disk_experiment_saveRestore() {
   setup();
   const exp = new DiskExperiment("exp1");
   await exp.createOrRestore();
-  const expDir = path.join(process.env.PROPEL_DIR, "exp1");
+  const expDir = path.join(process.env.PROPEL_ROOT, "exp1");
   assert(isDir(expDir));
   assert(fs.readdirSync(expDir).length === 0);
   const checkpoints = await exp.checkpoints();
