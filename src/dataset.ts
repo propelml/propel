@@ -69,16 +69,36 @@ abstract class Dataset {
   }
 
   // Most of the datasets just pass their reset calls upward.
+  /** Resets dataset iterator to start position. */
   reset(): void {
     if (this.parent) this.parent.reset();
   }
 
+  /** Indicates whether iterator has completed. */
   abstract get done(): boolean;
 
+  /** Returns an iterator over batched datasets: each item is a promise to
+   * a batch of data, which is an object of two named tensors: labels and either
+   * features or images (depending on the data set loaded).
+   * batchSize determines the number of training examples to run through the
+   * network at a time. Smaller batches reduce memory usage but also decrease
+   * accuracy of gradient descent.
+   * If the size of the dataset is not divisible by the batch size, the final
+   * batch will contain smaller tensors of the remaining data.
+   */
   batch(batchSize: number): Dataset {
     return new BatchDataset(this, batchSize);
   }
 
+  /** Returns an iterator which runs through the parent data set 'count' number
+   * of times. Example:
+   *
+   *    import * as pr from "propel";
+   *    const ds = pr.dataset("mnist/train").batch(150).repeat(100);
+   *
+   * This creates an iterator which runs through the entire batched dataset 100
+   * times - i.e. for 100 epochs.
+   */
   repeat(count?: number): Dataset {
     return new RepeatDataset(this, count);
   }
