@@ -201,6 +201,29 @@ testBrowser(async function notebook_progressBar() {
   assert(percent() === 0);
 });
 
+testBrowser(async function notebook_profileSmoke() {
+  let mdb = db.enableMock();
+  resetPage();
+  let el = h(nb.Profile, { profileUid: "non-existant" });
+  render(el, document.body);
+  await Promise.resolve(); // Wait for promise queue to flush.
+  let profileBlurbs = document.querySelectorAll(".profile-blurb");
+  assert(profileBlurbs.length === 0);
+  assert(objectsEqual(mdb.counts, { queryProfile: 1 }));
+
+  // Try again with a real uid.
+  mdb = db.enableMock();
+  resetPage();
+  el = h(nb.Profile, { profileUid: db.defaultOwner.uid });
+  render(el, document.body);
+  await Promise.resolve(); // Wait for promise queue to flush.
+  profileBlurbs = document.querySelectorAll(".profile-blurb");
+  console.log(profileBlurbs);
+  assert(profileBlurbs.length === 1);
+  assert(objectsEqual(mdb.counts, { queryProfile: 1 }));
+
+});
+
 // Call this to ensure that the DOM has been updated after events.
 function flush(): Promise<void> {
   rerender();
