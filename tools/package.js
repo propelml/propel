@@ -7,8 +7,10 @@ const fs = require("fs");
 const path = require("path");
 const config = require("./config");
 const { execSync } = require("child_process");
+const Bundler = require("parcel-bundler");
 
 const clean = process.argv.includes("clean");
+const debug = process.argv.includes("debug");
 
 if (clean) {
   run.rmrf("build");
@@ -70,7 +72,19 @@ async function npmPack(name, cb) {
 
 async function buildAndTest() {
   const propelPkgFn = await npmPack("propel", async distDir => {
-    await run.parcel("src/api.ts", distDir);
+    const opts = {
+      cache: true,
+      hmr: false,
+      minify: false,
+      outDir: distDir,
+      production: !debug,
+      publicUrl: "/",
+      target: "browser",
+      watch: false,
+    };
+    let b = new Bundler("src/api.ts", opts);
+    await b.bundle();
+
     const genFn = distDir + "/api.js";
     const mainFn = distDir + "/propel.js";
     fs.renameSync(genFn, mainFn);
