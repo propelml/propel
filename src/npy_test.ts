@@ -3,7 +3,7 @@ import * as pr from "./api";
 import * as npy from "./npy";
 import * as util from "./tensor_util";
 import * as types from "./types";
-import { IS_NODE } from "./util";
+import { Buffer, IS_NODE } from "./util";
 
 // Because the python interop test requires python and numpy installed
 // it is turned off by default here. The option is left for debugging

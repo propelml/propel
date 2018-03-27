@@ -127,15 +127,15 @@ async function buildAndTest() {
   execSync("npm install " + tfPkgFn, { stdio: "inherit" });
 
   // Quick test that it works.
-  fs.writeFileSync("test.js", `
-    let propel = require('propel');
-    console.log("propel", propel);
-    let tensor = require('propel').tensor;
-    console.log(tensor([1, 2, 3]).mul(42));
-    console.log("Using backend: %s", propel.backend);
-    if (propel.backend !== "tf") throw Error("Bad backend");
-  `);
-  run.sh("node test.js");
+  // TODO This only tests our example.js API when we really need to test
+  // the entire Propel API.
+  let exampleCode = fs.readFileSync(__dirname + "/../example.js", "utf8");
+  if (exampleCode.indexOf("train(3000)") < 0) {
+    throw Error("Sanity check of example code failed.");
+  }
+  exampleCode = exampleCode.replace("train(3000)", "train(2)");
+  fs.writeFileSync("test.js", exampleCode);
+  run.sh("node test.js", { PROPEL_DIR: testDir });
 
   console.log("npm publish %s", propelPkgFn);
   console.log("npm publish %s", tfPkgFn);

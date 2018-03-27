@@ -19,6 +19,7 @@ import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import { DiskExperiment } from "./disk_experiment";
 import { assert, assertAllEqual } from "./tensor_util";
+import { process } from "./util";
 import { isDir } from "./util_node";
 
 function setup() {
