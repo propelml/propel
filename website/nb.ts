@@ -435,6 +435,7 @@ export interface NotebookRootProps {
 
 export interface NotebookRootState {
   nbId?: string;
+  profileUid?: string;
 }
 
 export class NotebookRoot extends Component<NotebookRootProps,
@@ -450,7 +451,10 @@ export class NotebookRoot extends Component<NotebookRootProps,
       nbId = matches ? matches[1] : null;
     }
 
-    this.state = { nbId };
+    const matches = window.location.search.match(/profile=(\w+)/);
+    const profileUid = matches ? matches[1] : null;
+
+    this.state = { nbId, profileUid };
   }
 
   render() {
@@ -460,8 +464,14 @@ export class NotebookRoot extends Component<NotebookRootProps,
         nbId: this.state.nbId,
         userInfo: this.props.userInfo,
       });
+    } else if (this.state.profileUid) {
+      body = h(Profile, {
+          profileUid: this.state.profileUid,
+      });
     } else {
-      body = h(MostRecent, null);
+      body = h(MostRecent, {
+        uid: this.props.userInfo ? this.props.userInfo.uid : "",
+      });
     }
 
     return h("div", { "class": "notebook" },
@@ -474,26 +484,29 @@ export class NotebookRoot extends Component<NotebookRootProps,
   }
 }
 
+export interface MostRecentProps {
+  uid: string;
+}
+
 export interface MostRecentState {
   latest: db.NbInfo[];
+  own: db.NbInfo[];
 }
 
 function nbUrl(nbId: string): string {
-  // Careful, S3 is finicy about what URLs it serves. So
+  // Careful, S3 is finicky about what URLs it serves. So
   // /notebook?nbId=blah  will get redirect to /notebook/
   // because it is a directory with an index.html in it.
   const u = window.location.origin + "/notebook/?nbId=" + nbId;
   return u;
 }
 
-export class MostRecent extends Component<any, MostRecentState> {
+export class MostRecent extends Component<MostRecentProps, MostRecentState> {
   async componentWillMount() {
-    // Only query firebase when in the browser.
-    // This is to avoiding calling into firebase during static HTML generation.
-    if (IS_WEB) {
-      const latest = await db.active.queryLatest();
-      this.setState({latest});
-    }
+    // TODO potentially these two queries can be combined into one.
+    const latest = await db.active.queryLatest();
+    const own = await db.active.queryProfile(this.props.uid, 3);
+    this.setState({latest, own});
   }
 
   async onCreate() {
@@ -504,23 +517,16 @@ export class MostRecent extends Component<any, MostRecentState> {
   }
 
   render() {
-    if (!this.state.latest) {
+    if (!this.state.latest || !this.state.own) {
       return h(Loading, null);
     }
-    const notebookList = this.state.latest.map(info => {
-      const snippit = db.getInputCodes(info.doc).join("\n").slice(0, 100);
-      const href = nbUrl(info.nbId);
-      return h("a", { href },
-        h("li", null,
-          h("div", { "class": "code-snippit" }, snippit),
-          notebookBlurb(info.doc, false),
-        ),
-      );
-    });
+
+    const empty = !this.state.own ?
+        h("p", {"class": "most-recent-header"}, "Nothing to show yet.") : "";
     return h("div", { "class": "most-recent" },
       h("div", {"class": "most-recent-header"},
         h("div", {"class": "most-recent-header-title"},
-          h("h2", null, "Recently Updated"),
+          h("h2", null, "Your Most Recent Notebooks"),
         ),
         h("div", {"class": "most-recent-header-cta"},
           h("button", { "class": "create-notebook",
@@ -528,7 +534,63 @@ export class MostRecent extends Component<any, MostRecentState> {
           }, "+ New Notebook"),
         ),
       ),
-      h("ol", null, ...notebookList),
+      empty,
+      h("ol", null, ...notebookList(this.state.own)),
+      h("div", {"class": "most-recent-header"},
+        h("div", {"class": "most-recent-header-title"},
+          h("h2", null, "Recently Updated"),
+        ),
+      ),
+      h("ol", null, ...notebookList(this.state.latest)),
+    );
+  }
+}
+
+export interface ProfileProps {
+  profileUid: string;
+}
+
+export interface ProfileState {
+  latest: db.NbInfo[];
+}
+
+export class Profile extends Component<ProfileProps, ProfileState> {
+  async componentWillMount() {
+    const latest = await db.active.queryProfile(this.props.profileUid, 100);
+    this.setState({ latest });
+  }
+
+  render() {
+    if (!this.state.latest) {
+      return h(Loading, null)
+    } else if (this.state.latest.length === 0) {
+      return h("h1", null, "User has no notebooks");
+    }
+    const doc = this.state.latest[0].doc;
+    const profileBlurb = h("div", { "class": "blurb" }, null, [
+      h("div", { "class": "blurb-avatar" },
+        h(Avatar, { userInfo: doc.owner }),
+      ),
+      h("div", { "class": "blurb-name" },
+        h("p", { "class": "displayName" }, doc.owner.displayName),
+      ),
+      h("div", { "class": "date-created" },
+        h("p", { "class": "created" },
+          `Most Recent Update ${fmtDate(doc.updated)}.`),
+      ),
+    ]);
+
+    return h("div", null,
+      h("div", {"class": "profile-blurb"}, profileBlurb),
+      h("div", { "class": "most-recent" },
+        h("div", {"class": "most-recent-header"},
+          h("div", {"class": "most-recent-header-title"},
+            h("h2", null,
+              doc.owner.displayName + "'s Recently Updated Notebooks")
+          ),
+        ),
+        h("ol", null, ...notebookList(this.state.latest)),
+      )
     );
   }
 }
@@ -595,7 +657,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     this.setState({ editingTitle: false });
     doc.title = this.titleInput.value;
     this.update(doc);
-   }
+  }
 
   async onDelete(i) {
     const doc = this.state.doc;
@@ -719,6 +781,19 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 }
 
+function notebookList(notebooks: db.NbInfo[]): JSX.Element[] {
+  return notebooks.map(info => {
+    const snippit = db.getInputCodes(info.doc).join("\n").slice(0, 100);
+    const href = nbUrl(info.nbId);
+    return h("a", { href },
+      h("li", null,
+        h("div", { class: "code-snippit" }, snippit),
+        notebookBlurb(info.doc, false)
+      )
+    );
+  });
+}
+
 function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
   const dates = !showDates ? [] : [
     h("div", { "class": "date-created" },
@@ -728,12 +803,17 @@ function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
       h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
     ),
   ];
+  const profileUrl = window.location.origin + "/notebook/?profile=" +
+                     doc.owner.uid;
   return h("div", { "class": "blurb" }, null, [
     h("div", { "class": "blurb-avatar" },
       h(Avatar, { userInfo: doc.owner }),
     ),
     h("div", { "class": "blurb-name" },
-      h("p", { "class": "displayName" }, doc.owner.displayName),
+      h("a", {
+        "class": "displayName",
+        "href": profileUrl
+      }, doc.owner.displayName),
     ),
     ...dates
   ]);

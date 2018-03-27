@@ -26,6 +26,7 @@ export interface Database {
   updateDoc(nbId: string, doc: NotebookDoc): Promise<void>;
   clone(existingDoc: NotebookDoc): Promise<string>;
   create(): Promise<string>;
+  queryProfile(uid: string, limit: number): Promise<NbInfo[]>;
   queryLatest(): Promise<NbInfo[]>;
   signIn(): void;
   signOut(): void;
@@ -167,6 +168,19 @@ class DatabaseFB implements Database {
     return out.reverse();
   }
 
+  async queryProfile(uid: string, limit: number): Promise<NbInfo[]> {
+    lazyInit();
+    const query = nbCollection.where("owner.uid", "==", uid).limit(limit);
+    const snapshots = await query.get();
+    const out = [];
+    snapshots.forEach(snap => {
+      const nbId = snap.id;
+      const doc = snap.data();
+      out.push({ nbId, doc });
+    });
+    return out;
+  }
+
   signIn() {
     lazyInit();
     const provider = new firebase.auth.GithubAuthProvider();
@@ -222,6 +236,15 @@ export class DatabaseMock implements Database {
   async create(): Promise<string> {
     this.inc("create");
     return "createdNbId";
+  }
+
+  async queryProfile(uid: string, limit: number): Promise<NbInfo[]> {
+    this.inc("queryProfile");
+    if (uid === defaultOwner.uid) {
+      return [{ nbId: "default", doc: defaultDoc }];
+    } else {
+      return [];
+    }
   }
 
   async queryLatest(): Promise<NbInfo[]> {
