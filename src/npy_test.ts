@@ -1,5 +1,6 @@
 import { test } from "../tools/tester";
 import * as pr from "./api";
+import { propelURL } from "./fetch";
 import * as npy from "./npy";
 import * as util from "./tensor_util";
 import * as types from "./types";
@@ -13,19 +14,19 @@ const testPython = false;
 
 test(async function npy_load() {
   // python -c "import numpy as np; np.save('1.npy', [1.5, 2.5])"
-  let t = await npy.load("src/testdata/1.npy");
+  let t = await npy.load(propelURL + "src/testdata/1.npy");
   util.assertAllEqual(t, [ 1.5, 2.5 ]);
   util.assertShapesEqual(t.shape, [2]);
   util.assert(t.dtype === "float32");
 
   // python -c "import numpy as np; np.save('2.npy', [[1.5, 43], [13, 2.5]])"
-  t = await npy.load("src/testdata/2.npy");
+  t = await npy.load(propelURL + "src/testdata/2.npy");
   util.assertAllEqual(t, [[1.5, 43], [13, 2.5]]);
   util.assertShapesEqual(t.shape, [2, 2]);
   util.assert(t.dtype === "float32");
 
   // python -c "import numpy as np; np.save('3.npy', [[[1,2,3],[4,5,6]]])"
-  t = await npy.load("src/testdata/3.npy");
+  t = await npy.load(propelURL + "src/testdata/3.npy");
   util.assertAllEqual(t, [[[1, 2, 3], [4, 5, 6]]]);
   util.assertShapesEqual(t.shape, [1, 2, 3]);
   util.assert(t.dtype === "int32");
@@ -34,7 +35,7 @@ test(async function npy_load() {
    python -c "import numpy as np; np.save('4.npy', \
           np.array([0.1, 0.2], 'float32'))"
   */
-  t = await npy.load("src/testdata/4.npy");
+  t = await npy.load(propelURL + "src/testdata/4.npy");
   util.assertAllClose(t, [0.1, 0.2]);
   util.assertShapesEqual(t.shape, [2]);
   util.assert(t.dtype === "float32");
@@ -43,7 +44,7 @@ test(async function npy_load() {
    python -c "import numpy as np; np.save('uint8.npy', \
           np.array([0, 127], 'uint8'))"
   */
-  t = await npy.load("src/testdata/uint8.npy");
+  t = await npy.load(propelURL + "src/testdata/uint8.npy");
   util.assertAllClose(t, [0, 127]);
   util.assertShapesEqual(t.shape, [2]);
   util.assert(t.dtype === "uint8");

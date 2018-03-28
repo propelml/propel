@@ -17,9 +17,10 @@
 // or local files. There is a progress system to notify users about download.
 // See also fetchWithCache.
 import {
-  activeOutputHandler,
+  assert,
   Buffer,
   createResolvable,
+  getOutputHandler,
   global,
   IS_NODE,
   IS_WEB,
@@ -29,111 +30,118 @@ import {
   URL,
 } from "./util";
 
+export const propelHostname = "propelml.org";
+export const propelURL = `http://${propelHostname}/`;
 let lastProgress = 0;
-const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 
-// Takes either a fully qualified url or a path to a file in the propel
-// website directory. Examples
-//
-//    fetch("//tinyclouds.org/index.html");
-//    fetch("deps/data/iris.csv");
-//
-// Propel files will use propelml.org if not being run in the project
-// directory.
-async function fetch2(p: string): Promise<ArrayBuffer> {
-  // TODO The path hacks in this function are quite messy and need to be
-  // cleaned up.
-  if (IS_WEB) {
-    const job = randomString();
-    const host = document.location.hostname;
-    if (propelHosts.has(host)) {
-      p = p.replace("deps/", "/");
-      p = p.replace(/^src\//, "/src/");
+export function fetchArrayBuffer(p: string): Promise<ArrayBuffer> {
+  const url = resolve(p);
+  const job = randomString();
+  downloadProgress(job, 0, null); // Start download job with unknown size.
+  try {
+    if (IS_WEB) {
+      return fetchBrowserXHR(job, url);
+    } else if (isHTTP(url)) {
+      return fetchNodeHTTP(job, url);
     } else {
-      p = p.replace("deps/", "http://propelml.org/");
-      p = p.replace(/^src\//, "http://propelml.org/src/");
+      return fetchNodeFS(job, url);
     }
-    if (global.PROPEL_TESTER) {
-      p = p.replace("http://propelml.org/", "/");
-    }
-    try {
-      const req = new XMLHttpRequest();
-      const onLoad = createResolvable();
-      req.onload = onLoad.resolve;
-      req.onprogress = ev => downloadProgress(job, ev.loaded, ev.total);
-      req.open("GET", p, true);
-      req.responseType = "arraybuffer";
-      req.send();
-      await onLoad;
-      return req.response;
-    } finally {
-      downloadProgress(job, null, null);
-    }
-  } else {
-    if (p.match(/^http(s)*:\/\//)) {
-      return fetchRemoteFile(p);
-    }
-    const path = nodeRequire("path");
-    const { readFileSync } = nodeRequire("fs");
-    if (!path.isAbsolute(p)) {
-      p = path.join(__dirname, "..", p);
-    }
-    const b = readFileSync(p, null);
-    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+  } finally {
+    downloadProgress(job, null, null);
   }
 }
 
-async function fetchRemoteFile(url: string): Promise<ArrayBuffer> {
-  const u = new URL(url);
+// Transforms URLs that point to local resources to paths
+// matching those resources.
+export function resolve(p: string, isTest?: boolean): URL {
+  // If the optional isTest argument isn't supplied look for the global
+  // variable PROPEL_TESTER.
+  if (isTest == null) isTest = !!global.PROPEL_TESTER;
+
+  let base: URL;
+  if (IS_WEB) {
+    // Hack for tools/website_render.js
+    if (document.location.protocol === "about:") {
+      base = new URL("http://localhost:8080/");
+    } else {
+      base = new URL(document.location);
+    }
+  } else {
+    base = new URL("file:///");
+    base.pathname = process.cwd() + "/";
+  }
+
+  let url = new URL(p, base);
 
   // If we're in a testing environment, and trying to request
   // something from propelml.org, skip the download and get it from the repo.
-  if (global.PROPEL_TESTER && u.hostname === "propelml.org") {
-    const path = nodeRequire("path");
-    url = path.join(__dirname, "../deps/", u.pathname);
-    return fetch2(url);
+  if (isTest && url.hostname === propelHostname) {
+    if (IS_WEB) {
+      url.host = document.location.host;
+    } else {
+      const url2 = new URL("file:///");
+      const { join } = nodeRequire("path");
+      const pathname = join(__dirname, "../build/dev_website/", url.pathname);
+      url2.pathname = pathname;
+      url = url2;
+    }
   }
+  return url;
+}
 
-  const http = nodeRequire(u.protocol === "https:" ? "https" : "http");
-  const job = randomString();
+async function fetchBrowserXHR(job: string, url: URL): Promise<ArrayBuffer> {
+  assert(isHTTP(url));
+  const req = new XMLHttpRequest();
+  const promise = createResolvable();
+  req.onload = promise.resolve;
+  req.onprogress = ev => downloadProgress(job, ev.loaded, ev.total);
+  req.open("GET", url.toString(), true);
+  req.responseType = "arraybuffer";
+  req.send();
+  await promise;
+  return req.response;
+}
 
-  downloadProgress(job, 0, null); // Start download job with unknown size.
-
+async function fetchNodeHTTP(job: string, url: URL): Promise<ArrayBuffer> {
+  assert(isHTTP(url));
+  const http = nodeRequire(url.protocol === "https:" ? "https" : "http");
   const chunks: Buffer[] = [];
-
-  try {
-    const promise = createResolvable();
-    const req = http.get(url, res => {
-      const total = Number(res.headers["content-length"]);
-      let loaded = 0;
-      res.on("data", (chunk) => {
-        chunks.push(chunk);
-        loaded += chunk.length;
-        downloadProgress(job, loaded, total);
-      });
-      res.on("end", promise.resolve);
-      res.on("error", promise.reject);
+  const promise = createResolvable();
+  const req = http.get(url.toString(), res => {
+    const total = Number(res.headers["content-length"]);
+    let loaded = 0;
+    res.on("data", (chunk) => {
+      chunks.push(chunk);
+      loaded += chunk.length;
+      downloadProgress(job, loaded, total);
     });
-    req.on("error", promise.reject);
-    await promise;
-
-  } finally {
-    downloadProgress(job, null, null); // End download job.
-  }
-
+    res.on("end", promise.resolve);
+    res.on("error", promise.reject);
+  });
+  req.on("error", promise.reject);
+  await promise;
   const b = Buffer.concat(chunks);
   return b.buffer.slice(b.byteOffset,
     b.byteOffset + b.byteLength) as ArrayBuffer;
 }
 
-export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
-  return await fetch2(path);
+async function fetchNodeFS(job: string, url: URL): Promise<ArrayBuffer> {
+  // This function is async for consistancy with fetchNodeHTTP and
+  // fetchBrowserXHR, even tho it is actually sync.
+  const fs = nodeRequire("fs");
+  let p = decodeURIComponent(url.pathname);
+  if (process.platform === "win32" && p.startsWith("/")) {
+    p = p.slice(1);
+  }
+  const b = fs.readFileSync(p, null);
+  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 }
 
 export function downloadProgress(job: string, loaded: number | null,
                                  total: number | null): void {
-  if (activeOutputHandler) {
-    activeOutputHandler.downloadProgress({ job, loaded, total });
+  const oh = getOutputHandler();
+  if (oh != null) {
+    oh.downloadProgress({ job, loaded, total });
     return;
   }
 
@@ -155,4 +163,8 @@ export function downloadProgress(job: string, loaded: number | null,
       lastProgress = now;
     }
   }
+}
+
+function isHTTP(url: URL): boolean {
+  return url.protocol === "http:" || url.protocol === "https:";
 }

@@ -144,7 +144,7 @@ export function assertObjectsEqual(a, b) {
   }
 }
 
-export let activeOutputHandler: OutputHandler | null = null;
+let activeOutputHandler: OutputHandler | null = null;
 
 export function getOutputHandler(): OutputHandler | null {
   return activeOutputHandler;
