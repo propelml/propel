@@ -19,6 +19,7 @@
 
 import { TextDecoder } from "text-encoding";
 import { bo } from "./backend";
+import { fetchArrayBuffer } from "./fetch";
 import { Tensor } from "./tensor";
 import * as types from "./types";
 import * as util from "./util";
@@ -155,7 +156,7 @@ export function parse(ab: ArrayBuffer): Tensor {
 
 /** Loads and parses a npy file. */
 export async function load(filename: string): Promise<Tensor> {
-  const ab = await util.fetchArrayBuffer(filename);
+  const ab = await fetchArrayBuffer(filename);
   return parse(ab);
 }
 

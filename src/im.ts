@@ -16,10 +16,10 @@
 // This module allows Propel to read PNG and JPG images.
 
 import { concat, fill, Tensor, tensor } from "./api";
+import { fetchArrayBuffer, fetchBuffer } from "./fetch";
 import { convert } from "./tensor";
 import { Mode } from "./types";
-import { IS_NODE, nodeRequire } from "./util";
-import { createResolvable, fetchArrayBuffer, fetchBuffer } from "./util";
+import { createResolvable, IS_NODE, nodeRequire } from "./util";
 
 // TODO These modules are only used in Node and it is excessive to include them
 // in the browser bundle. However at the moment we only distribute a single
