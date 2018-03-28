@@ -562,35 +562,22 @@ export class Profile extends Component<ProfileProps, ProfileState> {
 
   render() {
     if (!this.state.latest) {
-      return h(Loading, null)
+      return h(Loading, null);
     } else if (this.state.latest.length === 0) {
       return h("h1", null, "User has no notebooks");
     }
     const doc = this.state.latest[0].doc;
-    const profileBlurb = h("div", { "class": "blurb" }, null, [
-      h("div", { "class": "blurb-avatar" },
+
+    return h("div", { "class": "most-recent" },
+      h("div", {"class": "centered"},
+        h("h2", null, doc.owner.displayName),
         h(Avatar, { userInfo: doc.owner }),
       ),
-      h("div", { "class": "blurb-name" },
-        h("p", { "class": "displayName" }, doc.owner.displayName),
-      ),
-      h("div", { "class": "date-created" },
-        h("p", { "class": "created" },
-          `Most Recent Update ${fmtDate(doc.updated)}.`),
-      ),
-    ]);
-
-    return h("div", null,
-      h("div", {"class": "profile-blurb"}, profileBlurb),
-      h("div", { "class": "most-recent" },
-        h("div", {"class": "most-recent-header"},
-          h("div", {"class": "most-recent-header-title"},
-            h("h2", null,
-              doc.owner.displayName + "'s Recently Updated Notebooks")
-          ),
-        ),
-        h("ol", null, ...notebookList(this.state.latest)),
-      )
+      h("ol", null, ...notebookList(this.state.latest, {
+        showDates: false,
+        showName: false,
+        showTitle: true,
+      })),
     );
   }
 }
@@ -748,7 +735,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         h("h2", {
           class: doc.title && doc.title.length ? "" : "untitled",
           value: doc.title
-        }, doc.title || "Untitled Notebook"),
+        }, docTitle(doc)),
         db.ownsDoc(this.props.userInfo, doc) ? editButton : null
       ]);
 
@@ -762,7 +749,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
       body = [
         h("div", { "class": "notebook-container" },
-          h("header", null, notebookBlurb(doc), title, cloneButton),
+          h("header", null,
+            h(Avatar, { userInfo: doc.owner }),
+            h("h2", null, profileLink(doc.owner)),
+            title,
+            cloneButton
+          ),
           this.renderCells(doc),
         ),
       ];
@@ -781,42 +773,58 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 }
 
-function notebookList(notebooks: db.NbInfo[]): JSX.Element[] {
+function docTitle(doc: db.NotebookDoc): string {
+  return doc.title || "Untitled Notebook";
+}
+
+function notebookList(notebooks: db.NbInfo[], {
+  showName = true,
+  showTitle = false,
+  showDates = false,
+} = {}): JSX.Element[] {
   return notebooks.map(info => {
-    const snippit = db.getInputCodes(info.doc).join("\n").slice(0, 100);
+    const snippit = db.getInputCodes(info.doc).join("\n\n");
     const href = nbUrl(info.nbId);
     return h("a", { href },
       h("li", null,
         h("div", { class: "code-snippit" }, snippit),
-        notebookBlurb(info.doc, false)
+        notebookBlurb(info.doc, { showName, showTitle, showDates })
       )
     );
   });
 }
 
-function notebookBlurb(doc: db.NotebookDoc, showDates = true): JSX.Element {
-  const dates = !showDates ? [] : [
-    h("div", { "class": "date-created" },
-      h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
-    ),
-    h("div", { "class": "date-updated" },
-      h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
-    ),
-  ];
-  const profileUrl = window.location.origin + "/notebook/?profile=" +
-                     doc.owner.uid;
-  return h("div", { "class": "blurb" }, null, [
-    h("div", { "class": "blurb-avatar" },
-      h(Avatar, { userInfo: doc.owner }),
-    ),
-    h("div", { "class": "blurb-name" },
-      h("a", {
-        "class": "displayName",
-        "href": profileUrl
-      }, doc.owner.displayName),
-    ),
-    ...dates
-  ]);
+function profileLink(u: db.UserInfo): JSX.Element {
+  const href = window.location.origin + "/notebook/?profile=" + u.uid;
+  return h("a", { class: "profile-link", href }, u.displayName);
+}
+
+function notebookBlurb(doc: db.NotebookDoc, {
+  showName = true,
+  showTitle = false,
+  showDates = false,
+} = {}): JSX.Element {
+  let body = [];
+  if (showDates) {
+    body = body.concat([
+      h("div", { "class": "date-created" },
+        h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
+      ),
+      h("div", { "class": "date-updated" },
+        h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
+      ),
+    ]);
+  }
+  if (showName) {
+    body = body.concat([
+      h("div", { "class": "blurb-avatar" }, h(Avatar, { userInfo: doc.owner })),
+      h("p", { "class": "blurb-name" }, doc.owner.displayName)
+    ]);
+  }
+  if (showTitle) {
+    body.push(h("p", { "class": "blurb-title" }, docTitle(doc)));
+  }
+  return h("div", { "class": "blurb" }, ...body);
 }
 
 function fmtDate(d: Date): string {

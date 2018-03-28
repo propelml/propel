@@ -20,9 +20,6 @@ testBrowser(async function notebook_Notebook() {
   const mdb = db.enableMock();
   await renderAnonNotebook();
   assert(objectsEqual(mdb.counts, { getDoc: 1 }));
-  // Check that we rendered the blurb.
-  const blurbs = document.getElementsByClassName("blurb");
-  assert(1 === blurbs.length);
   // Check that we rendered the title.
   const title = document.querySelectorAll("div.title > h2");
   assert(1 === title.length);

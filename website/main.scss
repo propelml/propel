@@ -54,6 +54,7 @@ body {
 }
 
 /* Centers and gives max-width to index, references, notebook pages */
+.centered,
 .training-example-inner,
 .use-it-inner,
 .flex-row,
@@ -654,7 +655,6 @@ header {
   font-size: 1.2rem;
   letter-spacing: 0.5px;
   display: flex;
-  margin-top: 8px;
 
   img {
     margin-right: $size0;
@@ -665,12 +665,6 @@ header {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 8px;
-
-  .blurb {
-    box-shadow: inset 0 -1px 0 $borderColor;
-    background-color: #fff;
-    margin-bottom: 16px;
-  }
 }
 
 .most-recent {
@@ -728,33 +722,18 @@ header {
         background-color: $cellBackgroundFocus;
       }
 
-      &:hover .displayName {
-        color: $linkColor;
-        text-decoration: underline;
-      }
-
       p {
         margin: 8px;
         color: $base03;
       }
 
       .code-snippit {
-        margin: 8px;
+        max-height: 180px;
+        margin: 8px 8px 0 8px;
         font-family: 'Roboto Mono', monospace;
-      }
-
-      .blurb {
-        background-color: #fff;
-        box-shadow: inset 0 1px 0 $borderColor;
-        font-size: 1.3rem;
-        line-height: 1.6rem;
-        letter-spacing: 0.5px;
-        display: flex;
-        margin-top: 8px;
-
-        img {
-          margin-right: $size0;
-        }
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
