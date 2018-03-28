@@ -1,5 +1,5 @@
 import { h, render, rerender } from "preact";
-import { assert, createResolvable, objectsEqual } from "../src/util";
+import { assert, createResolvable, assertObjectsEqual } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import * as db from "./db";
 import * as nb from "./nb";
@@ -9,9 +9,9 @@ testBrowser(function notebook_NotebookRoot() {
   resetPage();
   const el = h(nb.NotebookRoot, { });
   render(el, document.body);
-  assert(objectsEqual(mdb.counts, {
+  assertObjectsEqual(mdb.counts, {
     queryLatest: 1,
-  }));
+  });
   const c = document.body.getElementsByTagName("div")[0];
   assert(c.className === "notebook");
 });
@@ -19,7 +19,7 @@ testBrowser(function notebook_NotebookRoot() {
 testBrowser(async function notebook_Notebook() {
   const mdb = db.enableMock();
   await renderAnonNotebook();
-  assert(objectsEqual(mdb.counts, { getDoc: 1 }));
+  assertObjectsEqual(mdb.counts, { getDoc: 1 });
   // Check that we rendered the title.
   const title = document.querySelectorAll("div.title > h2");
   assert(1 === title.length);
@@ -35,7 +35,7 @@ testBrowser(async function notebook_Notebook() {
 testBrowser(async function notebook_focusNextCell() {
   const mdb = db.enableMock();
   await renderAnonNotebook();
-  assert(objectsEqual(mdb.counts, { getDoc: 1 }));
+  assertObjectsEqual(mdb.counts, { getDoc: 1 });
   // Test focusNextCell transitions.
   const cellEls = document.querySelectorAll(".notebook-cell");
   assert(cellEls.length >= 2);
@@ -84,16 +84,16 @@ testBrowser(async function notebook_titleEdit() {
   // Edit the title.
   titleInput.value = "New Title";
   // Before the save the db counts look like:
-  assert(objectsEqual(mdb.counts, { signIn: 1, getDoc: 1 }));
+  assertObjectsEqual(mdb.counts, { signIn: 1, getDoc: 1 });
   // Click the save button.
   saveTitle.click();
   await flush();
   // Check the database saw an updateDoc.
-  assert(objectsEqual(mdb.counts, {
+  assertObjectsEqual(mdb.counts, {
     getDoc: 1,
     signIn: 1,
     updateDoc: 1,
-  }));
+  });
   // Check the title got updated.
   title = document.querySelector(".title > h2");
   assert(title != null);
@@ -206,7 +206,7 @@ testBrowser(async function notebook_profileSmoke() {
   await Promise.resolve(); // Wait for promise queue to flush.
   let profileBlurbs = document.querySelectorAll(".profile-blurb");
   assert(profileBlurbs.length === 0);
-  assert(objectsEqual(mdb.counts, { queryProfile: 1 }));
+  assertObjectsEqual(mdb.counts, { queryProfile: 1 });
 
   // Try again with a real uid.
   mdb = db.enableMock();
@@ -217,7 +217,7 @@ testBrowser(async function notebook_profileSmoke() {
   profileBlurbs = document.querySelectorAll(".profile-blurb");
   console.log(profileBlurbs);
   assert(profileBlurbs.length === 1);
-  assert(objectsEqual(mdb.counts, { queryProfile: 1 }));
+  assertObjectsEqual(mdb.counts, { queryProfile: 1 });
 
 });
 
