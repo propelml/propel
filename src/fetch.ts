@@ -32,13 +32,6 @@ import {
 let lastProgress = 0;
 const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 
-export interface FetchEncodingMap {
-  "arraybuffer": ArrayBuffer;
-  "buffer": Buffer;
-  "utf8": string;
-}
-export type FetchEncoding = keyof FetchEncodingMap;
-
 // Takes either a fully qualified url or a path to a file in the propel
 // website directory. Examples
 //
@@ -47,8 +40,7 @@ export type FetchEncoding = keyof FetchEncodingMap;
 //
 // Propel files will use propelml.org if not being run in the project
 // directory.
-async function fetch2<E extends FetchEncoding>(
-    p: string, encoding: E): Promise<FetchEncodingMap[E]> {
+async function fetch2(p: string): Promise<ArrayBuffer> {
   // TODO The path hacks in this function are quite messy and need to be
   // cleaned up.
   if (IS_WEB) {
@@ -70,10 +62,7 @@ async function fetch2<E extends FetchEncoding>(
       req.onload = onLoad.resolve;
       req.onprogress = ev => downloadProgress(job, ev.loaded, ev.total);
       req.open("GET", p, true);
-      req.responseType = encoding === "utf8" ? "text" : "arraybuffer";
-      if (encoding === "utf8") {
-        req.overrideMimeType("text/plain; charset=utf-8");
-      }
+      req.responseType = "arraybuffer";
       req.send();
       await onLoad;
       return req.response;
@@ -82,26 +71,19 @@ async function fetch2<E extends FetchEncoding>(
     }
   } else {
     if (p.match(/^http(s)*:\/\//)) {
-      return fetchRemoteFile(p, encoding);
+      return fetchRemoteFile(p);
     }
     const path = nodeRequire("path");
     const { readFileSync } = nodeRequire("fs");
     if (!path.isAbsolute(p)) {
       p = path.join(__dirname, "..", p);
     }
-    if (encoding === "buffer") {
-      return readFileSync(p, null);
-    } else if (encoding === "arraybuffer") {
-      const b = readFileSync(p, null);
-      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-    } else {
-      return readFileSync(p, "utf8");
-    }
+    const b = readFileSync(p, null);
+    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
   }
 }
 
-async function fetchRemoteFile<E extends FetchEncoding>(
-    url: string, encoding: E): Promise<FetchEncodingMap[E]> {
+async function fetchRemoteFile(url: string): Promise<ArrayBuffer> {
   const u = new URL(url);
 
   // If we're in a testing environment, and trying to request
@@ -109,7 +91,7 @@ async function fetchRemoteFile<E extends FetchEncoding>(
   if (global.PROPEL_TESTER && u.hostname === "propelml.org") {
     const path = nodeRequire("path");
     url = path.join(__dirname, "../deps/", u.pathname);
-    return fetch2(url, encoding);
+    return fetch2(url);
   }
 
   const http = nodeRequire(u.protocol === "https:" ? "https" : "http");
@@ -139,29 +121,13 @@ async function fetchRemoteFile<E extends FetchEncoding>(
     downloadProgress(job, null, null); // End download job.
   }
 
-  const buffer = Buffer.concat(chunks);
-  if (encoding === "utf8") {
-    return buffer.toString("utf8");
-  } else {
-    const b = buffer;
-    return b.buffer.slice(b.byteOffset,
-      b.byteOffset + b.byteLength) as ArrayBuffer;
-  }
+  const b = Buffer.concat(chunks);
+  return b.buffer.slice(b.byteOffset,
+    b.byteOffset + b.byteLength) as ArrayBuffer;
 }
 
 export async function fetchArrayBuffer(path: string): Promise<ArrayBuffer> {
-  return await fetch2(path, "arraybuffer");
-}
-
-export async function fetchBuffer(path: string): Promise<Buffer> {
-  if (IS_WEB) {
-    throw new Error("`fetchBuffer` is not implemented to work on browser.");
-  }
-  return await fetch2(path, "buffer");
-}
-
-export async function fetchStr(path: string): Promise<string> {
-  return await fetch2(path, "utf8");
+  return await fetch2(path);
 }
 
 export function downloadProgress(job: string, loaded: number | null,
