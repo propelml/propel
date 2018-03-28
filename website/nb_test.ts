@@ -1,14 +1,15 @@
 import { h, render, rerender } from "preact";
-import { assert, createResolvable, assertObjectsEqual } from "../src/util";
+import { assert, assertObjectsEqual, createResolvable } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import * as db from "./db";
 import * as nb from "./nb";
 
-testBrowser(function notebook_NotebookRoot() {
+testBrowser(async function notebook_NotebookRoot() {
   const mdb = db.enableMock();
   resetPage();
   const el = h(nb.NotebookRoot, { });
   render(el, document.body);
+  await flush();
   assertObjectsEqual(mdb.counts, {
     queryLatest: 1,
   });
@@ -128,15 +129,17 @@ testBrowser(async function notebook_deleteLastCell() {
 testBrowser(async function notebook_progressBar() {
   resetPage();
 
-  let notebook: nb.Notebook;
+  let notebookRoot: nb.NotebookRoot;
   const promise = createResolvable();
-  const el = h(nb.Notebook, {
+  const el = h(nb.NotebookRoot, {
     nbId: "anonymous",
     onReady: promise.resolve,
-    ref: ref => notebook = ref,
+    ref: ref => notebookRoot = ref,
   });
   render(el, document.body);
   await promise;
+
+  const notebook = notebookRoot.notebookRef;
 
   // We need at least two cells for this test (which have cellId 1 and 2).
   notebook.onInsertCell(0);
@@ -198,27 +201,22 @@ testBrowser(async function notebook_progressBar() {
   assert(percent() === 0);
 });
 
-testBrowser(async function notebook_profileSmoke() {
-  let mdb = db.enableMock();
-  resetPage();
-  let el = h(nb.Profile, { profileUid: "non-existant" });
-  render(el, document.body);
-  await Promise.resolve(); // Wait for promise queue to flush.
-  let profileBlurbs = document.querySelectorAll(".profile-blurb");
-  assert(profileBlurbs.length === 0);
+testBrowser(async function notebook_profile() {
+  const mdb = db.enableMock();
+  await renderProfile("non-existant");
+  let avatars = document.querySelectorAll(".avatar");
+  assert(avatars.length === 0);
+  let notebooks = document.querySelectorAll(".most-recent ol li");
+  assert(notebooks.length === 0);
   assertObjectsEqual(mdb.counts, { queryProfile: 1 });
 
   // Try again with a real uid.
-  mdb = db.enableMock();
-  resetPage();
-  el = h(nb.Profile, { profileUid: db.defaultOwner.uid });
-  render(el, document.body);
-  await Promise.resolve(); // Wait for promise queue to flush.
-  profileBlurbs = document.querySelectorAll(".profile-blurb");
-  console.log(profileBlurbs);
-  assert(profileBlurbs.length === 1);
-  assertObjectsEqual(mdb.counts, { queryProfile: 1 });
-
+  await renderProfile(db.defaultOwner.uid);
+  avatars = document.querySelectorAll(".avatar");
+  assert(avatars.length === 1);
+  notebooks = document.querySelectorAll(".most-recent ol li");
+  assert(notebooks.length === 1);
+  assertObjectsEqual(mdb.counts, { queryProfile: 2 });
 });
 
 // Call this to ensure that the DOM has been updated after events.
@@ -232,10 +230,21 @@ function resetPage() {
   document.body.innerHTML = "";
 }
 
+function renderProfile(profileUid: string) {
+  const promise = createResolvable();
+  resetPage();
+  const el = h(nb.NotebookRoot, {
+    onReady: promise.resolve,
+    profileUid,
+  });
+  render(el, document.body);
+  return promise;
+}
+
 function renderOwnerNotebook() {
   resetPage();
   return new Promise((resolve) => {
-    const el = h(nb.Notebook, {
+    const el = h(nb.NotebookRoot, {
       nbId: "default",
       onReady: resolve,
       userInfo: db.defaultOwner, // Owns "default" doc.
@@ -247,7 +256,7 @@ function renderOwnerNotebook() {
 function renderAnonNotebook() {
   resetPage();
   return new Promise((resolve) => {
-    const el = h(nb.Notebook, {
+    const el = h(nb.NotebookRoot, {
       nbId: "default",
       onReady: resolve,
     });
