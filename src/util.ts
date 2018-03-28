@@ -132,6 +132,13 @@ export function objectsEqual(a: any, b: any): boolean {
   return true;
 }
 
+export function assertObjectsEqual(a, b) {
+  if (!objectsEqual(a, b)) {
+    console.error("Objects not equal:\n", a, "\n", b);
+    throw Error("assertObjectsEqual failed.");
+  }
+}
+
 const propelHosts = new Set(["", "127.0.0.1", "localhost", "propelml.org"]);
 
 export interface FetchEncodingMap {
