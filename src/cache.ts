@@ -19,8 +19,8 @@
 // The $HOME/.propel/cache directory is where these files will be stored.
 
 import * as rimraf from "rimraf";
-import { assert, Buffer, fetchArrayBuffer, IS_WEB, nodeRequire, URL }
-  from "./util";
+import { fetchArrayBuffer } from "./fetch";
+import { assert, Buffer, IS_WEB, nodeRequire, URL } from "./util";
 import { mkdirp, propelDir } from "./util_node";
 
 export interface Cache {

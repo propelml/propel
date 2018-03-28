@@ -1,1 +1,1 @@
-export { downloadProgress } from "../src/util";
+export { downloadProgress } from "../src/fetch";
