@@ -429,20 +429,38 @@ export class FixedCell extends Component<FixedProps, CellState> {
 }
 
 export interface NotebookRootProps {
-  userInfo?: db.UserInfo;
+  userInfo?: db.UserInfo; // The current user who is logged in.
+  // If nbId is specified, it will be queried, and set in doc.
   nbId?: string;
+  // If profileId is specified, it will be queried.
+  profileUid?: string;
+  // If neither nbId nor profileUid is specified, NotebookRoot will
+  // use the current URL's query string to search fo nbId and profile.
+  // If those are not found, NotebookRoot will query the most recent.
+  onReady: () => void;
 }
 
 export interface NotebookRootState {
+  // Same as in props, but after checking window.location.
   nbId?: string;
   profileUid?: string;
+
+  // If set a Notebook for this doc will be displayed.
+  doc?: db.NotebookDoc;
+  // If set the most-recent page will be displayed.
+  mostRecent?: db.NbInfo[];
+  // If set the profile page will be displayed.
+  profileLatest?: db.NbInfo[];
+
+  errorMsg?: string;
 }
 
 export class NotebookRoot extends Component<NotebookRootProps,
                                             NotebookRootState> {
+  notebookRef?: Notebook; // Hook for testing.
+
   constructor(props) {
     super(props);
-
     let nbId;
     if (this.props.nbId) {
       nbId = this.props.nbId;
@@ -450,28 +468,84 @@ export class NotebookRoot extends Component<NotebookRootProps,
       const matches = window.location.search.match(/nbId=(\w+)/);
       nbId = matches ? matches[1] : null;
     }
-
-    const matches = window.location.search.match(/profile=(\w+)/);
-    const profileUid = matches ? matches[1] : null;
-
+    let profileUid;
+    if (this.props.profileUid) {
+      profileUid = this.props.profileUid;
+    } else {
+      const matches = window.location.search.match(/profile=(\w+)/);
+      profileUid = matches ? matches[1] : null;
+    }
     this.state = { nbId, profileUid };
+  }
+
+  async componentWillMount() {
+    // Here is where we query firebase for all sorts of messages.
+    const { nbId, profileUid } = this.state;
+    try {
+      if (nbId) {
+        // nbId specified. Query the the notebook.
+        const doc = await (nbId === "anonymous"
+                           ? Promise.resolve(anonDoc)
+                           : db.active.getDoc(nbId));
+        this.setState({ doc });
+
+      } else if (profileUid) {
+        // profileUid specified. Query the profile.
+        const profileLatest =
+          await db.active.queryProfile(profileUid, 100);
+        this.setState({ profileLatest });
+
+      } else {
+        // Neither specified. Show the most-recent.
+        // TODO potentially these two queries can be combined into one.
+        const mostRecent = await db.active.queryLatest();
+        this.setState({ mostRecent });
+      }
+    } catch (e) {
+      this.setState({ errorMsg: e.message });
+    }
+  }
+
+  async componentDidUpdate() {
+    // Call the onReady callback for testing.
+    if (this.state.errorMsg || this.state.mostRecent ||
+        this.state.profileLatest || this.state.doc) {
+      // Make sure the notebook has fully executed.
+      await drainExecuteQueue();
+      if (this.props.onReady) this.props.onReady();
+    }
   }
 
   render() {
     let body;
-    if (this.state.nbId) {
-      body = h(Notebook, {
-        nbId: this.state.nbId,
+    if (this.state.errorMsg) {
+      body = h("div", { "class": "notification-screen"},
+        h("div", { "class": "notification-container"},
+          h("p", { "class": "error-header"}, null, "Error"),
+          h("p", null, this.state.errorMsg),
+        ),
+      );
+    } else if (this.state.profileLatest) {
+      body = h(Profile, {
+        profileLatest: this.state.profileLatest,
         userInfo: this.props.userInfo,
       });
-    } else if (this.state.profileUid) {
-      body = h(Profile, {
-          profileUid: this.state.profileUid,
+
+    } else if (this.state.doc) {
+      body = h(Notebook, {
+        nbInfo: { nbId: this.state.nbId, doc: this.state.doc },
+        ref: ref => this.notebookRef = ref,
+        userInfo: this.props.userInfo,
       });
-    } else {
+
+    } else if (this.state.mostRecent) {
       body = h(MostRecent, {
-        uid: this.props.userInfo ? this.props.userInfo.uid : "",
+        mostRecent: this.state.mostRecent,
+        userInfo: this.props.userInfo,
       });
+
+    } else {
+      body = h(Loading, null);
     }
 
     return h("div", { "class": "notebook" },
@@ -485,95 +559,72 @@ export class NotebookRoot extends Component<NotebookRootProps,
 }
 
 export interface MostRecentProps {
-  uid: string;
+  mostRecent: db.NbInfo[];
+  userInfo?: db.UserInfo;
 }
 
-export interface MostRecentState {
-  latest: db.NbInfo[];
-  own: db.NbInfo[];
-}
-
-function nbUrl(nbId: string): string {
-  // Careful, S3 is finicky about what URLs it serves. So
-  // /notebook?nbId=blah  will get redirect to /notebook/
-  // because it is a directory with an index.html in it.
-  const u = window.location.origin + "/notebook/?nbId=" + nbId;
-  return u;
-}
+export interface MostRecentState { }
 
 export class MostRecent extends Component<MostRecentProps, MostRecentState> {
-  async componentWillMount() {
-    // TODO potentially these two queries can be combined into one.
-    const latest = await db.active.queryLatest();
-    const own = await db.active.queryProfile(this.props.uid, 3);
-    this.setState({latest, own});
-  }
-
-  async onCreate() {
-    console.log("Click new");
-    const nbId = await db.active.create();
-    // Redirect to new notebook.
-    window.location.href = nbUrl(nbId);
-  }
-
   render() {
-    if (!this.state.latest || !this.state.own) {
-      return h(Loading, null);
+    let profileLinkEl = null;
+    if (this.props.userInfo) {
+      // TODO This is ugly - we're reusing most-recent-header just to get a line
+      // break between the link to "Your Notebooks" and "Most Recent".
+      profileLinkEl = h("div", {"class": "most-recent-header"},
+        h("h2", null,
+          profileLink(this.props.userInfo, "Your Notebooks"))
+      );
     }
 
-    const empty = !this.state.own ?
-        h("p", {"class": "most-recent-header"}, "Nothing to show yet.") : "";
     return h("div", { "class": "most-recent" },
-      h("div", {"class": "most-recent-header"},
-        h("div", {"class": "most-recent-header-title"},
-          h("h2", null, "Your Most Recent Notebooks"),
-        ),
-        h("div", {"class": "most-recent-header-cta"},
-          h("button", { "class": "create-notebook",
-                        "onClick": () => this.onCreate(),
-          }, "+ New Notebook"),
-        ),
-      ),
-      empty,
-      h("ol", null, ...notebookList(this.state.own)),
+      profileLinkEl,
       h("div", {"class": "most-recent-header"},
         h("div", {"class": "most-recent-header-title"},
           h("h2", null, "Recently Updated"),
         ),
+        h("div", {"class": "most-recent-header-cta"}, newNotebookButton()),
       ),
-      h("ol", null, ...notebookList(this.state.latest)),
+      h("ol", null, ...notebookList(this.props.mostRecent)),
     );
   }
 }
 
-export interface ProfileProps {
-  profileUid: string;
+function newNotebookButton() {
+  return h("button", {
+    "class": "create-notebook",
+    "onClick": async() => {
+      // Redirect to new notebook.
+      const nbId = await db.active.create();
+      window.location.href = nbUrl(nbId);
+    },
+  }, "+ New Notebook");
 }
 
-export interface ProfileState {
-  latest: db.NbInfo[];
+export interface ProfileProps {
+  profileLatest: db.NbInfo[];
+  userInfo?: db.UserInfo;
 }
+
+export interface ProfileState { }
 
 export class Profile extends Component<ProfileProps, ProfileState> {
-  async componentWillMount() {
-    const latest = await db.active.queryProfile(this.props.profileUid, 100);
-    this.setState({ latest });
-  }
-
   render() {
-    if (!this.state.latest) {
-      return h(Loading, null);
-    } else if (this.state.latest.length === 0) {
+    if (this.props.profileLatest.length === 0) {
       return h("h1", null, "User has no notebooks");
     }
-    const doc = this.state.latest[0].doc;
+    const doc = this.props.profileLatest[0].doc;
 
+    // TODO Profile is reusing the most-recent css class, because it's a very
+    // similar layout. The CSS class should be renamed something appropriate
+    // for both of them, maybe nb-listing.
     return h("div", { "class": "most-recent" },
       h("div", {"class": "centered"},
         h("h2", null, doc.owner.displayName),
         h(Avatar, { userInfo: doc.owner }),
+        newNotebookButton(),
       ),
-      h("ol", null, ...notebookList(this.state.latest, {
+      h("ol", null, ...notebookList(this.props.profileLatest, {
         showDates: false,
         showName: false,
         showTitle: true,
@@ -583,14 +634,12 @@ export class Profile extends Component<ProfileProps, ProfileState> {
 }
 
 export interface NotebookProps {
-  nbId: string;
-  onReady?: () => void;
+  nbInfo: db.NbInfo;
   userInfo?: db.UserInfo;  // Info about the currently logged in user.
 }
 
 export interface NotebookState {
-  doc?: db.NotebookDoc;
-  errorMsg?: string;
+  doc: db.NotebookDoc;
   isCloningInProgress: boolean;
   editingTitle: boolean;
 }
@@ -602,31 +651,23 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   constructor(props) {
     super(props);
     this.state = {
-      doc: null,
-      errorMsg: null,
+      doc: this.props.nbInfo.doc,
       isCloningInProgress: false,
       editingTitle: false,
     };
-  }
-
-  async componentWillMount() {
-    try {
-      const doc = await (this.props.nbId === "anonymous"
-                         ? Promise.resolve(anonDoc)
-                         : db.active.getDoc(this.props.nbId));
-      this.setState({ doc });
-    } catch (e) {
-      this.setState({ errorMsg: e.message });
-    }
   }
 
   private async update(doc): Promise<void> {
     this.setState({ doc });
     if (doc.anonymous) return; // don't persist anonymous notebooks
     try {
-      await db.active.updateDoc(this.props.nbId, doc);
+      await db.active.updateDoc(this.props.nbInfo.nbId, doc);
     } catch (e) {
-      this.setState({ errorMsg: e.message });
+      // TODO updating the database should be moved out of Notebook because
+      // errors are handled in NotebookRoot. Clearly we need Redux or something
+      // similar.
+      // We should be doing this.setState({ errorMsg: e.message });
+      throw Error(e);
     }
   }
 
@@ -670,10 +711,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     window.location.href = nbUrl(clonedId);
   }
 
-  get loading() {
-    return this.state.doc == null;
-  }
-
   renderCells(doc): JSX.Element {
     const codes = db.getInputCodes(doc);
     return h("div", { "class": "cells" }, codes.map((code, i) => {
@@ -690,86 +727,54 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   }
 
   render() {
-    let body;
+    const doc = this.state.doc;
 
-    if (this.state.errorMsg) {
-      body = [
-        h("div", { "class": "notification-screen"},
-          h("div", { "class": "notification-container"},
-            h("p", { "class": "error-header"}, null, "Error"),
-            h("p", null, this.state.errorMsg),
-          ),
-        ),
-      ];
+    const titleEdit = h("div", { class: "title" },
+      h("input", {
+        class: "title-input",
+        ref: ref => { this.titleInput = ref as HTMLInputElement; },
+        value: doc.title,
+      }),
+      h("button", {
+        class: "save-title green-button",
+        onClick: () => this.onSaveTitle(doc)
+      }, "Save"),
+      h("button", {
+        class: "cancel-edit-title",
+        onClick: () => this.setState({ editingTitle: false })
+      }, "Cancel")
+    );
 
-    } else if (this.state.doc == null) {
-      body = [
-        h(Loading, null)
-      ];
+    const editButton = h("button", {
+      class: "edit-title",
+      onClick: () => this.setState({ editingTitle: true })
+    }, "Edit");
 
-    } else {
-      const doc = this.state.doc;
+    const titleDisplay = h("div", { class: "title" }, [
+      h("h2", {
+        class: doc.title && doc.title.length ? "" : "untitled",
+        value: doc.title
+      }, docTitle(doc)),
+      db.ownsDoc(this.props.userInfo, doc) ? editButton : null
+    ]);
 
-      const titleEdit = h("div", { class: "title" },
-        h("input", {
-          class: "title-input",
-          ref: ref => { this.titleInput = ref as HTMLInputElement; },
-          value: doc.title,
-        }),
-        h("button", {
-          class: "save-title green-button",
-          onClick: () => this.onSaveTitle(doc)
-        }, "Save"),
-        h("button", {
-          class: "cancel-edit-title",
-          onClick: () => this.setState({ editingTitle: false })
-        }, "Cancel")
-      );
+    const title = this.state.editingTitle ? titleEdit : titleDisplay;
 
-      const editButton = h("button", {
-        class: "edit-title",
-        onClick: () => this.setState({ editingTitle: true })
-      }, "Edit");
+    const cloneButton = this.props.userInfo == null ? ""
+      : h("button", {
+          "class": "green-button",
+          "onClick": () => this.onClone(),
+        }, "Clone");
 
-      const titleDisplay = h("div", { class: "title" }, [
-        h("h2", {
-          class: doc.title && doc.title.length ? "" : "untitled",
-          value: doc.title
-        }, docTitle(doc)),
-        db.ownsDoc(this.props.userInfo, doc) ? editButton : null
-      ]);
-
-      const title = this.state.editingTitle ? titleEdit : titleDisplay;
-
-      const cloneButton = this.props.userInfo == null ? ""
-        : h("button", {
-            "class": "green-button",
-            "onClick": () => this.onClone(),
-          }, "Clone");
-
-      body = [
-        h("div", { "class": "notebook-container" },
-          h("header", null,
-            h(Avatar, { userInfo: doc.owner }),
-            h("h2", null, profileLink(doc.owner)),
-            title,
-            cloneButton
-          ),
-          this.renderCells(doc),
-        ),
-      ];
-    }
-
-    return h("div", null, ...body);
-  }
-
-  async componentDidUpdate() {
-    await drainExecuteQueue();
-
-    // We've rendered the Notebook with either a document or errorMsg.
-    if (this.state.doc || this.state.errorMsg) {
-      if (this.props.onReady) this.props.onReady();
-    }
+    return h("div", { "class": "notebook-container" },
+      h("header", null,
+        h(Avatar, { userInfo: doc.owner }),
+        h("h2", null, profileLink(doc.owner)),
+        title,
+        cloneButton
+      ),
+      this.renderCells(doc),
+    );
   }
 }
 
@@ -794,9 +799,10 @@ function notebookList(notebooks: db.NbInfo[], {
   });
 }
 
-function profileLink(u: db.UserInfo): JSX.Element {
+function profileLink(u: db.UserInfo, text: string = null): JSX.Element {
   const href = window.location.origin + "/notebook/?profile=" + u.uid;
-  return h("a", { class: "profile-link", href }, u.displayName);
+  return h("a", { class: "profile-link", href },
+    text ? text : u.displayName);
 }
 
 function notebookBlurb(doc: db.NotebookDoc, {
@@ -834,4 +840,12 @@ function fmtDate(d: Date): string {
 // Trims whitespace.
 function normalizeCode(code: string): string {
   return code.trimRight();
+}
+
+function nbUrl(nbId: string): string {
+  // Careful, S3 is finicky about what URLs it serves. So
+  // /notebook?nbId=blah  will get redirect to /notebook/
+  // because it is a directory with an index.html in it.
+  const u = window.location.origin + "/notebook/?nbId=" + nbId;
+  return u;
 }
