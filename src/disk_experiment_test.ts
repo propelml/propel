@@ -18,7 +18,7 @@ import * as path from "path";
 import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import { DiskExperiment } from "./disk_experiment";
-import { assert, assertAllEqual } from "./tensor_util";
+import { assert, assertAllEqual, assertEqual } from "./tensor_util";
 import { process } from "./util";
 import { isDir } from "./util_node";
 
@@ -38,15 +38,15 @@ test(async function disk_experiment_saveRestore() {
   await exp.createOrRestore();
   const expDir = path.join(process.env.PROPEL_ROOT, "exp1");
   assert(isDir(expDir));
-  assert(fs.readdirSync(expDir).length === 0);
+  assertEqual(fs.readdirSync(expDir).length, 0);
   const checkpoints = await exp.checkpoints();
-  assert(checkpoints.length === 0);
-  assert(exp.params.length === 0);
+  assertEqual(checkpoints.length, 0);
+  assertEqual(exp.params.length, 0);
 
   exp.params.define("hello/world", () => [1, 2, 3]);
   await exp.save();
   const checkpointDirs = fs.readdirSync(expDir);
-  assert(checkpointDirs.length === 1);
+  assertEqual(checkpointDirs.length, 1);
   const checkpointDir = path.join(expDir, checkpointDirs[0]);
   assert(isDir(checkpointDir));
   assert(fs.existsSync(path.join(checkpointDir, "hello/world.npy")));
@@ -54,7 +54,7 @@ test(async function disk_experiment_saveRestore() {
   // Try to load the checkpoint we just saved.
   const exp_ = new DiskExperiment("exp1");
   await exp_.createOrRestore();
-  assert(exp_.params.length === 1);
+  assertEqual(exp_.params.length, 1);
   const t = exp_.params.get("hello/world");
   assertAllEqual(t, [1, 2, 3]);
 });

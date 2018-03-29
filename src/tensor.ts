@@ -20,7 +20,7 @@ import * as ops from "./ops";
 import { Params } from "./params";
 import { allFinite, assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
-import { assert, IS_NODE } from "./util";
+import { assert, assertEqual, IS_NODE } from "./util";
 
 export function convert(t: types.TensorLike,
                         opts?: types.TensorOpts): Tensor {
@@ -64,9 +64,9 @@ export class Tensor implements types.Storage {
    */
   assign(t: Tensor): void {
     // Do we want to relax any of these constraints?
-    // assert(t.device === this.device);
+    // assertEqual(t.device, this.device);
     assertShapesEqual(t.shape, this.shape);
-    assert(t.dtype === this.dtype);
+    assertEqual(t.dtype, this.dtype);
 
     this.dispose();
     this.storage = t.storage;
@@ -666,7 +666,7 @@ export class Tensor implements types.Storage {
    */
   gather(indices: types.TensorLike, axis = 0): Tensor {
     const indicesT = this.colocate(indices, "int32");
-    assert(indicesT.rank === 1, "indices must be rank1 int32");
+    assertEqual(indicesT.rank, 1, "indices must be rank1 int32");
     return ops.gather(this, indicesT, axis);
   }
 
@@ -753,7 +753,7 @@ export class Tensor implements types.Storage {
       left = this.reshape([1, 1]);
       lShape = [];
     } else if (this.rank === 1) {
-      assert(this.shape[0] === xx.shape[0]);
+      assertEqual(this.shape[0], xx.shape[0]);
       left = this.reshape([1, this.shape[0]]);
       lShape = [];
     } else if (this.rank === 2) {
@@ -767,7 +767,7 @@ export class Tensor implements types.Storage {
       right = xx.reshape([1, 1]);
       rShape = [];
     } else if (xx.rank === 1) {
-      assert(this.shape[this.rank - 1] === xx.shape[0]);
+      assertEqual(this.shape[this.rank - 1], xx.shape[0]);
       right = xx.reshape([xx.shape[0], 1]);
       rShape = [];
     } else if (xx.rank === 2) {
@@ -807,8 +807,8 @@ export class Tensor implements types.Storage {
   softmaxCE(labels: types.TensorLike): Tensor {
     const logits = this;
     const labelsT = this.colocate(labels).cast("float32");
-    assert(labelsT.rank === 2);
-    assert(logits.rank === 2);
+    assertEqual(labelsT.rank, 2);
+    assertEqual(logits.rank, 2);
     const logQ = logits.logSoftmax();
     const pLogQ = labelsT.mul(logQ);
     return pLogQ.reduceSum([1]).neg();
@@ -827,7 +827,7 @@ export class Tensor implements types.Storage {
    */
   softmaxLoss(labels: types.TensorLike): Tensor {
     const logits = this;
-    assert(logits.rank === 2);
+    assertEqual(logits.rank, 2);
     const numLabels = logits.shape[1];
     let labelsT = this.colocate(labels);
     if (labelsT.rank === 1) {
@@ -879,7 +879,7 @@ export class Tensor implements types.Storage {
       stride: 2,
       padding: "valid",
     };
-    assert(this.rank === 4);
+    assertEqual(this.rank, 4);
     return ops.maxPool(this, Object.assign(defaults, opts));
   }
 
@@ -978,7 +978,7 @@ export function gc(fn: GCScopeFn) {
   try {
     fn(keep);
   } finally {
-    assert(s === scopes.pop());
+    assertEqual(s, scopes.pop());
     s.clean();
   }
 }

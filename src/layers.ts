@@ -33,6 +33,7 @@ import { Params } from "./params";
 import { Tensor } from "./tensor";
 import {
   assert,
+  assertEqual,
   assertShapesEqual,
 } from "./tensor_util";
 import * as types from "./types";
@@ -87,7 +88,7 @@ export function linear(input: Tensor, params: Params, outDim: number,
 export function conv2d(input: Tensor, params: Params, outChans,
                        opts?: ConvOpts): Tensor {
   let x = input;
-  assert(x.rank === 4);
+  assertEqual(x.rank, 4);
   opts = Object.assign(convDefaults, opts);
   const filter = params.define("filter", () =>
     ops.randn([
@@ -109,7 +110,7 @@ export function batchNorm(input: Tensor, params: Params,
   opts = Object.assign(bnDefaults, opts);
   const p = params;
   const x = input;
-  assert(x.rank === 4);
+  assertEqual(x.rank, 4);
   const c = x.shape[3];
   let moments;
   let mean = p.define("mean", () => {

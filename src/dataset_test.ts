@@ -15,8 +15,13 @@
 import { test } from "../tools/tester";
 import * as pr from "./api";
 import * as dataset from "./dataset";
-import { assert, assertAllClose, assertAllEqual, assertShapesEqual }
-  from "./tensor_util";
+import {
+  assert,
+  assertAllClose,
+  assertAllEqual,
+  assertEqual,
+  assertShapesEqual
+} from "./tensor_util";
 import { IS_NODE } from "./util";
 
 test(async function dataset_datasetFromSlices() {
@@ -142,7 +147,7 @@ test(async function dataset_iterableEndCondition() {
     const { features } = await p;
     count += features.shape[0];
   }
-  assert(count === 12);
+  assertEqual(count, 12);
 });
 
 test(async function dataset_shuffleSmoke() {

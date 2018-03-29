@@ -16,8 +16,8 @@
 import { Tensor } from "./tensor";
 import { DType, FlatVector, RegularArray, Shape, Storage, TensorLike,
     TypedArray } from "./types";
-import { assert } from "./util";
-export { assert } from "./util";
+import { assert, assertEqual } from "./util";
+export { assert, assertEqual } from "./util";
 
 function toShapeAndFlatVector(t: TensorLike): [Shape, FlatVector] {
   if ((t as Tensor).cpu) {
@@ -68,11 +68,10 @@ export function assertClose(actual: TensorLike, expected: TensorLike,
     `actual: ${actual} expected: ${expected}`);
 }
 
-export function assertEqual(actual: TensorLike, expected: number | boolean,
-                            msg = null) {
+export function assertEqualTensor(actual: TensorLike,
+                                  expected: number | boolean, msg = null) {
   actual = toNumber(actual);
-  if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
-  assert(actual === expected, msg);
+  assertEqual(actual, expected, msg);
 }
 
 export function assertShapesEqual(actual: Shape, expected: Shape) {
@@ -86,7 +85,7 @@ export function assertAllEqual(actual: TensorLike, expected: TensorLike) {
   const [expectedShape, expectedFlat] = toShapeAndFlatVector(expected);
   assertShapesEqual(actualShape, expectedShape);
   for (let i = 0; i < actualFlat.length; i++) {
-    assert(actualFlat[i] === expectedFlat[i],
+    assertEqual(actualFlat[i], expectedFlat[i],
       `index ${i} actual: ${actualFlat[i]} expected: ${expectedFlat[i]}`);
   }
 }

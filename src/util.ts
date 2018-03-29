@@ -62,6 +62,41 @@ export function assert(expr: boolean, msg = "") {
   }
 }
 
+export function equal(c: any, d: any): boolean {
+  const seen = new Map();
+  return (function compare(a, b) {
+    if (a === b) {
+      return true;
+    }
+    if (typeof a === "number" && typeof b === "number" &&
+        isNaN(a) && isNaN(b)) {
+      return true;
+    }
+    if (a && typeof a === "object" && b && typeof b === "object") {
+      if (seen.get(a) === b) {
+        return true;
+      }
+      for (const key in { ...a, ...b }) {
+        if (!compare(a[key], b[key])) {
+          return false;
+        }
+      }
+      seen.set(a, b);
+      return true;
+    }
+    return false;
+  })(c, d);
+}
+
+export function assertEqual(actual: any, expected: any, msg = null) {
+  if (!msg) { msg = `actual: ${actual} expected: ${expected}`; }
+  if (!equal(actual, expected)) {
+    console.error(
+      "assertEqual failed. actual = ", actual, "expected =", expected);
+    throw new Error(msg);
+  }
+}
+
 // Provides a map with default value 0.
 export class CounterMap {
   private map = new Map<number, number>();

@@ -16,7 +16,7 @@ import { bo } from "./backend";
 import * as ops from "./ops";
 import { convert, Tensor } from "./tensor";
 import * as types from "./types";
-import { assert } from "./util";
+import { assertEqual } from "./util";
 
 export { DType, TensorLike } from "./types";
 export { params, Params } from "./params";
@@ -163,10 +163,10 @@ export function conv2d(input: Tensor, filter: Tensor,
     stride: 1,
     padding: "valid",
   };
-  assert(input.dtype === "float32");
-  assert(filter.dtype === "float32");
-  assert(input.rank === 4);
-  assert(filter.rank === 4);
+  assertEqual(input.dtype, "float32");
+  assertEqual(filter.dtype, "float32");
+  assertEqual(input.rank, 4);
+  assertEqual(filter.rank, 4);
   return ops.conv2d(input, filter, Object.assign(defaults, opts));
 }
 

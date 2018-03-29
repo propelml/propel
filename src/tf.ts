@@ -13,13 +13,18 @@
    limitations under the License.
  */
 // TensorFlow backend.
-import { assert, assertEqual, getDType } from "./tensor_util";
+import {
+  assert,
+  assertEqualTensor,
+  getDType
+} from "./tensor_util";
 import {
   AttrDef,
   DTypeCode,
   Handle,
 } from "./tf_binding";
 import * as types from "./types";
+import { assertEqual } from "./util";
 
 export let binding;
 export let ctx;
@@ -38,7 +43,7 @@ export function loadBinding(): boolean {
 export function execute0(opName: string, inputs: TensorTF[], attrs): TensorTF {
   const handles = inputs.map((t) => t.handle);
   const r = binding.execute(ctx, opName, attrs, handles);
-  assertEqual(r.length, 1);
+  assertEqualTensor(r.length, 1);
   return new TensorTF(r[0]);
 }
 
@@ -331,7 +336,7 @@ export class OpsTF implements types.BackendOps {
   }
 
   reverse(x: TensorTF, dims: TensorTF): TensorTF {
-    assert(dims.dtype === "bool");
+    assertEqual(dims.dtype, "bool");
     return execute1("Reverse", [x, dims]);
   }
 
@@ -463,7 +468,7 @@ export class OpsTF implements types.BackendOps {
       ["Index", binding.ATTR_TYPE, binding.TF_INT32],
     ];
     const r = binding.execute(ctx, "Slice", attrs, handles);
-    assertEqual(r.length, 1);
+    assertEqualTensor(r.length, 1);
     return new TensorTF(r[0]);
   }
 
@@ -476,7 +481,7 @@ export class OpsTF implements types.BackendOps {
     ];
     const handles = [x.handle, indices.handle, axisT.handle];
     const r = binding.execute(ctx, "GatherV2", attrs, handles);
-    assertEqual(r.length, 1);
+    assertEqualTensor(r.length, 1);
     return new TensorTF(r[0]);
   }
 
@@ -489,7 +494,7 @@ export class OpsTF implements types.BackendOps {
       ["N", binding.ATTR_INT, inputs.length],
     ];
     const r = binding.execute(ctx, "Concat", attrs, handles);
-    assertEqual(r.length, 1);
+    assertEqualTensor(r.length, 1);
     return new TensorTF(r[0]);
   }
 
@@ -510,7 +515,7 @@ export class OpsTF implements types.BackendOps {
       ["Tpaddings", binding.ATTR_TYPE, binding.TF_INT32],
     ];
     const r = binding.execute(ctx, "PadV2", attrs, handles);
-    assertEqual(r.length, 1);
+    assertEqualTensor(r.length, 1);
     return new TensorTF(r[0]);
 
   }
@@ -536,7 +541,7 @@ export class OpsTF implements types.BackendOps {
       ["Tshape", binding.ATTR_TYPE, binding.TF_INT32],
     ];
     const r = binding.execute(ctx, "Reshape", attrs, handles);
-    assertEqual(r.length, 1);
+    assertEqualTensor(r.length, 1);
     return new TensorTF(r[0]);
   }
 
@@ -633,7 +638,7 @@ function tfStrides(s: number | [number, number]):
   if (typeof s === "number") {
     return [1, s, s, 1];
   } else {
-    assert(s.length === 2);
+    assertEqual(s.length, 2);
     return [1, s[0], s[1], 1];
   }
 }

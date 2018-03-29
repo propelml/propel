@@ -13,7 +13,7 @@
    limitations under the License.
  */
 
-import { assert, global, globalEval } from "../src/util";
+import { assert, assertEqual, global, globalEval } from "../src/util";
 import { test } from "../tools/tester";
 import { Transpiler } from "./nb_transpiler";
 
@@ -30,7 +30,7 @@ test(function nb_transpiler_transpile() {
     const transpiler = new Transpiler();
     const transpiled = transpiler.transpile(src, "test");
 
-    assert(transpiled === expected,
+    assertEqual(transpiled, expected,
           "unexpected transpiled source code\n" +
           `actual:   ${JSON.stringify(transpiled)}\n` +
           `expected: ${JSON.stringify(expected)}`
@@ -39,7 +39,7 @@ test(function nb_transpiler_transpile() {
     // Try to eval the transpiled source code. Note that this only verifies that
     // the transpiled code can be parsed correctly; the function body isn't run.
     const fn = globalEval(transpiled);
-    assert(typeof fn === "function");
+    assertEqual(typeof fn, "function");
   };
 
   /* tslint:disable:max-line-length */
@@ -153,7 +153,7 @@ test(async function nb_transpiler_getEntryPoint() {
   const getEntryPoint = () => transpiler.getEntryPoint();
   let checkEntryPointCalls = 0;
   const checkEntryPoint = (actual, expected) => {
-    assert(actual === expected,
+    assertEqual(actual, expected,
            "unexpected entry point name\n" +
            `actual:   ${actual}\n` +
            `expected: ${expected}`);
@@ -184,6 +184,6 @@ test(async function nb_transpiler_getEntryPoint() {
 
   await chain;
 
-  assert(checkEntryPointCalls === 4,
+  assertEqual(checkEntryPointCalls, 4,
          "unexpected number of checkEntryPoint calls were made\n");
 });

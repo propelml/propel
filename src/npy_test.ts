@@ -17,19 +17,19 @@ test(async function npy_load() {
   let t = await npy.load(propelURL + "src/testdata/1.npy");
   util.assertAllEqual(t, [ 1.5, 2.5 ]);
   util.assertShapesEqual(t.shape, [2]);
-  util.assert(t.dtype === "float32");
+  util.assertEqual(t.dtype, "float32");
 
   // python -c "import numpy as np; np.save('2.npy', [[1.5, 43], [13, 2.5]])"
   t = await npy.load(propelURL + "src/testdata/2.npy");
   util.assertAllEqual(t, [[1.5, 43], [13, 2.5]]);
   util.assertShapesEqual(t.shape, [2, 2]);
-  util.assert(t.dtype === "float32");
+  util.assertEqual(t.dtype, "float32");
 
   // python -c "import numpy as np; np.save('3.npy', [[[1,2,3],[4,5,6]]])"
   t = await npy.load(propelURL + "src/testdata/3.npy");
   util.assertAllEqual(t, [[[1, 2, 3], [4, 5, 6]]]);
   util.assertShapesEqual(t.shape, [1, 2, 3]);
-  util.assert(t.dtype === "int32");
+  util.assertEqual(t.dtype, "int32");
 
   /*
    python -c "import numpy as np; np.save('4.npy', \
@@ -38,7 +38,7 @@ test(async function npy_load() {
   t = await npy.load(propelURL + "src/testdata/4.npy");
   util.assertAllClose(t, [0.1, 0.2]);
   util.assertShapesEqual(t.shape, [2]);
-  util.assert(t.dtype === "float32");
+  util.assertEqual(t.dtype, "float32");
 
   /*
    python -c "import numpy as np; np.save('uint8.npy', \
@@ -47,7 +47,7 @@ test(async function npy_load() {
   t = await npy.load(propelURL + "src/testdata/uint8.npy");
   util.assertAllClose(t, [0, 127]);
   util.assertShapesEqual(t.shape, [2]);
-  util.assert(t.dtype === "uint8");
+  util.assertEqual(t.dtype, "uint8");
 });
 
 test(async function npy_serialize() {

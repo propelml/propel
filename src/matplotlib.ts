@@ -16,7 +16,7 @@
 import { Tensor } from "./api";
 import { toUint8Image } from "./im";
 import { PlotData } from "./output_handler";
-import { assertEqual } from "./tensor_util";
+import { assertEqualTensor } from "./tensor_util";
 import { getOutputHandler } from "./util";
 
 export function plot(...args) {
@@ -43,13 +43,13 @@ export function plot(...args) {
     }
   }
 
-  assertEqual(xs.length, ys.length);
+  assertEqualTensor(xs.length, ys.length);
   const data: PlotData = [];
   for (let i = 0; i < xs.length; ++i) {
     // TODO line = $.stack([xs[i], ys[i]], 1)
     const xv = xs[i].dataSync();
     const yv = ys[i].dataSync();
-    assertEqual(xv.length, yv.length);
+    assertEqualTensor(xv.length, yv.length);
     const line = [];
     for (let j = 0; j < xv.length; ++j) {
       line.push({ x: xv[j], y: yv[j] });

@@ -1,5 +1,5 @@
 import { h, render, rerender } from "preact";
-import { assert, assertObjectsEqual, createResolvable } from "../src/util";
+import { assert, assertEqual, createResolvable } from "../src/util";
 import { testBrowser } from "../tools/tester";
 import * as db from "./db";
 import * as nb from "./nb";
@@ -14,23 +14,23 @@ testBrowser(async function notebook_NotebookRoot() {
     queryLatest: 1,
   });
   const c = document.body.getElementsByTagName("div")[0];
-  assert(c.className === "notebook");
+  assertEqual(c.className, "notebook");
 });
 
 testBrowser(async function notebook_Notebook() {
   const mdb = db.enableMock();
   await renderAnonNotebook();
-  assertObjectsEqual(mdb.counts, { getDoc: 1 });
+  assertEqual(mdb.counts, { getDoc: 1 });
   // Check that we rendered the title.
   const title = document.querySelectorAll("div.title > h2");
-  assert(1 === title.length);
-  assert("Sample Notebook" === title[0].innerHTML);
+  assertEqual(1, title.length);
+  assertEqual("Sample Notebook", title[0].innerHTML);
   // Because we aren't logged in, we shouldn't see an edit button for the title.
   const editButtons = document.getElementsByClassName("edit-title");
-  assert(0 === editButtons.length);
+  assertEqual(0, editButtons.length);
   // Because we aren't logged in, we shouldn't see any clone button.
   const clones = document.getElementsByClassName("clone");
-  assert(0 === clones.length);
+  assertEqual(0, clones.length);
 });
 
 testBrowser(async function notebook_focusNextCell() {
@@ -64,7 +64,7 @@ testBrowser(async function notebook_titleEdit() {
   assert(db.defaultDoc.title.length > 1);
   // Check that we rendered the title.
   let title: HTMLElement = document.querySelector(".title > h2");
-  assert(db.defaultDoc.title === title.innerText);
+  assertEqual(db.defaultDoc.title, title.innerText);
   // Because we are logged in, we should see an edit button for the title.
   const editButton: HTMLButtonElement = document.querySelector(".edit-title");
   assert(editButton != null);
@@ -78,7 +78,7 @@ testBrowser(async function notebook_titleEdit() {
   // The edit button has been clicked, so we should see the title-input.
   titleInput = document.querySelector(".title-input");
   assert(null !== titleInput);
-  assert(titleInput.value === db.defaultDoc.title);
+  assertEqual(titleInput.value, db.defaultDoc.title);
   // The save button should be shown.
   const saveTitle: HTMLButtonElement = document.querySelector(".save-title");
   assert(saveTitle != null);
@@ -98,7 +98,7 @@ testBrowser(async function notebook_titleEdit() {
   // Check the title got updated.
   title = document.querySelector(".title > h2");
   assert(title != null);
-  assert("New Title" === title.innerText);
+  assertEqual("New Title", title.innerText);
 });
 
 testBrowser(async function notebook_deleteLastCell() {
@@ -108,9 +108,9 @@ testBrowser(async function notebook_deleteLastCell() {
   // Should have same number of delete buttons, as we have cells in the
   // default doc.
   const deleteButtons = document.getElementsByClassName("delete-button");
-  assert(deleteButtons.length === numCells);
+  assertEqual(deleteButtons.length, numCells);
   let cells = document.getElementsByClassName("notebook-cell");
-  assert(cells.length === numCells);
+  assertEqual(cells.length, numCells);
   // Now click all but one of the delete buttons.
   for (let i = 0; i < numCells - 1; i++) {
     const deleteButton: HTMLButtonElement =
@@ -119,7 +119,7 @@ testBrowser(async function notebook_deleteLastCell() {
     await flush();
   }
   cells = document.getElementsByClassName("notebook-cell");
-  assert(cells.length === 1);
+  assertEqual(cells.length, 1);
   // Now that there is only one cell left, the delete button should
   // not be shown.
   const deleteButton = document.querySelector(".delete-button");
@@ -169,36 +169,36 @@ testBrowser(async function notebook_progressBar() {
   // Start one download job, size not specified yet, will be 10kb.
   await downloadProgress("job1", 0, null);
   assert(visible());
-  assert(percent() === 0);
+  assertEqual(percent(), 0);
   // Start another, size 30k bytes.
   await downloadProgress("job2", 0, 30e3);
   assert(visible());
-  assert(percent() === 0);
+  assertEqual(percent(), 0);
   // Make progress on both jobs.
   await downloadProgress("job1", 1e3, 10e3);
-  assert(percent() === 100 * 1e3 / 40e3);
+  assertEqual(percent(), 100 * 1e3 / 40e3);
   await downloadProgress("job2", 1e3, 30e3);
-  assert(percent() === 100 * 2e3 / 40e3);
+  assertEqual(percent(), 100 * 2e3 / 40e3);
   await downloadProgress("job2", 15e3, 30e3);
-  assert(percent() === 100 * 16e3 / 40e3);
+  assertEqual(percent(), 100 * 16e3 / 40e3);
   // Set job1 to 100% from cellId 2.
   await downloadProgress("job1", 10e3, 10e3, 2);
-  assert(percent() === 100 * 25e3 / 40e3);
+  assertEqual(percent(), 100 * 25e3 / 40e3);
   // Finish job1.
   await downloadProgress("job1", null, null);
   // Since job1 is no longer active, and job2 is half done, the progress bar
   // is now back at 50%.
   // TODO: this is kinda weird.
   assert(visible());
-  assert(percent() === 50);
+  assertEqual(percent(), 50);
   // Set job2 to 100%.
   await downloadProgress("job2", 30e3, 30e3);
   assert(visible());
-  assert(percent() === 100);
+  assertEqual(percent(), 100);
   // Remove job2 from cell 2.
   await downloadProgress("job2", null, null, 2);
   assert(!visible());
-  assert(percent() === 0);
+  assertEqual(percent(), 0);
 });
 
 testBrowser(async function notebook_profile() {

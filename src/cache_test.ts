@@ -22,11 +22,12 @@ import { test } from "../tools/tester";
 import * as cache from "./cache";
 import {
   assert,
+  assertEqual,
   IS_NODE,
   localServer,
   nodeRequire,
   process,
-  tmpdir,
+  tmpdir
 } from "./util";
 
 // Some large datasets are external to the repository, and we would like
@@ -68,7 +69,7 @@ test(async function cache_fetchWithCache() {
   await localServer(async function(url: string) {
     url += "/data/mnist/train-images-idx3-ubyte.bin";
     const ab = await cache.fetchWithCache(url);
-    assert(ab.byteLength === 47040016);
+    assertEqual(ab.byteLength, 47040016);
     if (IS_NODE) {
       assert(fs.existsSync(cache.url2Filename(url)));
     }

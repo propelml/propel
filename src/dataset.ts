@@ -22,7 +22,7 @@ import * as cache from "./cache";
 import * as mnist from "./mnist";
 import * as npy from "./npy";
 import { NamedTensors } from "./tensor";
-import { assert, delay } from "./util";
+import { assertEqual, delay } from "./util";
 
 export function datasetFromSlices(tensors: NamedTensors): Dataset {
   return new SliceDataset(tensors);
@@ -308,7 +308,7 @@ async function loadData(fn: string):
   const nSamples = Number(header.shift());
   const nFeatures = Number(header.shift());
   // let labelNames = header;
-  assert(lines.length === nSamples);
+  assertEqual(lines.length, nSamples);
   const features: number[][] = [];
   const labels: number[] = [];
   for (const line of lines) {

@@ -21,7 +21,13 @@ import * as rimraf from "rimraf";
 import { Experiment, ExperimentOpts, print }  from "./experiment";
 import * as npy from "./npy";
 import { Params, params as createParams } from "./params";
-import { assert, Buffer, nodeRequire, process } from "./util";
+import {
+  assert,
+  assertEqual,
+  Buffer,
+  nodeRequire,
+  process
+} from "./util";
 import { isDir, propelDir } from "./util_node";
 
 const fs = nodeRequire("fs");
@@ -52,7 +58,7 @@ export class DiskExperiment extends Experiment {
       const latestCheckpoint = checkpoints[0];
       console.log("Restore checkpoint", latestCheckpoint);
       await this.restore(latestCheckpoint);
-      assert(this.step_ === latestCheckpoint);
+      assertEqual(this.step_, latestCheckpoint);
     } else {
       this.currentParams = createParams();
       this.step_ = 0;

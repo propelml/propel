@@ -2,7 +2,7 @@
 /// <reference path='./jasmine_types.d.ts' />
 
 import { inspect } from "util";
-import { global } from "../src/util";
+import { equal, global } from "../src/util";
 import { test } from "./tester";
 
 export function generateMethods() {
@@ -59,29 +59,7 @@ export const matchTesters: MatchTesters = {
   },
 
   toEqual(value: any, expected: any): boolean {
-    const seen = new Map();
-    return (function compare(a, b) {
-      if (a === b) {
-        return true;
-      }
-      if (typeof a === "number" && typeof b === "number" &&
-          isNaN(a) && isNaN(b)) {
-        return true;
-      }
-      if (a && typeof a === "object" && b && typeof b === "object") {
-        if (seen.get(a) === b) {
-          return true;
-        }
-        for (const key in { ...a, ...b }) {
-          if (!compare(a[key], b[key])) {
-            return false;
-          }
-        }
-        seen.set(a, b);
-        return true;
-      }
-      return false;
-    })(value, expected);
+    return equal(value, expected);
   },
 
   toBeLessThan(value: number, comparand: number): boolean {

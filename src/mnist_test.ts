@@ -21,7 +21,7 @@ test(async function mnist_trainSplit() {
   assertShapesEqual(images.shape, [60000, 28, 28]);
   assertAllEqual(images.reduceMax(), 255);
   assertShapesEqual(labels.shape, [60000]);
-  // assert(labels.dtype === "uint8");
+  // assertEqual(labels.dtype, "uint8");
   // > hexdump deps/mnist/train-labels-idx1-ubyte | head -1
   // 0000000 00 00 08 01 00 00 ea 60 05 00 04 01 09 02 01 03
   //         ---magic--- ---items--- ---------labels--------
