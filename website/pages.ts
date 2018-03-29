@@ -213,7 +213,7 @@ const TrainingExample = () =>
           p(b("What are NNs anyway?"), `The terminology is a bit misleading. Any
             number of operations and architectures can be considered a neural
             network. The primary thing in common is that NN models use
-            differentiable operations to allow gradient decent to improve their
+            differentiable operations to allow gradient descent to improve their
             fitness.`),
 
           p(`Propel provides a concise API for specifying, training, and
