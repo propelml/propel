@@ -21,6 +21,12 @@ import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
 import { createResolvable, fetchArrayBuffer, fetchBuffer } from "./util";
 
+// TODO These modules are only used in Node and it is excessive to include them
+// in the browser bundle. However at the moment we only distribute a single
+// bundle. So, for now, just include them normally.
+import * as JPEG from "jpeg-js";
+import * as pngjs from "pngjs";
+
 export interface Image {
   width: number;
   height: number;
@@ -139,9 +145,8 @@ function readMIME(data: Buffer): string {
 }
 
 async function pngReadHandler(data: Buffer, mode: Mode): Promise<Tensor> {
-  const PNG = nodeRequire("pngjs").PNG;
   const promise = createResolvable<Tensor>();
-  new PNG().parse(data).on("parsed", function(this: any) {
+  new pngjs.PNG().parse(data).on("parsed", function(this: any) {
     const data = new Uint8Array(this.data);
     promise.resolve(toTensor(data, this.height, this.width, mode));
   });
@@ -149,9 +154,8 @@ async function pngReadHandler(data: Buffer, mode: Mode): Promise<Tensor> {
 }
 
 function pngSaveHandler(filename: string, image): Promise<void> {
-  const PNG = nodeRequire("pngjs").PNG;
   const fs = nodeRequire("fs");
-  const file = new PNG({
+  const file = new pngjs.PNG({
     height: image.height,
     width: image.width
   });
@@ -164,13 +168,11 @@ function pngSaveHandler(filename: string, image): Promise<void> {
 }
 
 function jpegReadHandler(data: Buffer, mode: Mode): Tensor {
-  const JPEG = require("jpeg-js");
   const img = JPEG.decode(data, true);
   return toTensor(img.data, img.height, img.width, mode);
 }
 
 function jpegSaveHandler(filename: string, image): void {
-  const JPEG = nodeRequire("jpeg-js");
   const fs = nodeRequire("fs");
   const {data} = JPEG.encode(image);
   fs.writeFileSync(filename, data);
