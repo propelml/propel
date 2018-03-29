@@ -18,7 +18,7 @@
 import { TextDecoder } from "text-encoding";
 import { isUndefined } from "util";
 import { stack, tensor, Tensor } from "./api";
-import * as cache from "./cache";
+import { fetchWithCache } from "./fetch";
 import * as mnist from "./mnist";
 import * as npy from "./npy";
 import { NamedTensors } from "./tensor";
@@ -299,7 +299,7 @@ class ShuffleDataset extends Dataset {
 
 async function loadData(fn: string):
     Promise<{ features: Tensor, labels: Tensor }> {
-  const ab = await cache.fetchWithCache(fn);
+  const ab = await fetchWithCache(fn);
   const dec = new TextDecoder("ascii");
   const csv = dec.decode(new Uint8Array(ab));
 
@@ -365,7 +365,7 @@ const cifar10URLs = {
 
 export async function cifar10Load(splitName: string):
     Promise<{images: Tensor, labels: Tensor}> {
-  const load = async(url) => npy.parse(await cache.fetchWithCache(url));
+  const load = async(url) => npy.parse(await fetchWithCache(url));
   const [images, labels] = await Promise.all([
     await load(cifar10URLs[splitName].images),
     await load(cifar10URLs[splitName].labels),
