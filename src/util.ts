@@ -327,3 +327,28 @@ export function randomString(): string {
 export function tmpdir(): string {
   return process.env.TEMP || process.env.TMPDIR || "/tmp";
 }
+
+// Helper function to start a local web server.
+export async function localServer(
+  cb: (url: string) => Promise<void>
+): Promise<void> {
+  if (!IS_NODE) {
+    // We don't need a local server, since we're being hosted from one already.
+    await cb(`http://${document.location.host}/`);
+  } else {
+    const root = __dirname + "/../build/dev_website";
+    const { isDir } = require("./util_node");
+    assert(isDir(root), root +
+      " does not exist. Run ./tools/dev_website before running this test.");
+    const { createServer } = nodeRequire("http-server");
+    const server = createServer({ cors: true, root });
+    server.listen();
+    const port = server.server.address().port;
+    const url = `http://127.0.0.1:${port}/`;
+    try {
+      await cb(url);
+    } finally {
+      server.close();
+    }
+  }
+}
