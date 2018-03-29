@@ -1,7 +1,12 @@
 import { test } from "../tools/tester";
 import { randn, zeros } from "./api";
 import { params } from "./params";
-import { assert, assertAllEqual, assertShapesEqual } from "./tensor_util";
+import {
+  assert,
+  assertAllEqual,
+  assertShapesEqual
+} from "./tensor_util";
+import { assertEqual } from "./util";
 
 test(async function params_smoke() {
   const p = params();
@@ -27,6 +32,6 @@ test(async function params_scope() {
   // Check that they were set on the original params.
   assert(p.has("L1/weights"));
   assert(p.has("L1/bias"));
-  assert(p.get("L1/weights") === w);
-  assert(p.get("L1/bias") === b);
+  assertEqual(p.get("L1/weights"), w);
+  assertEqual(p.get("L1/bias"), b);
 });

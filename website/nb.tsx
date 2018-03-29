@@ -24,7 +24,14 @@
 import { escape } from "he";
 import { Component, h } from "preact";
 import { OutputHandlerDOM } from "../src/output_handler";
-import { assert, delay, IS_WEB, randomString, URL } from "../src/util";
+import {
+  assert,
+  assertEqual,
+  delay,
+  IS_WEB,
+  randomString,
+  URL
+} from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
 import { RPC, WindowRPC } from "./rpc";
@@ -272,7 +279,7 @@ export class Cell extends Component<CellProps, CellState> {
 
       // Find pre to replace by codemirror instance.
       const pres = this.input.getElementsByTagName("pre");
-      assert(pres.length === 1);
+      assertEqual(pres.length, 1);
 
       this.editor =
         CodeMirror(div => this.input.replaceChild(div, pres[0]), options);

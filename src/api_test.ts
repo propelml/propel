@@ -20,7 +20,7 @@ import * as api from "./api";
 import { assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
-import { assert, IS_NODE } from "./util";
+import { assert, assertEqual, IS_NODE } from "./util";
 
 function checkGrad(f, g, val = 1.0) {
   const epsilon = 0.01;
@@ -84,13 +84,13 @@ test(async function api_randn() {
 
 test(async function api_convertWithType() {
   const t = tensor([1, 2, 3], {dtype: "int32"});
-  assert(t.dtype === "int32");
+  assertEqual(t.dtype, "int32");
   const ta = t.dataSync();
   assert(ta instanceof Int32Array);
 
   const ta2 = new Int32Array([1, 2, 3]);
   const t2 = tensor(ta2);
-  assert(t2.dtype === "int32");
+  assertEqual(t2.dtype, "int32");
   assert(t2.dataSync() instanceof Int32Array);
 });
 
@@ -457,7 +457,7 @@ testDevices(async function api_reduceMean(tensor, device) {
     [9, 8, 7],
     [6, 5, 4],
   ]);
-  assert(a.device === device);
+  assertEqual(a.device, device);
   assertAllClose(a.reduceMean([0]), [7.5, 6.5, 5.5]);
   assertAllClose(a.reduceMean([1]), [8, 5]);
   assertAllClose(a.reduceMean(), 6.5);
@@ -525,8 +525,8 @@ testDevices(async function api_onesAndZerosLike(tensor, device) {
   ]);
   const ones = a.onesLike();
   const zeros = a.zerosLike();
-  assert(ones.device === device);
-  assert(zeros.device === device);
+  assertEqual(ones.device, device);
+  assertEqual(zeros.device, device);
   assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
   assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
 });
@@ -541,7 +541,7 @@ test(async function api_equal() {
     [0, 8, 2],
   ]);
   const r = a.equal(b);
-  assert(r.dtype === "bool");
+  assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
   assertAllEqual(r, [ [1, 0, 1], [0, 1, 0] ]);
 
@@ -563,7 +563,7 @@ test(async function api_greater() {
     [0, 8, 4],
   ]);
   const r = a.greater(b);
-  assert(r.dtype === "bool");
+  assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
   assertAllEqual(r, [ [0, 1, 0], [1, 0, 0] ]);
   // greater isn't differentiable but it should have the same behavior as
@@ -584,7 +584,7 @@ test(async function api_greaterEqual() {
     [0, 8, 4],
   ]);
   const r = a.greaterEqual(b);
-  assert(r.dtype === "bool");
+  assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
   assertAllEqual(r, [ [1, 1, 1], [1, 1, 0] ]);
   // greaterEqual isn't differentiable but it should have the same behavior as
@@ -605,7 +605,7 @@ test(async function api_less() {
     [0, 8, 4],
   ]);
   const r = a.less(b);
-  assert(r.dtype === "bool");
+  assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
   assertAllEqual(r, [ [0, 0, 0], [0, 0, 1] ]);
   // less isn't differentiable but it should have the same behavior as
@@ -626,7 +626,7 @@ test(async function api_lessEqual() {
     [0, 8, 4],
   ]);
   const r = a.lessEqual(b);
-  assert(r.dtype === "bool");
+  assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
   assertAllEqual(r, [ [1, 0, 1], [0, 1, 1] ]);
   // lessEqual isn't differentiable but it should have the same behavior as
@@ -691,7 +691,7 @@ testDevices(async function api_reshape(tensor, device) {
   const f = (x) => tensor(x).reshape([3, 2]);
   const g = grad(f);
   const ga = g(a);
-  assert(ga.device === device);
+  assertEqual(ga.device, device);
   assertAllEqual(ga, [
     [1, 1, 1],
     [1, 1, 1],
@@ -825,19 +825,19 @@ test(async function api_dot() {
 test(async function api_zerosOnes() {
   const z1 = zeros([2, 3]);
   assertAllEqual(z1, [[0, 0, 0], [0, 0, 0]]);
-  assert(z1.dtype === "float32");
+  assertEqual(z1.dtype, "float32");
 
   const z2 = zeros([2, 3], {dtype: "int32"});
   assertAllEqual(z2, [[0, 0, 0], [0, 0, 0]]);
-  assert(z2.dtype === "int32");
+  assertEqual(z2.dtype, "int32");
 
   const o1 = ones([2, 3]);
   assertAllEqual(o1, [[1, 1, 1], [1, 1, 1]]);
-  assert(o1.dtype === "float32");
+  assertEqual(o1.dtype, "float32");
 
   const o2 = ones([2, 3], {dtype: "int32"});
   assertAllEqual(o2, [[1, 1, 1], [1, 1, 1]]);
-  assert(o2.dtype === "int32");
+  assertEqual(o2.dtype, "int32");
 });
 
 test(async function api_bcastAdd() {
@@ -857,7 +857,7 @@ test(async function api_bcastAdd() {
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assert(gab.length === 2);
+  assertEqual(gab.length, 2);
   assertAllEqual(gab[0], [
     [1, 1],
     [1, 1],
@@ -884,7 +884,7 @@ test(async function api_bcastSub() {
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assert(gab.length === 2);
+  assertEqual(gab.length, 2);
   assertAllEqual(gab[0], [
     [1, 1],
     [1, 1],
@@ -911,7 +911,7 @@ test(async function api_bcastMul() {
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assert(gab.length === 2);
+  assertEqual(gab.length, 2);
   assertAllEqual(gab[0], [
     [42, 43],
     [42, 43],
@@ -938,7 +938,7 @@ test(async function api_bcastDiv() {
   ]);
   const g = multigrad(f, [0, 1]);
   const gab = g(a, b);
-  assert(gab.length === 2);
+  assertEqual(gab.length, 2);
   assertAllClose(gab[0], [
     [0.02380952, 0.02325581],
     [0.02380952, 0.02325581],
@@ -981,7 +981,7 @@ testDevices(async function api_slice(tensor, device) {
   assertAllEqual(a.slice(1, 1), [[[3, 3, 3], [4, 4, 4]]]);
 
   const s2 = tensor([1, 2, 3], {dtype: "int32"}).slice([1], [1]);
-  assert(s2.dtype === "int32");
+  assertEqual(s2.dtype, "int32");
   assertAllEqual(s2, [2]);
   // Backwards pass.
   const f = (x) => tensor(x).slice([1, 0, 0], [2, 1, 3]);
@@ -1052,7 +1052,7 @@ testDevices(async function api_stack(tensor, device) {
 
 test(async function api_cast() {
   const a = tensor([255, 127, 0], {dtype: "uint8"});
-  assert(a.dtype === "uint8");
+  assertEqual(a.dtype, "uint8");
   const r = a.cast("float32").div(255);
   assertAllClose(r, [1.0, 127 / 255, 0]);
 });
@@ -1118,10 +1118,10 @@ test(async function api_devicePlacement() {
   const s = tensor([3, 4]).gpu();
   const r = t.mul(s);
   const rCpu = r.cpu();
-  assert(t.device === "GPU:0");
-  assert(s.device === "GPU:0");
-  assert(r.device === "GPU:0");
-  assert(rCpu.device === "CPU:0");
+  assertEqual(t.device, "GPU:0");
+  assertEqual(s.device, "GPU:0");
+  assertEqual(r.device, "GPU:0");
+  assertEqual(rCpu.device, "CPU:0");
   assertAllEqual(rCpu, [3, 8]);
 });
 
@@ -1201,7 +1201,7 @@ if (IS_NODE) {
   test(async function api_inspect() {
     const t = tensor([1, 2, 3]);
     const actual = require("util").inspect(t);
-    assert("[ 1.,  2.,  3.]" === actual);
+    assertEqual("[ 1.,  2.,  3.]", actual);
   });
 }
 
@@ -1237,13 +1237,13 @@ test(async function api_data() {
 
 test(async function api_dtypeConstructors() {
   const ui8 = api.uint8([254, 255, 256, 257]);
-  assert(ui8.dtype === "uint8");
+  assertEqual(ui8.dtype, "uint8");
   assertAllEqual(ui8, [254, 255, 0, 1]);
   const i32 = api.int32([1, 2, 3]);
-  assert(i32.dtype === "int32");
+  assertEqual(i32.dtype, "int32");
   assertAllEqual(i32, [1, 2, 3]);
   const f32 = api.float32([1.5, 3.5]);
-  assert(f32.dtype === "float32");
+  assertEqual(f32.dtype, "float32");
   assertAllEqual(f32, [1.5, 3.5]);
 });
 
@@ -1308,6 +1308,6 @@ test(async function api_sin_cos_tan() {
 });
 
 test(async function api_size() {
-  assert(api.range(20).size === 20);
-  assert(api.range(20).reshape([4, 5]).size === 20);
+  assertEqual(api.range(20).size, 20);
+  assertEqual(api.range(20).reshape([4, 5]).size, 20);
 });

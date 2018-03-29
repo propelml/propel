@@ -27,7 +27,7 @@ import { gradParams } from "./backprop";
 import * as format from "./format";
 import { Params, params as createParams } from "./params";
 import { gc, NamedTensors, Tensor } from "./tensor";
-import { assert, getOutputHandler, IS_NODE } from "./util";
+import { assertEqual, getOutputHandler, IS_NODE } from "./util";
 
 export interface ExperimentOpts {
   checkpointsToKeep?: number;
@@ -185,7 +185,7 @@ export abstract class Experiment {
       this.currentParams.isTraining = false;
       const grads = gradsAndLoss[0];
       loss = gradsAndLoss[1];
-      assert(loss.rank === 0);
+      assertEqual(loss.rank, 0);
       keep(loss);
       optimizer(opts, this.currentParams, grads);
     });

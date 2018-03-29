@@ -19,9 +19,10 @@
 import { bo } from "./backend";
 import * as backprop from "./backprop";
 import { convert, Tensor } from "./tensor";
-import { assert, bcastGradientArgs, shapesEqual } from "./tensor_util";
+import { bcastGradientArgs, shapesEqual } from "./tensor_util";
 import * as types from "./types";
 import { Storage } from "./types";
+import { assertEqual } from "./util";
 
 // FWFunc defines a "primative" op (using autograd nomenclature). It should
 // never use Tensors, only Storage objects. These forward pass functions
@@ -151,7 +152,7 @@ let globalSavedForBackward = null;
 function saveForBackward(...args) {
   // JavaScript is single threaded. Therefore we don't to worry about multiple
   // call stacks.
-  assert(globalSavedForBackward === null);
+  assertEqual(globalSavedForBackward, null);
   globalSavedForBackward = args;
 }
 
@@ -577,7 +578,7 @@ defBW("reduceLogSumExp", (g, ans, x) => {
 });
 
 export const softmax = defFW("softmax", (x) => {
-  assert(x.shape.length === 2);
+  assertEqual(x.shape.length, 2);
   const ans = bo.softmax(x);
   saveForBackward(ans);
   return ans;
@@ -587,7 +588,7 @@ defBW("softmax", (g, ans) => {
 });
 
 export const logSoftmax = defFW("logSoftmax", (x) => {
-  assert(x.shape.length === 2);
+  assertEqual(x.shape.length, 2);
   const ans = bo.logSoftmax(x);
   saveForBackward(ans);
   return ans;

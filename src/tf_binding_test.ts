@@ -15,6 +15,7 @@
 import { test } from "../tools/tester";
 import { assert, assertAllEqual } from "./tensor_util";
 import * as tf from "./tf";
+import { assertEqual } from "./util";
 
 assert(tf.loadBinding());
 const binding = tf.binding;
@@ -33,7 +34,7 @@ test(async function binding_equals() {
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
   ];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, a])[0];
-  assert(binding.getDevice(r) === "CPU:0");
+  assertEqual(binding.getDevice(r), "CPU:0");
   assertAllEqual(binding.getShape(r), [2]);
 
   const result = Array.from(new Uint8Array(binding.asArrayBuffer(r)));
@@ -50,8 +51,8 @@ test(async function binding_matMul() {
   const typedArray = new Float32Array([1, 2, 3, 4, 5, 6]);
   const a = new binding.Handle(typedArray, [2, 3], binding.TF_FLOAT);
   const b = new binding.Handle(typedArray, [3, 2], binding.TF_FLOAT);
-  assert(binding.getDevice(a) === "CPU:0");
-  assert(binding.getDevice(b) === "CPU:0");
+  assertEqual(binding.getDevice(a), "CPU:0");
+  assertEqual(binding.getDevice(b), "CPU:0");
   assertAllEqual(binding.getShape(a), [2, 3]);
   assertAllEqual(binding.getShape(b), [3, 2]);
 
@@ -62,7 +63,7 @@ test(async function binding_matMul() {
   ];
   const retvals = binding.execute(ctx, "MatMul", opAttrs, [a, b]);
   const r = retvals[0];
-  assert(binding.getDevice(r) === "CPU:0");
+  assertEqual(binding.getDevice(r), "CPU:0");
   const result = Array.from(new Float32Array(binding.asArrayBuffer(r)));
   assertAllEqual(result, [22, 28, 49, 64]);
 });
@@ -71,18 +72,18 @@ test(async function binding_mul() {
   const typedArray = new Float32Array([2, 5]);
   const a = new binding.Handle(typedArray, [2], binding.TF_FLOAT);
   const b = new binding.Handle(typedArray, [2], binding.TF_FLOAT);
-  assert(binding.getDevice(a) === "CPU:0");
-  assert(binding.getDevice(b) === "CPU:0");
+  assertEqual(binding.getDevice(a), "CPU:0");
+  assertEqual(binding.getDevice(b), "CPU:0");
 
-  assert(binding.getDType(a) === binding.TF_FLOAT);
-  assert(binding.getDType(b) === binding.TF_FLOAT);
+  assertEqual(binding.getDType(a), binding.TF_FLOAT);
+  assertEqual(binding.getDType(b), binding.TF_FLOAT);
 
   const opAttrs = [
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
   ];
   const retvals = binding.execute(ctx, "Mul", opAttrs, [a, b]);
   const r = retvals[0];
-  assert(binding.getDevice(r) === "CPU:0");
+  assertEqual(binding.getDevice(r), "CPU:0");
   const result = Array.from(new Float32Array(binding.asArrayBuffer(r)));
   assertAllEqual(result, [4, 25]);
 });
@@ -96,7 +97,7 @@ test(async function binding_chaining() {
     ["T", binding.ATTR_TYPE, binding.TF_FLOAT],
   ];
   const r = binding.execute(ctx, "Equal", opAttrs, [a, b])[0];
-  assert(binding.getDType(r) === binding.TF_BOOL);
+  assertEqual(binding.getDType(r), binding.TF_BOOL);
   assertAllEqual(binding.getShape(r), [2]);
 
   const reductionIndices = new binding.Handle(new Int32Array([0]), [1],
@@ -126,7 +127,7 @@ test(async function binding_reshape() {
 test(async function binding_boolean() {
   const ta = new Uint8Array([0, 1, 0, 1]);
   const t = new binding.Handle(ta, [3], binding.TF_BOOL);
-  assert(binding.getDType(t) === binding.TF_BOOL);
+  assertEqual(binding.getDType(t), binding.TF_BOOL);
   assertAllEqual(binding.getShape(t), [3]);
   const result = Array.from(new Uint8Array(binding.asArrayBuffer(t)));
   assertAllEqual(result, [0, 1, 0, 1]);
@@ -137,7 +138,7 @@ test(async function binding_listDevices() {
   assert(devices.length >= 1);
   // Assuming first device is always CPU.
   const cpuDevice = devices[0];
-  assert(cpuDevice["deviceType"] === "CPU");
+  assertEqual(cpuDevice["deviceType"], "CPU");
   assert(cpuDevice["name"].indexOf("device:CPU:0") > 0);
   assert(cpuDevice["memoryBytes"] > 1024);
   console.log(devices);
@@ -170,17 +171,17 @@ test(async function binding_createSmallHandle() {
   for (const [tftype, taConstructor] of types) {
     // scalar CPU
     h = binding.createSmallHandle(ctx, tftype, "CPU:0", 42);
-    assert(binding.getDevice(h) === "CPU:0");
-    assert(binding.getShape(h).length === 0);
-    assert(binding.getDType(h) === tftype);
+    assertEqual(binding.getDevice(h), "CPU:0");
+    assertEqual(binding.getShape(h).length, 0);
+    assertEqual(binding.getDType(h), tftype);
     v = Array.from(new taConstructor(binding.asArrayBuffer(h)));
     assertAllEqual(v, [42]);
 
     // array CPU
     h = binding.createSmallHandle(ctx, tftype, "CPU:0", [1, 2, 3]);
-    assert(binding.getDevice(h) === "CPU:0");
+    assertEqual(binding.getDevice(h), "CPU:0");
     assertAllEqual(binding.getShape(h), [3]);
-    assert(binding.getDType(h) === tftype);
+    assertEqual(binding.getDType(h), tftype);
     v = Array.from(new taConstructor(binding.asArrayBuffer(h)));
     assertAllEqual(v, [1, 2, 3]);
 
@@ -194,8 +195,8 @@ test(async function binding_createSmallHandle() {
     // scalar GPU
     h = binding.createSmallHandle(ctx, tftype, "GPU:0", 42);
     assert(binding.getDevice(h).endsWith("GPU:0"));
-    assert(binding.getShape(h).length === 0);
-    assert(binding.getDType(h) === tftype);
+    assertEqual(binding.getShape(h).length, 0);
+    assertEqual(binding.getDType(h), tftype);
     hCpu = binding.copyToDevice(ctx, h, "CPU:0");
     v = Array.from(new taConstructor(binding.asArrayBuffer(hCpu)));
     assertAllEqual(v, [42]);
@@ -204,7 +205,7 @@ test(async function binding_createSmallHandle() {
     h = binding.createSmallHandle(ctx, tftype, "GPU:0", [1, 2, 3]);
     assert(binding.getDevice(h).endsWith("GPU:0"));
     assertAllEqual(binding.getShape(h), [3]);
-    assert(binding.getDType(h) === tftype);
+    assertEqual(binding.getDType(h), tftype);
     hCpu = binding.copyToDevice(ctx, h, "CPU:0");
     v = Array.from(new taConstructor(binding.asArrayBuffer(hCpu)));
     assertAllEqual(v, [1, 2, 3]);

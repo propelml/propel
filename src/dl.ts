@@ -26,7 +26,7 @@ import { NDArrayMath } from "./dl/math/math";
 import { Array1D, Array2D, Array3D, Array4D, NDArray, Scalar }
   from "./dl/math/ndarray";
 import { MatrixOrientation } from "./dl/math/types";
-import { assert, getDType, makeTypedArray } from "./tensor_util";
+import { assert, assertEqual, getDType, makeTypedArray } from "./tensor_util";
 import * as types from "./types";
 
 const deviceRegistry = new Map<string, NDArrayMath>();
@@ -137,7 +137,8 @@ export class OpsDL implements types.BackendOps {
     const f = (t) => t ?
       MatrixOrientation.TRANSPOSED :
       MatrixOrientation.REGULAR;
-    assert(x.shape.length === 2 && y.shape.length === 2);
+    assertEqual(x.shape.length, 2);
+    assertEqual(y.shape.length, 2);
     const x2 = x as Array2D;
     const y2 = y as Array2D;
     return x.math.matMul(x2, y2, f(transposeA), f(transposeB));
@@ -156,14 +157,14 @@ export class OpsDL implements types.BackendOps {
     ENV.setMath(x.math);
     const ones = NDArray.zerosLike(x);
     ones.fill(1.0);
-    assert(ones.math === x.math);
+    assertEqual(ones.math, x.math);
     return ones;
   }
 
   zerosLike(x: TensorDL): TensorDL {
     ENV.setMath(x.math);
     const zeros = NDArray.zerosLike(x);
-    assert(zeros.math === x.math);
+    assertEqual(zeros.math, x.math);
     return zeros;
   }
 
@@ -174,7 +175,7 @@ export class OpsDL implements types.BackendOps {
     ENV.setMath(value.math);
     const out = NDArray.zeros(shape, value.dtype);
     out.fill(value.dataSync()[0]);
-    assert(out.math === value.math);
+    assertEqual(out.math, value.math);
     return out;
   }
 
@@ -383,7 +384,7 @@ export class OpsDL implements types.BackendOps {
       if (d >= 0) {
         return d;
       } else {
-        assert(d === -1, "Bad value in size");
+        assertEqual(d, -1, "Bad value in size");
         return x.shape[i] - begin[i];
       }
     });

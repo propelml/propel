@@ -15,7 +15,7 @@
 import { AbstractToken } from "acorn";
 import * as acorn from "acorn/dist/acorn";
 import * as walk from "acorn/dist/walk";
-import { assert } from "../src/util";
+import { assert, assertEqual } from "../src/util";
 
 function noop() {}
 
@@ -225,7 +225,7 @@ export class Transpiler {
       ecmaVersion: 8
     });
     const functionExpression = root.body[0].expression;
-    assert(functionExpression.type === "FunctionExpression");
+    assertEqual(functionExpression.type, "FunctionExpression");
     return functionExpression.body;
   }
 

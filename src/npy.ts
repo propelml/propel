@@ -42,7 +42,7 @@ export async function serialize(tensor: Tensor): Promise<ArrayBuffer> {
   // Spaces to 16-bit align.
   const padding = " ".repeat((16 - unpaddedLength % 16) % 16);
   header += padding;
-  util.assert((unpaddedLength + padding.length) % 16 === 0);
+  util.assertEqual((unpaddedLength + padding.length) % 16, 0);
   // Either int32 or float32 for now Both 4 bytes per element.
   // TODO support uint8 and bool.
   const bytesPerElement = 4;
@@ -64,7 +64,7 @@ export async function serialize(tensor: Tensor): Promise<ArrayBuffer> {
 
   // Write data
   const data = await tensor.data();
-  util.assert(data.length === numEls(tensor.shape));
+  util.assertEqual(data.length, numEls(tensor.shape));
   for (let i = 0; i < data.length; i++) {
     switch (tensor.dtype) {
       case "float32":
@@ -123,28 +123,28 @@ export function parse(ab: ArrayBuffer): Tensor {
   const size = numEls(header.shape);
   if (header["descr"] === "<f8") {
     // 8 byte float. float64.
-    util.assert(bytesLeft === size * 8);
+    util.assertEqual(bytesLeft, size * 8);
     const s = ab.slice(pos, pos + size * 8);
     const ta = new Float32Array(new Float64Array(s));
     return fromTypedArrayAndShape(ta, header.shape);
 
   } else if (header["descr"] === "<f4") {
     // 4 byte float. float32.
-    util.assert(bytesLeft === size * 4);
+    util.assertEqual(bytesLeft, size * 4);
     const s = ab.slice(pos, pos + size * 4);
     const ta = new Float32Array(s);
     return fromTypedArrayAndShape(ta, header.shape);
 
   } else if (header["descr"] === "<i8") {
     // 8 byte int. int64.
-    util.assert(bytesLeft === size * 8);
+    util.assertEqual(bytesLeft, size * 8);
     const s = ab.slice(pos, pos + size * 8);
     const ta = new Int32Array(s).filter((val, i) => i % 2 === 0);
     return fromTypedArrayAndShape(ta, header.shape);
 
   } else if (header["descr"] === "|u1") {
     // uint8.
-    util.assert(bytesLeft === size);
+    util.assertEqual(bytesLeft, size);
     const s = ab.slice(pos, pos + size);
     const ta = new Uint8Array(s);
     return fromTypedArrayAndShape(ta, header.shape);
