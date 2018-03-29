@@ -20,8 +20,14 @@ import * as path from "path";
 import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import * as cache from "./cache";
-import { assert, IS_NODE, nodeRequire, process, tmpdir } from "./util";
-import { isDir } from "./util_node";
+import {
+  assert,
+  IS_NODE,
+  localServer,
+  nodeRequire,
+  process,
+  tmpdir,
+} from "./util";
 
 // Some large datasets are external to the repository, and we would like
 // to cache the downloads during CI. Only in these tests do we use
@@ -38,29 +44,6 @@ function setup() {
 function teardown() {
   if (IS_NODE) {
     delete process.env["PROPEL_ROOT"];
-  }
-}
-
-// Helper function to start a local web server.
-// TODO should be moved to tools/tester eventually.
-async function localServer(cb: (url: string) => Promise<void>): Promise<void> {
-  if (!IS_NODE) {
-    // We don't need a local server, since we're being hosted from one already.
-    await cb(`http://${document.location.host}/`);
-  } else {
-    const root = __dirname + "/../build/dev_website";
-    assert(isDir(root), root +
-      " does not exist. Run ./tools/dev_website before running this test.");
-    const { createServer } = nodeRequire("http-server");
-    const server = createServer({ cors: true, root });
-    server.listen();
-    const port = server.server.address().port;
-    const url = `http://127.0.0.1:${port}/`;
-    try {
-      await cb(url);
-    } finally {
-      server.close();
-    }
   }
 }
 
