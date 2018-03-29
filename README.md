@@ -18,6 +18,8 @@ https://github.com/propelml/propel/blob/master/example.js
 Also the documentation has many examples:
 http://propelml.org/docs
 
+We have a real-time chat at https://gitter.im/propelml/propel
+
 
 ## How to run TF examples
 
