@@ -13,7 +13,7 @@
    limitations under the License.
  */
 import { tensor, Tensor } from "./api";
-import * as cache from "./cache";
+import { fetchWithCache } from "./fetch";
 import { assert } from "./util";
 
 export function filenames(split: string): [string, string] {
@@ -49,7 +49,7 @@ export async function loadSplit(split: string):
 }
 
 async function loadFile2(href: string) {
-  const ab = await cache.fetchWithCache(href);
+  const ab = await fetchWithCache(href);
   const i32 = new Int32Array(ab);
   const ui8 = new Uint8Array(ab);
 

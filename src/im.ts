@@ -16,10 +16,11 @@
 // This module allows Propel to read PNG and JPG images.
 
 import { concat, fill, Tensor, tensor } from "./api";
+import { fetchArrayBuffer, fetchBuffer } from "./fetch";
 import { convert } from "./tensor";
 import { Mode } from "./types";
 import { IS_NODE, nodeRequire } from "./util";
-import { createResolvable, fetchArrayBuffer, fetchBuffer } from "./util";
+import { createResolvable } from "./util";
 
 export interface Image {
   width: number;

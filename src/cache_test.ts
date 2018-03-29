@@ -20,6 +20,7 @@ import * as path from "path";
 import * as rimraf from "rimraf";
 import { test } from "../tools/tester";
 import * as cache from "./cache";
+import { fetchWithCache } from "./fetch";
 import { assert, IS_NODE, nodeRequire, process, tmpdir } from "./util";
 import { isDir } from "./util_node";
 
@@ -84,7 +85,7 @@ test(async function cache_fetchWithCache() {
   cache.clearAll();
   await localServer(async function(url: string) {
     url += "/data/mnist/train-images-idx3-ubyte.bin";
-    const ab = await cache.fetchWithCache(url);
+    const ab = await fetchWithCache(url);
     assert(ab.byteLength === 47040016);
     if (IS_NODE) {
       assert(fs.existsSync(cache.url2Filename(url)));

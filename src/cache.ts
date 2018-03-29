@@ -19,7 +19,7 @@
 // The $HOME/.propel/cache directory is where these files will be stored.
 
 import * as rimraf from "rimraf";
-import { assert, Buffer, fetchArrayBuffer, IS_WEB, nodeRequire, URL }
+import { assert, Buffer, IS_WEB, nodeRequire, URL }
   from "./util";
 import { mkdirp, propelDir } from "./util_node";
 
@@ -31,15 +31,8 @@ export interface Cache {
 
 let cacheImpl: Cache;
 
-// TODO move this function to src/fetch.ts
-export async function fetchWithCache(url: string): Promise<ArrayBuffer> {
-  let ab = await cacheImpl.get(url);
-  if (ab != null) {
-    return ab;
-  }
-  ab = await fetchArrayBuffer(url);
-  cacheImpl.set(url, ab);
-  return ab;
+export function getCacheImpl() {
+  return cacheImpl;
 }
 
 export function clearAll(): Promise<void> {
