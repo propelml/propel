@@ -15,6 +15,9 @@
 // handler can be loaded without pulling in the entire math library.
 
 import * as d3 from "d3";
+import { h , render } from "preact";
+import { Inspector } from "../website/inspector";
+import { SerializedObject, unserialize } from "../website/serializer";
 import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
@@ -28,7 +31,7 @@ export interface Progress {
 export interface OutputHandler {
   imshow(image: Image): void;
   plot(data: PlotData): void;
-  print(text: string): void;
+  print(text: object[] | string): void;
   downloadProgress(progress: Progress);
 }
 
@@ -152,13 +155,24 @@ export class OutputHandlerDOM implements OutputHandler {
       });
   }
 
-  print(text: string): void {
-    const element = this.element;
-    const last = element.lastChild;
-    let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
-    s += text + "\n";
-    const el = document.createTextNode(s);
-    element.appendChild(el);
+  print(data: SerializedObject[] | string): void {
+    if (typeof data === "string") {
+      const element = this.element;
+      const last = element.lastChild;
+      let s = (last && last.nodeType !== Node.TEXT_NODE) ? "\n" : "";
+      s += data + "\n";
+      const el = document.createTextNode(s);
+      element.appendChild(el);
+      return;
+    }
+    try {
+      for (let i = 0; i < data.length; ++i) {
+        const elem = h(Inspector, {
+          object: unserialize(data[i])
+        });
+        render(elem, this.element);
+      }
+    } catch (e) {}
   }
 
   downloadProgress(progress: Progress) {
