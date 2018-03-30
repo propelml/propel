@@ -31,10 +31,6 @@ export function convert(t: types.TensorLike,
 /** Tensor wraps a Storage object. This is the main public
  * interface to tensor operatiors. Each instance has a unique id for use in
  * backprop.  Nothing about Tensors is backend specific.
- * Tensor might be renamed to BoxedTensor in the near future. To
- * external users this class is called just Tensor. We use a more specific name
- * internally so as not to confuse it with the many other tensor classes in
- * Propel.
  */
 export class Tensor implements types.Storage {
   /* TODO The storage property should be private. Probably better would be if
