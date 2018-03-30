@@ -55,7 +55,6 @@ body {
 }
 
 /* Centers and gives max-width to index, references, notebook pages */
-.centered,
 .training-example-inner,
 .use-it-inner,
 .flex-row,
@@ -70,7 +69,6 @@ h2,
 button,
 .button,
 .source-link,
-.avatar,
 .typestr {
   margin: $size1;
 }
@@ -647,28 +645,6 @@ header {
   margin: 0 auto;
   padding: 0 8px;
 
-  .most-recent-header {
-    display: grid;
-    grid-template-columns: auto auto;
-    justify-content: space-between;
-    max-width: 960px;
-    margin: 0 auto;
-
-    .most-recent-header-title {
-      display: grid;
-      align-content: center;
-    }
-
-    .most-recent-header-cta {
-      display: grid;
-      align-content: center;
-
-      button {
-        @include buttonHover;
-      }
-    }
-  }
-
   ol {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -713,6 +689,27 @@ header {
       }
     }
   }
+}
+
+.most-recent-header {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  max-width: 960px;
+  margin: 0 auto;
+
+  .most-recent-header-cta {
+    display: grid;
+    align-content: center;
+
+    button {
+      @include buttonHover;
+    }
+  }
+}
+
+.most-recent-header-title {
+  display: flex;
 }
 
 .green-button {
