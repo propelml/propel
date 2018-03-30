@@ -1,3 +1,8 @@
+//  CSS should follow BEM syntax structure moving forward.  
+//  https://en.bem.info/methodology/
+//  Only the references page has been converted so far, 
+//  see references.scss for example.
+
 @import './normalize.scss';
 @import './codemirror.scss';
 //@import './theme_dark.scss';
@@ -6,6 +11,7 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono);
 
 $githubGreen: #33ba1d;
+$sizeXS: 4px;
 $size0: 8px;
 $size1: 16px;
 $size2: 32px;
@@ -14,6 +20,8 @@ $size3: 64px;
 $borderColor: #eee;
 $accentColor: #247ee9;  // blue
 $shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.3);
+//  Following imports use above variables, thus imported here.
+@import './references.scss';
 
 @mixin buttonHover {
   -webkit-transform: perspective(1px) translateZ(0);
