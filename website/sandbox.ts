@@ -21,6 +21,7 @@ import * as test_internals from "./test_internals";
 import { global, globalEval, setOutputHandler } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
 import { RPC, WindowRPC } from "./rpc";
+import { serialize } from "./serializer";
 
 async function importModule(target) {
   const m = {
@@ -77,20 +78,8 @@ function guessCellId(error?: Error): number {
 class Console {
   constructor(private rpc: RPC, private cellId: number) { }
 
-  private inspect(value): string {
-    if (value instanceof propel.Tensor) {
-      return value.toString();
-    }
-    if (value && typeof value === "object") {
-      try {
-        return JSON.stringify(value, null, 2);
-      } catch (e) {}
-    }
-    return value + ""; // Convert to string.
-  }
-
   private print(...args: any[]) {
-    this.rpc.call("print", this.cellId, args.map(this.inspect).join(" "));
+    this.rpc.call("print", this.cellId, args.map(serialize));
   }
 
   log(...args: any[]): void {
