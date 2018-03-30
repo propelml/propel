@@ -1,7 +1,7 @@
 //  CSS should follow BEM syntax structure moving forward.  
 //  https://en.bem.info/methodology/
-//  Only the references page has been converted so far, 
-//  see references.scss for example.
+//  Only the references and index pages have been converted so far, 
+//  see references.scss or index.scss for examples.
 
 @import './normalize.scss';
 @import './codemirror.scss';
@@ -21,6 +21,7 @@ $borderColor: #eee;
 $accentColor: #247ee9;  // blue
 $shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.3);
 //  Following imports use above variables, thus imported here.
+@import './index.scss';
 @import './references.scss';
 
 @mixin buttonHover {
@@ -63,7 +64,7 @@ body {
 }
 
 /* Centers and gives max-width to index, references, notebook pages */
-.training-example-inner,
+.training__inner,
 .use-it-inner,
 .flex-row,
 .references {
@@ -181,32 +182,13 @@ header {
 }
 
 .training-example {
-  background: $lightGrey;
+  background: $bodyBackground;
 
   .training-example-inner {
     padding: $size2 0;
   }
 }
 
-.use-it {
-  background: $lightGrey;
-
-  .use-it-inner {
-    padding: $size2 0;
-  }
-
-  p {
-    margin: $size1 0 0 0;
-  }
-
-  .snippit-title {
-    margin-left: 16px;
-  }
-
-  pre {
-    background: $bodyBackground;
-  }
-}
 //loading animation
 
 @-webkit-keyframes loadingScreen {
@@ -406,35 +388,6 @@ header {
   background-color: $bodyBackground;
 }
 
-.intro h2 {
-  margin-top: $size0;
-}
-
-.perks {
-  h2 {
-    min-height: 32px;
-    padding-left: 40px;
-    background-position: center left;
-    background-repeat: no-repeat;
-
-    &.world {
-      background-image: url(./img/world.svg);
-    }
-
-    &.upward {
-      background-image: url(./img/upward.svg);
-    }
-
-    &.chip {
-      background-image: url(./img/chip.svg);
-    }
-
-    &.lightning {
-      background-image: url(./img/lightning.svg);
-    }
-  }
-}
-
 .footer {
   display: flex;
   justify-content: center;
@@ -444,7 +397,6 @@ header {
   margin-top: $size1;
   background-color: $bodyBackground;
   text-align: center;
-  border-top: 1px solid $borderColor;
 
   * {
     font-size: 1.4rem;
