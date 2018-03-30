@@ -9,6 +9,7 @@ $githubGreen: #33ba1d;
 $size0: 8px;
 $size1: 16px;
 $size2: 32px;
+$size3: 64px;
 
 $borderColor: #eee;
 $accentColor: #247ee9;  // blue
@@ -63,11 +64,21 @@ body {
   margin: 0 auto;
 }
 
+p,
+h1,
+h2,
+button,
+.button,
+.source-link,
+.avatar,
+.typestr {
+  margin: $size1;
+}
+
 p {
   font-size: $size1;
   line-height: $size2;
   color: $textColor;
-  margin: $size1;
 }
 
 h1,
@@ -99,8 +110,7 @@ svg {
 }
 
 .button,
-button,
-input[type=button] {
+button {
   border: none;
   color: #fff;
   background-color: $base0;
@@ -130,6 +140,7 @@ header {
   background-color: $bodyBackground;
   color: $textColor;
   padding: $size0 0;
+  margin-bottom: $size1;
 
   h2 {
     flex: 1 0 auto;
@@ -159,13 +170,11 @@ header {
   }
 
   button {
-    margin-left: $size1;
     align-self: center;
   }
 
   .title {
     display: flex;
-    margin-bottom: 1em;
   }
 
   input {
@@ -282,9 +291,6 @@ header {
 }
 
 .notebook-cell {
-  transition: border-left-color 0.2s;
-  border-left: 1px solid $borderColor;
-
   button {
     position: relative;
     z-index: 1000;
@@ -303,8 +309,6 @@ header {
   }
 
   &.notebook-cell-focus {
-    border-left: 1px solid $accentColor;
-
     button {
       opacity: 1;
     }
@@ -314,8 +318,8 @@ header {
   .CodeMirror,
   .input > pre,
   .output {
-    margin: 0;
-    padding: $size0;
+    background: none;
+    margin: $size1;
     white-space: pre-wrap;
     word-break: keep-all;
 
@@ -337,9 +341,7 @@ header {
   }
 
   .input {
-    border: 1px solid $borderColor;
-    border-left: 0; // because the border is on notebook-cell.
-    margin-bottom: 8px;
+    background: $cellBackground;
 
     button.delete-button {
       /* Top right corner */
@@ -367,10 +369,8 @@ header {
   }
 
   .output-container {
-    margin-bottom: 24px;
     border-bottom: $borderColor;
     border-right: $borderColor;
-    margin-left: 16px;
 
     .insert-button {
       /* Bottom right corner */
@@ -386,6 +386,14 @@ header {
   }
 }
 
+.notebook .notebook-cell {
+  border-left: 1px solid $borderColor;
+}
+
+.notebook .notebook-cell-focus {
+  border-left: 1px solid $accentColor;
+}
+
 .flex-row {
   display: flex;
   flex-wrap: wrap;
@@ -394,20 +402,6 @@ header {
   .flex-cell {
     flex-basis: 100%;
     flex-grow: 1;
-    padding: $size1;
-  }
-
-  .flex-cell.intro-notebook {
-    padding: 0;
-
-    .notebook-cell {
-      border-left: 0;
-      border-right: 0;
-    }
-  }
-
-  p {
-    margin: 0;
   }
 }
 
@@ -492,12 +486,6 @@ header {
     font-size: 2rem;
     color: $linkColor;
     font-weight: 300;
-  }
-
-  h2,
-  .source-link,
-  .typestr {
-    margin: $size0;
   }
 
   & .arg-global-header-title {
@@ -644,7 +632,6 @@ header {
 
 .header-button {
   display: inline-block;
-  margin: 0 10px 10px 0;
 
   @include buttonHover;
 }
@@ -663,8 +650,7 @@ header {
 
 .notebook-container {
   max-width: 960px;
-  margin: 0 auto;
-  padding: 0 8px;
+  margin: 0 auto $size3 auto;
 }
 
 .most-recent {
@@ -739,10 +725,6 @@ header {
   }
 }
 
-.cells {
-  margin-top: 50px;
-}
-
 .green-button {
   background: $githubGreen;
   color: #fff;
@@ -754,7 +736,7 @@ header {
   }
 }
 
-img.avatar {
+.avatar {
   display: block;
 }
 
@@ -843,28 +825,16 @@ img.avatar {
 .progress-bar {
   display: none;
   border-top: 1px solid $accentColor;
-  margin-top: -$size0;
 }
 
 // Mobile first. No desktop related things above this line.
 @media (max-width: 1100px) {
-  .notebook-cell {
-    .output-container {
-      margin-left: 0;
-    }
-  }
-
   .most-recent {
     max-width: 640px;
   }
 }
 
 @media (min-width: 600px) {
-  .most-recent,
-  .notebook-container {
-    padding: 0 16px;
-  }
-
   h1 {
     font-size: 3.2rem;
   }

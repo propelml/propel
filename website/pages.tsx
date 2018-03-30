@@ -89,12 +89,8 @@ const Intro = () => (
         dynamic language which, we think, could act as an ideal workflow
         for scientific programmers of all sorts.
       </p>
-      <p>
-        { headerButton("/docs", "API Ref") }
-        { false && `Hide notebook link until more developed.` }
-        { false && `headerButton("/notebook", "Notebook"),` }
-        { headerButton("http://github.com/propelml/propel", "Github") }
-      </p>
+      { headerButton("/docs", "API Ref") }
+      { headerButton("http://github.com/propelml/propel", "Github") }
     </div>
     <div class="intro-notebook flex-cell">
       { nb.cell(tanhGrads) }
