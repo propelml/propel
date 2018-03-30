@@ -637,9 +637,8 @@ export class Profile extends Component<ProfileProps, ProfileState> {
     // for both of them, maybe nb-listing.
     return (
       <div class="most-recent">
-        <div class="centered">
-          <h2>{ doc.owner.displayName }</h2>
-          <Avatar userInfo={ doc.owner } />
+        <div class="most-recent-header">
+          <UserTitle userInfo={ doc.owner } />
           { newNotebookButton() }
         </div>
         <ol>
@@ -804,9 +803,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     return (
       <div class="notebook-container">
+        <UserTitle userInfo={ doc.owner } />
         <div class="notebook-header">
-          <Avatar userInfo={ doc.owner } />
-          <h2>{ profileLink(doc.owner) }</h2>
           { title }
           { cloneButton }
         </div>
@@ -814,6 +812,15 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       </div>
     );
   }
+}
+
+function UserTitle(props) {
+  return (
+    <div class="most-recent-header-title">
+      <Avatar userInfo={ props.userInfo } />
+      <h2>{ profileLink(props.userInfo) }</h2>
+    </div>
+  );
 }
 
 function docTitle(doc: db.NotebookDoc): string {
