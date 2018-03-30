@@ -19,6 +19,7 @@ Also the documentation has many examples:
 http://propelml.org/docs
 
 We have a real-time chat at https://gitter.im/propelml/propel
+And a twitter https://twitter.com/propelml
 
 
 ## How to run TF examples
