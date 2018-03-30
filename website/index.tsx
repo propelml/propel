@@ -37,7 +37,7 @@ export const PropelIndex = (props) => {
 const Intro = () => (
   <div class="intro flex-row">
     <div class="flex-cell">
-      <h2>Differential Programming in JavaScript</h2>
+      <h2 class="intro__header">Differential Programming in JavaScript</h2>
       <p>
         <b>Propel</b> provides a GPU-backed numpy-like infrastructure
         for scientific computing in JavaScript.  JavaScript is a fast,
@@ -47,7 +47,7 @@ const Intro = () => (
       { headerButton("/docs", "API Ref") }
       { headerButton("http://github.com/propelml/propel", "Github") }
     </div>
-    <div class="intro-notebook flex-cell">
+    <div class="intro__notebook flex-cell">
       { nb.cell(tanhGrads) }
     </div>
   </div>
@@ -67,10 +67,10 @@ plot(x, f(x),
 
 const UseIt = () => (
   <div class="use-it">
-    <div class="use-it-inner">
-      <p class="snippit-title">Use it in Node:</p>
+    <div class="use-it__inner">
+      <p class="use-it__snippit-title">Use it in Node:</p>
       { fixed("npm install propel\nlet pr = require(\"propel\");") }
-      <p class="snippit-title">Use it in a browser:</p>
+      <p class="use-it__snippit-title">Use it in a browser:</p>
       { fixed(`<script src="https://unpkg.com/propel@${version}"></script>`) }
     </div>
   </div>
@@ -80,23 +80,23 @@ const Perks = () => (
   <div class="perks">
     <div class="flex-row">
       <div class="flex-cell">
-        <h2 class="world">Run anywhere.</h2>
+        <h2 class="perks__header perks--world">Run anywhere.</h2>
         <p>
           Propel runs both in the browser and natively from Node. In
           both environments Propel is able to use GPU hardware for
           computations.  In the browser it utilizes WebGL through
-          <a href="https://deeplearnjs.org/">deeplearn.js</a>
+          <a href="https://deeplearnjs.org/"> deeplearn.js</a>
           and on Node it uses TensorFlow's
           <a href="https://www.tensorflow.org/install/install_c">
-            C API
+           C API
           </a>.
         </p>
       </div>
       <div class="flex-cell">
-        <h2 class="upward">Phd optional.</h2>
+        <h2 class="perks__header perks--upward">Phd optional.</h2>
         <p>
           Propel has an imperative
-          <a href="https://github.com/HIPS/autograd">autograd</a>
+          <a href="https://github.com/HIPS/autograd"> autograd</a>
           -style API.  Computation graphs are traced as
           you run them -- a general purpose
           <i>gradient function</i>
@@ -106,7 +106,7 @@ const Perks = () => (
     </div>
     <div class="flex-row">
       <div class="flex-cell">
-        <h2 class="chip">Did somebody say GPUs?</h2>
+        <h2 class="perks__header perks--chip">Did somebody say GPUs?</h2>
         <p>
           Browsers are great for demos, but they are not a great numerics
           platform. WebGL is a far cry from CUDA. By running Propel outside
@@ -116,7 +116,7 @@ const Perks = () => (
         </p>
       </div>
       <div class="flex-cell">
-        <h2 class="lightning">Let's do this.</h2>
+        <h2 class="perks__header perks--lightning">Let's do this.</h2>
         <p>
           The basic propel npm package is javascript only,
           without TensorFlow bindings. To upgrade your speed dramatically
@@ -155,20 +155,25 @@ for (const batch of ds) {
 `;
 
 const TrainingExample = () => (
-  <div class="training-example-inner">
-    <div class="training-example-inner">
-      <h2>Neural Networks</h2>
+  <div class="training">
+    <div class="training__inner">
+      <h2 class="training__header">Neural Networks</h2>
       <div class="flex-row">
-        <div class="flex-cell">{ nb.cell(trainingExampleCode) }</div>
+        <div class="flex-cell training__example">
+          { nb.cell(trainingExampleCode) }
+        </div>
         <div class="flex-cell">
-          <p>
-            <b>What are NNs anyway?</b> The terminology is a bit misleading. Any
+          <p class="training__copy">
+            <b>What are NNs anyway?</b>
+          </p>
+          <p class="training__copy">
+            The terminology is a bit misleading. Any
             number of operations and architectures can be considered a neural
             network. The primary thing in common is that NN models use
             differentiable operations to allow gradient descent to improve their
             fitness.
           </p>
-          <p>
+          <p class="training__copy">
             Propel provides a concise API for specifying, training, and
             making inference in neural networks. In the example, a two layer
             fully-connected ReLU network is being trained on the iris dataset.

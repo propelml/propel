@@ -1,6 +1,18 @@
 <svg width="32" height="32" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<use xlink:href="#path0_fill" fill="#1E2937"/>
-<use xlink:href="#path1_fill" transform="translate(12 6)" fill="#FFFFFF"/>
+<title>lightning</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(3675 7907)">
+<g id="lightning">
+<g id="Oval 3">
+<use xlink:href="#path0_fill" transform="translate(-3675 -7907)" fill="#444444"/>
+</g>
+<g id="ic_flash_on_white_24px">
+<g id="Shape">
+<use xlink:href="#path1_fill" transform="translate(-3664 -7901)" fill="#FFFFFF"/>
+</g>
+</g>
+</g>
+</g>
 <defs>
 <path id="path0_fill" fill-rule="evenodd" d="M 16 32C 24.8366 32 32 24.8366 32 16C 32 7.16344 24.8366 0 16 0C 7.16344 0 0 7.16344 0 16C 0 24.8366 7.16344 32 16 32Z"/>
 <path id="path1_fill" d="M 0 0L 0 11L 3 11L 3 20L 10 8L 6 8L 10 0L 0 0Z"/>

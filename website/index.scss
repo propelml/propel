@@ -1,0 +1,77 @@
+.intro {
+
+  &__header {
+    margin-top: $size0;
+  }
+}
+
+.use-it {
+  background: $lightGrey;
+  margin: $size2 0;
+  border-top: 1px solid $borderColor;
+  border-bottom: 1px solid $borderColor;
+
+  &__inner {
+    padding: $size2 0 $size3 0;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  &__snippit-title {
+    margin: $size1 0 0 $size1;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.065em;
+  }
+}
+
+.perks {
+
+  padding: $size2 0 $size3 0;
+
+  &__header {
+    min-height: 32px;
+    padding-left: 40px;
+    background-position: center left;
+    background-repeat: no-repeat;
+  }
+
+  &--world{
+    background-image: url(./img/world.svg);
+  }
+
+  &--upward{
+    background-image: url(./img/upward.svg);
+  }
+
+  &--chip{
+    background-image: url(./img/chip.svg);
+  }
+
+  &--lightning{
+    background-image: url(./img/lightning.svg);
+  }
+}
+
+.training {
+  background: $lightGrey;
+  padding: $size1 0 $size2 0;
+  margin: $size1 0 0 0;
+  border-top: 1px solid $borderColor;
+  border-bottom: 1px solid $borderColor;
+ 
+  &__inner {
+    padding: $size2 0;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  &__header {
+    color: $base1;
+  }
+
+  &__copy {
+    color: $base1;
+  }
+}
