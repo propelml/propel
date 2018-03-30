@@ -268,6 +268,56 @@ header {
   }
 }
 
+.tree-node {
+  .cm-s-syntax {
+    background-color: transparent;
+  }
+
+  pre {
+    background-color: transparent;
+    margin-top: -25px;
+  }
+
+  .tree-arrow-wrapper {
+    display: inline-block;
+    width: $size1;
+    height: $size1;
+  }
+
+  .tree-arrow {
+    text-align: center;
+    transform: rotate(0);
+    transition: transform 0.2s ease-in;
+
+    &::after {
+      content: "▶";
+    }
+  }
+
+  .tree-group {
+    margin-left: $size1;
+  }
+
+  .tree-header.collapsible {
+    cursor: pointer;
+  }
+
+  &.collapsed {
+    .tree-arrow {
+      transform: rotate(90deg);
+    }
+  }
+
+  &.inline {
+    display: inline-block;
+    text-align: center;
+
+    .tree-arrow-wrapper {
+      display: none;
+    }
+  }
+}
+
 .notebook-cell {
   button {
     position: relative;
