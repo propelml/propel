@@ -76,6 +76,9 @@ export function equal(c: any, d: any): boolean {
       if (seen.get(a) === b) {
         return true;
       }
+      if (Object.keys(a).length !== Object.keys(b).length) {
+        return false;
+      }
       for (const key in { ...a, ...b }) {
         if (!compare(a[key], b[key])) {
           return false;
@@ -157,26 +160,6 @@ export function createResolvable<T>(): Resolvable<T> {
     methods = { resolve, reject };
   });
   return Object.assign(promise, methods) as Resolvable<T>;
-}
-
-export function objectsEqual(a: any, b: any): boolean {
-  const aProps = Object.getOwnPropertyNames(a);
-  const bProps = Object.getOwnPropertyNames(b);
-  if (aProps.length !== bProps.length) return false;
-  for (let i = 0; i < aProps.length; i++) {
-    const k = aProps[i];
-    if (a[k] !== b[k]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-export function assertObjectsEqual(a, b) {
-  if (!objectsEqual(a, b)) {
-    console.error("Objects not equal:\n", a, "\n", b);
-    throw Error("assertObjectsEqual failed.");
-  }
 }
 
 let activeOutputHandler: OutputHandler | null = null;

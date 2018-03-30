@@ -1,9 +1,7 @@
 import {
-  assert,
   assertEqual,
   IS_NODE,
-  nodeRequire,
-  objectsEqual
+  nodeRequire
 } from "../src/util";
 import { test } from "../tools/tester";
 import { RPC, WebSocketRPC } from "./rpc";
@@ -56,8 +54,8 @@ if (IS_NODE) {
     rpc2.start({});
     assertEqual((await rpc2.call("getNumber")), 3.14);
     assertEqual((await rpc2.call("getString")), "hello");
-    assert(objectsEqual(await rpc2.call("getObject"), { i: "am an object" }));
-    assert(objectsEqual(await rpc2.call("getArray"), [1, 2, 3]));
+    assertEqual(await rpc2.call("getObject"), { i: "am an object" });
+    assertEqual(await rpc2.call("getArray"), [1, 2, 3]);
     rpc1.stop();
     rpc2.stop();
     cleanup();
