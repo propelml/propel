@@ -528,6 +528,8 @@ export class Tensor implements types.Storage {
    * storage.
    */
   stopGradient(): Tensor {
+    // Pass the buck. The next tensor owns this storage now.
+    untrack(this);
     return new Tensor(this.storage);
   }
 
@@ -974,13 +976,10 @@ export type GCScopeFn = (keep: (t: Tensor) => void) => void;
 export function gc(fn: GCScopeFn) {
   const s = new GCScope();
   scopes.push(s);
-  const keep = (t: Tensor): void => { s.keep(t); };
-  try {
-    fn(keep);
-  } finally {
-    assertEqual(s, scopes.pop());
-    s.clean();
-  }
+  const keep = (t: Tensor) => s.keep(t);
+  fn(keep);
+  assertEqual(s, scopes.pop());
+  s.clean();
 }
 
 function track(t: Tensor) {

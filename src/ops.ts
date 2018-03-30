@@ -93,13 +93,18 @@ function defFW(name: string, fwFunc: FWFunc): OpFunc {
 
     // Call the forward function, and wrap the resulting Storage object in a
     // Tensor.
-    const storageAnswer: types.Storage = fwFunc(...bargs);
-    const ans = new Tensor(storageAnswer);
-    cTensors.push(ans);
-
-    const savedForBackward =
-      convertSavedStorageObjectsTos(globalSavedForBackward, cTensors);
-    globalSavedForBackward = null;
+    let storageAnswer: Storage;
+    let ans: Tensor;
+    let savedForBackward;
+    try {
+      storageAnswer = fwFunc(...bargs);
+      ans = new Tensor(storageAnswer);
+      cTensors.push(ans);
+      savedForBackward =
+        convertSavedStorageObjectsTos(globalSavedForBackward, cTensors);
+    } finally {
+      globalSavedForBackward = null;
+    }
 
     backprop.recordOp({
       name,
