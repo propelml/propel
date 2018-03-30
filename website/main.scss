@@ -141,6 +141,12 @@ header {
   color: $textColor;
   padding: $size0 0;
   margin-bottom: $size1;
+}
+
+.notebook-header {
+  .untitled {
+    color: #aaa;
+  }
 
   h2 {
     flex: 1 0 auto;
@@ -149,32 +155,16 @@ header {
     align-self: center;
   }
 
-  p {
-    font-size: 18px;
-    line-height: 28px;
-    font-weight: 100;
-    margin-top: -2px;
-    margin-bottom: 0;
+  .title {
+    display: flex;
   }
 
   .title-input {
     flex: 1 0 auto;
   }
 
-  .untitled {
-    color: #aaa;
-  }
-
   .title-form {
     flex: 1 0 auto;
-  }
-
-  button {
-    align-self: center;
-  }
-
-  .title {
-    display: flex;
   }
 
   input {

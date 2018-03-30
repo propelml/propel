@@ -57,16 +57,18 @@ export function Footer(props) {
 
 export function GlobalHeader(props) {
   return (
-    <div class="global-header">
-      <div class="global-header-inner">
-        <PropelLogo
-          subtitle={ props.subtitle }
-          subtitleLink={ props.subtitleLink } />
-        <div class="global-header-right">
-          { props.children }
+    <header>
+      <div class="global-header">
+        <div class="global-header-inner">
+          <PropelLogo
+            subtitle={ props.subtitle }
+            subtitleLink={ props.subtitleLink } />
+          <div class="global-header-right">
+            { props.children }
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
 
