@@ -1,6 +1,6 @@
 const { dataset, experiment } = require("propel");
 
-async function train(maxSteps) {
+async function train(maxSteps = 3000) {
   // Load mnist asynchronously, with a batch size of 128 and
   // repeat the dataset for 100 epochs.
   const ds = dataset("mnist/train").batch(128).repeat(100);
@@ -45,5 +45,5 @@ async function train(maxSteps) {
   }
 }
 
-train(3000);
+train(Number(process.argv[2]));
 
