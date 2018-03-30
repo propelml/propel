@@ -47,7 +47,8 @@ export const References = (props) => {
   return (
     <div class="references">
       <GlobalHeader subtitle="References" />
-      <p>This work is inspired by and built upon great technologies.</p>
+      <p class="references__details">
+      This work is inspired by and built upon great technologies.</p>
       <div dangerouslySetInnerHTML={ { __html: refhtml } } />
       <Footer />
     </div>
