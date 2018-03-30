@@ -124,6 +124,7 @@ export abstract class RPCBase implements RPC {
   }
 
   private async onCall(message: CallMessage) {
+    console.log(message, this.handlers);
     const { id, handler, args } = message;
     const ret: ReturnMessage = {
       type: "return",
@@ -189,13 +190,27 @@ export class WindowRPC extends RPCBase {
 }
 
 export class WebSocketRPC extends RPCBase {
+  private connected: Promise<void>;
+
   constructor(private socket: WebSocket) {
     super();
+    // tslint:disable-next-line:variable-name
+    const WebSocket: any = socket.constructor;
+    if (socket.readyState === WebSocket.CONNECTING) {
+      this.connected = new Promise(res => {
+        socket.addEventListener("open", () => res());
+      });
+    } else {
+      this.connected = Promise.resolve();
+    }
   }
 
   protected send(message: Message): void {
     // TODO: use a better serialization prototcol than JSON.
-    this.socket.send(JSON.stringify(message));
+    this.connected.then(() => {
+      // TODO: handle failure.
+      this.socket.send(JSON.stringify(message));
+    });
   }
 
   // Use an arrow function to make this function have a bound `this`.
@@ -205,8 +220,8 @@ export class WebSocketRPC extends RPCBase {
   }
 
   start(handlers: RpcHandlers): void {
-    super.start(handlers);
     this.socket.addEventListener("message", this.receive);
+    super.start(handlers);
   }
 
   stop(): void {

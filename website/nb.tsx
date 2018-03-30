@@ -27,7 +27,7 @@ import { OutputHandlerDOM } from "../src/output_handler";
 import { assert, delay, IS_WEB, randomString, URL } from "../src/util";
 import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
 import * as db from "./db";
-import { RPC, WindowRPC } from "./rpc";
+import { RPC, WebSocketRPC, WindowRPC } from "./rpc";
 
 const cellTable = new Map<number, Cell>(); // Maps id to Cell.
 let nextCellId = 1;
@@ -62,17 +62,22 @@ const anonDoc = {
 // Given a cell's id, which can either be an integer or
 // a string of the form "cell5" (where 5 is the id), look up
 // the component in the global table.
-export function lookupCell(id: string | number): Cell {
+export function lookupCell(id: string | number | null): Cell {
   let numId;
   if (typeof id === "string") {
     numId = Number(id.replace("cell", ""));
-  } else {
+  } else if (typeof id === "number") {
     numId = id;
+  } else {
+    // HACK ALARM. Return the first cell.
+    for (const [_, cell] of cellTable) {
+      return cell;
+    }
   }
   return cellTable.get(numId);
 }
 
-export function lookupOutputHandler(id: string | number) {
+export function lookupOutputHandler(id: string | number | null) {
   const cell = lookupCell(id);
   return cell.getOutputHandler();
 }
@@ -123,23 +128,38 @@ function createIframe(rpcChannelId): HTMLIFrameElement {
 
 let sandboxIframe: HTMLIFrameElement = null;
 let sandboxRpc: RPC = null;
+let sandboxSocket: WebSocket = null;
 
 function createSandbox(): void {
-  const rpcChannelId = randomString();
-  sandboxIframe = createIframe(rpcChannelId);
-  sandboxRpc = new WindowRPC(sandboxIframe.contentWindow, rpcChannelId);
-  sandboxRpc.start(rpcHandlers);
+  // If there is a port parameter in the URL, connect to a remote notebook
+  // over a websocket. Otherwise create an iframe sandbox.
+  const match = window.location.search.match(/port=(\d+)/);
+  if (match) {
+    const port = Number(match[1]);
+    sandboxSocket = new WebSocket(`ws://127.0.0.1:${port}`);
+    sandboxRpc = new WebSocketRPC(sandboxSocket);
+    sandboxRpc.start(rpcHandlers);
+  } else {
+    const rpcChannelId = randomString();
+    sandboxIframe = createIframe(rpcChannelId);
+    sandboxRpc = new WindowRPC(sandboxIframe.contentWindow, rpcChannelId);
+    sandboxRpc.start(rpcHandlers);
+  }
 }
 
 function destroySandbox(): void {
   if (!sandboxRpc) return;
 
   sandboxRpc.stop();
-  if (sandboxIframe.parentNode) {
+  if (sandboxIframe && sandboxIframe.parentNode) {
     sandboxIframe.parentNode.removeChild(sandboxIframe);
+  }
+  if (sandboxSocket) {
+    sandboxSocket.close();
   }
   sandboxRpc = null;
   sandboxIframe = null;
+  sandboxSocket = null;
 }
 
 export function sandbox(): RPC {

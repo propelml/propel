@@ -23,8 +23,10 @@
 //    provided. Given that experiements handle parameters, this
 //    provides a good place to interface.
 
+import { startServer } from "../website/nb_host";
 import { gradParams } from "./backprop";
 import * as format from "./format";
+import { plot }  from "./matplotlib";
 import { Params, params as createParams } from "./params";
 import { gc, NamedTensors, Tensor } from "./tensor";
 import { assert, getOutputHandler, IS_NODE } from "./util";
@@ -52,6 +54,8 @@ export async function experiment(name: string,
   if (IS_NODE) {
     const { DiskExperiment } = require("./disk_experiment");
     exp = new DiskExperiment(name, opts);
+    // Start a websocket server that the notebook can connect to.
+    startServer();
   } else {
     exp = new BrowserExperiment(name, opts);
   }
