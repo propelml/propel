@@ -23,11 +23,17 @@
 //    provided. Given that experiements handle parameters, this
 //    provides a good place to interface.
 
-import { gradParams } from "./backprop";
 import * as format from "./format";
+import {
+  LossFn,
+  minimize,
+  Optimizer,
+  optimizerSGD,
+  SGDOpts
+} from "./optimizers";
 import { Params, params as createParams } from "./params";
-import { gc, NamedTensors, Tensor } from "./tensor";
-import { assertEqual, getOutputHandler, IS_NODE } from "./util";
+import { Tensor } from "./tensor";
+import { getOutputHandler, IS_NODE } from "./util";
 
 export interface ExperimentOpts {
   checkpointsToKeep?: number;
@@ -95,25 +101,6 @@ async function printHelper(...args: PrintArgs): Promise<string> {
   return strings.join(" ");
 }
 
-export interface SGDOpts {
-  lr: number;
-  momentum?: number; // TODO currently unused.
-}
-
-type LossFn = (params: Params) => Tensor;
-
-// Optimizer is expected to modify the params in someway.
-type Optimizer = (opts, params: Params, grads: NamedTensors) => void;
-
-function sgd(opts, params: Params, grads: NamedTensors): void {
-  for (const name of Object.keys(grads)) {
-    const g = grads[name];
-    const p = params.get(name);
-    // p -= g * lr
-    p.assign(p.sub(g.mul(opts.lr)));
-  }
-}
-
 interface RateInfo {
   step: number;
   time: Date;
@@ -141,7 +128,7 @@ export abstract class Experiment {
 
   /** Performs SGD given the loss and current parameters. */
   sgd(opts: SGDOpts, lossFn: LossFn): void {
-    return this.minimize(sgd, opts, lossFn);
+    return this.minimize(optimizerSGD, opts, lossFn);
   }
 
   abstract createOrRestore(): Promise<void>;
@@ -176,19 +163,8 @@ export abstract class Experiment {
   /** Modifies the current parameters given the loss and optimizer. */
   minimize(optimizer: Optimizer, opts: SGDOpts, lossFn: LossFn): void {
     this.step_++;
-    let loss;
-    gc((keep) => {
-      const gradFn = gradParams(lossFn);
-      // Forward/Backward pass
-      this.currentParams.isTraining = true;
-      const gradsAndLoss = gradFn(this.currentParams);
-      this.currentParams.isTraining = false;
-      const grads = gradsAndLoss[0];
-      loss = gradsAndLoss[1];
-      assertEqual(loss.rank, 0);
-      keep(loss);
-      optimizer(opts, this.currentParams, grads);
-    });
+    opts.params = this.currentParams;
+    const { loss } = minimize(optimizer, opts, lossFn);
 
     const printArgs = ["step", this.step, "loss", loss];
     const rate = this.getRate();
