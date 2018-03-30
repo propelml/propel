@@ -10,9 +10,7 @@ testBrowser(async function notebook_NotebookRoot() {
   const el = h(nb.NotebookRoot, { });
   render(el, document.body);
   await flush();
-  assertObjectsEqual(mdb.counts, {
-    queryLatest: 1,
-  });
+  assertEqual(mdb.counts, { queryLatest: 1 });
   const c = document.body.getElementsByTagName("div")[0];
   assertEqual(c.className, "notebook");
 });
@@ -36,7 +34,7 @@ testBrowser(async function notebook_Notebook() {
 testBrowser(async function notebook_focusNextCell() {
   const mdb = db.enableMock();
   await renderAnonNotebook();
-  assertObjectsEqual(mdb.counts, { getDoc: 1 });
+  assertEqual(mdb.counts, { getDoc: 1 });
   // Test focusNextCell transitions.
   const cellEls = document.querySelectorAll(".notebook-cell");
   assert(cellEls.length >= 2);
@@ -85,12 +83,12 @@ testBrowser(async function notebook_titleEdit() {
   // Edit the title.
   titleInput.value = "New Title";
   // Before the save the db counts look like:
-  assertObjectsEqual(mdb.counts, { signIn: 1, getDoc: 1 });
+  assertEqual(mdb.counts, { signIn: 1, getDoc: 1 });
   // Click the save button.
   saveTitle.click();
   await flush();
   // Check the database saw an updateDoc.
-  assertObjectsEqual(mdb.counts, {
+  assertEqual(mdb.counts, {
     getDoc: 1,
     signIn: 1,
     updateDoc: 1,
@@ -208,7 +206,7 @@ testBrowser(async function notebook_profile() {
   assert(avatars.length === 0);
   let notebooks = document.querySelectorAll(".most-recent ol li");
   assert(notebooks.length === 0);
-  assertObjectsEqual(mdb.counts, { queryProfile: 1 });
+  assertEqual(mdb.counts, { queryProfile: 1 });
 
   // Try again with a real uid.
   await renderProfile(db.defaultOwner.uid);
@@ -216,7 +214,7 @@ testBrowser(async function notebook_profile() {
   assert(avatars.length === 1);
   notebooks = document.querySelectorAll(".most-recent ol li");
   assert(notebooks.length === 1);
-  assertObjectsEqual(mdb.counts, { queryProfile: 2 });
+  assertEqual(mdb.counts, { queryProfile: 2 });
 });
 
 // Call this to ensure that the DOM has been updated after events.
