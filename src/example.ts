@@ -6,7 +6,7 @@
 import * as pr from "./api";
 import { IS_NODE } from "./util";
 
-export async function train(maxSteps = 0) {
+export async function train(maxSteps = 3000) {
   const ds = pr.dataset("mnist/train").batch(128).repeat(100);
   const exp = await pr.experiment("exp001");
   for (const batchPromise of ds) {
@@ -22,5 +22,5 @@ export async function train(maxSteps = 0) {
 }
 
 if (IS_NODE && require.main === module) {
-  train(3000);
+  train(Number(process.argv[2]));
 }

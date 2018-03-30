@@ -147,12 +147,8 @@ async function buildAndTest() {
   // TODO This only tests our example.js API when we really need to test
   // the entire Propel API.
   let exampleCode = fs.readFileSync(__dirname + "/../example.js", "utf8");
-  if (exampleCode.indexOf("train(3000)") < 0) {
-    throw Error("Sanity check of example code failed.");
-  }
-  exampleCode = exampleCode.replace("train(3000)", "train(2)");
-  fs.writeFileSync("test.js", exampleCode);
-  run.sh("node test.js", { PROPEL_ROOT: propelRoot });
+  fs.writeFileSync("example.js", exampleCode);
+  run.sh("node example.js 2", { PROPEL_ROOT: propelRoot });
 
   console.log("npm publish %s", propelPkgFn);
   console.log("npm publish %s", tfPkgFn);
