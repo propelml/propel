@@ -18,7 +18,7 @@ import { concat, fill, grad, linspace, listDevices, multigrad,
   TensorLike, zeros } from "./api";
 import * as api from "./api";
 import { assertAllClose, assertAllEqual, assertClose,
-  assertShapesEqual } from "./tensor_util";
+  assertShapesEqual, shapesEqual } from "./tensor_util";
 import * as types from "./types";
 import { assert, assertEqual, IS_NODE } from "./util";
 
@@ -1310,4 +1310,28 @@ test(async function api_sin_cos_tan() {
 test(async function api_size() {
   assertEqual(api.range(20).size, 20);
   assertEqual(api.range(20).reshape([4, 5]).size, 20);
+});
+
+test(async function api_stopGradientSwallowedErr() {
+  function loss(params) {
+    const a = api.zeros([ 5 ]);
+    const b = api.zeros([ 11 ]);
+    b.stopGradient();
+    assert(!shapesEqual(a.shape, b.shape));
+    // Because the shapes aren't equal, they should throw error when added
+    // together.
+    return a.add(b);
+  }
+  let error;
+  try {
+    api.sgd({ lr: 0.01 }, loss);
+  } catch (e) {
+    error = e;
+  }
+  console.log("error.message", error.message);
+  // TODO This check is brittle - it relies on the text of the exception message
+  // coming from DL and TF.
+  // TF: Incompatible shapes
+  // DL: Operands could not be broadcast together with shapes
+  assert(error && error.message.match(/shape/i));
 });
