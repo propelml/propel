@@ -57,7 +57,10 @@ export const References = (props) => {
 export const PropelIndex = (props) => {
   return (
     <div class="index">
-      <Splash />
+      <GlobalHeader>
+        <a href="/notebook">Notebook</a>
+        <UserMenu { ...props } />
+      </GlobalHeader>
       <Intro />
       <UseIt />
       <Perks />
@@ -66,18 +69,6 @@ export const PropelIndex = (props) => {
     </div>
   );
 };
-
-const Splash = props => (
-  <div>
-    { false && `TODO "header" should be inside GlobalHeader.` }
-    <header>
-      <GlobalHeader>
-        <a href="/notebook">Notebook</a>
-        <UserMenu { ...props } />
-      </GlobalHeader>
-    </header>
-  </div>
-);
 
 const Intro = () => (
   <div class="intro flex-row">

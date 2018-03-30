@@ -763,7 +763,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         <button
           class="save-title green-button"
           onClick={ () => this.onSaveTitle(doc) } >
-          Button
+          Save
         </button>
         <button
           class="cancel-edit-title"
@@ -804,12 +804,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
     return (
       <div class="notebook-container">
-        <header>
+        <div class="notebook-header">
           <Avatar userInfo={ doc.owner } />
           <h2>{ profileLink(doc.owner) }</h2>
           { title }
           { cloneButton }
-        </header>
+        </div>
         { this.renderCells(doc) }
       </div>
     );
