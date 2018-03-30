@@ -152,7 +152,7 @@ export function sandbox(): RPC {
 // Convenience function to create Notebook JSX element.
 export function cell(code: string, props: CellProps = {}): JSX.Element {
   props.code = code.trim();
-  return h(Cell, props);
+  return <Cell { ...props } />;
 }
 
 // When rendering HTML server-side, all of the notebook cells are executed so
@@ -353,25 +353,26 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   render() {
-    const runButton = h("button", {
-      "class": "run-button",
-      "onClick": this.run.bind(this),
-    }, "");
+    const runButton = (
+      <button class="run-button" onClick={ this.run.bind(this) } />
+    );
 
     let deleteButton = null;
     if (this.props.onDelete) {
-      deleteButton = h("button", {
-          "class": "delete-button",
-          "onClick": this.clickedDelete.bind(this),
-      }, "");
+      deleteButton = (
+        <button
+          class="delete-button"
+          onClick={ this.clickedDelete.bind(this) } />
+      );
     }
 
     let insertButton = null;
     if (this.props.onInsertCell) {
-      insertButton = h("button", {
-          "class": "insert-button",
-          "onClick": this.clickedInsertCell.bind(this),
-      }, "");
+      insertButton = (
+        <button
+          class="insert-button"
+          onClick={ this.clickedInsertCell.bind(this) } />
+      );
     }
 
     // If supplied outputHTML, use that in the output div.
@@ -385,27 +386,26 @@ export class Cell extends Component<CellProps, CellState> {
         __html: this.outputHTML,
       };
     }
-    const outputDiv = h("div", outputDivAttr);
+    const outputDiv = <div { ...outputDivAttr } />;
 
-    return h("div", {
-        "class": "notebook-cell",
-        "id": `cell${this.id}`,
-        "ref": (ref => { this.parentDiv = ref; }),
-      },
-      h("div", {
-        "class": "input",
-        "ref": (ref => { this.input = ref; }),
-      },
-        // This pre is replaced by CodeMirror if users have JavaScript enabled.
-        h("pre", { }, this.code),
-        deleteButton,
-        runButton,
-      ),
-      h("div", { "class": "progress-bar" }),
-      h("div", { "class": "output-container" },
-        outputDiv,
-        insertButton,
-      )
+    return (
+      <div
+        class="notebook-cell"
+        id={ `cell${this.id}` }
+        ref={ ref => { this.parentDiv = ref; } } >
+        <div
+          class="input"
+          ref={ ref => { this.input = ref; } } >
+          <pre>{ this.code }</pre>
+          { deleteButton }
+          { runButton }
+        </div>
+        <div class="progress-bar" />
+        <div class="output-container">
+          { outputDiv }
+          { insertButton }
+        </div>
+      </div>
     );
   }
 }
@@ -420,10 +420,12 @@ export interface FixedProps {
 export class FixedCell extends Component<FixedProps, CellState> {
   render() {
     // Render as a pre in case people don't have javascript turned on.
-    return h("div", { "class": "notebook-cell", },
-      h("div", { "class": "input" },
-        h("pre", { }, normalizeCode(this.props.code)),
-      )
+    return (
+      <div class="notebook-cell">
+        <div class="input">
+          <pre>{ normalizeCode(this.props.code) }</pre>
+        </div>
+      </div>
     );
   }
 }
@@ -519,41 +521,46 @@ export class NotebookRoot extends Component<NotebookRootProps,
   render() {
     let body;
     if (this.state.errorMsg) {
-      body = h("div", { "class": "notification-screen"},
-        h("div", { "class": "notification-container"},
-          h("p", { "class": "error-header"}, null, "Error"),
-          h("p", null, this.state.errorMsg),
-        ),
+      body = (
+        <div class="notification-screen">
+          <div class="notebook-container">
+            <p class="error-header">Error</p>
+            <p>{ this.state.errorMsg }</p>
+          </div>
+        </div>
       );
     } else if (this.state.profileLatest) {
-      body = h(Profile, {
-        profileLatest: this.state.profileLatest,
-        userInfo: this.props.userInfo,
-      });
+      body = (
+        <Profile
+          profileLatest={ this.state.profileLatest }
+          userInfo={ this.props.userInfo } />
+      );
 
     } else if (this.state.doc) {
-      body = h(Notebook, {
-        nbInfo: { nbId: this.state.nbId, doc: this.state.doc },
-        ref: ref => this.notebookRef = ref,
-        userInfo: this.props.userInfo,
-      });
-
+      body = (
+        <Notebook
+          nbInfo={ { nbId: this.state.nbId, doc: this.state.doc } }
+          ref= { ref => this.notebookRef = ref }
+          userInfo= { this.props.userInfo } />
+      );
     } else if (this.state.mostRecent) {
-      body = h(MostRecent, {
-        mostRecent: this.state.mostRecent,
-        userInfo: this.props.userInfo,
-      });
+      body = (
+        <MostRecent
+          mostRecent={ this.state.mostRecent }
+          userInfo={ this.props.userInfo } />
+      );
 
     } else {
-      body = h(Loading, null);
+      body = <Loading />;
     }
 
-    return h("div", { "class": "notebook" },
-      h(GlobalHeader, {
-        subtitle: "Notebook",
-        subtitleLink: "/notebook",
-      }, h(UserMenu, { userInfo: this.props.userInfo })),
-      body,
+    return (
+      <div class="notebook">
+        <GlobalHeader subtitle="Notebook" subtitleLink="/notebook" >
+          <UserMenu userInfo={ this.props.userInfo } />
+        </GlobalHeader>
+        { body }
+      </div>
     );
   }
 }
@@ -571,34 +578,44 @@ export class MostRecent extends Component<MostRecentProps, MostRecentState> {
     if (this.props.userInfo) {
       // TODO This is ugly - we're reusing most-recent-header just to get a line
       // break between the link to "Your Notebooks" and "Most Recent".
-      profileLinkEl = h("div", {"class": "most-recent-header"},
-        h("h2", null,
-          profileLink(this.props.userInfo, "Your Notebooks"))
+      profileLinkEl = (
+        <div class="most-recent-header">
+          <h2>{ profileLink(this.props.userInfo, "Your Notebooks") }</h2>
+        </div>
       );
     }
 
-    return h("div", { "class": "most-recent" },
-      profileLinkEl,
-      h("div", {"class": "most-recent-header"},
-        h("div", {"class": "most-recent-header-title"},
-          h("h2", null, "Recently Updated"),
-        ),
-        h("div", {"class": "most-recent-header-cta"}, newNotebookButton()),
-      ),
-      h("ol", null, ...notebookList(this.props.mostRecent)),
+    return (
+      <div class="most-recent">
+        { profileLinkEl }
+        <div class="most-recent-header">
+          <div class="most-recent-header-title">
+            <h2>Recently Updated</h2>
+          </div>
+          <div class="most-recent-header-cta">
+            { newNotebookButton() }
+          </div>
+        </div>
+        <ol>
+          { ...notebookList(this.props.mostRecent) }
+        </ol>
+      </div>
     );
   }
 }
 
 function newNotebookButton() {
-  return h("button", {
-    "class": "create-notebook",
-    "onClick": async() => {
-      // Redirect to new notebook.
-      const nbId = await db.active.create();
-      window.location.href = nbUrl(nbId);
-    },
-  }, "+ New Notebook");
+  return (
+    <button
+      class="create-notebook"
+      onClick={async() => {
+        // Redirect to new notebook.
+        const nbId = await db.active.create();
+        window.location.href = nbUrl(nbId);
+      }} >
+      + New Notebook
+    </button>
+  );
 }
 
 export interface ProfileProps {
@@ -611,24 +628,28 @@ export interface ProfileState { }
 export class Profile extends Component<ProfileProps, ProfileState> {
   render() {
     if (this.props.profileLatest.length === 0) {
-      return h("h1", null, "User has no notebooks");
+      return <h1>User has no notebooks</h1>;
     }
     const doc = this.props.profileLatest[0].doc;
 
     // TODO Profile is reusing the most-recent css class, because it's a very
     // similar layout. The CSS class should be renamed something appropriate
     // for both of them, maybe nb-listing.
-    return h("div", { "class": "most-recent" },
-      h("div", {"class": "centered"},
-        h("h2", null, doc.owner.displayName),
-        h(Avatar, { userInfo: doc.owner }),
-        newNotebookButton(),
-      ),
-      h("ol", null, ...notebookList(this.props.profileLatest, {
-        showDates: false,
-        showName: false,
-        showTitle: true,
-      })),
+    return (
+      <div class="most-recent">
+        <div class="centered">
+          <h2>{ doc.owner.displayName }</h2>
+          <Avatar userInfo={ doc.owner } />
+          { newNotebookButton() }
+        </div>
+        <ol>
+          {...notebookList(this.props.profileLatest, {
+            showDates: false,
+            showName: false,
+            showTitle: true,
+          })}
+        </ol>
+      </div>
     );
   }
 }
@@ -713,67 +734,84 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   renderCells(doc): JSX.Element {
     const codes = db.getInputCodes(doc);
-    return h("div", { "class": "cells" }, codes.map((code, i) => {
-      // Only display the delete button if there is more than one
-      // cell.
-      const onDelete = doc.cells.length > 1 ? () => this.onDelete(i)
-                                            : null;
-      return cell(code, {
-        onRun: (updatedCode) => this.onRun(updatedCode, i),
-        onDelete,
-        onInsertCell: () => this.onInsertCell(i),
-      });
-    }));
+    return (
+      <div class="cells">
+        {codes.map((code, i) => {
+          // Only display the delete button if there is more than one
+          // cell.
+          const onDelete = doc.cells.length > 1 ? () => this.onDelete(i)
+                                                : null;
+          return cell(code, {
+            onRun: (updatedCode) => this.onRun(updatedCode, i),
+            onDelete,
+            onInsertCell: () => this.onInsertCell(i),
+          });
+        })}
+      </div>
+    );
   }
 
   render() {
     const doc = this.state.doc;
 
-    const titleEdit = h("div", { class: "title" },
-      h("input", {
-        class: "title-input",
-        ref: ref => { this.titleInput = ref as HTMLInputElement; },
-        value: doc.title,
-      }),
-      h("button", {
-        class: "save-title green-button",
-        onClick: () => this.onSaveTitle(doc)
-      }, "Save"),
-      h("button", {
-        class: "cancel-edit-title",
-        onClick: () => this.setState({ editingTitle: false })
-      }, "Cancel")
+    const titleEdit = (
+      <div class="title">
+        <input
+          class="title-input"
+          ref={ ref => { this.titleInput = ref as HTMLInputElement; } }
+          value={ doc.title } />
+        <button
+          class="save-title green-button"
+          onClick={ () => this.onSaveTitle(doc) } >
+          Button
+        </button>
+        <button
+          class="cancel-edit-title"
+          onClick={ () => this.setState({ editingTitle: false }) } >
+          Cancel
+        </button>
+      </div>
     );
 
-    const editButton = h("button", {
-      class: "edit-title",
-      onClick: () => this.setState({ editingTitle: true })
-    }, "Edit");
+    const editButton = (
+      <button
+        class="edit-title"
+        onClick={ () => this.setState({ editingTitle: true }) } >
+        Edit
+      </button>
+    );
 
-    const titleDisplay = h("div", { class: "title" }, [
-      h("h2", {
-        class: doc.title && doc.title.length ? "" : "untitled",
-        value: doc.title
-      }, docTitle(doc)),
-      db.ownsDoc(this.props.userInfo, doc) ? editButton : null
-    ]);
+    const titleDisplay = (
+      <div class="title">
+        <h2
+          class={ doc.title && doc.title.length ? "" : "untitled" }
+          value={ doc.title } >
+          { docTitle(doc) }
+        </h2>
+        { db.ownsDoc(this.props.userInfo, doc) ? editButton : null }
+      </div>
+    );
 
     const title = this.state.editingTitle ? titleEdit : titleDisplay;
 
-    const cloneButton = this.props.userInfo == null ? ""
-      : h("button", {
-          "class": "green-button",
-          "onClick": () => this.onClone(),
-        }, "Clone");
+    const cloneButton = this.props.userInfo == null ? "" : (
+      <button
+        class="green-button"
+        onClick={ () => this.onClone() } >
+        Clone
+      </button>
+    );
 
-    return h("div", { "class": "notebook-container" },
-      h("header", null,
-        h(Avatar, { userInfo: doc.owner }),
-        h("h2", null, profileLink(doc.owner)),
-        title,
-        cloneButton
-      ),
-      this.renderCells(doc),
+    return (
+      <div class="notebook-container">
+        <header>
+          <Avatar userInfo={ doc.owner } />
+          <h2>{ profileLink(doc.owner) }</h2>
+          { title }
+          { cloneButton }
+        </header>
+        { this.renderCells(doc) }
+      </div>
     );
   }
 }
@@ -790,19 +828,24 @@ function notebookList(notebooks: db.NbInfo[], {
   return notebooks.map(info => {
     const snippit = db.getInputCodes(info.doc).join("\n\n");
     const href = nbUrl(info.nbId);
-    return h("a", { href },
-      h("li", null,
-        h("div", { class: "code-snippit" }, snippit),
-        notebookBlurb(info.doc, { showName, showTitle, showDates })
-      )
+    return (
+      <a href={ href } >
+        <li>
+            <div class="code-snippit">{ snippit }</div>
+            { notebookBlurb(info.doc, { showName, showTitle, showDates }) }
+        </li>
+      </a>
     );
   });
 }
 
 function profileLink(u: db.UserInfo, text: string = null): JSX.Element {
   const href = window.location.origin + "/notebook/?profile=" + u.uid;
-  return h("a", { class: "profile-link", href },
-    text ? text : u.displayName);
+  return (
+    <a class="profile-link" href={ href } >
+      { text ? text : u.displayName }
+    </a>
+  );
 }
 
 function notebookBlurb(doc: db.NotebookDoc, {
@@ -813,24 +856,32 @@ function notebookBlurb(doc: db.NotebookDoc, {
   let body = [];
   if (showDates) {
     body = body.concat([
-      h("div", { "class": "date-created" },
-        h("p", { "class": "created" }, `Created ${fmtDate(doc.created)}.`),
-      ),
-      h("div", { "class": "date-updated" },
-        h("p", { "class": "updated" }, `Updated ${fmtDate(doc.updated)}.`),
-      ),
+      <div class="date-created">
+        <p class="created">
+          Created { fmtDate(doc.created) }
+        </p>
+      </div>,
+      <div class="date-updated">
+        <p class="updated">
+          Updated { fmtDate(doc.updated) }
+        </p>
+      </div>
     ]);
   }
   if (showName) {
     body = body.concat([
-      h("div", { "class": "blurb-avatar" }, h(Avatar, { userInfo: doc.owner })),
-      h("p", { "class": "blurb-name" }, doc.owner.displayName)
+      <div class="blurb-avatar">
+        <Avatar userInfo={ doc.owner } />
+      </div>,
+      <p class="blurb-name">
+        { doc.owner.displayName }
+      </p>
     ]);
   }
   if (showTitle) {
-    body.push(h("p", { "class": "blurb-title" }, docTitle(doc)));
+    body.push(<p class="blurb-title">{ docTitle(doc) }</p>);
   }
-  return h("div", { "class": "blurb" }, ...body);
+  return <div class="blurb">{ ...body }</div>;
 }
 
 function fmtDate(d: Date): string {

@@ -4,6 +4,8 @@
     "alwaysStrict": true,
     "declaration": true,
     "diagnostics": false,
+    "jsx": "react",
+    "jsxFactory": "h",
     "lib": ["es5", "dom", "es2017"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,

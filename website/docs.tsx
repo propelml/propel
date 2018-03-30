@@ -14,7 +14,7 @@
  */
 // tslint:disable:variable-name
 import { h } from "preact";
-import { div, GlobalHeader, p } from "./common";
+import { GlobalHeader } from "./common";
 import * as nb from "./nb";
 
 export interface DocEntry {
@@ -60,7 +60,7 @@ export function markupDocStr(docstr: string): JSX.Element {
         if (line == null || isIndented(line)) {
           state = "code";
           const src = buf.join("\n");
-          elements.push(p(src));
+          elements.push(<p>{ src }</p>);
           buf = [];
         }
         break;
@@ -81,41 +81,50 @@ export function markupDocStr(docstr: string): JSX.Element {
     buf.push(line);
   }
   evalState(null);
-
-  return div("docstr", elements);
+  return <div class="docstr">{ elements }</div>;
 }
 
-const DocIndex = ({docs}) => {
-  const list = docs.map(entry => {
+const DocIndex = ({ docs }) => {
+  const List = docs.map(entry => {
     const tag = toTagName(entry.name);
     const className = "name " + entry.kind;
-    return h("li", null, h("a", { href: "#" + tag, "class": className },
-      entry.name));
+    console.log(tag);
+    return (
+      <li>
+        <a href={ "#" + tag } class={ className }>{ entry.name }</a>
+      </li>
+    );
   });
-  return h("ol", { "class": "docindex" }, list);
+  return (
+    <ol class="docindex">
+      { ...List }
+    </ol>
+  );
 };
 
-const DocEntries = ({docs}) => {
+const DocEntries = ({ docs }) => {
   const entries = docs.map(entry => {
     const tag = toTagName(entry.name);
     const out = [];
 
-    out.push(h("h2", { id: tag, "class": "name" },
-      h("a", { "href": "#" + tag }, entry.name)));
+    out.push(
+      <h2 id={ tag } class="name">
+        <a href={ "#" + tag }>{ entry.name }</a>
+      </h2>
+    );
 
     if (entry.typestr) {
-      out.push(div("typestr", entry.typestr));
+      out.push(<div class="typestr">{ entry.typestr }</div>);
     }
     if (entry.docstr) {
       out.push(markupDocStr(entry.docstr));
     }
 
     const sourceLink = !entry.sourceUrl ? null
-      : h("a", { "class": "source-link", "href": entry.sourceUrl }, " source");
-
-    return div("doc-entry", sourceLink, ...out);
+      : <a class="source-link" href={ entry.sourceUrl }> source</a>;
+    return <div class="doc-entry">{ sourceLink }{ ...out }</div>;
   });
-  return div("doc-entries", ...entries);
+  return <div class="doc-entries">{ ...entries }</div>;
 };
 
 function startsWithUpperCase(s: string): boolean {
@@ -135,14 +144,15 @@ export function Docs(props) {
     if (a.name > b.name) return 1;
     return 0;
   });
-
-  return div("docs",
-    h(GlobalHeader, { subtitle: "Docs" }),
-      div("doc-wrapper",
-        div("panel",
-          h(DocIndex, { docs }),
-        ),
-        h(DocEntries, { docs }),
-    ),
+  return (
+    <div class="docs">
+      <GlobalHeader subtitle="Docs" />
+      <div class="doc-wrapper">
+        <div class="panel">
+          <DocIndex docs={ docs } />
+        </div>
+        <DocEntries docs={ docs } />
+      </div>
+    </div>
   );
 }
