@@ -24,6 +24,7 @@ export { dataset } from "./dataset";
 export { experiment } from "./experiment";
 export { load } from "./npy";
 export { backend } from "./backend";
+export { sgd, minimize } from "./optimizers";
 export { plot, imshow } from "./matplotlib";
 export { imread, imsave } from "./im";
 export { Tensor } from "./tensor";
