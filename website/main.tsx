@@ -18,8 +18,7 @@ function cells() {
 window.addEventListener("load", async() => {
   cells();
 
-  render(h(Router, null), document.body, document.body.children[0]);
-
+  render(<Router />, document.body, document.body.children[0]);
   await drainExecuteQueue();
 
   // If we're in a testing environment...

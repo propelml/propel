@@ -17,7 +17,7 @@
 // client-side for generating HTML.
 import { readFileSync } from "fs";
 import { Component, h, render } from "preact";
-import { div, Footer, GlobalHeader, p, UserMenu } from "./common";
+import { Footer, GlobalHeader, UserMenu } from "./common";
 import * as db from "./db";
 import { Docs } from "./docs";
 import * as nb from "./nb";
@@ -34,20 +34,8 @@ export function renderPage(p: Page): void {
   render(h(p.root, null), document.body, document.body.children[0]);
 }
 
-function b(...children) {
-  return h("b", null, ...children);
-}
-
-function i(...children) {
-  return h("i", null, ...children);
-}
-
 function headerButton(href, text) {
-  return h("a", { "class": "button header-button", "href": href }, text);
-}
-
-function link(href, ...children) {
-  return h("a", {href}, ...children);
+  return <a class="button header-button" href={ href }>{ text }</a>;
 }
 
 function fixed(code: string): JSX.Element {
@@ -56,56 +44,63 @@ function fixed(code: string): JSX.Element {
 
 export const References = (props) => {
   const refhtml = readFileSync(__dirname + "/references.html", "utf8");
-  return div("references",
-    h(GlobalHeader, { subtitle: "References" }),
-    p("This work is inspired by and built upon great technologies."),
-    h("div", {
-      dangerouslySetInnerHTML: { __html: refhtml },
-    }),
-    h(Footer, null),
+  return (
+    <div class="references">
+      <GlobalHeader subtitle="References" />
+      <p>This work is inspired by and built upon great technologies.</p>
+      <div dangerouslySetInnerHTML={ { __html: refhtml } } />
+      <Footer />
+    </div>
   );
 };
 
 export const PropelIndex = (props) => {
-  return div("index",
-    h(Splash, props),
-    h(Intro, null),
-    h(UseIt, null),
-    h(Perks, null),
-    h(TrainingExample, null),
-    h(Footer, null),
+  return (
+    <div class="index">
+      <Splash />
+      <Intro />
+      <UseIt />
+      <Perks />
+      <TrainingExample />
+      <Footer />
+    </div>
   );
 };
 
-const Splash = (props) =>
-  div("splash",
-    // TODO "header" should be inside GlobalHeader.
-    h("header", null,
-      h(GlobalHeader, null,
-        h("a", { href: "/notebook" }, "Notebook"),
-        h(UserMenu, props)
-      ),
-    )
-  );
+const Splash = props => (
+  <div>
+    { false && `TODO "header" should be inside GlobalHeader.` }
+    <header>
+      <GlobalHeader>
+        <a href="/notebook">Notebook</a>
+        <UserMenu { ...props } />
+      </GlobalHeader>
+    </header>
+  </div>
+);
 
-const Intro = () =>
-  div("intro flex-row",
-    div("flex-cell",
-      h("h2", {}, "Differential Programming in JavaScript"),
-      p(
-        b("Propel"), ` provides a GPU-backed numpy-like infrastructure
+const Intro = () => (
+  <div class="intro flex-row">
+    <div class="flex-cell">
+      <h2>Differential Programming in JavaScript</h2>
+      <p>
+        <b>Propel</b> provides a GPU-backed numpy-like infrastructure
         for scientific computing in JavaScript.  JavaScript is a fast,
         dynamic language which, we think, could act as an ideal workflow
-        for scientific programmers of all sorts.`),
-      p(
-        headerButton("/docs", "API Ref"),
-        // Hide notebook link until more developed.
-        // headerButton("/notebook", "Notebook"),
-        headerButton("http://github.com/propelml/propel", "Github")
-      )
-    ),
-    div("intro-notebook flex-cell", nb.cell(tanhGrads))
-  );
+        for scientific programmers of all sorts.
+      </p>
+      <p>
+        { headerButton("/docs", "API Ref") }
+        { false && `Hide notebook link until more developed.` }
+        { false && `headerButton("/notebook", "Notebook"),` }
+        { headerButton("http://github.com/propelml/propel", "Github") }
+      </p>
+    </div>
+    <div class="intro-notebook flex-cell">
+      { nb.cell(tanhGrads) }
+    </div>
+  </div>
+);
 
 const tanhGrads = `
 import { grad, linspace, plot } from "propel";
@@ -119,68 +114,73 @@ plot(x, f(x),
      x, grad(grad(grad(grad(f))))(x))
 `;
 
-const UseIt = () =>
-  div("use-it",
-    div("use-it-inner",
-      h("p", { "class": "snippit-title" }, "Use it in Node:"),
-      fixed("npm install propel\nlet pr = require(\"propel\");"),
-      h("p", { "class": "snippit-title" }, "Use it in a browser:"),
-      fixed(`<script src="https://unpkg.com/propel@${version}"></script>`)
-    )
-  );
+const UseIt = () => (
+  <div class="use-it">
+    <div class="use-it-inner">
+      <p class="snippit-title">Use it in Node:</p>
+      { fixed("npm install propel\nlet pr = require(\"propel\");") }
+      <p class="snippit-title">Use it in a browser:</p>
+      { fixed(`<script src="https://unpkg.com/propel@${version}"></script>`) }
+    </div>
+  </div>
+);
 
-const Perks = () =>
-  div("perks",
-    div("flex-row",
-      div("flex-cell",
-        h("h2", { "class": "world" }, "Run anywhere."),
-        p(
-          `Propel runs both in the browser and natively from Node. In
+const Perks = () => (
+  <div class="perks">
+    <div class="flex-row">
+      <div class="flex-cell">
+        <h2 class="world">Run anywhere.</h2>
+        <p>
+          Propel runs both in the browser and natively from Node. In
           both environments Propel is able to use GPU hardware for
-          computations.  In the browser it utilizes WebGL through `,
-          link("https://deeplearnjs.org/", "deeplearn.js"),
-          " and on Node it uses TensorFlow's ",
-          link("https://www.tensorflow.org/install/install_c", "C API"),
-          "."
-        ),
-      ),
-      div("flex-cell",
-        h("h2", { "class": "upward" }, "Phd optional."),
-        p(
-          "Propel has an imperative ",
-          link("https://github.com/HIPS/autograd", "autograd"),
-          `-style API.  Computation graphs are traced as
-          you run them -- a general purpose `,
-          i("gradient function"),
-          ` provides an elegant interface to backpropagation.`
-        ),
-      ),
-    ),
-    div("flex-row",
-      div("flex-cell",
-        h("h2", { "class": "chip" }, "Did somebody say GPUs?"),
-        p(
-          `Browsers are great for demos, but they are not a great numerics
+          computations.  In the browser it utilizes WebGL through
+          <a href="https://deeplearnjs.org/">deeplearn.js</a>
+          and on Node it uses TensorFlow's
+          <a href="https://www.tensorflow.org/install/install_c">
+            C API
+          </a>.
+        </p>
+      </div>
+      <div class="flex-cell">
+        <h2 class="upward">Phd optional.</h2>
+        <p>
+          Propel has an imperative
+          <a href="https://github.com/HIPS/autograd">autograd</a>
+          -style API.  Computation graphs are traced as
+          you run them -- a general purpose
+          <i>gradient function</i>
+          provides an elegant interface to backpropagation.
+        </p>
+      </div>
+    </div>
+    <div class="flex-row">
+      <div class="flex-cell">
+        <h2 class="chip">Did somebody say GPUs?</h2>
+        <p>
+          Browsers are great for demos, but they are not a great numerics
           platform. WebGL is a far cry from CUDA. By running Propel outside
           of the browser, users will be able to target multiple GPUs and
           make TCP connections. The models developed server-side will be
-          much easier to deploy as HTML demos.`
-        ),
-      ),
-      div("flex-cell",
-        h("h2", { "class": "lightning" }, "Let's do this."),
-        p(`The basic propel npm package is javascript only,
+          much easier to deploy as HTML demos.
+        </p>
+      </div>
+      <div class="flex-cell">
+        <h2 class="lightning">Let's do this.</h2>
+        <p>
+          The basic propel npm package is javascript only,
           without TensorFlow bindings. To upgrade your speed dramatically
-          install`),
-        fixed([
-          "npm install propel_mac",
-          "npm install propel_windows",
-          "npm install propel_linux",
-          "npm install propel_linux_gpu",
-        ].join("\n"))
-      ),
-    )
-  );
+          install
+        </p>
+        { fixed([
+            "npm install propel_mac",
+            "npm install propel_windows",
+            "npm install propel_linux",
+            "npm install propel_linux_gpu",
+          ].join("\n")) }
+      </div>
+    </div>
+  </div>
+);
 
 // TODO Use require instead of import in the trainingExampleCode.
 // So people can copy and past the code into the terminal.
@@ -203,30 +203,34 @@ for (const batch of ds) {
 }
 `;
 
-const TrainingExample = () =>
-  div("training-example",
-    div("training-example-inner",
-      h("h2", null, "Neural Networks"),
-      div("flex-row",
-        div("flex-cell", nb.cell(trainingExampleCode)),
-        div("flex-cell",
-          p(b("What are NNs anyway?"), `The terminology is a bit misleading. Any
+const TrainingExample = () => (
+  <div class="training-example-inner">
+    <div class="training-example-inner">
+      <h2>Neural Networks</h2>
+      <div class="flex-row">
+        <div class="flex-cell">{ nb.cell(trainingExampleCode) }</div>
+        <div class="flex-cell">
+          <p>
+            <b>What are NNs anyway?</b> The terminology is a bit misleading. Any
             number of operations and architectures can be considered a neural
             network. The primary thing in common is that NN models use
             differentiable operations to allow gradient descent to improve their
-            fitness.`),
-
-          p(`Propel provides a concise API for specifying, training, and
+            fitness.
+          </p>
+          <p>
+            Propel provides a concise API for specifying, training, and
             making inference in neural networks. In the example, a two layer
             fully-connected ReLU network is being trained on the iris dataset.
             Iris is a very small dataset where each training example is only
             4 floating point features. There are three possible labels to apply.
             As with all classification problems, we apply softmaxLoss to the
-            labels.`),
-        ),
-      )
-    )
-  );
+            labels.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export let firebaseUrls = [
   "https://www.gstatic.com/firebasejs/4.9.0/firebase.js",
