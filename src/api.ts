@@ -193,3 +193,14 @@ export function stack(tensors: types.TensorLike[], axis = 0): Tensor {
   tensors = tensors.map(t => convert(t).expandDims(axis));
   return concat(tensors, axis);
 }
+
+/** Returns a tensor grid for grid based evaluations.
+ *    import * as pr from "propel"
+ *    x = [1, 2, 3]
+ *    y = [4, 5, 6]
+ *    pr.meshgrid([x, y])
+ */
+export function meshgrid(coordinates: any, indexing : "xy" | "ij" = "xy")
+: Tensor[] {
+  return ops.meshgrid(coordinates, indexing);
+}
