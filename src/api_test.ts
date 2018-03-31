@@ -1311,3 +1311,12 @@ test(async function api_size() {
   assertEqual(api.range(20).size, 20);
   assertEqual(api.range(20).reshape([4, 5]).size, 20);
 });
+
+test(async function api_meshgrid() {
+  const x = api.linspace(1, 3);
+  const y = x.square();
+  // this is ugly... maybe just take TensorLike coordinates?
+  const coords = [await x.data(), await y.data()];
+  const [x1, y1] = api.meshgrid(coords);
+  console.log(x1.dataSync(), y1.dataSync());
+});

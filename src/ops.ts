@@ -482,6 +482,21 @@ defBW("less", null, null); // Not differentiable.
 export let lessEqual = defFW("lessEqual", (x, y) => bo.lessEqual(x, y));
 defBW("lessEqual", null, null); // Not differentiable.
 
+export function meshgrid(inputs, indexing) {
+  const baseShape = inputs.map(() => 1);
+  return inputs.map((coordArray, i) => {
+    const newShape = baseShape.slice();
+    newShape[i] = -1;
+    let output = convert(coordArray).reshape(newShape);
+    if (indexing === "xy" && inputs.length > 1 && i < 2) {
+      const xyShape = baseShape.slice();
+      xyShape[~i + 2] = -1; // only flatten the x and y dims
+      output = output.reshape(xyShape);
+    }
+    return output;
+  });
+}
+
 export let select = defFW("select", (cond, x, y) => {
   saveForBackward(cond);
   return bo.select(cond, x, y);
