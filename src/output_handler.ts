@@ -170,6 +170,7 @@ export class OutputHandlerDOM implements OutputHandler {
         const elem = h(Inspector, {
           object: unserialize(data[i])
         });
+        console.log(elem);
         render(elem, this.element);
       }
     } catch (e) {}

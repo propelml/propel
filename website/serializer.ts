@@ -140,8 +140,13 @@ export interface ExtendableUnserializedObject {
   data: ExtendableData;
   type: "object" | "array" | "tensor";
   cons?: string;
+  isCircular: boolean;
 }
-export type UnserializedObject = ExtendableUnserializedObject | GNode<any>;
+export interface UnserializedNode extends GNode<any> {
+  isCircular: boolean;
+}
+export type UnserializedObject = ExtendableUnserializedObject |
+                                 UnserializedNode;
 
 // This class provides a graph data structure.
 // Which means it split objects into data and edges.
@@ -214,8 +219,7 @@ class Graph {
     }
     for (let i = 0; i < this.edges.length; ++i) {
       const [from, name, to] = this.edges[i];
-      // space[from].data[name] = {...space[to], isCircular: from >= to};
-      space[from].data[name] = space[to];
+      space[from].data[name] = {...space[to], isCircular: from >= to};
     }
     return space[0];
   }
