@@ -14,13 +14,19 @@
 // This file is intentionally decoupled from matplotlib.ts, so the dom output
 // handler can be loaded without pulling in the entire math library.
 
-import * as d3 from "d3";
+// FIXME
+// tslint:disable:object-literal-sort-keys
+
 import { h , render } from "preact";
+import * as vega from "vega-lib";
 import { Inspector } from "../website/inspector";
 import { SerializedObject, unserialize } from "../website/serializer";
 import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
+
+export type VegaConfig = vega.Config;
+export type VegaSpec = vega.Spec;
 
 export interface Progress {
   job: string;
@@ -39,120 +45,103 @@ const progressOutputHandlerMap = new Map<string, OutputHandler>();
 
 export class OutputHandlerDOM implements OutputHandler {
   // TODO colors should match those used by the syntax highlighting.
-  private color = d3.scaleOrdinal(d3.schemeCategory10);
   private progressJobs = new Map<string, Progress>();
 
   constructor(private element: Element) {}
-
-  private makeAxis(svg, margin, xScale, yScale, width, height) {
-    const axisBottom = d3.axisBottom(xScale);
-    axisBottom.tickSizeOuter(0);
-    svg.append("g")
-      .attr("transform", `translate(${margin.left},${height + margin.top})`)
-      .call(axisBottom);
-
-    const axisLeft = d3.axisLeft(yScale);
-    axisLeft.tickSizeOuter(0);
-    svg.append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`)
-      .call(axisLeft);
-
-    const axisRight = d3.axisRight(yScale);
-    axisRight.ticks(0);
-    axisRight.tickSizeOuter(0);
-    svg.append("g")
-      .attr("transform", `translate(${width + margin.left},${margin.top})`)
-      .call(axisRight);
-
-    const axisTop = d3.axisTop(xScale);
-    axisTop.ticks(0);
-    axisTop.tickSizeOuter(0);
-    svg.append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`)
-      .call(axisTop);
-  }
-
-  private getLimits(lines): number[] {
-    // TODO Replace this with real ops on tensors.
-    let xMin, xMax, yMin, yMax;
-    for (const line of lines) {
-      for (const point of line) {
-        if (xMin === undefined || point.x < xMin) {
-          xMin = point.x;
-        }
-
-        if (yMin === undefined || point.y < yMin) {
-          yMin = point.y;
-        }
-
-        if (xMax === undefined || point.x > xMax) {
-          xMax = point.x;
-        }
-
-        if (yMax === undefined || point.y > yMax) {
-          yMax = point.y;
-        }
-      }
-    }
-    return [xMin, xMax, yMin, yMax];
-  }
 
   imshow(image: Image): void {
     const canvas = createCanvas(image);
     this.element.appendChild(canvas);
   }
 
+  vega(spec: VegaSpec, config: VegaConfig = {}) {
+    const runtime = vega.parse(spec, config);
+    const view = new vega.View(runtime, {
+      loader: vega.loader(),
+      logLevel: vega.Warn,
+      renderer: "svg"
+    }).initialize(this.element);
+    view.run();
+  }
+
   plot(data: PlotData): void {
-    const outputId_ = "#" + this.element.id;
-
-    // Make an SVG Container
-    let width = 440;
-    let height = 300;
-
-    // No append.
-    d3.select(outputId_).select("svg").remove();
-
-    const svg = d3.select(outputId_).append("svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("width", width)
-      .attr("height", height);
-    const m = 30;
-    const margin = { top: m, right: m, bottom: m, left: m };
-    width = +svg.attr("width") - margin.left - margin.right;
-    height = +svg.attr("height") - margin.top - margin.bottom;
-    const g = svg.append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    const [xMin, xMax, yMin, yMax] = this.getLimits(data);
-
-    // A small inner margin prevents the plot lines from touching the axes.
-    const xMargin = (xMax - xMin) * 0.02;
-    const yMargin = (yMax - yMin) * 0.02;
-
-    const xScale = d3.scaleLinear()
-      .domain([xMin - xMargin, xMax + xMargin])
-      .range([0, width]);
-
-    const yScale = d3.scaleLinear()
-      .domain([yMin - yMargin, yMax + yMargin])
-      .range([height, 0]);
-
-    this.makeAxis(svg, margin, xScale, yScale, width, height);
-
-    const line = (d3.line() as any)
-      .x(d => xScale(d.x))
-      .y(d => yScale(d.y));
-
-    g.selectAll("path").data(data)
-      .enter()
-      .append("path")
-      .attr("d", line as any)
-      .style("fill", "none")
-      .style("stroke-width", "2px")
-      .style("stroke", (d, i) => {
-        return this.color(i as any);
+    const d = data.map((line, i) => {
+      return line.map(({ x, y }) => {
+        const obj = { x, y, c: i };
+        // console.log("obj", obj)
+        return obj;
       });
+    });
+    let vegaData = [];
+    for (const line of d) {
+      vegaData = vegaData.concat(line);
+    }
+
+    this.vega({
+      $schema: "https://vega.github.io/schema/vega/v3.json",
+      width: 440,
+      height: 300,
+
+      data: [{
+        name: "table",
+        values: vegaData,
+      }],
+
+      scales: [
+        {
+          name: "x",
+          type: "linear",
+          domain: {"data": "table", "field": "x"},
+          range: "width",
+        },
+        {
+          name: "y",
+          type: "linear",
+          domain: {"data": "table", "field": "y"},
+          range: "height",
+          nice: true,
+          zero: true,
+        },
+        {
+          name: "color",
+          type: "ordinal",
+          domain: {"data": "table", "field": "c"},
+          range: "category",
+        }
+      ],
+
+      axes: [
+        {"orient": "bottom", "scale": "x"},
+        {"orient": "left", "scale": "y"}
+      ],
+
+      marks: [
+        {
+          "type": "group",
+          "from": {
+            "facet": {
+              "name": "series",
+              "data": "table",
+              "groupby": "c"
+            }
+          },
+          "marks": [
+            {
+              "type": "line",
+              "from": {"data": "series"},
+              "encode": {
+                "enter": {
+                  "x": {"scale": "x", "field": "x"},
+                  "y": {"scale": "y", "field": "y"},
+                  "stroke": {"scale": "color", "field": "c"},
+                  "strokeWidth": {"value": 2}
+                },
+              }
+            }
+          ]
+        }
+      ]
+    });
   }
 
   print(data: SerializedObject[] | string): void {
