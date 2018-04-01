@@ -41,8 +41,9 @@
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",
     "typescript": "^2.7.2",
-    "yauzl": "^2.9.1",
-    "ws": "^5.0.0"
+    "vega-lib": "^3.2.1",
+    "ws": "^5.0.0",
+    "yauzl": "^2.9.1"
   },
   "browserslist": [
     ">5%"
