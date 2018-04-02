@@ -567,6 +567,7 @@ static napi_value NewHandle(napi_env env, napi_callback_info info) {
     case napi_uint32_array:
       width = sizeof(uint32_t);
       good_dtype = (tf_type == TF_UINT32);
+      break;
     case napi_float32_array:
       width = sizeof(float);
       good_dtype = (tf_type == TF_FLOAT);
