@@ -88,7 +88,6 @@ const DocIndex = ({ docs }) => {
   const List = docs.map(entry => {
     const tag = toTagName(entry.name);
     const className = "name " + entry.kind;
-    console.log(tag);
     return (
       <li>
         <a href={ "#" + tag } class={ className }>{ entry.name }</a>
