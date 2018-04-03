@@ -27,8 +27,8 @@ export interface InspectorState {
   isCollapsible: boolean;
 }
 
-export class Inspector extends Component<InspectorProps, InspectorState>{
-  inlineRendered;
+export class Inspector extends Component<InspectorProps, InspectorState> {
+  inlineRendered: JSX.Element[];
   constructor(props) {
     super();
     const isCollapsible = this.isCollapsible(props);
@@ -38,23 +38,24 @@ export class Inspector extends Component<InspectorProps, InspectorState>{
     };
   }
 
-  shouldExpandByDefault({ depth = 0, object }, isCollapsible) {
+  shouldExpandByDefault({ depth = 0, object }: InspectorProps,
+                        isCollapsible: boolean): boolean {
     if (!isCollapsible) return false;
     if (object.isCircular) return false;
     if (depth === 0) return true;
     return Object.getOwnPropertyNames(object.data).length <= 15;
   }
 
-  toggle = () => {
+  toggle(): void {
     this.setState(s => ({
       isCollapsed: !s.isCollapsed
     }));
   }
 
-  renderChild() {
+  renderChild(): JSX.Element {
     const { object: { data, type }, depth = 0 } = this.props;
     const properties = [];
-    switch (type){
+    switch (type) {
       case "object":
       case "array":
         for (const key in data) {
@@ -85,7 +86,7 @@ export class Inspector extends Component<InspectorProps, InspectorState>{
     );
   }
 
-  isCollapsible(props) {
+  isCollapsible(props: InspectorProps): boolean {
     const { object: { data, type } } = props;
     switch (type) {
       case "array":
@@ -102,7 +103,7 @@ export class Inspector extends Component<InspectorProps, InspectorState>{
     return false;
   }
 
-  renderInlinePreview(data, type) {
+  renderInlinePreview(data, type: string): JSX.Element[] {
     let keys = Object.getOwnPropertyNames(data);
     let elements = null;
     if (type === "array") {
@@ -124,7 +125,7 @@ export class Inspector extends Component<InspectorProps, InspectorState>{
     return elements;
   }
 
-  render() {
+  render(): JSX.Element {
     const { object: { data, type, cons, isCircular }, name } = this.props;
     const { depth = 0, inline = false } = this.props;
     const { isCollapsed, isCollapsible } = this.state;
