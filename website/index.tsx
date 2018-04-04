@@ -85,21 +85,25 @@ const Perks = () => (
           Propel runs both in the browser and natively from Node. In
           both environments Propel is able to use GPU hardware for
           computations.  In the browser it utilizes WebGL through
-          <a href="https://deeplearnjs.org/"> deeplearn.js</a>
+          &nbsp;
+          <a href="https://deeplearnjs.org/">deeplearn.js</a>
+          &nbsp;
           and on Node it uses TensorFlow's
-          <a href="https://www.tensorflow.org/install/install_c">
-           C API
-          </a>.
+          &nbsp;
+          <a href="https://www.tensorflow.org/install/install_c">C API</a>.
         </p>
       </div>
       <div class="flex-cell">
         <h2 class="perks__header perks--upward">Phd optional.</h2>
         <p>
           Propel has an imperative
-          <a href="https://github.com/HIPS/autograd"> autograd</a>
+          &nbsp;
+          <a href="https://github.com/HIPS/autograd">autograd</a>
           -style API.  Computation graphs are traced as
           you run them -- a general purpose
+          &nbsp;
           <i>gradient function</i>
+          &nbsp;
           provides an elegant interface to backpropagation.
         </p>
       </div>
