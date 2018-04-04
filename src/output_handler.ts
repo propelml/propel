@@ -68,7 +68,6 @@ export class OutputHandlerDOM implements OutputHandler {
     const d = data.map((line, i) => {
       return line.map(({ x, y }) => {
         const obj = { x, y, c: i };
-        // console.log("obj", obj)
         return obj;
       });
     });
@@ -159,7 +158,6 @@ export class OutputHandlerDOM implements OutputHandler {
         const elem = h(Inspector, {
           object: unserialize(data[i])
         });
-        console.log(elem);
         render(elem, this.element);
       }
     } catch (e) {}
