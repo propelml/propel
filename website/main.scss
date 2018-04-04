@@ -439,20 +439,15 @@ header {
 
 .footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-content: center;
-  width: 100%;
-  height: 8rem;
-  margin-top: $size1;
+  margin: $size2 0;
   background-color: $bodyBackground;
-  text-align: center;
 
   * {
-    font-size: 1.4rem;
-    line-height: 2.4rem;
-    font-weight: 400;
     text-transform: uppercase;
-    margin: auto 8px;
+    margin: $size0;
   }
 }
 
