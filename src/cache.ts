@@ -61,19 +61,18 @@ export function url2Filename(url: string): string {
   if (!(u.protocol === "http:" || u.protocol === "https:")) {
     throw Error(`Unsupported protocol '${u.protocol}'`);
   }
+  let pathnameParts = u.toString().replace(u.origin, "").split("/");
   // Just to be safe, use encodeURI to transform pathname and hostname. Note
   // that not all encoded components map to valid Windows filenames - there may
   // be a bug here in the future with URLs containing non-standard characters.
+  pathnameParts = pathnameParts.map(encodeURIComponent);
   const h = encodeURI(u.hostname);
-  const p = encodeURI(u.pathname);
-  assert(p.indexOf("..") < 0, "Safety sanity check");
-  assert(h.indexOf("..") < 0, "Safety sanity check");
   const path = nodeRequire("path");
   // Note we purposely leave the port out of the cache path because
   // Windows doesn't allow colons in filenames. This is probably fine
   // in 99% of cases and is the simplest solution.
-  const cacheFn = path.resolve(path.join(cacheBase(), h, p));
-  assert(cacheFn.startsWith(cacheBase()));
+  const cacheFn = path.resolve(cacheBase(), h, ...pathnameParts);
+  assert(cacheFn.startsWith(cacheBase()));  // Sanity check.
   return cacheFn;
 }
 

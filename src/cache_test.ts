@@ -49,17 +49,27 @@ function teardown() {
 }
 
 if (IS_NODE) {
+  function assertPathEndsWith(actual: string, expected: string): void {
+    // Split and join done for windows compat.
+    const { join } = nodeRequire("path");
+    const expected2 = join(...expected.split("/"));
+    assert(actual.endsWith(expected2));
+  }
+
   test(async function cache_url2Filename() {
     const actual = cache.url2Filename(
       "http://propelml.org/data/mnist/train-images-idx3-ubyte.bin");
-    const expected0 =
+    const expected =
       ".propel/cache/propelml.org/data/mnist/train-images-idx3-ubyte.bin";
-    // Split and join done for windows compat.
-    const { join } = nodeRequire("path");
-    const expected = join(...expected0.split("/"));
-    console.log("actual", actual);
-    console.log("expected", expected);
-    assert(actual.endsWith(expected));
+    assertPathEndsWith(actual, expected);
+  });
+
+  test(async function cache_url2FilenameQueryString() {
+    const actual = cache.url2Filename(
+      "https://unpkg.com/sha256@0.2.0/?meta");
+    const expected =
+      ".propel/cache/unpkg.com/sha256%400.2.0/%3Fmeta";
+    assertPathEndsWith(actual, expected);
   });
 }
 
