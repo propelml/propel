@@ -45,7 +45,10 @@ export async function loadSplit(split: string):
   const imagesPromise = loadFile2(hrefImages);
   const labelsPromise = loadFile2(hrefLabels);
   const [images, labels] = await Promise.all([imagesPromise, labelsPromise]);
-  return { images, labels };
+  return {
+    images: images.expandDims(-1),  // Add channel dim to make it 4D.
+    labels,
+  };
 }
 
 async function loadFile2(href: string) {
