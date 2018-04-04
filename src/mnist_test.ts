@@ -18,7 +18,7 @@ import { assertAllEqual, assertShapesEqual } from "./tensor_util";
 
 test(async function mnist_trainSplit() {
   const { images, labels } = await mnist.loadSplit("train");
-  assertShapesEqual(images.shape, [60000, 28, 28]);
+  assertShapesEqual(images.shape, [60000, 28, 28, 1]);
   assertAllEqual(images.reduceMax(), 255);
   assertShapesEqual(labels.shape, [60000]);
   // assertEqual(labels.dtype, "uint8");
@@ -30,7 +30,7 @@ test(async function mnist_trainSplit() {
 
 test(async function mnist_testSplit() {
   const {images, labels} = await mnist.loadSplit("test");
-  assertShapesEqual(images.shape, [10000, 28, 28]);
+  assertShapesEqual(images.shape, [10000, 28, 28, 1]);
   assertShapesEqual(labels.shape, [10000]);
   assertAllEqual(labels.slice([0], [3]), [7, 2, 1]);
 });
