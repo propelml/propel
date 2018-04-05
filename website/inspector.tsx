@@ -257,7 +257,7 @@ export class Inspector extends Component<InspectorProps, InspectorState> {
       <div class={ className } >
         <div
           class={ "tree-header cm-s-syntax" + isCollapsibleClass }
-          onClick={ !inline && isCollapsible && this.toggle } >
+          onClick={ !inline && isCollapsible && this.toggle.bind(this) } >
           { depth === 0 && !isCollapsible ? null : (
             <div class="tree-arrow-wrapper">
               { !isCollapsible ? null : (
