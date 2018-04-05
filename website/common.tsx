@@ -98,3 +98,8 @@ export function Avatar(props: { size?: number, userInfo: db.UserInfo }) {
       width={ size } />
   );
 }
+
+// Trims whitespace.
+export function normalizeCode(code: string): string {
+  return code.trimRight();
+}
