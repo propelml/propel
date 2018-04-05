@@ -18,21 +18,23 @@
 // re-rendered client-side. The Propel code in the cells are executed
 // server-side so the results can be displayed even if javascript is disabled.
 
-// tslint:disable:no-reference
-/// <reference path="../node_modules/@types/codemirror/index.d.ts" />
-
 import { escape } from "he";
 import { Component, h } from "preact";
 import { OutputHandlerDOM } from "../src/output_handler";
 import {
   assert,
-  assertEqual,
   delay,
-  IS_WEB,
   randomString,
   URL
 } from "../src/util";
-import { Avatar, GlobalHeader, Loading, UserMenu } from "./common";
+import { CodeMirrorComponent } from "./codemirror";
+import {
+  Avatar,
+  GlobalHeader,
+  Loading,
+  normalizeCode,
+  UserMenu,
+} from "./common";
 import * as db from "./db";
 import { RPC, WindowRPC } from "./rpc";
 
@@ -174,15 +176,6 @@ export async function drainExecuteQueue() {
   }
 }
 
-const codemirrorOptions = {
-  lineNumbers: false,
-  lineWrapping: true,
-  mode: "javascript",
-  scrollbarStyle: null,
-  theme: "syntax",
-  viewportMargin: Infinity,
-};
-
 export interface CellProps {
   code?: string;
   onRun?: (code: null | string) => void;
@@ -197,7 +190,7 @@ export class Cell extends Component<CellProps, CellState> {
   input: Element;
   output: Element;
   private outputHandler: OutputHandlerDOM;
-  editor: CodeMirror.Editor;
+  cm: CodeMirrorComponent;
   readonly id: number;
   outputHTML?: string;
 
@@ -217,8 +210,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   get code(): string {
-    return normalizeCode(this.editor ? this.editor.getValue()
-                                     : this.props.code);
+    return normalizeCode(this.cm ? this.cm.code : this.props.code);
   }
 
   getOutputHandler() {
@@ -235,79 +227,6 @@ export class Cell extends Component<CellProps, CellState> {
 
   clearOutput() {
     this.output.innerHTML = "";
-  }
-
-  // Because CodeMirror has a lot of state that is not managed through
-  // React, manually apply prop changes.
-  componentWillReceiveProps(nextProps: CellProps) {
-    const nextCode = normalizeCode(nextProps.code);
-    if (nextCode !== this.code) {
-      this.editor.setValue(nextCode);
-      this.clearOutput();
-    }
-  }
-
-  // Because CodeMirror has complex internal state, we only update the
-  // component if the props have changed (e.g. if props.onDelete has been
-  // changed as demoed in the notebook_DeleteLastCell test).
-  // Code updates are done in componentWillReceiveProps.
-  // TODO This is very hacky. Ideally we wouldn't have to mange CM's
-  // state like this.
-  shouldComponentUpdate(nextProps, nextState) {
-    const propChanged = (name) =>
-      (this.props[name] == null) !== (nextProps[name] == null);
-    if (propChanged("onDelete") || propChanged("onInsertCell")) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  componentDidMount() {
-    const options = Object.assign({}, codemirrorOptions, {
-      mode: "javascript",
-      value: this.code,
-    });
-
-    // If we're in node, doing server-side rendering, we don't enable
-    // CodeMirror as its not clear if it can re-initialize its state after
-    // being serialized.
-    if (IS_WEB) {
-      // tslint:disable:variable-name
-      const CodeMirror = require("codemirror");
-      require("codemirror/mode/javascript/javascript.js");
-
-      // Find pre to replace by codemirror instance.
-      const pres = this.input.getElementsByTagName("pre");
-      assertEqual(pres.length, 1);
-
-      this.editor =
-        CodeMirror(div => this.input.replaceChild(div, pres[0]), options);
-
-      const runCellAndFocusNext = () => {
-        this.run();
-        this.editor.getInputField().blur();
-        this.focusNext();
-        return true;
-      };
-
-      this.editor.setOption("extraKeys", {
-        "Alt-Enter": runCellAndFocusNext,
-        "Ctrl-Enter": () =>  {
-          this.run();
-          return true;
-        },
-        "Shift-Enter": runCellAndFocusNext,
-      });
-
-      this.editor.on("focus", () => {
-        this.parentDiv.classList.add("notebook-cell-focus");
-      });
-
-      this.editor.on("blur", () => {
-        this.parentDiv.classList.remove("notebook-cell-focus");
-      });
-    }
   }
 
   focusNext() {
@@ -331,7 +250,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   focus() {
-    this.editor.focus();
+    this.cm.focus();
     this.parentDiv.classList.add("notebook-cell-focus");
     this.parentDiv.scrollIntoView();
   }
@@ -399,6 +318,12 @@ export class Cell extends Component<CellProps, CellState> {
     }
     const outputDiv = <div { ...outputDivAttr } />;
 
+    const runCellAndFocusNext = () => {
+      this.run();
+      this.cm.blur();
+      this.focusNext();
+    };
+
     return (
       <div
         class="notebook-cell"
@@ -407,7 +332,19 @@ export class Cell extends Component<CellProps, CellState> {
         <div
           class="input"
           ref={ ref => { this.input = ref; } } >
-          <pre>{ this.code }</pre>
+          <CodeMirrorComponent
+            code={ this.code }
+            ref={ ref => { this.cm = ref; } }
+            onFocus={ () => {
+              this.parentDiv.classList.add("notebook-cell-focus");
+            } }
+            onBlur={ () => {
+              this.parentDiv.classList.remove("notebook-cell-focus");
+            } }
+            onAltEnter={ runCellAndFocusNext }
+            onShiftEnter={ runCellAndFocusNext }
+            onCtrlEnter={ () => { this.run(); } }
+          />
           { deleteButton }
           { runButton }
         </div>
@@ -904,11 +841,6 @@ function notebookBlurb(doc: db.NotebookDoc, {
 
 function fmtDate(d: Date): string {
   return d.toISOString();
-}
-
-// Trims whitespace.
-function normalizeCode(code: string): string {
-  return code.trimRight();
 }
 
 function nbUrl(nbId: string): string {
