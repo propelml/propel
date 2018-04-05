@@ -42,7 +42,7 @@ let defaultFormatOptions: FormatOptions = {
   // total items > triggers array summarization
   "threshold": 1000,
   // Precision of floating point representations.
-  "precision": 7,
+  "precision": 6,
   "linewidth": 75,
   "formatter": undefined,
 };
@@ -58,7 +58,7 @@ export function getPrintoptions(): FormatOptions {
   return { ...defaultFormatOptions };
 }
 
-function FloatFormatter(tensor, precision): FormatterFunction {
+function floatFormatter(tensor, precision): FormatterFunction {
   // TODO - This function needs some optimizations
   // Also it does not generate same output as NumPy in somecases
   const format = x => String(Number(x).toFixed(precision)).replace(/0+$/, "");
@@ -207,7 +207,7 @@ function getFormatFunction(tensor: Tensor, opts: FormatOptions)
     case "uint8":
       return IntegerFormatter(tensor);
     case "float32":
-      return FloatFormatter(tensor, opts.precision);
+      return floatFormatter(tensor, opts.precision);
   }
   throw new Error("Unsupported dtype.");
 }
