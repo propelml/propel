@@ -82,6 +82,7 @@ function getGithubUrlForFile(fileName: string) {
 
 export function genJSON(): DocEntry[] {
   // Global variables.
+  const { exclude } = require("../tsconfig");
   const visitQueue: ts.Node[] = [];
   const visitHistory = new Map<ts.Symbol, boolean>();
   let checker: ts.TypeChecker = null;
@@ -94,10 +95,24 @@ export function genJSON(): DocEntry[] {
       s = skipAlias(s, checker);
       log("requestVisit", s.getName());
       const decls = s.getDeclarations();
-      // What does it mean tot have multiple declarations?
+      // What does it mean to have multiple declarations?
       // assert(decls.length === 1);
-      visitQueue.push(decls[0]);
-      visitHistory.set(s, true);
+      const sourceFileName = decls[0].getSourceFile().fileName;
+      // Dont visit if sourceFileName is in tsconfig excludes
+      if (!exclude.some(matchesSourceFileName)) {
+        visitQueue.push(decls[0]);
+        visitHistory.set(s, true);
+      } else {
+        log("excluded", sourceFileName);
+      }
+
+      function matchesSourceFileName(excludeDir) {
+        // Replace is used for cross-platform compatibility
+        // as 'getSourceFile().fileName' returns posix path
+        const excludePath = path.resolve(__dirname, "..", excludeDir);
+        const posixExcludePath = excludePath.replace(/\\/g, "/");
+        return sourceFileName.includes(posixExcludePath);
+      }
     }
   }
 
@@ -180,9 +195,7 @@ export function genJSON(): DocEntry[] {
       log("- FunctionExpression", name);
 
     } else if (ts.isInterfaceDeclaration(node)) {
-      const symbol = checker.getSymbolAtLocation(node.name);
-      const name = symbol.getName();
-      log("- Interface", name);
+      visitClass(node);
 
     } else if (ts.isObjectLiteralExpression(node)) {
       // TODO Ignoring for now.
@@ -194,7 +207,7 @@ export function genJSON(): DocEntry[] {
 
     } else {
       log("Unknown node", node.kind);
-      assert(false);
+      assert(false, "Unknown node");
     }
   }
 
@@ -265,7 +278,7 @@ export function genJSON(): DocEntry[] {
     return `${githubUrl}#${sourceRange}`;
   }
 
-  function visitClass(node: ts.ClassDeclaration) {
+  function visitClass(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
     const symbol = checker.getSymbolAtLocation(node.name);
     const className = symbol.getName();
 
@@ -289,7 +302,13 @@ export function genJSON(): DocEntry[] {
         continue;
       }
 
-      if (ts.isConstructorDeclaration(m)) {
+      if (ts.isPropertySignature(m)) {
+        visitProp(m, name, className);
+
+      } else if (ts.isMethodSignature(m)) {
+        visitMethod(m, name, className);
+
+      } else if (ts.isConstructorDeclaration(m)) {
         visitMethod(m, "constructor", className);
 
       } else if (ts.isMethodDeclaration(m)) {
@@ -310,7 +329,8 @@ export function genJSON(): DocEntry[] {
     }
   }
 
-  function visitProp(node: ts.ClassElement, name: string, className?: string) {
+  function visitProp(node: ts.ClassElement | ts.PropertySignature,
+                     name: string, className?: string) {
     name = className ? `${className}.${name}` : name;
 
     const symbol = checker.getSymbolAtLocation(node.name);
@@ -325,7 +345,7 @@ export function genJSON(): DocEntry[] {
     });
   }
 
-  function classElementName(m: ts.ClassElement): string {
+  function classElementName(m: ts.ClassElement | ts.TypeElement): string {
     if (m.name) {
       if (ts.isIdentifier(m.name)) {
         return ts.idText(m.name);
