@@ -177,7 +177,7 @@ test(async function dataset_cifar10() {
     assertShapesEqual(images.shape, [4, 32, 32, 3]);
     assertShapesEqual(labels.shape, [4]);
     assertAllEqual(images.slice([0, 0, 0, 0], [1, 5, 1, 1]).squeeze(),
-      [59, 33, 97, 154, 142]);
+      [59, 16, 25, 33, 50]);
     assertAllEqual(labels, [6, 9, 9, 4]);
   }
 });

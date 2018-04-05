@@ -354,11 +354,11 @@ export async function loadWine():
 
 const cifar10URLs = {
   test: {
-    images: "http://ar.propelml.org/cifar10_test_images.npy",
+    images: "http://ar.propelml.org/cifar10_test_images_NHWC.npy",
     labels: "http://ar.propelml.org/cifar10_test_labels.npy",
   },
   train: {
-    images: "http://ar.propelml.org/cifar10_train_images.npy",
+    images: "http://ar.propelml.org/cifar10_train_images_NHWC.npy",
     labels: "http://ar.propelml.org/cifar10_train_labels.npy",
   },
 };
