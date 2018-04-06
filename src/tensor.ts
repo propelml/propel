@@ -66,7 +66,7 @@ export class Tensor implements types.Storage {
     // Do we want to relax any of these constraints?
     // assertEqual(t.device, this.device);
     assertShapesEqual(t.shape, this.shape);
-    assertEqual(t.dtype, this.dtype);
+    assertEqual(t.dtype, this.dtype, "Tensor.assign() dtypes not equal.");
 
     this.dispose();
     this.storage = t.storage;
@@ -462,7 +462,8 @@ export class Tensor implements types.Storage {
     // Convert dims to 1D tensor of booleans.
     const ta = new Uint8Array(this.rank);
     for (const dim of dims) {
-      assert(-this.rank <= dim && dim < this.rank);
+      assert(-this.rank <= dim && dim < this.rank,
+        `Tensor.reverse() Bad dim value ${dim}`);
       const i = dim >= 0 ? dim : this.rank + dim;
       ta[i] = 1;
     }
@@ -649,8 +650,8 @@ export class Tensor implements types.Storage {
       size_ = size;
     }
 
-    assert(allFinite(begin_));
-    assert(allFinite(size_));
+    assert(allFinite(begin_), "Tensor.slice() begin values not all finite.");
+    assert(allFinite(size_), "Tensor.slice() size values not all finite.");
     return ops.slice(this, begin_, size_);
   }
 
@@ -668,7 +669,7 @@ export class Tensor implements types.Storage {
    */
   gather(indices: types.TensorLike, axis = 0): Tensor {
     const indicesT = this.colocate(indices, "int32");
-    assertEqual(indicesT.rank, 1, "indices must be rank1 int32");
+    assertEqual(indicesT.rank, 1, "Tensor.gather() indices must be rank 1.");
     return ops.gather(this, indicesT, axis);
   }
 
@@ -755,7 +756,7 @@ export class Tensor implements types.Storage {
       left = this.reshape([1, 1]);
       lShape = [];
     } else if (this.rank === 1) {
-      assertEqual(this.shape[0], xx.shape[0]);
+      assertEqual(this.shape[0], xx.shape[0], "Tensor.dot() mismatched shape.");
       left = this.reshape([1, this.shape[0]]);
       lShape = [];
     } else if (this.rank === 2) {
@@ -769,7 +770,8 @@ export class Tensor implements types.Storage {
       right = xx.reshape([1, 1]);
       rShape = [];
     } else if (xx.rank === 1) {
-      assertEqual(this.shape[this.rank - 1], xx.shape[0]);
+      assertEqual(this.shape[this.rank - 1], xx.shape[0],
+        "Tensor.dot() mismatched.");
       right = xx.reshape([xx.shape[0], 1]);
       rShape = [];
     } else if (xx.rank === 2) {
@@ -809,8 +811,10 @@ export class Tensor implements types.Storage {
   softmaxCE(labels: types.TensorLike): Tensor {
     const logits = this;
     const labelsT = this.colocate(labels).cast("float32");
-    assertEqual(labelsT.rank, 2);
-    assertEqual(logits.rank, 2);
+    assertEqual(labelsT.rank, 2,
+      "Tensor.softmaxCE() expected labels to be rank 2.");
+    assertEqual(logits.rank, 2,
+      "Tensor.softmaxCE() expected logits to be rank 2.");
     const logQ = logits.logSoftmax();
     const pLogQ = labelsT.mul(logQ);
     return pLogQ.reduceSum([1]).neg();
@@ -829,7 +833,8 @@ export class Tensor implements types.Storage {
    */
   softmaxLoss(labels: types.TensorLike): Tensor {
     const logits = this;
-    assertEqual(logits.rank, 2);
+    assertEqual(logits.rank, 2,
+      "Tensor.softmaxLoss() expected logits to be rank 2.");
     const numLabels = logits.shape[1];
     let labelsT = this.colocate(labels);
     if (labelsT.rank === 1) {
@@ -858,8 +863,10 @@ export class Tensor implements types.Storage {
    *    pretendImage.rescale([0, 255], [-1, 1]);
    */
   rescale(inScale: [number, number], outScale: [number, number]): Tensor {
-    assert(inScale[0] < inScale[1]);
-    assert(outScale[0] < outScale[1]);
+    assert(inScale[0] < inScale[1],
+      "Tensor.rescale() expected inScale[0] < inScale[1]");
+    assert(outScale[0] < outScale[1],
+      "Tensor.rescale() expected outScale[0] < outScale[1]");
     return this.cast("float32")
                .sub(inScale[0])
                .div(inScale[1] - inScale[0])
@@ -881,7 +888,7 @@ export class Tensor implements types.Storage {
       stride: 2,
       padding: "valid",
     };
-    assertEqual(this.rank, 4);
+    assertEqual(this.rank, 4, "Tensor.maxPool() expected rank 4.");
     return ops.maxPool(this, Object.assign(defaults, opts));
   }
 
