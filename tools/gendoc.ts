@@ -33,6 +33,8 @@ const repoBaseUrl = "https://github.com/propelml/propel";
 
 const fileGithubUrls = new Map<string, string>();
 
+console.log("typescript version", ts.versionMajorMinor);
+
 function getGithubUrlForFile(fileName: string) {
   if (fileGithubUrls.has(fileName)) {
     return fileGithubUrls.get(fileName);
@@ -103,6 +105,8 @@ export function genJSON(): DocEntry[] {
       if (!exclude.some(excludeDir => sourceFileName.includes(excludeDir))) {
         visitQueue.push(decls[0]);
         visitHistory.set(s, true);
+      } else {
+        console.log("DEBUG exclude.... ", sourceFileName, exclude);
       }
     }
   }
