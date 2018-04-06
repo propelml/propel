@@ -23,6 +23,7 @@ test(async function gendoc_smoke() {
   const names = docs.map(e => e.name);
   // Check that a few of the names are correct.
   assert(names.indexOf("Tensor") >= 0);
+  assert(names.indexOf("Params") >= 0);
   assert(names.indexOf("Tensor.add") >= 0);
   assert(names.indexOf("Tensor[Symbol.iterator]") >= 0);
 });

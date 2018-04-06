@@ -15,7 +15,7 @@
 import { OutputHandler } from "./output_handler";
 import { RegularArray } from "./types";
 
-const debug = false;
+const debug = true;
 
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
