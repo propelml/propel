@@ -46,6 +46,9 @@ function toNumber(t: TensorLike): number {
 }
 
 export function shapesEqual(x: Shape, y: Shape): boolean {
+  // Shape [] and shape [1] are the same.
+  if (x.length === 0 && y.length === 1) return y[0] === 1;
+  if (x.length === 1 && y.length === 0) return x[0] === 1;
   if (x.length !== y.length) return false;
   for (let i = 0; i < x.length; ++i) {
     if (x[i] !== y[i]) return false;
