@@ -14,12 +14,10 @@
   "devDependencies": {
     "@types/acorn": "^4.0.3",
     "@types/codemirror": "0.0.51",
-    "@types/d3": "^4.13.0",
     "@types/node": "^8.9.4",
     "@types/seedrandom": "^2.4.27",
     "acorn": "^5.5.0",
     "codemirror": "^5.35.0",
-    "d3": "^4.13.0",
     "http-server": "^0.10.0",
     "jpeg-js": "^0.3.3",
     "ncp": "^2.0.0",
