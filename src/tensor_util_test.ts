@@ -13,7 +13,23 @@
    limitations under the License.
  */
 import { test } from "../tools/tester";
-import { assertShapesEqual, bcastGradientArgs } from "./tensor_util";
+import {
+  assertShapesEqual,
+  bcastGradientArgs,
+  shapesEqual
+} from "./tensor_util";
+import { assert } from "./util";
+
+test(async function tensor_util_shapeEqual() {
+  assert(shapesEqual([1], []));
+  assert(shapesEqual([], [1]));
+  assert(shapesEqual([], []));
+  assert(shapesEqual([1], [1]));
+  assert(shapesEqual([1, 2, 3], [1, 2, 3]));
+  assert(!shapesEqual([1, 2, 4], [1, 2, 3]));
+  assert(!shapesEqual([1, 2, 3], [1, 2, 3, 4]));
+  assert(!shapesEqual([2], [1]));
+});
 
 test(async function tensor_util_bcastGradientArgs() {
   let [r0, r1] = bcastGradientArgs([2, 3, 5], [1]);
