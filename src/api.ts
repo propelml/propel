@@ -164,10 +164,10 @@ export function conv2d(input: Tensor, filter: Tensor,
     stride: 1,
     padding: "valid",
   };
-  assertEqual(input.dtype, "float32");
-  assertEqual(filter.dtype, "float32");
-  assertEqual(input.rank, 4);
-  assertEqual(filter.rank, 4);
+  assertEqual(input.dtype, "float32", "conv2d expected input to be float32");
+  assertEqual(filter.dtype, "float32", "conv2d expected filter to be float32");
+  assertEqual(input.rank, 4, "conv2d() input should be rank 4.");
+  assertEqual(filter.rank, 4, "conv2d() filter rank should be 4.");
   return ops.conv2d(input, filter, Object.assign(defaults, opts));
 }
 
