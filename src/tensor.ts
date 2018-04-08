@@ -79,7 +79,7 @@ export class Tensor implements types.Storage {
   /** Returns an iterator over the values of the tensor.
    *
    *    import { range } from "propel";
-   *    for (let i in range(10)) {
+   *    for (let i of range(10)) {
    *      console.log(i)
    *    }
    */
