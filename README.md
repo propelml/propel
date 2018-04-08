@@ -85,7 +85,7 @@ Propel has two major components:
  2. the website, located in `website/`.
 
 Due to the notebook and documentation, the website is fairly non-trivial. It
-is written in React (actually Preact), but does not use JSX.
+is written in React (actually Preact).
 
 When working on the website, it's often nice to run a dev server
 
