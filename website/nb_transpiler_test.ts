@@ -92,6 +92,12 @@ test(function nb_transpiler_transpile() {
     "void (__global.a=function a() { var leave_me_alone = 1; });");
   t("function a() { var { leave_me_alone } = {}; }",
     "void (__global.a=function a() { var { leave_me_alone } = {}; });");
+  t("class GlobalClass {}",
+    "void (__global.GlobalClass=class GlobalClass {});");
+  t("class GlobalMyArray extends Array {}",
+    "void (__global.GlobalMyArray=class GlobalMyArray extends Array {});");
+  t("var X = class ClassExpression {};",
+    "void ((__global.X = class ClassExpression {}));");
   t("if (true) { var make_me_a_global = 1; }",
     "if (true) { void ((__global.make_me_a_global = 1)); }");
   t("if (true) { var { make_me_a_global } = {}; }",

@@ -100,7 +100,7 @@ const evalScopeVisitors = {
       return;
     }
 
-    state.edit.insertBefore(node, `__global.${node.id.name}=`);
+    state.edit.insertBefore(node, `void (__global.${node.id.name}=`);
     state.edit.insertAfter(node, `);`);
   },
 
