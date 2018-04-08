@@ -20,7 +20,7 @@
 import { h , render } from "preact";
 import * as vega from "vega-lib";
 import { Inspector } from "../website/inspector";
-import { SerializedObject, unserialize } from "../website/serializer";
+import { ValueDescriptor } from "../website/serializer";
 import { createCanvas, Image } from "./im";
 
 export type PlotData = Array<Array<{ x: number, y: number }>>;
@@ -143,7 +143,7 @@ export class OutputHandlerDOM implements OutputHandler {
     });
   }
 
-  print(data: SerializedObject[] | string): void {
+  print(data: ValueDescriptor[] | string): void {
     if (typeof data === "string") {
       const element = this.element;
       const last = element.lastChild;
@@ -154,12 +154,8 @@ export class OutputHandlerDOM implements OutputHandler {
       return;
     }
     try {
-      for (let i = 0; i < data.length; ++i) {
-        const elem = h(Inspector, {
-          object: unserialize(data[i])
-        });
-        render(elem, this.element);
-      }
+      const elem = h(Inspector, { descriptors: data });
+      render(elem, this.element);
     } catch (e) {}
   }
 
