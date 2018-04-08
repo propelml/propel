@@ -13,225 +13,281 @@
    limitations under the License.
  */
 
-import { Tensor } from "../src/api";
-import * as types from "../src/types";
+import { toString as formatTensor } from "../src/format";
+import { Tensor } from "../src/tensor";
+import { isNumericalKey } from "../src/util";
 
-// This module generates a non-circular object from any of js data types
-// so they can be sent or received thru RPC.
-// TODO optimize generated data size.
-
-export interface NodeTypeMap {
-  number: number;
-  string: string;
-  symbol: string;
-  function: {
-    isNative: boolean;
-    name: string;
-  };
-  undefined: undefined;
-  null: undefined;
-  object: undefined;
-  date: string;
-  regexp: string;
-  boolean: 1 | 0;
-  promise: undefined;
-  array: undefined;
-  tensor: {
-    shape: number[];
-    dtype: types.DType;
-    data: string;
-  };
+export interface AtomDescriptor {
+  type: "null" | "undefined" | "getter" | "gettersetter" | "setter";
+}
+export interface PrimitiveDescriptor {
+  type: "boolean" | "date" | "number" | "regexp" | "string" | "symbol";
+  value: string;
+}
+export interface BaseObjectDescriptor {
+  ctor: string | null;            // Name of the object's constructor.
+  props: PropertyDescriptor[];    // Descriptors for object properties.
+}
+export interface ArrayDescriptor extends BaseObjectDescriptor {
+  type: "array";
+  length: number;
+}
+export interface BoxDescriptor extends BaseObjectDescriptor {
+  type: "box";
+  primitive: PrimitiveDescriptor; // Primitive value boxed in this object.
+}
+export interface FunctionDescriptor extends BaseObjectDescriptor {
+  type: "function";
+  name: string;
+  async: boolean;
+  class: boolean;
+  generator: boolean;
+}
+export interface ObjectDescriptor extends BaseObjectDescriptor {
+  type: "object";
+}
+export interface TensorDescriptor extends BaseObjectDescriptor {
+  type: "tensor";
+  dtype: string;
+  shape: number[];
+  formatted: string;
 }
 
-export type NodeTypes = keyof NodeTypeMap;
+export type ValueDescriptor =
+  // TODO: add Maps and Sets.
+  AtomDescriptor | PrimitiveDescriptor | ArrayDescriptor | BoxDescriptor |
+  ObjectDescriptor | FunctionDescriptor | TensorDescriptor;
+export type DescriptorRef = number;
+export interface DescriptorSet { [id: number]: ValueDescriptor; }
 
-export interface GNode<T extends NodeTypes>{
-  type: T;
-  data?: NodeTypeMap[T];
-  cons?: string;
+export interface PropertyDescriptor {
+  key: DescriptorRef;
+  value: DescriptorRef;
+  hidden: boolean; // Property is private or non-enumerable.
 }
 
-function isNative(fn) {
-  return (/\{\s*\[native code\]\s*\}/).test("" + fn);
+export interface InspectorData {
+  roots: DescriptorRef[];
+  descriptors: DescriptorSet;
 }
 
-function Nodify(data): GNode<keyof NodeTypeMap> {
-  switch (typeof data){
-    case "number":
-    case "string":
-    case "boolean":
-      return {
-        type: typeof data,
-        data
-      };
-    case "undefined":
-      return {
-        type: "undefined"
-      };
-    case "function":
-      return {
-        type: "function",
-        data: {
-          isNative: isNative(data),
-          name: data.name
-        }
-      };
-    case "object":
-      if (data === null) {
-        return {
-          type: "null"
-        };
-      }
-      if (data instanceof Date) {
-        return {
-          type: "date",
-          data: data.toString()
-        };
-      }
-      if (data instanceof RegExp) {
-        return {
-          type: "regexp",
-          data: data.toString()
-        };
-      }
-      if (data instanceof Promise) {
-        return {
-          type: "promise"
-        };
-      }
-      if (data instanceof Array) {
-        return {
-          type: "array"
-        };
-      }
-      if (data instanceof Tensor) {
-        return {
-          type: "tensor",
-          data: {
-            data: data.toString(),
-            dtype: data.dtype,
-            shape: data.shape
-          }
-        };
-      }
-      return {
-        type: "object",
-        cons: data.constructor ? data.constructor.name : "Object"
-      };
-    case "symbol":
-      return {
-        type: "symbol",
-        data: data.toString()
-      };
+export interface InspectorOptions {
+  // TODO: add 'depth' and 'maxArrayLength' options.
+  showHidden?: boolean;
+  showProto?: boolean;
+}
+
+class Placeholder {
+  static getter = new Placeholder("getter");
+  static gettersetter = new Placeholder("gettersetter");
+  static setter = new Placeholder("setter");
+  private constructor(readonly type: AtomDescriptor["type"]) {}
+}
+
+// tslint:disable:variable-name
+const AsyncFunction = (async function() {}).constructor;
+const GeneratorFunction = (function*() {}).constructor;
+const TypedArray = Object.getPrototypeOf(Int32Array);
+// tslint:enable:variable-name
+
+// This function calls fn(), and returns true if the succeeds. If fn() throws
+// an exception, it'll catch the exception and return false.
+function succeeds(fn: () => void): boolean {
+  try {
+    fn();
+    return true;
+  } catch (e) {
+    return false;
   }
-  return undefined;
 }
 
-// object, property name, value
-export type Edge = [number, string, number];
+class DescriptionBuilder {
+  private options: InspectorOptions = { showHidden: false }; // Defaults.
+  private descriptorCount = 0;
+  private descriptors = new Array<ValueDescriptor>();
+  private valueMap = new Map<any, DescriptorRef>();
 
-export interface SerializedObject {
-  data: { [key: number] : GNode<any> };
-  edges: Edge[];
-}
-
-export type ExtendableData = { [key: string]: UnserializedObject };
-export interface ExtendableUnserializedObject {
-  data: ExtendableData;
-  type: "object" | "array" | "tensor";
-  cons?: string;
-  isCircular: boolean;
-}
-export interface UnserializedNode extends GNode<any> {
-  isCircular: boolean;
-}
-export type UnserializedObject = ExtendableUnserializedObject |
-                                 UnserializedNode;
-
-// This class provides a graph data structure.
-// Which means it split objects into data and edges.
-// Data is an array (actually an object) of nodes. (look at GNode data-type)
-// We keep all references to children in one array called `edges`.
-class Graph {
-  id = 0;
-  map: WeakMap<object, number>;
-
-  constructor(private data = {}, private edges: Edge[] = []) {
-    this.map = new WeakMap<object, number>();
+  constructor(options?: InspectorOptions) {
+    if (options) Object.assign(this.options, options);
   }
 
-  stringify(data, parent? : number, name?: string) {
-    const node = Nodify(data);
-    let id;
-    if (node.type === "object" || node.type === "array") {
-      if (this.map.has(data)) {
-        return this.map.get(data);
-      }
-      id = this.push(node, parent, name);
-      this.map.set(data, id);
-      // insert childs
-      let keys: Array<string | symbol> = Object.getOwnPropertyNames(data);
-      keys = keys.concat(Object.getOwnPropertySymbols(data));
-      for (const propertyName of keys) {
-        const propertyStr = String(propertyName);
-        const child = data[propertyName];
-        if (typeof child === "object" && child !== null) {
-          const childId = this.stringify(data[propertyName], id, propertyStr);
-          this.edges.push([id, propertyStr, childId]);
-          continue;
-        }
-        this.push(Nodify(child), id, propertyStr);
-      }
-    } else {
-      id = this.push(node, parent, name);
+  getDescriptors(): ValueDescriptor[] {
+    return this.descriptors;
+  }
+
+  describe(value: any): DescriptorRef {
+    let id = this.valueMap.get(value);
+    // If no descriptor for this value is found, create a new one.
+    if (id === undefined) {
+      // Assign an id.
+      id = this.descriptorCount++;
+      this.valueMap.set(value, id);
+      // Create a new descriptor.
+      this.descriptors[id] = this.createDescriptor(value);
     }
     return id;
   }
 
-  push(node: GNode<any>, parent?: number, name?: string): number {
-    const nodeId = this.id++;
-    if (parent !== undefined) {
-      this.edges.push([parent, name.toString(), nodeId]);
-    }
-    this.data[nodeId] = node;
-    return nodeId;
-  }
-
-  serialized(): SerializedObject {
-    return {data: this.data, edges: this.edges};
-  }
-
-  object(): UnserializedObject {
-    const space = {};
-    for (const key in this.data) {
-      if (this.data.hasOwnProperty(key)) {
-        const node = this.data[key];
-        space[key] = {type: node.type};
-        if (node.data !== undefined) {
-          space[key].data = node.data;
-        } else if (node.type === "object" || node.type === "array") {
-          space[key].data = {};
-          if (node.type === "object") {
-            space[key].cons = node.cons;
-          }
+  private createDescriptor(value: any): ValueDescriptor {
+    // Handle primitive value types.
+    const type = typeof value;
+    switch (type) {
+      case "boolean":
+      case "number":
+      case "string":
+      case "symbol":
+        return { type, value: String(value) };
+      case "undefined":
+        return { type };
+      case "object":
+        if (value === null) {
+          return { type: "null" };
         }
+    }
+    // Handle non-value placeholders (e.g. Placeholder.getter).
+    if (value instanceof Placeholder) {
+      return { type: value.type };
+    }
+
+    // If we get here, the value must be non-primitive (an object or function).
+    const d: BaseObjectDescriptor = {
+      ctor: null,
+      props: []
+    };
+    const proto = Object.getPrototypeOf(value);
+
+    // Capture the name of the constructor.
+    if (proto === null) {
+      d.ctor = null; // Object has no prototype, so the constructor is null.
+    } else if (typeof proto.constructor === "function") {
+      d.ctor = proto.constructor.name;
+    } else {
+      d.ctor = "[unknown]";
+    }
+
+    // Some helper variables that we need later to decide which keys to skip.
+    const valueIsBoxedString = value instanceof String;
+    const valueIsTensor = value instanceof Tensor;
+
+    // List named properties and symbols.
+    const keys = [
+      ...Object.getOwnPropertyNames(value),
+      ...Object.getOwnPropertySymbols(value)
+    ];
+    for (const key of keys) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      // For strings, skip numeric keys that point at a character in the string.
+      if (valueIsBoxedString && typeof key === "string" &&
+          isNumericalKey(key) && Number(key) < value.length) {
+        continue;
       }
+      // Set the 'hidden' flag for non-enumerable properties, as well as a few
+      // known-private fields.
+      const hidden = !descriptor.enumerable ||
+                     (valueIsTensor && key === "_id") ||
+                     (valueIsTensor && key === "storage");
+      // If the `showHidden` option is not set, skip hidden properties.
+      if (hidden && !this.options.showHidden) {
+        continue;
+      }
+      // If the property has a getter/setter, list it as such. We make no
+      // attempt to read the property value, since this may have side effects.
+      if (descriptor.get || descriptor.set) {
+        // `type` becomes either "getter", "setter", or "gettersetter".
+        const type = (descriptor.get ? "getter" : "") +
+                     (descriptor.set ? "setter" : "");
+        d.props.push({
+          key: this.describe(key),
+          value: this.describe(Placeholder[type]),
+          hidden
+        });
+        continue;
+      }
+      // Describe the property value.
+      d.props.push({
+        key: this.describe(key),
+        value: this.describe(descriptor.value),
+        hidden
+      });
     }
-    for (let i = 0; i < this.edges.length; ++i) {
-      const [from, name, to] = this.edges[i];
-      space[from].data[name] = {...space[to], isCircular: from >= to};
+
+    // If the `showProto` option was set, add prototype to prop list.
+    if (proto !== null && this.options.showProto) {
+      d.props.push({
+        key: this.describe("__proto__"),
+        value: this.describe(proto),
+        hidden: true
+      });
     }
-    return space[0];
+
+    // Detect what kind of non-primitive we're dealing with.
+    if (type === "function") {
+      // Function or class.
+      return {
+        type: "function",
+        name: value.name,
+        async: value instanceof AsyncFunction,
+        class: /^class\s/.test(value),
+        generator: value instanceof GeneratorFunction,
+        ...d,
+      } as FunctionDescriptor;
+    } else if ((value instanceof Array || value instanceof TypedArray) &&
+              succeeds(() => value.length)) {
+      // Array-like object (with a magic length property).
+      return {
+        type: "array",
+        length: value.length,
+        ...d
+      } as ArrayDescriptor;
+    } else if (value instanceof Tensor) {
+      // Tensor shapes [] and [1] are equivalent, but the latter looks better.
+      const tensor = value.shape.length > 0 ? value : value.reshape([1]);
+      return {
+        type: "tensor",
+        dtype: tensor.dtype,
+        shape: [...tensor.shape],
+        formatted: formatTensor(tensor),
+        ...d,
+      } as TensorDescriptor;
+    } else if ((value instanceof Boolean || value instanceof Number ||
+              value instanceof String) && succeeds(() => value.valueOf())) {
+      // This is a box object as they are created by e.g. `new Number(3)`.
+      const p = this.createDescriptor(value.valueOf());
+      return {
+        type: "box",
+        primitive: p as PrimitiveDescriptor,
+        ...d
+      } as BoxDescriptor;
+    } else if (value instanceof Date && succeeds(() => value.toISOString())) {
+      // For practical purposes we pretend that there exist "regexp" and "date"
+      // primitives, and that Date/RegExp objects are boxed versions of them.
+      return {
+        type: "box",
+        primitive: { type: "date", value: value.toISOString() },
+        ...d
+      } as BoxDescriptor;
+    } else if (value instanceof RegExp && succeeds(() => String(value))) {
+      return {
+        type: "box",
+        primitive: { type: "regexp", value: String(value) },
+        ...d,
+      } as BoxDescriptor;
+    } else {
+      // Regular or other type of object.
+      return { type: "object", ...d };
+    }
   }
 }
 
-export function serialize(data) {
-  const graph = new Graph();
-  graph.stringify(data);
-  return graph.serialized();
-}
-
-export function unserialize(data: SerializedObject) {
-  const graph = new Graph(data.data, data.edges);
-  return graph.object();
+// This function "describes" any javascript object for the purpose of
+// inspection/pretty printing. The returned descriptor object can be
+// serialized (e.g. using JSON) and sent to a different javascript context.
+export function describe(values: any[],
+                         options?: InspectorOptions): InspectorData {
+  const builder = new DescriptionBuilder(options);
+  const roots = values.map(v => builder.describe(v));
+  return {
+    roots,
+    descriptors: builder.getDescriptors(),
+  };
 }

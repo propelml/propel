@@ -72,3 +72,21 @@ test(async function util_randomString() {
     seen.add(s);
   }
 });
+
+test(async function util_isNumericalKey() {
+  assertEqual(util.isNumericalKey("0"), true);
+  assertEqual(util.isNumericalKey("1"), true);
+  assertEqual(util.isNumericalKey("1000"), true);
+  assertEqual(util.isNumericalKey("4294967294"), true); // Max allowed.
+  assertEqual(util.isNumericalKey("4294967295"), false); // Out of range.
+  assertEqual(util.isNumericalKey("-1"), false);
+  assertEqual(util.isNumericalKey("00"), false);
+  assertEqual(util.isNumericalKey("01"), false);
+  assertEqual(util.isNumericalKey("0.000001"), false);
+  assertEqual(util.isNumericalKey("0 "), false);
+  assertEqual(util.isNumericalKey(" 2"), false);
+  assertEqual(util.isNumericalKey("1a"), false);
+  assertEqual(util.isNumericalKey("text"), false);
+  assertEqual(util.isNumericalKey("false"), false);
+  assertEqual(util.isNumericalKey(""), false);
+});

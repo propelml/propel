@@ -268,50 +268,91 @@ header {
   }
 }
 
-.tree-node {
-  .cm-s-syntax {
-    background-color: transparent;
+.inspector,
+.inspector__content {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspector__list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0 0 0 1.25em;
+}
+
+.inspector__prop-list {
+  padding-left: 1.75em;
+}
+
+.inspector__li {
+  display: flex;
+}
+
+.inspector__toggle {
+  display: inline-block;
+  margin: 0 0 0 -1.25em;
+  width: 1.25em;
+  flex-shrink: 0;
+  color: $base7;
+
+  &::after {
+    content: "◢";
+  }
+}
+
+.inspector__content--pre {
+  white-space: pre;
+}
+
+.inspector__prop--hidden > .inspector__content > .inspector__key {
+  opacity: 0.5;
+}
+
+.inspector--show-if-collapsed {
+  display: none;
+}
+
+.inspector__li:not(.inspector__li--expanded) {
+  // Rules that apply to collapsed subtrees go here.
+  .inspector--show-if-expanded {
+    display: none;
   }
 
-  pre {
-    background-color: transparent;
+  .inspector--show-if-collapsed {
+    display: initial;
   }
 
-  .tree-arrow-wrapper {
-    display: inline-block;
-    width: $size1;
-    height: $size1;
+  .inspector__toggle::after {
+    content: "▷";
   }
 
-  .tree-arrow {
-    text-align: center;
-    transform: rotate(0);
-    transition: transform 0.2s ease-in;
+  .inspector__root + .inspector__root::before {
+    content: " ";
+  }
 
-    &::after {
-      content: "▶";
+  .inspector__prop:not(.inspector__prop--hidden) + .inspector__prop::before {
+    content: ", ";
+  }
+
+  .inspector__content:not(.inspector__content--pre) {
+    white-space: nowrap;
+  }
+
+  .inspector__list {
+    padding: 0;
+
+    &,
+    .inspector__li,
+    .inspector__content {
+      display: inline;
+      white-space: nowrap;
     }
-  }
 
-  .tree-group {
-    margin-left: $size1;
-  }
-
-  .tree-header.collapsible {
-    cursor: pointer;
-  }
-
-  &.collapsed {
-    .tree-arrow {
-      transform: rotate(90deg);
-    }
-  }
-
-  &.inline {
-    display: inline-block;
-    text-align: center;
-
-    .tree-arrow-wrapper {
+    .inspector--show-if-parent-expanded,
+    .inspector__prop--hidden,
+    .inspector__toggle {
       display: none;
     }
   }
@@ -349,6 +390,8 @@ header {
     margin: $size1;
     white-space: pre-wrap;
     word-break: keep-all;
+    max-width: 100%;
+    box-sizing: border-box;
 
     /* Spans the whole grid */
     grid-column: 1 / -1;
