@@ -21,7 +21,7 @@ import * as test_internals from "./test_internals";
 import { global, globalEval, setOutputHandler } from "../src/util";
 import { Transpiler } from "./nb_transpiler";
 import { RPC, WindowRPC } from "./rpc";
-import { serialize } from "./serializer";
+import { describe, InspectorData, InspectorOptions } from "./serializer";
 
 async function importModule(target) {
   const m = {
@@ -78,20 +78,20 @@ function guessCellId(error?: Error): number {
 class Console {
   constructor(private rpc: RPC, private cellId: number) { }
 
-  private print(...args: any[]) {
-    this.rpc.call("print", this.cellId, args.map(serialize));
+  private print(data: InspectorData) {
+    this.rpc.call("print", this.cellId, data);
   }
 
   log(...args: any[]): void {
-    this.print(...args);
+    this.print(describe(args));
   }
 
   warn(...args: any[]): void {
-    this.print(...args);
+    this.print(describe(args));
   }
 
   error(...args: any[]): void {
-    this.print(...args);
+    this.print(describe(args));
   }
 }
 

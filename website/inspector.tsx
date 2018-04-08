@@ -14,263 +14,381 @@
  */
 
 import { Component, h } from "preact";
+import { IS_WEB, isNumericalKey, randomString } from "../src/util";
+import {
+  BaseObjectDescriptor,
+  InspectorData,
+  PropertyDescriptor,
+  ValueDescriptor
+} from "./serializer";
 
-export interface InspectorProps {
-  object: any;
-  name?: string;
-  depth?: number;
-  inline?: boolean;
-}
+type ElementLike = JSX.Element | string | null;
+type ElementList = ElementLike[];
 
-export interface InspectorState {
-  isCollapsed: boolean;
-  isCollapsible: boolean;
-}
+export class Inspector extends Component<InspectorData, void>{
+  private parents = new Set(); // Used for circular reference detection.
 
-export class Inspector extends Component<InspectorProps, InspectorState> {
-  inlineRendered: JSX.Element[];
-  constructor(props) {
-    super();
-    const isCollapsible = this.isCollapsible(props);
-    this.state = {
-      isCollapsed: this.shouldExpandByDefault(props, isCollapsible),
-      isCollapsible
-    };
-  }
-
-  shouldExpandByDefault({ depth = 0, object }: InspectorProps,
-                        isCollapsible: boolean): boolean {
-    if (!isCollapsible) return false;
-    if (object.isCircular) return false;
-    if (depth === 0) return true;
-    return Object.getOwnPropertyNames(object.data).length <= 15;
-  }
-
-  toggle(): void {
-    this.setState(s => ({
-      isCollapsed: !s.isCollapsed
-    }));
-  }
-
-  renderChild(): JSX.Element {
-    const { object: { data, type }, depth = 0 } = this.props;
-    const properties = [];
-    switch (type) {
-      case "object":
-      case "array":
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            properties.push({
-              name: key,
-              object: data[key]
-            });
+  private renderKey(d: ValueDescriptor,
+                    arrayIndex: number | null = null): ElementList {
+    switch (d.type) {
+      case "string":
+        const value = d.value;
+        // Keys that look like javascript identifiers are rendered without
+        // quote marks. Numerical keys can be omitted entirely.
+        const isSimpleKey =  /^[a-z$_][\w$_]*$/i.test(value);
+        const isArrayKey = (typeof arrayIndex === "number")
+                           && isNumericalKey(value);
+        if (isArrayKey || isSimpleKey) {
+          // 12: {...}
+          // simple_key: {...}
+          let elements = [
+            <span class="inspector__key cm-property">{ value }</span>,
+            ": "
+          ];
+          // If the array keys are in the right order without holes, hide them
+          // from the collapsed view.
+          if (isArrayKey && Number(value) === arrayIndex) {
+            elements = addClass(elements, "inspector--show-if-parent-expanded");
           }
+          return elements;
+        } else {
+          // "my!weird*key\n": {...}
+          return [
+            <span class="inspector__key cm-string">
+              { JSON.stringify(value) }
+            </span>,
+            ": "
+          ];
         }
+      case "symbol":
+        // [Symbol(some symbol)]: {...}
+        return [
+          "[",
+          <span class="inspector__key cm-property">{ d.value }</span>,
+          "] :"
+        ];
+      default:
+        // Keys are always either a string, symbol, or prototype key.
+        throw new Error("Unexpected key type");
+    }
+  }
+
+  private renderValue(d: ValueDescriptor): ElementList {
+    // Render primitive values.
+    switch (d.type) {
+      case "boolean":
+        return [<span class="cm-atom">{ d.value }</span>];
+      case "date":
+        return [<span class="cm-string-2">{ d.value }</span>];
+      case "getter":
+        return [<span class="cm-keyword">[getter]</span>];
+      case "gettersetter":
+        return [<span class="cm-keyword">[getter/setter]</span>];
+      case "null":
+        return [<span class="cm-atom">null</span>];
+      case "number":
+        return [<span class="cm-number">{ d.value }</span>];
+      case "regexp":
+        return [<span class="cm-string-2">{ d.value }</span>];
+      case "setter":
+        return [<span class="cm-keyword">[setter]</span>];
+      case "string":
+        return [<span class="cm-string">{ JSON.stringify(d.value) }</span>];
+      case "symbol":
+        return [<span class="cm-string">{ d.value }</span>];
+      case "undefined":
+        return [<span class="cm-atom">undefined</span>];
+    }
+
+    // Detect circular references.
+    if (this.parents.has(d)) {
+      return [<span class="cm-keyword">[circular]</span>];
+    }
+    this.parents.add(d);
+
+    // Render the list of properties and other content that is expanded when the
+    // expand button is clicked.
+    const listItems: ElementList = [];
+
+    if (d.type === "tensor") {
+      // TODO: the tensor is currently formatted by Tensor.toString(),
+      // and displayed in a monospace font. Make it nicer by using a table.
+      // Remove the outer layer of square brackets added by toString().
+      const formatted = d.formatted.replace(/(^\[)|(\]$)/g, "")
+                                   .replace(/,\n+ /g, "\n");
+      listItems.push(
+        <li class="inspector__li inspector__prop">
+          <div class="inspector__content inspector__content--pre">
+            { formatted }
+          </div>
+        </li>
+      );
+    }
+    // Add regular array/object properties.
+    const isArray = d.type === "array";
+    listItems.push(...d.props.map((prop, index) =>
+      this.renderProperty(prop, isArray ? index : null)
+    ));
+    // Wrap the items in an <ul> element, but only if the list contains at
+    // least one item.
+    const list: ElementLike =
+      (listItems.length > 0)
+        ? <ul class="inspector__list inspector__prop-list">
+            { ...listItems }
+          </ul>
+        : null;
+
+    // Render the object header, containing the class name, sometimes
+    // some metadata between parentheses, and boxed primitive content.
+    const elements: ElementList = [];
+    switch (d.type) {
+      case "array":
+        // If the constructor is "Array", it is hidden when collapsed.
+        // Square brackets are used and they are always visible.
+        //   [1, 2, 3, 4, 5, foo: "bar"]
+        //   Array(3) [1, 2, 3, ...properties...]
+        //   Float32Array(30) [...]
+        let ctorElements = [
+          <span class="cm-def">{ d.ctor }</span>,
+          "(", <span class="cm-number">{ d.length }</span>, ") "
+        ];
+        if (d.ctor === "Array") {
+          ctorElements = addClass(ctorElements, "inspector--show-if-expanded");
+        }
+        elements.push(...ctorElements, "[", list, "]");
+        break;
+      case "box":
+        // The class name is omitted when it is "Date" or "RegExp".
+        // Number, Boolean, String are shown to distinguish from primitives.
+        // Properties are wrapped in curly braces; these are hidden when
+        // there are no properties..
+        //   Number:42 {...properties...}
+        //   /abcd/i {...properties...}
+        if (d.ctor !== "Date" && d.ctor !== "RegExp") {
+          elements.push(<span class="cm-def">{ d.ctor }</span>, ":");
+        }
+        elements.push(
+          ...this.renderValue(d.primitive),
+          ...this.renderPropListWithBraces(d, list)
+        );
+        break;
+      case "function":
+        // Constructor name is only shown if it is nontrivial.
+        //   function() {...properties...}
+        //   class Foo
+        //   async function* bar()
+        //   MyFunction:function baz()
+        if (!/^(Async)?(Generator)?Function$/.test(d.ctor)) {
+          elements.push(<span class="cm-def">{ d.ctor }</span>, ":");
+        }
+        elements.push(
+          <span class="cm-keyword">
+            { d.async ? "async " : "" }
+            { d.class ? "class" : "function"}
+            { d.generator ? "*" : "" }
+          </span>,
+          d.name ? " " : "",
+          d.name ? <span class="cm-def">{ d.name }</span> : "",
+          d.class ? "" : "()",
+          ...this.renderPropListWithBraces(d, list)
+        );
         break;
       case "tensor":
-        properties.push({
-          object: {
-            data: data.data,
-            type: "tensorValue"
+        // Tensor(float32) [1]
+        // Tensor(float32 15) [1, 2, 3, ...etc...]
+        // Tensor(float32 2✕2) [[1, 2], [3, 4]]
+        // Tensor(uint32 3✕4✕4) [[[[...tensor...]]], foo: bar]
+        const isScalar = d.shape.length === 0 ||
+                         (d.shape.length === 1 && d.shape[0] === 1);
+        elements.push(
+          <span class="cm-def">{ d.ctor }</span>,
+          "(",
+          <span class="cm-string-2">{ d.dtype }</span>
+        );
+        if (!isScalar) {
+          for (const [dim, size] of d.shape.entries()) {
+            elements.push(
+              dim === 0 ? " " : "✕",
+              <span class="cm-number">{ size }</span>
+            );
           }
-        });
+        }
+        elements.push(") [", list, "]");
+        break;
+      case "object":
+        // Constructor name is omitted when it's "Object", or when the
+        // object doesn't have a prototype at all (ctor === null).
+        // Curly braces are always shown, even when there are no properties.
+        //   {a: "hello", b: "world"}
+        //   MyObject {"#^%&": "something"}
+        if (d.ctor !== null && d.ctor !== "Object") {
+          elements.push(<span class="cm-def">{ d.ctor }</span>, " ");
+        }
+        elements.push("{", list, "}");
         break;
     }
-    const nextDepth = depth + 1;
-    return (
-      <div class="tree-group">
-        {properties.map(({ name, object }) => (
-          <Inspector depth={ nextDepth } name={ name } object={ object } />
-        ))}
-      </div>
-    );
+
+    // Pop cycle detection stack.
+    this.parents.delete(d);
+
+    return elements;
   }
 
-  isCollapsible(props: InspectorProps): boolean {
-    const { object: { data, type } } = props;
-    switch (type) {
-      case "array":
-      case "object":
-        let keys = Object.getOwnPropertyNames(data);
-        if (type === "array") {
-          keys = keys.filter(x => x !== "length");
-        }
-        this.inlineRendered = this.renderInlinePreview(data, type);
-        return this.inlineRendered.length < keys.length;
-      case "tensor":
-        return true;
+  private renderPropListWithBraces(d: BaseObjectDescriptor,
+                                   list?: ElementLike): ElementList {
+    if (!list) return [];
+    // If the list contains items that are visible in collapsed mode, always
+    // show the curly braces. Otherwise show them only when expanded.
+    const hasVisibleProps = d.props.some(prop => !prop.hidden);
+    const braceClass = hasVisibleProps ? "" : "inspector--show-if-expanded";
+    return [
+       ...addClass([" {"], braceClass),
+       list,
+       ...addClass(["}"], braceClass),
+    ];
+  }
+
+  // Returns true if a descriptor needs an expand button.
+  private isExpandable(d: ValueDescriptor): boolean {
+    // If a reference is circular it can't be expanded.
+    if (this.parents.has(d)) {
+      return false;
+    }
+    // Tensors can be always expanded to show its values.
+    if (d.type === "tensor") {
+      return true;
+    }
+    // Objects can be expanded if they have properties.
+    if ((d.type === "array" || d.type === "box" || d.type === "function" ||
+         d.type === "object") && d.props.length > 0) {
+      return true;
     }
     return false;
   }
 
-  renderInlinePreview(data, type: string): JSX.Element[] {
-    let keys = Object.getOwnPropertyNames(data);
-    let elements = null;
-    if (type === "array") {
-      keys = keys.filter(x => x !== "length");
+  private renderExpandButton(): ElementLike {
+    // Use a simple <a href="javascript:"> link, so it "just works" on pages
+    // that have been pre-rendered into static html.
+    const id = randomString();
+    return <a id={ id } class="inspector__toggle"
+              href={ `javascript:Inspector.toggle("${id}")` } />;
+  }
+
+  private renderProperty(prop: PropertyDescriptor,
+                         arrayIndex: number | null = null): ElementLike {
+    const key = this.props.descriptors[prop.key];
+    const value = this.props.descriptors[prop.value];
+    const attr = { class: "inspector__li inspector__prop" };
+    if (prop.hidden) attr.class += " inspector__prop--hidden";
+    return (
+      <li { ...attr }>
+       { this.isExpandable(value) && this.renderExpandButton() }
+       <div class="inspector__content">
+          { ...this.renderKey(key, arrayIndex) }
+          { ...this.renderValue(value) }
+        </div>
+      </li>
+    );
+  }
+
+  private renderRoot(): ElementLike {
+    if (this.props.roots.length === 0) return "";
+     // Map root ids to descriptors.
+    const descriptors = this.props.descriptors;
+    const roots = this.props.roots.map(id => descriptors[id]);
+    // Count the number of items with children.
+    const rootsWithChildren = roots.map(d => +this.isExpandable(d))
+                                   .reduce((count, d) => count + d);
+    let rootElement: ElementLike;
+    if (rootsWithChildren <= 1) {
+      // With at most one expandable item, place all roots in a single div.
+      const elements = [].concat(...roots.map((d, index) => [
+        index > 0 ? " " : "", // Space between items.
+        ...this.renderValue(d)
+      ]));
+      rootElement = <div class="inspector__content">{ ...elements }</div>;
+    } else {
+      // With more than one expandable root, place all of them in a separate.
+      // list item.
+      const listItems = roots.map(d =>
+        <li class="inspector__li inspector__root">
+          { this.isExpandable(d) && this.renderExpandButton() }
+          <div class="inspector__content">
+            { ...this.renderValue(d) }
+          </div>
+        </li>
+      );
+      rootElement =
+        <div class="inspector__content">
+          <ul class="inspector__list">
+            { ...listItems }
+          </ul>
+        </div>;
     }
-    const maxElements = type === "array" ? 20 : 10;
-    const num = Math.min(Math.max(keys.length * 2 - 1, 0), maxElements);
-    elements = new Array(num)
-      .fill(null).map((x, i) => {
-        if (i === maxElements - 1) return <span>,...</span>;
-        if (i % 2) return <span>, </span>;
-        return (
-          <Inspector
-            object={ data[keys[i / 2]] }
-            inline={ true }
-            name= { type === "object" && keys[i / 2] } />
-        );
-      });
-    return elements;
+    // If there are expandable items, add a top-level expand button.
+    if (rootsWithChildren > 0) {
+      rootElement =
+        <ul class="inspector__list">
+          <li class="inspector__li">
+            { this.renderExpandButton() }
+            { rootElement }
+          </li>
+        </ul>;
+    }
+    return rootElement;
   }
 
   render(): JSX.Element {
-    const { object: { data, type, cons, isCircular }, name } = this.props;
-    const { depth = 0, inline = false } = this.props;
-    const { isCollapsed, isCollapsible } = this.state;
-    let value = null;
-    if (inline && isCircular) {
-      value = (
-        <span class="cm-keyword">[Circular]</span>
-      );
-    } else {
-      switch (type) {
-        case "number":
-          value = (
-            <span class="cm-number">
-              { data }
-            </span>
-          );
-          break;
-        case "string":
-          value = (
-            <span class="cm-string">
-              { JSON.stringify(data) }
-            </span>
-          );
-          break;
-        case "symbol":
-          value = (
-            <span class="cm-atom">
-              { data }
-            </span>
-          );
-          break;
-        case "function":
-          value = (
-            <span>
-              <span class="cm-keyword">function</span>&nbsp;
-              <span class="cm-def">
-                { data.name }
-              </span>
-              <span>
-              { data.isNative ? "() { [native code] }" : "() {...}" }
-              </span>
-            </span>
-          );
-          break;
-        case "undefined":
-          value = <span class="cm-atom">undefined</span>;
-          break;
-        case "null":
-          value = <span class="cm-atom">null</span>;
-          break;
-        case "object":
-          value = (
-            <span>
-              <span class="cm-variable">
-              { inline && cons === "Object" ? "" : cons + " "}
-              </span>
-              &#123;
-                { ...this.inlineRendered }
-              &#125;
-            </span>
-          );
-          break;
-        case "array":
-          value = (
-            <span>
-              <span class="cm-variable">
-                { inline ? "" : "Array " }
-              </span>
-              [
-                { ...this.inlineRendered }
-              ]
-            </span>
-          );
-          break;
-        case "date":
-          value = (
-            <span class="cm-atom">
-              { data }
-            </span>
-          );
-          break;
-        case "regexp":
-          value = (
-            <span class="cm-string-2">
-              { data }
-            </span>
-          );
-          break;
-        case "boolean":
-          value = (
-            <span class="cm-atom">
-              { data ? "true" : "false" }
-            </span>
-          );
-          break;
-        case "promise":
-          value = (
-            <span class="cm-atom">
-              Promise
-            </span>
-          );
-          break;
-        case "tensor":
-          value = (
-            <span>
-              <span class="cm-variable">
-                Tensor(dtype="{data.dtype}", shape=[{data.shape.join(", ")}])
-              </span>
-            </span>
-          );
-          break;
-        case "tensorValue":
-          value = (
-            <pre>
-              { data }
-            </pre>
-          );
-          break;
-        default:
-          return null;
-      }
-    }
-    const isCollapsedClass = isCollapsed ? " collapsed" : "";
-    const isCollapsibleClass = isCollapsible ? " collapsible" : "";
-    const inlineClass = inline ? " inline" : "";
-    const depthClass = " depth-" + depth;
-    const className = "tree-node" + isCollapsedClass + inlineClass + depthClass;
-    return (
-      <div class={ className } >
-        <div
-          class={ "tree-header cm-s-syntax" + isCollapsibleClass }
-          onClick={ !inline && isCollapsible && this.toggle } >
-          { depth === 0 && !isCollapsible ? null : (
-            <div class="tree-arrow-wrapper">
-              { !isCollapsible ? null : (
-                <div class="tree-arrow" />
-              ) }
-            </div>
-          ) }
-          { name && <span class="cm-property">{ name }</span> }
-          { name && ": " }
-          { value }
-        </div>
-        { !inline && isCollapsed && this.renderChild() }
-      </div>
-    );
+    return <div class="inspector cm-s-syntax">{ this.renderRoot() }</div>;
   }
+
+  static toggle(id: string): void {
+    const el = document.getElementById(id);
+    const parent = el.parentNode as HTMLElement;
+    parent.classList.toggle("inspector__li--expanded");
+  }
+}
+
+// Helper function to attach a css class to a list of elements.
+// The element list may contain strings; they are converted to spans.
+function addClass(elements: ElementList, classes: string): ElementList {
+  // Remove redundant whitespace from classes.
+  classes = classes.split(/\s+/).filter(s => s !== "").join();
+  // Return early when no classes are added.
+  if (classes === "") return elements;
+  const result: ElementList = [];
+  let stringBuffer = "";
+  for (const el of elements) {
+    if (el === null) {
+      // Remove empty elements.
+    } else if (typeof el === "string") {
+      // Merge adjacent strings so we don't create so many spans.
+      stringBuffer += el;
+    } else {
+      if (stringBuffer) {
+        // Wrap the buffered-up string in a <span> element and flush.
+        result.push(<span class={ classes }>{ stringBuffer }</span>);
+        stringBuffer = "";
+      }
+      // Add our css class to the existing element.
+      const elClass = el.attributes.class;
+      el.attributes.class = elClass ? `${elClass} ${classes}` : classes;
+      result.push(el);
+    }
+  }
+  if (stringBuffer) {
+    result.push(<span class={ classes }>{ stringBuffer }</span>);
+  }
+  return result;
+}
+
+// Make Inspector available on the global object. This allows expand button
+// to use a simple textual click handler, which survives serialization.
+// We make the property non-enumerable to minimize interaction with other
+// components.
+if (IS_WEB) {
+  Object.defineProperty(window, "Inspector", {
+    enumerable: false,
+    value: Inspector
+  });
 }
