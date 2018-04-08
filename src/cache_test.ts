@@ -18,13 +18,15 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as rimraf from "rimraf";
-import { test } from "../tools/tester";
+import {
+  localServer,
+  test,
+} from "../tools/tester";
 import * as cache from "./cache";
 import {
   assert,
   assertEqual,
   IS_NODE,
-  localServer,
   nodeRequire,
   process,
   tmpdir

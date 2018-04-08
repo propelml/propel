@@ -13,12 +13,14 @@
    limitations under the License.
  */
 
-import { test } from "../tools/tester";
+import {
+  localServer,
+  test,
+} from "../tools/tester";
 import * as fetch from "./fetch";
 import {
   assert,
   IS_WEB,
-  localServer,
   nodeRequire,
   process,
   URL,
