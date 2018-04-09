@@ -15,7 +15,7 @@
 import { OutputHandler } from "./output_handler";
 import { RegularArray } from "./types";
 
-const debug = false;
+export const debug = false;
 
 // If you use the eval function indirectly, by invoking it via a reference
 // other than eval, as of ECMAScript 5 it works in the global scope rather than
@@ -194,4 +194,19 @@ export function isNumericalKey(key: string): boolean {
 
 export function tmpdir(): string {
   return process.env.TEMP || process.env.TMPDIR || "/tmp";
+}
+
+// TODO maybe share this with nb_transpiler.getEntryPoint().
+export function captureStackTrace(error?: Error): string {
+  let stack: string;
+  if (error) {
+    stack = error.stack;
+  } else {
+    try {
+      throw new Error();
+    } catch (e) {
+      stack = e.stack;
+    }
+  }
+  return stack;
 }
