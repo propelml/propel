@@ -129,6 +129,7 @@ export interface TapeEntry {
   inputShapeDTypes: ShapeDTypeList;
   outputIds: number[];
   savedForBackward: any[];
+  originStackTrace?: string;
 }
 
 /** TensorOpts are used to build Tensors in functions like tensor() and zeros().

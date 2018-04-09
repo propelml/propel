@@ -21,6 +21,7 @@ import { getBackwardFunc } from "./ops";
 import { convert, NamedTensors, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
+import * as util from "./util";
 
 // Hacky. How does one define methods on interfaces?
 function tapeEntryToString(e: types.TapeEntry): string {
@@ -59,6 +60,9 @@ export class Tape {
   recordOp(tapeEntry: types.TapeEntry): void {
     if (!this.shouldRecord(tapeEntry.inputIds)) {
       return;
+    }
+    if (util.debug) {
+      tapeEntry.originStackTrace = util.captureStackTrace();
     }
     log("recordOp %s", tapeEntryToString(tapeEntry));
     for (const tid of tapeEntry.outputIds) {
@@ -207,6 +211,9 @@ function imperativeGrad(target: Tensor,
     const outGrad = gradients.aggregate(op.outputIds[0]);
 
     log("backprop", tapeEntryToString(op));
+    if (util.debug && op.originStackTrace) {
+      log("op origin", op.originStackTrace);
+    }
     log("- outGrad %s", outGrad.shape, outGrad.device);
 
     const bwFunc = getBackwardFunc(op.name);

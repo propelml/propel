@@ -90,3 +90,8 @@ test(async function util_isNumericalKey() {
   assertEqual(util.isNumericalKey("false"), false);
   assertEqual(util.isNumericalKey(""), false);
 });
+
+test(async function util_captureStackTrace() {
+  const s = util.captureStackTrace();
+  assert(/util_captureStackTrace/.test(s));
+});
