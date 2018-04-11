@@ -22,7 +22,7 @@ import {
   assertShapesEqual,
 } from "./tensor_util";
 
-test(async function layer_conv2d() {
+test(async function layers_conv2d() {
   const x = api.ones([1, 4, 4, 1]);
   const p = api.params();
   const out = layers.conv2d(x, p.scope("L1"), 2);
@@ -33,7 +33,7 @@ test(async function layer_conv2d() {
   assertShapesEqual(p.get("L1/bias").shape, [2]);
 });
 
-test(async function layer_linear() {
+test(async function layers_linear() {
   const p = api.params();
   const x = api.zeros([2, 5]);
   const out = layers.linear(x, p.scope("L2"), 10);
@@ -42,7 +42,7 @@ test(async function layer_linear() {
   assertShapesEqual(out.shape, [2, 10]);
 });
 
-test(async function layer_batchNorm() {
+test(async function layers_batchNorm() {
   const p = api.params();
   const c0 = api.randn([2, 50, 50, 1]).mul(3).sub(7);
   const c1 = api.randn([2, 50, 50, 1]).mul(13).add(2);
