@@ -160,15 +160,17 @@ export function conv2d(input: Tensor, filter: Tensor,
    *    filter = pr.gaussian([5, 5]);
    *    pr.imshow(img.conv2d(filter))
    */
-  const defaults: types.ConvOpts = {
-    stride: 1,
+  const defaults = Object.freeze({
     padding: "valid",
-  };
+    stride: 1,
+  });
   assertEqual(input.dtype, "float32", "conv2d expected input to be float32");
   assertEqual(filter.dtype, "float32", "conv2d expected filter to be float32");
   assertEqual(input.rank, 4, "conv2d() input should be rank 4.");
   assertEqual(filter.rank, 4, "conv2d() filter rank should be 4.");
-  return ops.conv2d(input, filter, Object.assign(defaults, opts));
+  opts = Object.assign({}, defaults, opts) as any;
+  const r = ops.conv2d(input, filter, opts);
+  return r;
 }
 
 /** Concatenates tensors along the specified axis:

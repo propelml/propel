@@ -56,3 +56,25 @@ test(async function layers_batchNorm() {
   assertAllClose(m.mean, [0, 0], 0.1);
   assertAllClose(m.variance, [1, 1], 0.1);
 });
+
+test(async function layers_conv2dBackpropBug() {
+  const g = api.gradParams((params) => {
+    let x = api.zeros([1, 4, 4, 1]);
+    x = layers.conv2d(x, params.scope("A"), 1, {
+      bias: false,
+      padding: "same",
+      size: 1,
+      stride: 1,
+    });
+    assertShapesEqual(x.shape, [1, 4, 4, 1]);
+    x = layers.conv2d(x, params.scope("B"), 1, {
+      bias: false,
+      padding: "same",
+      size: 1,
+      stride: 2,
+    });
+    assertShapesEqual(x.shape, [1, 2, 2, 1]);
+    return x.reduceMean();
+  });
+  g(api.params());
+});
