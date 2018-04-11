@@ -45,28 +45,28 @@ export interface LinearOpts {
 
 // Slightly different than types.ConvOpts, this one includes "size".
 export interface ConvOpts {
+  bias?: boolean;
+  padding?: types.Padding;
   size?: number | [number, number];
   stride?: number | [number, number];
-  padding?: types.Padding;
-  bias?: boolean;
 }
 
-const convDefaults: ConvOpts = {
+const convDefaults = Object.freeze({
+  bias: true,
+  padding: "same",
   size: 3,
   stride: 1,
-  padding: "same",
-  bias: true,
-};
+});
 
 export interface BatchNormOpts {
   decay: number;
   epsilon: number;
 }
 
-const bnDefaults = {
+const bnDefaults = Object.freeze({
   decay: 0.997,
   epsilon: 1e-5,
-};
+});
 
 export function linear(input: Tensor, params: Params, outDim: number,
                        { bias = true, scale = 0.01 }: LinearOpts = {}): Tensor {
@@ -85,18 +85,21 @@ export function linear(input: Tensor, params: Params, outDim: number,
   return x;
 }
 
-export function conv2d(input: Tensor, params: Params, outChans,
+export function conv2d(input: Tensor, params: Params, outChans: number,
                        opts?: ConvOpts): Tensor {
   let x = input;
-  assertEqual(x.rank, 4);
-  opts = Object.assign(convDefaults, opts);
-  const filter = params.define("filter", () =>
-    ops.randn([
-      opts.size,
-      opts.size,
-      x.shape[3],
-      outChans
-    ]));
+  assertEqual(x.rank, 4, "conv2d() Expected rank 4 input.");
+  opts = Object.assign({}, convDefaults, opts);
+  const filter = params.define("filter", () => {
+    let shape;
+    if (Array.isArray(opts.size)) {
+      assertEqual(opts.size.length, 2, "conv2d() Bad filter shape.");
+      shape = opts.size.concat([x.shape[3], outChans]);
+    } else {
+      shape = [opts.size, opts.size, x.shape[3], outChans];
+    }
+    return ops.randn(shape);
+  });
   x = ops.conv2d(x, filter, opts);
   if (opts.bias) {
     const b = params.define("bias", () => ops.zeros([outChans]));
@@ -107,7 +110,7 @@ export function conv2d(input: Tensor, params: Params, outChans,
 
 export function batchNorm(input: Tensor, params: Params,
                           opts?: BatchNormOpts): Tensor {
-  opts = Object.assign(bnDefaults, opts);
+  opts = Object.assign({}, bnDefaults, opts);
   const p = params;
   const x = input;
   assertEqual(x.rank, 4);
