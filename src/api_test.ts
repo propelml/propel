@@ -1291,6 +1291,21 @@ test(async function api_moments() {
   const { mean, variance } = x.moments([1]);
   assertAllEqual(mean, [0.5, 2.5]);
   assertAllEqual(variance, [0.25, 0.25]);
+
+  const fm = x => x.moments([0, 1]).mean;
+  const g = grad(fm);
+  const gx = g(zeros([2, 2]));
+  assertAllEqual(gx, [
+    [0.25, 0.25],
+    [0.25, 0.25],
+  ]);
+  const fv = x => x.moments([0, 1]).variance;
+  const gv = grad(fv);
+  const gvx = gv(zeros([2, 2]));
+  assertAllEqual(gvx, [
+    [0, 0],
+    [0, 0],
+  ]);
 });
 
 test(async function api_sin_cos_tan() {
