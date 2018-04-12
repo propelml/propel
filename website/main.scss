@@ -309,7 +309,7 @@ header {
   }
 }
 
-.inspector__arg-list,
+.inspector__root-list,
 .inspector__prop-list {
   padding-left: 1.75em;
 }
@@ -324,7 +324,7 @@ header {
     display: none;
   }
 
-  .inspector__arg-list {
+  .inspector__root-list {
     & > li > .inspector__content::after {
       content: ",";
     }
@@ -378,7 +378,7 @@ header {
     }
   }
 
-  .inspector__arg-list > li + li::before {
+  .inspector__root-list > li + li::before {
     content: " ";
   }
   .inspector__prop-list > li:not(.inspector__li--hidden) ~ li::before {

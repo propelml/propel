@@ -79,7 +79,7 @@ class Console {
   constructor(private rpc: RPC, private cellId: number) { }
 
   private print(...args: any[]) {
-    this.rpc.call("print", this.cellId, args.map(v => describe(v)));
+    this.rpc.call("print", this.cellId, describe(args));
   }
 
   log(...args: any[]): void {

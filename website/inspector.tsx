@@ -14,9 +14,10 @@
  */
 
 import { Component, h } from "preact";
-import { IS_WEB, isNumericalKey, randomString } from "../src/util";
+import { isNumericalKey, randomString } from "../src/util";
 import {
   BaseObjectDescriptor,
+  InspectorData,
   PropertyDescriptor,
   ValueDescriptor
 } from "./serializer";
@@ -25,9 +26,9 @@ type ElementLike = JSX.Element | string;
 type ElementList = ElementLike[];
 type Visibility = "always" | "collapsed" | "expanded" | "parent-expanded";
 
-export interface InspectorProps { descriptors: ValueDescriptor[]; }
+export class Inspector extends Component<InspectorData, void>{
+  private parents = new Set(); // Used for circular reference detection.
 
-export class Inspector extends Component<InspectorProps, void>{
   private renderKey(d: ValueDescriptor,
                     arrayIndex: number | null = null): ElementList {
     switch (d.type) {
@@ -69,8 +70,6 @@ export class Inspector extends Component<InspectorProps, void>{
     switch (d.type) {
       case "boolean":
         return [<span class="cm-atom">{ d.value }</span>];
-      case "circular":
-        return [<span class="cm-keyword">[circular]</span>];
       case "date":
         return [<span class="cm-string-2">{ d.value }</span>];
       case "getter":
@@ -86,7 +85,7 @@ export class Inspector extends Component<InspectorProps, void>{
       case "regexp":
         return [<span class="cm-string-2">{ d.value }</span>];
       case "setter":
-        return [<span class="cm-keyword">[Setter]</span>];
+        return [<span class="cm-keyword">[setter]</span>];
       case "string":
         return [<span class="cm-string">{ JSON.stringify(d.value) }</span>];
       case "symbol":
@@ -94,6 +93,12 @@ export class Inspector extends Component<InspectorProps, void>{
       case "undefined":
         return [<span class="cm-atom">undefined</span>];
     }
+
+    // Detect circular references.
+    if (this.parents.has(d)) {
+      return [<span class="cm-keyword">[circular]</span>];
+    }
+    this.parents.add(d);
 
     // Render the list of properties and other content that is expanded when the
     // expand button is clicked.
@@ -121,7 +126,7 @@ export class Inspector extends Component<InspectorProps, void>{
         ? <ul class="inspector__list inspector__prop-list">
             { ...listItems }
           </ul>
-        : undefined;
+        : null;
 
     // Render the object header, containing the class name, sometimes
     // some metadata between parentheses, and boxed primitive content.
@@ -209,6 +214,9 @@ export class Inspector extends Component<InspectorProps, void>{
         break;
     }
 
+    // Pop cycle detection stack.
+    this.parents.delete(d);
+
     return elements;
   }
 
@@ -227,6 +235,10 @@ export class Inspector extends Component<InspectorProps, void>{
   }
 
   private hasChildren(d: ValueDescriptor): boolean {
+    // If a reference is circular it can't be expanded.
+    if (this.parents.has(d)) {
+      return false;
+    }
     // Returns true if a descriptor has properties that warrant it getting an
     // expand/collapse button.
     return d.type === "tensor" ||
@@ -242,27 +254,31 @@ export class Inspector extends Component<InspectorProps, void>{
               href={ `javascript:Inspector.toggle("${id}")` } />;
   }
 
-  private renderProperty(d: PropertyDescriptor,
+  private renderProperty(prop: PropertyDescriptor,
                          arrayIndex: number | null = null): ElementLike {
-    const hasChildren = this.hasChildren(d.value);
-    const attr = d.hidden ? { class: "inspector__li--hidden" } : {};
+    const key = this.props.descriptors[prop.key];
+    const value = this.props.descriptors[prop.value];
+    const attr = prop.hidden ? { class: "inspector__li--hidden" } : {};
     return (
       <li { ...attr }>
-       { hasChildren && this.renderExpandButton() }
+       { this.hasChildren(value) && this.renderExpandButton() }
        <div class="inspector__content">
-          { ...this.renderKey(d.key, arrayIndex) }
-          { ...this.renderValue(d.value) }
+          { ...this.renderKey(key, arrayIndex) }
+          { ...this.renderValue(value) }
         </div>
       </li>
     );
   }
 
-  private renderRoot(descriptors: ValueDescriptor[]): ElementLike {
-    if (descriptors.length === 0) return "";
+  private renderRoot(): ElementLike {
+    if (this.props.roots.length === 0) return "";
+     // Map root ids to descriptors.
+    const descriptors = this.props.descriptors;
+    const roots = this.props.roots.map(id => descriptors[id]);
     // When inspecting a only non-expandable values, simply lay them out
     // next to one another in a single div.
-    if (descriptors.every(d => !this.hasChildren(d))) {
-      const elements = [].concat(...descriptors.map(
+    if (roots.every(d => !this.hasChildren(d))) {
+      const elements = [].concat(...roots.map(
         (d, index) => [
           index > 0 ? " " : "", // Space between items.
           ...this.renderValue(d)
@@ -271,7 +287,7 @@ export class Inspector extends Component<InspectorProps, void>{
     }
     // Since there is at least something expandable at the top level, make <li>
     // elements for all items.
-    let rootItems = descriptors.map(d =>
+    let rootItems = roots.map(d =>
       <li>
         { this.hasChildren(d) && this.renderExpandButton() }
         <div class="inspector__content">
@@ -280,15 +296,15 @@ export class Inspector extends Component<InspectorProps, void>{
       </li>
     );
     // If there is more than one descriptor, wrap the list in another list
-    // and add an expand button that allows the user to display all descriptors
+    // and add an expand button that allows the user to display all roots
     // on a separate line.
-    if (descriptors.length > 1) {
+    if (roots.length > 1) {
       rootItems = [
         <li>
           { this.renderExpandButton() }
           <div class="inspector__content">
             { ...showWhen("expanded", "(") }
-            <ul class="inspector__list inspector__arg-list">
+            <ul class="inspector__list inspector__root-list">
               { ...rootItems }
             </ul>
             { ...showWhen("expanded", ")") }
@@ -296,7 +312,7 @@ export class Inspector extends Component<InspectorProps, void>{
         </li>
       ];
     }
-    // Create the tree-root list of one element.
+    // Create the tree-root element.
     return (
       <ul class="inspector__list inspector__tree-root">
         { ...rootItems }
@@ -305,8 +321,7 @@ export class Inspector extends Component<InspectorProps, void>{
   }
 
   render(): JSX.Element {
-    const d = this.props.descriptors;
-    return <div class="inspector cm-s-syntax">{ this.renderRoot(d) }</div>;
+    return <div class="inspector cm-s-syntax">{ this.renderRoot() }</div>;
   }
 
   static toggle(id: string): void {
@@ -348,13 +363,11 @@ function showWhen(when: Visibility, ...elements: ElementList): ElementList {
   return result;
 }
 
-if (IS_WEB) {
-  // Make Inspector available on the global object. This allows expand button
-  // to use a simple textual click handler, which survives serialization.
-  // We make the property non-enumerable to minimize interaction with other
-  // components.
-  Object.defineProperty(window, "Inspector", {
-    enumerable: false,
-    value: Inspector
-  });
-}
+// Make Inspector available on the global object. This allows expand button
+// to use a simple textual click handler, which survives serialization.
+// We make the property non-enumerable to minimize interaction with other
+// components.
+Object.defineProperty(window, "Inspector", {
+  enumerable: false,
+  value: Inspector
+});
