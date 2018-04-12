@@ -82,6 +82,11 @@ class Console {
     this.rpc.call("print", this.cellId, data);
   }
 
+  _inspect(value: any, options?: InspectorOptions) {
+    options = { showHidden: true, ...options };
+    this.print(describe([value], options));
+  }
+
   log(...args: any[]): void {
     this.print(describe(args));
   }
