@@ -51,16 +51,16 @@ test(async function backend_cosh() {
   const actual = bo.cosh(a);
   assertAllEqual(actual.shape, [2, 2]);
   const expected = [
-    [  1.54308063,   3.76219569],
-    [ 10.067662  ,  27.30823284],
+    [1.54308063, 3.76219569],
+    [10.067662, 27.30823284],
   ];
   assertAllClose(actual, expected);
 });
 
 test(async function backend_reluGrad() {
   const grad = tensor([[-1, 42], [-3, 4]]);
-  const ans = tensor([[-7, 4], [ 0.1, -9 ]]);
+  const ans = tensor([[-7, 4], [0.1, -9]]);
   const actual = bo.reluGrad(grad, ans);
   assertAllEqual(actual.shape, [2, 2]);
-  assertAllClose(actual, [[0, 42], [-3,  0]]);
+  assertAllClose(actual, [[0, 42], [-3, 0]]);
 });

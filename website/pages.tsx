@@ -90,7 +90,7 @@ export interface RouterState {
 // The root of all pages of the propel website.
 // Handles auth.
 export class Router extends Component<any, RouterState> {
-  constructor(props)  {
+  constructor(props) {
     super(props);
     this.state = {
       userInfo: null,

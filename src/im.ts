@@ -85,7 +85,7 @@ export function toUint8Image(image: Tensor): Image {
 async function webImageDecoder(filename: string, mode: Mode)
     : Promise<Tensor> {
   const buffer = await fetchArrayBuffer(filename);
-  const blob = new Blob( [ buffer ], { type: "image/jpeg" } );
+  const blob = new Blob( [buffer], { type: "image/jpeg" } );
   const dataURI = window.URL.createObjectURL(blob);
 
   const img = new Image();

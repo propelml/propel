@@ -35,7 +35,7 @@ export class Inspector extends Component<InspectorData, void>{
         const value = d.value;
         // Keys that look like javascript identifiers are rendered without
         // quote marks. Numerical keys can be omitted entirely.
-        const isSimpleKey =  /^[a-z$_][\w$_]*$/i.test(value);
+        const isSimpleKey = /^[a-z$_][\w$_]*$/i.test(value);
         const isArrayKey = (typeof arrayIndex === "number")
                            && isNumericalKey(value);
         if (isArrayKey || isSimpleKey) {

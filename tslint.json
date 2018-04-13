@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "tslint-eslint-rules"
+  ],
   "rules": {
     "align": [
       true,
@@ -8,6 +11,7 @@
       "parameters",
       "statements"
     ],
+    "array-bracket-spacing": [true, "never"],
     "array-type": [true, "array-simple"],
     "arrow-return-shorthand": true,
     "ban": [true,
@@ -21,11 +25,14 @@
       ["Number", "Use 'number' instead."],
       ["Boolean", "Use 'boolean' instead."]
     ],
+    "brace-style": [true, "1tbs", { "allowSingleLine": true }],
+    "block-spacing": [true, "always"],
     "class-name": true,
     "comment-format": [true, "check-space"],
     "curly": [true, "ignore-same-line"],
     "eofline": true,
     "forin": true,
+    "ter-func-call-spacing": true,
     "indent": [true, "spaces", 2],
     "interface-name": [true, "never-prefix"],
     "jsdoc-format": true,
@@ -46,6 +53,7 @@
     "no-inferrable-types": true,
     "no-irregular-whitespace": true,
     "no-namespace": [true, "allow-declarations"],
+    "no-multi-spaces": true,
     "no-reference": true,
     "no-string-throw": true,
     "no-trailing-whitespace": true,
@@ -59,6 +67,8 @@
     "quotemark": [true, "double"],
     "prefer-const": true,
     "radix": true,
+    // https://github.com/buzinas/tslint-eslint-rules/issues/318
+    // "space-before-blocks": true,
     "space-before-function-paren": [true, "never"],
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     //"switch-default": true,

@@ -43,7 +43,7 @@ function getSampleCoords(axis: number, rank: number): string {
   if (rank > 4 || axis < 0 || axis >= rank) {
     throw Error(`Gather for rank ${rank} is not yet supported`);
   }
-  const v =  ["coords.x", "coords.y", "coords.z", "coords.w"];
+  const v = ["coords.x", "coords.y", "coords.z", "coords.w"];
   v[axis] = "int(getIndices(" + v[axis] + "))";
   return v.slice(0, rank).join(", ");
 }

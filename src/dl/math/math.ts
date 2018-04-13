@@ -1446,7 +1446,7 @@ export class NDArrayMath implements NDArrayManager {
 
     util.assert(
         input3D.shape[2] === filter.shape[1],
-        `Error in conv1d: depth of input (${input3D.shape[2]}) must match  ` +
+        `Error in conv1d: depth of input (${input3D.shape[2]}) must match ` +
             `input depth for filter ${filter.shape[1]}.`);
 
     const filter4D =
@@ -1508,7 +1508,7 @@ export class NDArrayMath implements NDArrayManager {
 
     util.assert(
         input4D.shape[3] === filter.shape[2],
-        `Error in conv2d: depth of input (${input4D.shape[3]}) must match  ` +
+        `Error in conv2d: depth of input (${input4D.shape[3]}) must match ` +
             `input depth for filter ${filter.shape[2]}.`);
 
     const convInfo =

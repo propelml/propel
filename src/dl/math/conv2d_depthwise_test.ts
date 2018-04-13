@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-
+// tslint:disable:no-multi-spaces
 import * as test_util from "../test_util";
 import { MathTests } from "../test_util";
 import { Array3D, Array4D } from "./ndarray";

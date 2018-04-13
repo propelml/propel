@@ -14,7 +14,6 @@
  * limitations under the License.
  * =============================================================================
  */
-
 import * as test_util from "../test_util";
 import { MathTests } from "../test_util";
 
@@ -98,7 +97,7 @@ import { Array3D, Array4D } from "./ndarray";
     it("x=5x5x1, f=3, s=2 no duplicate max value", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([5, 5, 1], [
-        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
       ]);
 
@@ -114,7 +113,7 @@ import { Array3D, Array4D } from "./ndarray";
     it("x=5x5x1, f=3, s=2 duplicate max value", math => {
       const dy = Array3D.new([2, 2, 1], [1, 2, 3, 4]);
       const x = Array3D.new([5, 5, 1], [
-        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 24,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 24,
         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 12
       ]);
 
@@ -165,15 +164,15 @@ import { Array3D, Array4D } from "./ndarray";
       // dy is slightly modified to show the difference.
       const dy = Array3D.new([2, 2, 2], [1, 11, 2, 22, 3, 33, 4, 44]);
       const x = Array3D.new([4, 4, 2], [
-        0, 1, 1, 2, 2,  2, 3,  1, 4,  1, 5,  1, 6,  1, 7,  1,
+        0, 1, 1, 2, 2, 2, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1,
         8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 2, 14, 2, 15, 1
       ]);
 
       const dx = math.maxPoolBackprop(dy, x, 2, 2, 0);
 
       const expected = [
-        0, 0, 0, 11, 0, 22, 0, 0, 0, 0, 1, 0,  0, 0,  2, 0,
-        0, 0, 0, 0,  0, 0,  0, 0, 0, 0, 3, 33, 0, 44, 4, 0
+        0, 0, 0, 11, 0, 22, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33, 0, 44, 4, 0
       ];
       test_util.expectArraysClose(dx, expected);
     });
@@ -184,17 +183,17 @@ import { Array3D, Array4D } from "./ndarray";
       // dy is slightly modified to show the difference.
       const dy = Array3D.new([2, 2, 2], [1, 11, 2, 22, 3, 33, 4, 44]);
       const x = Array3D.new([5, 5, 2], [
-        0,  0,  1,  1,  2,  2,  3,  3,  4,  4,  5,  5,  6,  6,  7,  7,  8,
-        8,  9,  9,  10, 10, 11, 11, 12, 24, 13, 13, 14, 14, 15, 15, 16, 16,
+        0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
+        8, 9, 9, 10, 10, 11, 11, 12, 24, 13, 13, 14, 14, 15, 15, 16, 16,
         17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 12
       ]);
 
       const dx = math.maxPoolBackprop(dy, x, 3, 2, 0);
 
       const expected = [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 110, 0, 0, 2, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,   0, 3, 0, 0, 0, 4, 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 4, 0
       ];
       test_util.expectArraysClose(dx, expected);
     });
