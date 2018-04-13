@@ -140,7 +140,7 @@ class DatabaseFB implements Database {
     if (!u) return "anonymous";
 
     const newDoc = {
-      cells: [ "// New Notebook. Insert code here." ],
+      cells: ["// New Notebook. Insert code here."],
       created: firebase.firestore.FieldValue.serverTimestamp(),
       owner: {
         displayName: u.displayName,

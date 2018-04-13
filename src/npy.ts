@@ -35,7 +35,7 @@ export async function serialize(tensor: Tensor): Promise<ArrayBuffer> {
   // output ArrayBuffer.
   const magicStr = "NUMPY";
   const versionStr = "\x01\x00";
-  const [ d, fo, s ] = [ descr, "False", tensor.shape.join(",") + "," ];
+  const [d, fo, s] = [descr, "False", tensor.shape.join(",") + ","];
   let header = `{'descr': '${d}', 'fortran_order': ${fo}, 'shape': (${s}), }`;
   const unpaddedLength = 1 + magicStr.length + versionStr.length +
                          2 + header.length;

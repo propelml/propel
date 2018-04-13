@@ -42,6 +42,7 @@ function isIndented(s: string): boolean {
 }
 
 function unindent(s: string): string {
+  // tslint:disable-next-line:no-multi-spaces
   return s.replace(/^  /, "");
 }
 

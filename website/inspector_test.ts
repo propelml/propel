@@ -138,7 +138,7 @@ test(async function inspector_describe() {
      { type: "string", value: "symbolic key comes last" }]);
 
   // Built-in objects with some extra properties tucked on.
-  const curry = o => Object.assign(o,  { "77": "xx", yy: "zz" });
+  const curry = o => Object.assign(o, { "77": "xx", yy: "zz" });
   t(curry(new Date(sometime)),
     [{ type: "box", primitive: { type: "date", value: sometime }, ctor: "Date", props: [
        { key: 1, value: 2, hidden: false },

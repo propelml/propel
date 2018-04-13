@@ -308,26 +308,22 @@ export class OpsDL implements types.BackendOps {
     return x.math.argMin(x, axis);
   }
 
-  reduceSum(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceSum(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.sum(x, axes, keepDims);
   }
 
-  reduceMean(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceMean(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.mean(x, axes, keepDims);
   }
 
-  reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceMax(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.max(x, axes, keepDims);
   }
 
-  reduceMin(x: TensorDL, axes: number[], keepDims: boolean): TensorDL
-  {
+  reduceMin(x: TensorDL, axes: number[], keepDims: boolean): TensorDL {
     ENV.setMath(x.math);
     return x.math.min(x, axes, keepDims);
   }

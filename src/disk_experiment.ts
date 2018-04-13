@@ -18,7 +18,7 @@
 // the browser bundle.
 
 import * as rimraf from "rimraf";
-import { Experiment, ExperimentOpts, print }  from "./experiment";
+import { Experiment, ExperimentOpts, print } from "./experiment";
 import * as npy from "./npy";
 import { Params, params as createParams } from "./params";
 import {

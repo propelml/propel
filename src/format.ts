@@ -27,7 +27,7 @@ export interface FormatOptions {
   threshold?: number;
   precision?: number;
   linewidth?: number;
-  formatter?:  FormatterFunction | Formatter;
+  formatter?: FormatterFunction | Formatter;
   // TODO
   // floatmode?: "fixed" | "unique" | "maxprec" | "maxprec_equal";
   // nanstr?: string;
@@ -234,7 +234,7 @@ export function toString(tensor: Tensor, opts: FormatOptions = {},
   // Get formatter for this dtype.
   const formatFunction = getFormatFunction(tensor, opts);
 
-  const nextLinePrefix =  " ";
+  const nextLinePrefix = " ";
   return formatTensor(tensor, formatFunction, opts.linewidth,
                       nextLinePrefix, separator, opts.edgeitems,
                       summaryInsert);

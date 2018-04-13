@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+// tslint:disable:no-multi-spaces
 import { test } from "../tools/tester";
 import * as pr from "./api";
 import * as dataset from "./dataset";
@@ -26,19 +27,19 @@ import { IS_NODE } from "./util";
 
 test(async function dataset_datasetFromSlices() {
   const labels = pr.tensor([
-    [ 0, 1, 0 ],
-    [ 1, 0, 0 ],
-    [ 0, 0, 1 ],
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1],
   ]);
   let ds = dataset.datasetFromSlices({ labels });
 
   // XXX should shape be [1,3] or [3] ?
   let el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 1, 0 ]]);
+  assertAllEqual(el.labels, [[0, 1, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 1, 0, 0 ]]);
+  assertAllEqual(el.labels, [[1, 0, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 0, 1 ]]);
+  assertAllEqual(el.labels, [[0, 0, 1]]);
   el = await ds.next();
   assert(el == null);
 
@@ -46,12 +47,12 @@ test(async function dataset_datasetFromSlices() {
   ds = dataset.datasetFromSlices({ labels }).batch(2);
   el = await ds.next();
   assertAllEqual(el.labels, [
-    [ 0, 1, 0 ],
-    [ 1, 0, 0 ],
+    [0, 1, 0],
+    [1, 0, 0],
   ]);
   el = await ds.next();
   assertAllEqual(el.labels, [
-    [ 0, 0, 1 ],
+    [0, 0, 1],
   ]);
   el = await ds.next();
   assert(el == null);
@@ -60,30 +61,30 @@ test(async function dataset_datasetFromSlices() {
 test(async function dataset_mnist() {
   const ds = dataset.dataset("mnist/train").batch(5);
   const { images, labels } = await ds.next();
-  assertAllEqual(labels, [ 5, 0, 4, 1, 9 ]);
+  assertAllEqual(labels, [5, 0, 4, 1, 9]);
   assertShapesEqual(images.shape, [5, 28, 28, 1]);
 });
 
 test(async function dataset_repeatSlices() {
   const labels = pr.tensor([
-    [ 0, 1, 0 ],
-    [ 1, 0, 0 ],
-    [ 0, 0, 1 ],
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1],
   ]);
   const ds = dataset.datasetFromSlices({ labels }).repeat(2);
 
   let el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 1, 0 ]]);
+  assertAllEqual(el.labels, [[0, 1, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 1, 0, 0 ]]);
+  assertAllEqual(el.labels, [[1, 0, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 0, 1 ]]);
+  assertAllEqual(el.labels, [[0, 0, 1]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 1, 0 ]]);
+  assertAllEqual(el.labels, [[0, 1, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 1, 0, 0 ]]);
+  assertAllEqual(el.labels, [[1, 0, 0]]);
   el = await ds.next();
-  assertAllEqual(el.labels, [[ 0, 0, 1 ]]);
+  assertAllEqual(el.labels, [[0, 0, 1]]);
   el = await ds.next();
   assert(el == null);
 });
@@ -99,7 +100,7 @@ test(async function dataset_iris() {
   const ds = dataset.dataset("iris").batch(2);
   const { features, labels } = await ds.next();
   assertAllClose(features.slice([0, 0], [2, -1]),
-                 [[ 5.1,  3.5,  1.4,  0.2], [ 4.9,  3. ,  1.4,  0.2]]);
+                 [[5.1,  3.5,  1.4,  0.2], [4.9,  3. ,  1.4,  0.2]]);
   assertAllEqual(labels.slice([0], [2]), [0, 0]);
 });
 
@@ -108,8 +109,8 @@ test(async function dataset_breastCancer() {
   const { features, labels } = await ds.next();
   const firstFeatures = features.slice([0, 0], [2, 4]);
   assertAllClose(firstFeatures,
-    [[   17.99,    10.38,   122.8 ,  1001.  ],
-     [   20.57,    17.77,   132.9 ,  1326.  ]]);
+    [[17.99,    10.38,   122.8 ,  1001.],
+     [20.57,    17.77,   132.9 ,  1326.]]);
   assertAllEqual(labels.slice([0], [2]), [0, 0]);
 });
 
@@ -118,8 +119,8 @@ test(async function dataset_wine() {
   const { features, labels } = await ds.next();
   const firstFeatures = features.slice([0, 0], [2, 4]);
   assertAllClose(firstFeatures,
-    [[ 14.23,   1.71,   2.43,  15.6 ],
-     [ 13.2 ,   1.78,   2.14,  11.2 ]]);
+    [[14.23,   1.71,   2.43,  15.6],
+     [13.2 ,   1.78,   2.14,  11.2]]);
   assertAllEqual(labels.slice([0], [2]), [0, 0]);
 });
 
@@ -137,9 +138,9 @@ test(async function dataset_iterable() {
 
 test(async function dataset_iterableEndCondition() {
   const features = pr.tensor([
-    [ 0, 1, 0 ],
-    [ 1, 0, 0 ],
-    [ 0, 0, 1 ],
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1],
   ]);
   const ds = dataset.datasetFromSlices({ features }).batch(2).repeat(4);
   let count = 0;
@@ -152,9 +153,9 @@ test(async function dataset_iterableEndCondition() {
 
 test(async function dataset_shuffleSmoke() {
   const labels = pr.tensor([
-    [ 0, 1, 0 ],
-    [ 1, 0, 0 ],
-    [ 0, 0, 1 ],
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1],
   ]);
   const ds = dataset.datasetFromSlices({ labels }).shuffle(2);
   const el0 = await ds.next();

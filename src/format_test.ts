@@ -41,12 +41,12 @@ test(async function format_3DInt32() {
 });
 
 test(async function format_1DFloat32() {
-  let d = [ 1.2,  0. ,  0. ,  0.123];
+  let d = [1.2, 0., 0., 0.123];
   let actual = toString(float32(d));
   let expected = "[ 1.2  ,  0.   ,  0.   ,  0.123]";
   assertEqual(actual, expected);
 
-  d = [ 5.1, 3.5, 1.4, 0.2];
+  d = [5.1, 3.5, 1.4, 0.2];
   actual = toString(float32(d));
   expected = "[ 5.1,  3.5,  1.4,  0.2]";
   assertEqual(actual, expected);

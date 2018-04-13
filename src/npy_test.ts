@@ -15,7 +15,7 @@ const testPython = false;
 test(async function npy_load() {
   // python -c "import numpy as np; np.save('1.npy', [1.5, 2.5])"
   let t = await npy.load(propelURL + "src/testdata/1.npy");
-  util.assertAllEqual(t, [ 1.5, 2.5 ]);
+  util.assertAllEqual(t, [1.5, 2.5]);
   util.assertShapesEqual(t.shape, [2]);
   util.assertEqual(t.dtype, "float32");
 
@@ -51,7 +51,7 @@ test(async function npy_load() {
 });
 
 test(async function npy_serialize() {
-  const t = pr.tensor([ 1.5, 2.5 ]);
+  const t = pr.tensor([1.5, 2.5]);
   const ab = await npy.serialize(t);
   // Now try to parse it.
   const tt = npy.parse(ab);
@@ -60,10 +60,10 @@ test(async function npy_serialize() {
 
 if (IS_NODE && testPython) {
   test(async function npy_pythonInterop() {
-    await checkPython("[ 1.5  2.5]", [ 1.5, 2.5 ]);
-    await checkPython("[ 1.  2.]", [ 1, 2 ]);
+    await checkPython("[ 1.5  2.5]", [1.5, 2.5]);
+    await checkPython("[ 1.  2.]", [1, 2]);
     await checkPython("[[1 2]\n [3 4]]",
-      pr.tensor([[ 1, 2 ], [3, 4]], { dtype: "int32" }));
+      pr.tensor([[1, 2], [3, 4]], { dtype: "int32" }));
   });
 
   async function checkPython(expected: string,

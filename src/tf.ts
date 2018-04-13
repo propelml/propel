@@ -369,8 +369,7 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
-  reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceSum(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
     return execute0("Sum", [x, axesT], [
@@ -380,8 +379,7 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
-  reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceMean(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // reduceMean should always return float32 tensor but TF doesn't
     // handled that conversion.
     if (x.dtype !== "float32") {
@@ -396,8 +394,7 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
-  reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceMax(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
     return execute0("Max", [x, axesT], [
@@ -407,8 +404,7 @@ export class OpsTF implements types.BackendOps {
     ]);
   }
 
-  reduceMin(x: TensorTF, axes: number[], keepDims: boolean): TensorTF
-  {
+  reduceMin(x: TensorTF, axes: number[], keepDims: boolean): TensorTF {
     // axesT is expected to be on CPU.
     const axesT = int32Small(axes);
     return execute0("Min", [x, axesT], [

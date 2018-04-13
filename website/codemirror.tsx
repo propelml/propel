@@ -89,11 +89,11 @@ export class CodeMirrorComponent extends
     this.editor =
       CodeMirror(div => parentEl.replaceChild(div, pre), options);
     this.editor.setOption("extraKeys", {
-      "Alt-Enter": () =>  {
+      "Alt-Enter": () => {
         if (this.props.onAltEnter) this.props.onAltEnter();
         return true;
       },
-      "Ctrl-Enter": () =>  {
+      "Ctrl-Enter": () => {
         if (this.props.onCtrlEnter) this.props.onCtrlEnter();
         return true;
       },

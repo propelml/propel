@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+// tslint:disable:no-multi-spaces
 import { test } from "../tools/tester";
 import { concat, fill, grad, linspace, listDevices, multigrad,
   ones, Params, randn, range, stack, tensor, Tensor,
@@ -342,9 +343,9 @@ test(async function api_reverse() {
   assertAllEqual(tensor([1, 2, 3, 4]).reverse(), [4, 3, 2, 1]);
 
   const t = tensor([[
-    [[ 0,  1,  2,  3],
-     [ 4,  5,  6,  7],
-     [ 8,  9, 10, 11]],
+    [[0,  1,  2,  3],
+     [4,  5,  6,  7],
+     [8,  9, 10, 11]],
     [[12, 13, 14, 15],
      [16, 17, 18, 19],
      [20, 21, 22, 23]]
@@ -354,16 +355,16 @@ test(async function api_reverse() {
     [[12, 13, 14, 15],
      [16, 17, 18, 19],
      [20, 21, 22, 23]],
-    [[ 0,  1,  2,  3],
-     [ 4,  5,  6,  7],
-     [ 8,  9, 10, 11]]
+    [[0,  1,  2,  3],
+     [4,  5,  6,  7],
+     [8,  9, 10, 11]]
   ]]);
   assertAllEqual(t.reverse([1]), tR1);
   assertAllEqual(t.reverse([-3]), tR1);
   const tR2 = tensor([[
-    [[ 8,  9, 10, 11],
-     [ 4,  5,  6,  7],
-     [ 0,  1,  2,  3]],
+    [[8,  9, 10, 11],
+     [4,  5,  6,  7],
+     [0,  1,  2,  3]],
     [[20, 21, 22, 23],
      [16, 17, 18, 19],
      [12, 13, 14, 15]]
@@ -527,8 +528,8 @@ testDevices(async function api_onesAndZerosLike(tensor, device) {
   const zeros = a.zerosLike();
   assertEqual(ones.device, device);
   assertEqual(zeros.device, device);
-  assertAllEqual(ones, [ [1, 1, 1], [1, 1, 1] ]);
-  assertAllEqual(zeros, [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(ones, [[1, 1, 1], [1, 1, 1]]);
+  assertAllEqual(zeros, [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_equal() {
@@ -543,14 +544,14 @@ test(async function api_equal() {
   const r = a.equal(b);
   assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 0, 1], [0, 1, 0] ]);
+  assertAllEqual(r, [[1, 0, 1], [0, 1, 0]]);
 
   // equal isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).equal(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_greater() {
@@ -565,13 +566,13 @@ test(async function api_greater() {
   const r = a.greater(b);
   assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [0, 1, 0], [1, 0, 0] ]);
+  assertAllEqual(r, [[0, 1, 0], [1, 0, 0]]);
   // greater isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).greater(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_greaterEqual() {
@@ -586,13 +587,13 @@ test(async function api_greaterEqual() {
   const r = a.greaterEqual(b);
   assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 1, 1], [1, 1, 0] ]);
+  assertAllEqual(r, [[1, 1, 1], [1, 1, 0]]);
   // greaterEqual isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).greaterEqual(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_less() {
@@ -607,13 +608,13 @@ test(async function api_less() {
   const r = a.less(b);
   assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [0, 0, 0], [0, 0, 1] ]);
+  assertAllEqual(r, [[0, 0, 0], [0, 0, 1]]);
   // less isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).less(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_lessEqual() {
@@ -628,13 +629,13 @@ test(async function api_lessEqual() {
   const r = a.lessEqual(b);
   assertEqual(r.dtype, "bool");
   // TODO Allow assertAllEqual to handle boolean.
-  assertAllEqual(r, [ [1, 0, 1], [0, 1, 1] ]);
+  assertAllEqual(r, [[1, 0, 1], [0, 1, 1]]);
   // lessEqual isn't differentiable but it should have the same behavior as
   // autograd does.
   const f = (x, y) => tensor(x).lessEqual(y);
   const g = multigrad(f, [0, 1]);
-  assertAllEqual(g(a, b)[0], [ [0, 0, 0], [0, 0, 0] ]);
-  assertAllEqual(g(a, b)[1], [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(a, b)[0], [[0, 0, 0], [0, 0, 0]]);
+  assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
 test(async function api_select() {
@@ -643,7 +644,7 @@ test(async function api_select() {
     [4, 5, 6],
   ]);
   const f = tensor([
-    [ 7,  8,  9],
+    [7,  8,  9],
     [10, 11, 12],
   ]);
   // TODO Use false/true literals instead of 0 and 1 in cond.
@@ -653,12 +654,12 @@ test(async function api_select() {
   ], {dtype: "bool"});
   const r = cond.select(t, f);
   assertAllEqual(r, [
-    [ 1, 8,  3],
+    [1, 8,  3],
     [10, 5, 12],
   ]);
   // select isn't differentiable.
   const g = grad((c) => c.select(t, f));
-  assertAllEqual(g(cond), [ [0, 0, 0], [0, 0, 0] ]);
+  assertAllEqual(g(cond), [[0, 0, 0], [0, 0, 0]]);
 
   function f2(x) {
     x = tensor(x);
@@ -715,8 +716,8 @@ testDevices(async function api_pad(tensor, device) {
   const padded2 = d2.pad([[1, 2], [0, 0]], 42);
   assertAllEqual(padded2, [
     [42, 42, 42],
-    [ 9,  5,  7],
-    [ 6,  8,  4],
+    [9,  5,  7],
+    [6,  8,  4],
     [42, 42, 42],
     [42, 42, 42],
   ]);
@@ -1002,8 +1003,8 @@ testDevices(async function api_gather(tensor, device) {
     [1, 2, 3, 4],
   ]);
   assertAllEqual(t.gather([2, 0], 1), [
-    [ 3,  1],
-    [ 7,  5],
+    [3,  1],
+    [7,  5],
     [11,  9]
   ]);
 });
@@ -1068,7 +1069,7 @@ testDevices(async function api_oneHot(tensor, device) {
 
   const b = tensor([0, 1, 3, 4], {dtype: "int32"});
   assertAllEqual(b.oneHot(5, 0.5, -0.5), [
-    [ 0.5, -0.5, -0.5, -0.5, -0.5],
+    [0.5, -0.5, -0.5, -0.5, -0.5],
     [-0.5,  0.5, -0.5, -0.5, -0.5],
     [-0.5, -0.5, -0.5,  0.5, -0.5],
     [-0.5, -0.5, -0.5, -0.5,  0.5],
@@ -1094,9 +1095,9 @@ test(async function api_softmaxCE() {
   assertAllClose(ce, [12.00034142, 8.00034142, 3.6003418]);
   const g = grad(f);
   assertAllClose(g(logits), [
-    [ -9.99993861e-01,   3.35348042e-04,   9.99658465e-01],
-    [  6.14211376e-06,  -9.99664664e-01,   9.99658465e-01],
-    [ -2.99993873e-01,   3.35348042e-04,   2.99658477e-01]
+    [-9.99993861e-01,   3.35348042e-04,   9.99658465e-01],
+    [6.14211376e-06,  -9.99664664e-01,   9.99658465e-01],
+    [-2.99993873e-01,   3.35348042e-04,   2.99658477e-01]
   ]);
 });
 
@@ -1129,7 +1130,7 @@ testDevices(async function api_neuralNet(tensor, device) {
   const inference = (params: Params, images: Tensor) => {
     let inputs = images.cast("float32").div(255).reshape([-1, 28 * 28]);
     let outputs;
-    const layerSizes = [ 28 * 28, 64, 10 ];
+    const layerSizes = [28 * 28, 64, 10];
     for (let i = 0; i < layerSizes.length - 1; ++i) {
       const m = layerSizes[i];
       const n = layerSizes[i + 1];
@@ -1258,10 +1259,10 @@ test(async function api_conv2d() {
   assertShapesEqual(g_[0].shape, img.shape);
   assertShapesEqual(g_[1].shape, filter.shape);
   assertAllEqual(g_[0].squeeze(), [
-    [ 0, 1, 1, 1 ],
-    [ 2, 6, 6, 4 ],
-    [ 2, 6, 6, 4 ],
-    [ 2, 5, 5, 3 ],
+    [0, 1, 1, 1],
+    [2, 6, 6, 4],
+    [2, 6, 6, 4],
+    [2, 5, 5, 3],
   ]);
   assertAllEqual(g_[1].squeeze(), [[45, 54], [81, 90]]);
 });
@@ -1279,10 +1280,10 @@ test(async function api_maxPool() {
   const gx = g(x);
   assertShapesEqual(gx.shape, x.shape);
   assertAllEqual(gx.squeeze(), [
-    [ 0, 0, 0, 0 ],
-    [ 0, 1, 0, 1 ],
-    [ 0, 0, 0, 0 ],
-    [ 0, 1, 0, 1 ],
+    [0, 0, 0, 0],
+    [0, 1, 0, 1],
+    [0, 0, 0, 0],
+    [0, 1, 0, 1],
   ]);
 });
 
@@ -1314,8 +1315,8 @@ test(async function api_size() {
 
 test(async function api_stopGradientSwallowedErr() {
   function loss(params) {
-    const a = api.zeros([ 5 ]);
-    const b = api.zeros([ 11 ]);
+    const a = api.zeros([5]);
+    const b = api.zeros([11]);
     b.stopGradient();
     assert(!shapesEqual(a.shape, b.shape));
     // Because the shapes aren't equal, they should throw error when added

@@ -574,7 +574,7 @@ export let reduceLogSumExp = defFW("reduceLogSumExp",
     const e = bo.exp(bo.sub(x, m));
     const s = bo.reduceSum(e, axes, true);
     const sLog = bo.log(s);
-    const ans =  bo.add(m, sLog);
+    const ans = bo.add(m, sLog);
     saveForBackward(ans, x);
     return ans;
   });

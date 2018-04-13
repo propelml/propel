@@ -57,7 +57,7 @@ export function registerPrerenderedOutput(output) {
 // An anonymous notebook doc for when users aren't logged in
 const anonDoc = {
   anonymous: true,
-  cells: [ "// New Notebook. Insert code here." ],
+  cells: ["// New Notebook. Insert code here."],
   created: new Date(),
   owner: {
     displayName: "Anonymous",
