@@ -38,6 +38,7 @@
     "ts-loader": "^3.5.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",
+    "tslint-eslint-rules": "^5.1.0",
     "typescript": "^2.7.2",
     "vega-lib": "^3.2.1",
     "ws": "^5.0.0",
