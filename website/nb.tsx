@@ -204,7 +204,7 @@ export class Cell extends Component<CellProps, CellState> {
   }
 
   componentWillMount() {
-    if (!this.outputHTML) {
+    if (this.outputHTML == null) {
       cellExecuteQueue.push(this);
     }
   }

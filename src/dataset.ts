@@ -103,6 +103,7 @@ abstract class Dataset {
    *
    *    import * as pr from "propel";
    *    const ds = pr.dataset("mnist/train").batch(150).repeat(100);
+   *    await ds.next();
    *
    * This creates an iterator which runs through the entire batched dataset 100
    * times - i.e. for 100 epochs.
