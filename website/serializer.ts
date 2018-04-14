@@ -159,6 +159,8 @@ class DescriptionBuilder {
     // Capture the name of the constructor.
     if (proto === null) {
       d.ctor = null; // Object has no prototype, so the constructor is null.
+    } else if (proto.constructor === Tensor) {
+      d.ctor = "Tensor"; // Work around `Tensor` being renamed by minifier.
     } else if (typeof proto.constructor === "function") {
       d.ctor = proto.constructor.name;
     } else {
