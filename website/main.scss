@@ -784,6 +784,7 @@ header {
     padding: 0 16px;
     background-color: #fff;
     position: fixed;
+    top: 0;
     z-index: 1001;
     border-bottom: 1px solid $borderColor;
     box-shadow: $shadow;
