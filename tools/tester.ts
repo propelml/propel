@@ -86,17 +86,14 @@ function filter(name: string): boolean {
 }
 
 const readline = IS_NODE ? require("readline") : null;
-const format = IS_NODE ? require("util").format : null;
 function log(...args) {
-  if (IS_NODE) {
-    if (process.stdout.isTTY) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0, null);
-    }
-    process.stdout.write(format(...args));
-  } else {
-    console.log(...args);
+  if (IS_NODE && process.stdout.isTTY) {
+    // Clear second to last line.
+    readline.cursorTo(process.stdout, 0, null);
+    readline.moveCursor(process.stdout, null, -1);
+    readline.clearLine(process.stdout, 0);
   }
+  console.log(...args);
 }
 
 async function runTests() {
@@ -115,7 +112,7 @@ async function runTests() {
       await fn();
       passed++;
     } catch (e) {
-      console.error("\n\nTest FAIL", name);
+      console.error("\nTest FAIL", name);
       console.error((e && e.stack) || e);
       failed++;
       if (exitOnFail) {
@@ -125,7 +122,7 @@ async function runTests() {
     }
   }
 
-  console.log(`\n\nDONE. Test passed: ${passed}, failed: ${failed}`);
+  console.log(`\nDONE. Test passed: ${passed}, failed: ${failed}`);
 
   if (failed === 0) {
     // All good.
