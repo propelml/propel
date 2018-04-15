@@ -909,20 +909,34 @@ import { Array1D, Array2D, Array3D, Scalar } from "./ndarray";
 
       const res = math.select(cond, a, b);
       expect(res.dtype).toBe("float32");
-      expect(res.dataSync()).toEqual(
+      test_util.expectArraysClose(res.dataSync(),
         new Float32Array([4, 5, 1, 5, -1]));
 
       a.dispose();
       b.dispose();
+      cond.dispose();
+    });
+
+    it("handles rank 0", math => {
+      const a = Scalar.new(1);
+      const b = Scalar.new(4);
+      const cond = Scalar.new(false, "bool");
+
+      const res = math.select(cond, a, b);
+      expect(res.dtype).toBe("float32");
+      test_util.expectArraysClose(res.dataSync(),
+        new Float32Array([4]));
+
+      a.dispose();
+      b.dispose();
+      cond.dispose();
     });
   };
 
   test_util.describeMathCPU("select", [tests]);
-  /*
-  test_util.describeMathGPU('select', [tests], [
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 2, 'WEBGL_FLOAT_TEXTURE_ENABLED': true},
-    {'WEBGL_VERSION': 1, 'WEBGL_FLOAT_TEXTURE_ENABLED': false}
+  test_util.describeMathGPU("select", [tests], [
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 2, "WEBGL_FLOAT_TEXTURE_ENABLED": true},
+    {"WEBGL_VERSION": 1, "WEBGL_FLOAT_TEXTURE_ENABLED": false}
   ]);
-  */
 }
