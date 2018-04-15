@@ -18,8 +18,13 @@
 // the public API.
 
 import * as dl from "./dl";
-import { flatten, inferShape, isTypedArray, makeTypedArray }
-  from "./tensor_util";
+import { Tensor } from "./tensor";
+import {
+  flatten,
+  inferShape,
+  isTypedArray,
+  makeTypedArray,
+} from "./tensor_util";
 import * as tf from "./tf";
 import * as types from "./types";
 import { deepCloneArray, IS_WEB, process } from "./util";
@@ -87,6 +92,12 @@ export function convertStorage(x: types.TensorLike,
     const shape = inferShape(x);
     const data = flatten(x) as number[];
     return create(makeTypedArray(data, dtype), shape, dtype, device);
+  } else if (x instanceof Tensor) {
+    if (x.device !== device) {
+      return bo.copyToDevice(x.storage, device);
+    } else {
+      return x.storage;
+    }
   }
   throw new Error("Unreachable");
 }

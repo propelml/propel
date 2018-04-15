@@ -24,7 +24,14 @@ import { assert, assertEqual, IS_NODE } from "./util";
 
 export function convert(t: types.TensorLike,
                         opts?: types.TensorOpts): Tensor {
-  if (t instanceof Tensor) return t;
+  if (t instanceof Tensor) {
+    if (opts && (!opts.device || opts.device !== t.device)) {
+      // If t is a tensor, and convertion to another device is requested,
+      // switch out the underlying storage object.
+      t.storage = convertStorage(t, opts);
+    }
+    return t;
+  }
   return new Tensor(convertStorage(t, opts));
 }
 
@@ -97,19 +104,9 @@ export class Tensor implements types.Storage {
     };
   }
 
-  /** This is similar convert() - it turns TensorLike objects into Tensors - but
-   * the function further ensures that the returned tensor is on the same
-   * devices as this tensor.
-   */
+  /** Ensures that the argument is on the same devices as this tensor. */
   colocate(t: types.TensorLike, dtype?: types.DType): Tensor {
-    if (t instanceof Tensor) {
-      if (t.device === this.device) return t;
-      // TODO Warning! This might be an unnecessary copy. Maybe we should
-      // notify the user? Maybe this shouldn't be allowed even.
-      // For now we stay silent.
-      return new Tensor(bo.copyToDevice(t.storage, this.device));
-    }
-    return new Tensor(convertStorage(t, {dtype, device: this.device}));
+    return convert(t, { dtype, device: this.device });
   }
 
   /** Returns a TypedArray containing the actual data of the tensor.
