@@ -18,7 +18,7 @@
 // https://github.com/HIPS/autograd/blob/e99d1276653a54114aa8835bef8f831c82c8d3e3/autograd/numpy/numpy_jvps.py
 import { bo } from "./backend";
 import * as backprop from "./backprop";
-import { convert, Tensor } from "./tensor";
+import { tensor, Tensor } from "./tensor";
 import { bcastGradientArgs, shapesEqual } from "./tensor_util";
 import * as types from "./types";
 import { Storage } from "./types";
@@ -175,7 +175,7 @@ export function ones(shape: types.Shape,
   if (!(shape instanceof Array)) {
     throw new Error("Ones takes a shape as an argument");
   }
-  return fill(convert(1, opts), shape);
+  return fill(tensor(1, opts), shape);
 }
 
 /** Return a new tensor of given shape and dtype, filled with zeros.
@@ -188,7 +188,7 @@ export function zeros(shape: types.Shape,
   if (!(shape instanceof Array)) {
     throw new Error("Zeros takes a shape as an argument");
   }
-  return fill(convert(0, opts), shape);
+  return fill(tensor(0, opts), shape);
 }
 
 /** Produces a new tensor with random values, drawn from the standard normal
@@ -313,7 +313,7 @@ export const square = defFW("square", (x) => {
   return bo.square(x);
 });
 defBW("square", (g, x) => {
-  const two = convert(2, x);
+  const two = tensor(2, x);
   return g.mul(x.mul(two));
 });
 
@@ -453,7 +453,7 @@ defBW("reduceMean", (g, axes, shape, dtype) => {
     n *= shape[j];
     gs[j] = 1;
   }
-  const a = convert(1 / n, {dtype: "float32", device: g.device});
+  const a = tensor(1 / n, {dtype: "float32", device: g.device});
   return g.reshape(gs).mul(fill(a, shape));
 });
 

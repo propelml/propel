@@ -14,7 +14,7 @@
  */
 import { bo } from "./backend";
 import * as ops from "./ops";
-import { convert, Tensor } from "./tensor";
+import { tensor, Tensor } from "./tensor";
 import * as types from "./types";
 import { assertEqual } from "./util";
 
@@ -27,29 +27,10 @@ export { backend } from "./backend";
 export { sgd, minimize } from "./optimizers";
 export { plot, imshow } from "./matplotlib";
 export { imread, imsave } from "./im";
-export { Tensor } from "./tensor";
+export { tensor, Tensor } from "./tensor";
 export { grad, multigrad, multigradAndVal, gradAndVal, gradParams, ParamsFn }
   from "./backprop";
 export { ones, zeros, randn } from "./ops";
-
-/** Turns a javascript array of numbers into a tensor. Like this:
- *
- *    import { tensor } from "propel";
- *    tensor([[1, 2, 3], [4, 5, 6]]).square();
- *
- * If a tensor is given to tensor, it simply returns it.
- *
- * @arg t - An array of numbers, representing a Tensor. Or a Tensor in which
- *          case tensor() acts as the identity function.
- * @arg args - An object like this { dtype: "int32", device: "GPU:0" }
- */
-export function tensor(t: types.TensorLike, args?: types.TensorOpts): Tensor {
-  return convert(t, args);
-}
-
-// For backwards compatibility with the old API.
-// TODO: remove this after re-running gendoc and updating the default notebook.
-export const T = tensor;
 
 /** Returns a list of available device names.
  *
@@ -193,6 +174,6 @@ export function concat(tensors: types.TensorLike[], axis = 0): Tensor {
  *    pr.stack([a, b], 0)
  */
 export function stack(tensors: types.TensorLike[], axis = 0): Tensor {
-  tensors = tensors.map(t => convert(t).expandDims(axis));
+  tensors = tensors.map(t => tensor(t).expandDims(axis));
   return concat(tensors, axis);
 }
