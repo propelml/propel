@@ -18,6 +18,7 @@ import { concat, fill, grad, linspace, listDevices, multigrad,
   ones, Params, randn, range, stack, tensor, Tensor,
   TensorLike, zeros } from "./api";
 import * as api from "./api";
+import { backend } from "./backend";
 import { assertAllClose, assertAllEqual, assertClose,
   assertShapesEqual, shapesEqual } from "./tensor_util";
 import * as types from "./types";
@@ -1119,6 +1120,16 @@ test(async function api_softmaxLoss() {
   ], {dtype: "float32"});
   const loss = logits.softmaxLoss([0, 2]);
   assertAllClose(loss, 6.0);
+});
+
+test(async function api_defaultDevicePlacement() {
+  if (!gpuAvail()) {
+    console.log("GPU not available. Skipping defaultDevicePlacement.");
+    return;
+  }
+  const t = tensor([1, 2]);
+  // See defaultDevice in src/backend.ts.
+  assertEqual(t.device, backend === "tf" ? "CPU:0" : "GPU:0");
 });
 
 test(async function api_devicePlacement() {

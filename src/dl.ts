@@ -19,6 +19,7 @@
 import "./dl/math/backends/backend_cpu";
 import "./dl/math/backends/backend_webgl";
 
+import { defaultDevice } from "./backend";
 import { ENV } from "./dl/environment";
 import { MathBackendWebGL }
  from "./dl/math/backends/backend_webgl";
@@ -90,7 +91,7 @@ export class OpsDL implements types.BackendOps {
       dtype = getDType(values);
     }
     if (device == null) {
-      device = "CPU:0";
+      device = defaultDevice;
     }
     const math = lookupMath(device);
     return NDArray.make(shape, { values }, dtype as any, math);

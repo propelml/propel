@@ -13,6 +13,7 @@
    limitations under the License.
  */
 // TensorFlow backend.
+import { defaultDevice } from "./backend";
 import {
   assert,
   assertEqualTensor,
@@ -92,7 +93,7 @@ function dtypePropel2TF(dtype: types.DType): number {
 }
 
 function colocateDevice(colocateWith?: TensorTF): string {
-  return colocateWith ? binding.getDevice(colocateWith.handle) : "CPU:0";
+  return colocateWith ? binding.getDevice(colocateWith.handle) : defaultDevice;
 }
 
 function int32Small(v: number | number[], colocateWith?: TensorTF): TensorTF {
