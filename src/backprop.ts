@@ -18,7 +18,7 @@
 
 import { fill, Params } from "./api";
 import { getBackwardFunc } from "./ops";
-import { convert, NamedTensors, Tensor } from "./tensor";
+import { NamedTensors, tensor, Tensor } from "./tensor";
 import * as types from "./types";
 import { assert, assertEqual, CounterMap, log } from "./util";
 import * as util from "./util";
@@ -107,7 +107,7 @@ export function gradParams(f: ParamsFn, names?: string[]) {
       }
     }
     let result = f(params); // Do the forward pass.
-    result = convert(result);
+    result = tensor(result);
     // At this point we need to turn params into an array, so it can be
     // processed by imperativeGrad.
     const order: string[] = [];
@@ -134,7 +134,7 @@ export function multigradAndVal(f, argnums?: number[]) {
   return function(...args: types.TensorLike[]):
       [Tensor[], Tensor] {
     pushNewTape();
-    const targs: Tensor[] = args.map((tl) => convert(tl));
+    const targs: Tensor[] = args.map((tl) => tensor(tl));
     // Watch the specified argnums.
     if (argnums == null) {
       for (const t of targs) {
@@ -146,7 +146,7 @@ export function multigradAndVal(f, argnums?: number[]) {
       }
     }
     let result = f.apply(null, targs); // Do the forward pass.
-    result = convert(result);
+    result = tensor(result);
     const tape = popTape();
     return [imperativeGrad(result, targs, tape), result];
   };
@@ -228,7 +228,7 @@ function imperativeGrad(target: Tensor,
         // Null backwards function, return a zero tensor of the same shape and
         // dtype as the input.
         const [shape, dtype] = shapeDType;
-        const zero = convert(0, {dtype, device: outGrad.device});
+        const zero = tensor(0, {dtype, device: outGrad.device});
         return fill(zero, shape);
       }
     });
@@ -364,7 +364,7 @@ export class GradientCollector {
   aggregate(tid: number): Tensor {
     if (!this.map.has(tid) || this.map.get(tid).length === 0) {
       // TODO(scalar) Handle non-scalar shapes.
-      return convert(0);
+      return tensor(0);
     }
     const grads = this.map.get(tid);
     // log('aggregate tid %d ngrads %d', tid, grads.length);

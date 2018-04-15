@@ -1,5 +1,5 @@
 import { watch } from "./backprop";
-import { convert, Tensor } from "./tensor";
+import { Tensor, tensor as convert } from "./tensor";
 import * as types from "./types";
 
 /** Constructs a new params object.

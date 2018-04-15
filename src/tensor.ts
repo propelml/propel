@@ -22,8 +22,19 @@ import { allFinite, assertShapesEqual } from "./tensor_util";
 import * as types from "./types";
 import { assert, assertEqual, IS_NODE } from "./util";
 
-export function convert(t: types.TensorLike,
-                        opts?: types.TensorOpts): Tensor {
+/** Turns a javascript array of numbers into a tensor. Like this:
+ *
+ *    import { tensor } from "propel";
+ *    tensor([[1, 2, 3], [4, 5, 6]]).square();
+ *
+ * If a tensor is given to tensor, it simply returns it.
+ *
+ * @arg t - An array of numbers, representing a Tensor. Or a Tensor in which
+ *          case tensor() acts as the identity function.
+ * @arg args - An object like this { dtype: "int32", device: "GPU:0" }
+ */
+export function tensor(t: types.TensorLike,
+                       opts?: types.TensorOpts): Tensor {
   if (t instanceof Tensor) {
     if (opts && (!opts.device || opts.device !== t.device)) {
       // If t is a tensor, and convertion to another device is requested,
@@ -106,7 +117,7 @@ export class Tensor implements types.Storage {
 
   /** Ensures that the argument is on the same devices as this tensor. */
   colocate(t: types.TensorLike, dtype?: types.DType): Tensor {
-    return convert(t, { dtype, device: this.device });
+    return tensor(t, { dtype, device: this.device });
   }
 
   /** Returns a TypedArray containing the actual data of the tensor.

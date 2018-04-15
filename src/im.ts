@@ -17,7 +17,6 @@
 
 import { concat, fill, Tensor, tensor } from "./api";
 import { fetchArrayBuffer } from "./fetch";
-import { convert } from "./tensor";
 import { Mode } from "./types";
 import { createResolvable, IS_NODE, nodeRequire } from "./util";
 
@@ -35,7 +34,7 @@ export interface Image {
 
 function toTensor(data: Uint8Array, height: number, width: number,
                   mode: Mode): Tensor {
-  let image = convert(data).reshape([height, width, 4]);
+  let image = tensor(data).reshape([height, width, 4]);
   if (mode === "RGBA") {
     return image;
   }
