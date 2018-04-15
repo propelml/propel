@@ -52,6 +52,10 @@ let onLoadCalled = false;
   }
 })();
 
+const gpuAvail = bo.listDevices().length > 1;
+// Default to CPU on TF and GPU on DL.
+export const defaultDevice = backend === "tf" || !gpuAvail ? "CPU:0" : "GPU:0";
+
 function preferTF(): boolean {
   // If we're in the browser, don't even attempt it.
   if (IS_WEB) return false;
@@ -76,7 +80,7 @@ export function convertStorage(x: types.TensorLike,
   const create = bo.fromTypedArray;
 
   const dtype = opts ? opts.dtype : undefined;
-  const device = (opts ? opts.device : null) || "CPU:0";
+  const device = (opts ? opts.device : null) || defaultDevice;
 
   if (typeof x === "number") {
     // TODO On TF we should take advantage of createSmallHandle for scalars.
