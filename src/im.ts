@@ -17,7 +17,6 @@
 
 import { concat, fill, Tensor, tensor } from "./api";
 import { fetchArrayBuffer } from "./fetch";
-import { Mode } from "./types";
 import { createResolvable, IS_NODE, nodeRequire } from "./util";
 
 // TODO These modules are only used in Node and it is excessive to include them
@@ -26,6 +25,8 @@ import { createResolvable, IS_NODE, nodeRequire } from "./util";
 import * as JPEG from "jpeg-js";
 import * as pngjs from "pngjs";
 
+export type ImageMode = "RGBA" | "RGB" | "L";
+
 export interface Image {
   width: number;
   height: number;
@@ -33,7 +34,7 @@ export interface Image {
 }
 
 function toTensor(data: Uint8Array, height: number, width: number,
-                  mode: Mode): Tensor {
+                  mode: ImageMode): Tensor {
   let image = tensor(data).reshape([height, width, 4]);
   if (mode === "RGBA") {
     return image;
@@ -81,7 +82,7 @@ export function toUint8Image(image: Tensor): Image {
   throw new Error(`Unsupported image rank.`);
 }
 
-async function webImageDecoder(filename: string, mode: Mode)
+async function webImageDecoder(filename: string, mode: ImageMode)
     : Promise<Tensor> {
   const buffer = await fetchArrayBuffer(filename);
   const blob = new Blob( [buffer], { type: "image/jpeg" } );
@@ -143,7 +144,8 @@ function readMIME(data: Uint8Array): string {
   return null;
 }
 
-async function pngReadHandler(data: ArrayBuffer, mode: Mode): Promise<Tensor> {
+async function pngReadHandler(data: ArrayBuffer,
+                              mode: ImageMode): Promise<Tensor> {
   const promise = createResolvable<Tensor>();
   new pngjs.PNG().parse(data).on("parsed", function(this: any) {
     const data = new Uint8Array(this.data);
@@ -166,7 +168,7 @@ function pngSaveHandler(filename: string, image): Promise<void> {
   });
 }
 
-function jpegReadHandler(data: ArrayBuffer, mode: Mode): Tensor {
+function jpegReadHandler(data: ArrayBuffer, mode: ImageMode): Tensor {
   const img = JPEG.decode(data, true);
   return toTensor(img.data, img.height, img.width, mode);
 }
@@ -178,7 +180,7 @@ function jpegSaveHandler(filename: string, image): void {
   return;
 }
 
-async function nodeImageDecoder(filename: string, mode: Mode)
+async function nodeImageDecoder(filename: string, mode: ImageMode)
     : Promise<Tensor> {
   const ab = await fetchArrayBuffer(filename);
   const ui8 = new Uint8Array(ab);
@@ -202,7 +204,7 @@ async function nodeImageDecoder(filename: string, mode: Mode)
  *    img = await imread("/src/testdata/sample.png")
  *    imshow(img.transpose([1, 0, 2]))
  */
-export async function imread(filename: string, mode: Mode = "RGBA")
+export async function imread(filename: string, mode: ImageMode = "RGBA")
     : Promise<Tensor> {
   if (IS_NODE) {
     return await nodeImageDecoder(filename, mode);
