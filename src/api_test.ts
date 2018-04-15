@@ -41,15 +41,25 @@ interface ConvertFn {
   (x: TensorLike, args?: types.TensorOpts): Tensor;
 }
 
+function cpuConvert(x: TensorLike, args?: types.TensorOpts): Tensor {
+  args = Object.assign({}, { device: "CPU:0"}, args);
+  const t = tensor(x, args);
+  assertEqual(t.device, "CPU:0");
+  return t;
+}
+
 function gpuConvert(x: TensorLike, args?: types.TensorOpts): Tensor {
-  return tensor(x, args).gpu();
+  args = Object.assign({}, { device: "GPU:0"}, args);
+  const t = tensor(x, args);
+  assertEqual(t.device, "GPU:0");
+  return t;
 }
 
 // Allows tests to run on CPU:0 and GPU:0 (if available).
 function testDevices(
   fn: ($: ConvertFn, device: string) => Promise<void>
 ): void {
-  test({ fn: () => fn(tensor, "CPU:0"), name: `${fn.name}_cpu` });
+  test({ fn: () => fn(cpuConvert, "CPU:0"), name: `${fn.name}_cpu` });
   if (gpuAvail()) {
     test({ fn: () => fn(gpuConvert, "GPU:0"), name: `${fn.name}_gpu` });
   }
