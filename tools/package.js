@@ -134,8 +134,8 @@ async function buildAndTest() {
   const propelRoot = path.join(testDir, "propel_root");
   run.mkdir(propelRoot);
 
-  // Pretend we're the tar module. Copy package.json into the npm directory so it
-  // doesn't warn about not having description or repository fields.
+  // Pretend we're the tar module. Copy package.json into the npm directory so
+  // it doesn't warn about not having description or repository fields.
   createPackageJson(run.root + "/node_modules/tar/package.json",
                     path.join(testDir, "package.json"));
 

@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowUnreachableCode": false,
     "alwaysStrict": true,
-    "declaration": true,
+    "declaration": false,
     "diagnostics": false,
     "jsx": "react",
     "jsxFactory": "h",
     "lib": ["es5", "dom", "es2017"],
     "module": "commonjs",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "noImplicitReturns": true,
