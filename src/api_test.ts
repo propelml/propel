@@ -638,7 +638,7 @@ test(async function api_lessEqual() {
   assertAllEqual(g(a, b)[1], [[0, 0, 0], [0, 0, 0]]);
 });
 
-test(async function api_select() {
+testDevices(async function api_select(tensor, device) {
   const t = tensor([
     [1, 2, 3],
     [4, 5, 6],
@@ -653,6 +653,7 @@ test(async function api_select() {
     [0, 1, 0],
   ], {dtype: "bool"});
   const r = cond.select(t, f);
+  assertEqual(r.dtype, "float32");
   assertAllEqual(r, [
     [1, 8,  3],
     [10, 5, 12],

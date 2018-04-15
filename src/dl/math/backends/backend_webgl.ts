@@ -49,6 +49,7 @@ import { PadProgram } from "./webgl/pad_gpu";
 import { Pool2DProgram } from "./webgl/pool_gpu";
 import { ReduceProgram } from "./webgl/reduce_gpu";
 import { ResizeBilinear3DProgram } from "./webgl/resize_bilinear_gpu";
+import { SelectProgram } from "./webgl/select_gpu";
 import { SliceProgram } from "./webgl/slice_gpu";
 import { TextureData, TextureType } from "./webgl/tex_util";
 import { TextureManager } from "./webgl/texture_manager";
@@ -460,7 +461,9 @@ export class MathBackendWebGL implements MathBackend {
   }
 
   select(cond: NDArray<"bool">, a: NDArray, b: NDArray): NDArray {
-    throw new Error("select GPU not yet implemented!");
+    const program = new SelectProgram(cond.shape);
+    const output = this.makeOutputArray(program.outputShape, a.dtype);
+    return this.compileAndRun(program, [cond, a, b], output);
   }
 
   topKValues<D extends DataType, T extends NDArray<D>>(x: T, k: number):

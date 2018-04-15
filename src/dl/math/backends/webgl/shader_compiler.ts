@@ -776,7 +776,7 @@ function getSamplerAtOutputCoords(
 }
 
 export function getCoordsDataType(rank: number): string {
-  if (rank === 1) {
+  if (rank === 0 || rank === 1) {
     return "int";
   } else if (rank === 2) {
     return "ivec2";
