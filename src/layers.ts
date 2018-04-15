@@ -68,6 +68,24 @@ const bnDefaults = Object.freeze({
   epsilon: 1e-5,
 });
 
+type Initializer = () => Tensor;
+
+// As introduced by "Delving Deep into Rectifiers" by
+// Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
+// https://arxiv.org/abs/1502.01852
+function initHe(shape: types.Shape): Initializer {
+  return () => {
+    let n = shape.slice(1).reduce((a, b) => a * b, 1);
+    let stdd = Math.sqrt(2 / n);
+    console.log("initHe stdd", stdd)
+    return ops.randn(shape).mul(stdd);
+  }
+}
+
+function initZeros(shape: types.Shape): Initializer {
+  return () => ops.zeros(shape);
+}
+
 export function linear(input: Tensor, params: Params, outDim: number,
                        { bias = true, scale = 0.01 }: LinearOpts = {}): Tensor {
   assert(input.rank >= 2);
@@ -79,7 +97,7 @@ export function linear(input: Tensor, params: Params, outDim: number,
   const w = p.define("weights", () => ops.randn([inDim, outDim]).mul(scale));
   x = x.matmul(w);
   if (bias) {
-    const b = p.define("bias", () => ops.zeros([outDim]));
+    const b = p.define("bias", initZeros([outDim]));
     x = x.add(b);
   }
   return x;
@@ -90,19 +108,17 @@ export function conv2d(input: Tensor, params: Params, outChans: number,
   let x = input;
   assertEqual(x.rank, 4, "conv2d() Expected rank 4 input.");
   opts = Object.assign({}, convDefaults, opts);
-  const filter = params.define("filter", () => {
-    let shape;
-    if (Array.isArray(opts.size)) {
-      assertEqual(opts.size.length, 2, "conv2d() Bad filter shape.");
-      shape = opts.size.concat([x.shape[3], outChans]);
-    } else {
-      shape = [opts.size, opts.size, x.shape[3], outChans];
-    }
-    return ops.randn(shape);
-  });
+  let filterShape;
+  if (Array.isArray(opts.size)) {
+    assertEqual(opts.size.length, 2, "conv2d() Bad filter shape.");
+    filterShape = opts.size.concat([x.shape[3], outChans]);
+  } else {
+    filterShape = [opts.size, opts.size, x.shape[3], outChans];
+  }
+  const filter = params.define("filter", initHe(filterShape));
   x = ops.conv2d(x, filter, opts);
   if (opts.bias) {
-    const b = params.define("bias", () => ops.zeros([outChans]));
+    const b = params.define("bias", initZeros([outChans]));
     x = x.add(b);
   }
   return x;
