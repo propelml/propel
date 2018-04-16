@@ -12,6 +12,9 @@ export async function train(expName: string): Promise<void> {
     exp.sgd({ lr: 0.01 }, (params) => {
       const x = images.rescale([0, 255], [-1, 1]);
       const logits = resnet.resnetSimple(x, params, n);
+      const predictions = logits.argmax(1);
+      const trainAcc = resnet.accuracy(predictions, labels);
+      console.log("train accuracy", trainAcc);
       return resnet.loss(params, logits, labels);
     });
   }

@@ -17,9 +17,17 @@ import { assert } from "../src/util";
 
 const weightDecay = 0.0001
 
-export function loss(params: Params, logits: Tensor, labels: Tensor, numClasses= 1000) {
-  const softmaxLoss = logits.softmaxLoss(labels);
-  return softmaxLoss.add(weightDecayLoss(params));
+export function loss(params: Params, logits: Tensor, labels: Tensor) {
+  const l = logits.softmaxLoss(labels);
+  const r = weightDecayLoss(params)
+  return l.add(r);
+}
+
+export function accuracy(predictions: Tensor, labels: Tensor) {
+  let total = predictions.shape[0];
+  labels = labels.cast("int32")
+  let correct = predictions.equal(labels).cast("int32").reduceSum();
+  return correct.cast("float32").div(total)
 }
 
 function weightDecayLoss(params: Params): Tensor {
