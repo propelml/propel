@@ -77,7 +77,6 @@ function initHe(shape: types.Shape): Initializer {
   return () => {
     let n = shape.slice(1).reduce((a, b) => a * b, 1);
     let stdd = Math.sqrt(2 / n);
-    console.log("initHe stdd", stdd)
     return ops.randn(shape).mul(stdd);
   }
 }

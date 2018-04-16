@@ -10,18 +10,27 @@
 import {
   Params,
   Tensor,
+  tensor,
 } from "../src/api";
 import { assertShapesEqual } from "../src/tensor_util";
 import { assert } from "../src/util";
 
-/*
-weight_decay=0.0001,
-batch_norm_decay=0.997,
-batch_norm_epsilon=1e-5
-*/
+const weightDecay = 0.0001
 
-export function loss(logits: Tensor, labels: Tensor, numClasses= 1000) {
-  return logits.softmaxLoss(labels);
+export function loss(params: Params, logits: Tensor, labels: Tensor, numClasses= 1000) {
+  const softmaxLoss = logits.softmaxLoss(labels);
+  return softmaxLoss.add(weightDecayLoss(params));
+}
+
+function weightDecayLoss(params: Params): Tensor {
+  let loss = tensor(0);
+  for (let [name, p] of params) {
+    if (name.endsWith("filter") || name.endsWith("weights")) {
+      let l2norm = p.square().reduceSum();
+      loss = loss.add(l2norm);
+    }
+  }
+  return loss.mul(weightDecay);
 }
 
 /** ResNet used in sect 4.2 of https://arxiv.org/abs/1512.03385

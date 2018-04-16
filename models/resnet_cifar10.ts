@@ -12,7 +12,7 @@ export async function train(expName: string): Promise<void> {
     exp.sgd({ lr: 0.01 }, (params) => {
       const x = images.rescale([0, 255], [-1, 1]);
       const logits = resnet.resnetSimple(x, params, n);
-      return resnet.loss(logits, labels);
+      return resnet.loss(params, logits, labels);
     });
   }
 }
