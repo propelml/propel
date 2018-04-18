@@ -523,6 +523,16 @@ defBW("gather", (g: Tensor, indices: Tensor, axis: number) => {
   throw new Error("Not Implemented.");
 });
 
+export const unsortedSegmentSum = defFW("unsortedSegmentSum",
+  (x: Storage, segmentIds: Storage, segmentNum: number): Storage => {
+    saveForBackward(segmentIds, segmentNum);
+    return bo.unsortedSegmentSum(x, segmentIds, segmentNum);
+  });
+defBW("unsortedSegmentSum", (g: Tensor, segmentIds: Tensor,
+                             segmentNum: number) => {
+  throw new Error("Not Implemented.");
+});
+
 export const concat = defFW("concat",
   (axis: number, ...inputs: types.Storage[]) => {
     const shapes = inputs.map(t => t.shape);

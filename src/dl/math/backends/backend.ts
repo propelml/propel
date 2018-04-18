@@ -165,5 +165,8 @@ export interface MathBackend extends NDArrayStorage {
 
   setDiag(input: Array2D, diag: Array1D): Array2D;
 
+  unsortedSegmentSum(data: NDArray, segmentIds: Array1D<"int32">,
+                     numSegments: number): NDArray;
+
   dispose(): void;
 }

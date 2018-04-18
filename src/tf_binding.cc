@@ -144,6 +144,7 @@ const std::map<std::string, int> attrNameMap = {
     {"Taxis", 0},
     {"Tidx", 0},
     {"Tindices", 0},
+    {"Tnumsegments", 0},
     {"Tpaddings", 0},
     {"Tparams", 0},
     {"Tperm", 0},
@@ -175,6 +176,7 @@ const char* AttrNameLookup(napi_env env, napi_value attr_name_js) {
   if (it != attrNameMap.end()) {
     return it->first.c_str();
   }
+  fprintf(stderr, "not found: %s\n", attr_name);
   fatal("Unreachable");
 }
 

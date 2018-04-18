@@ -1508,6 +1508,11 @@ export class MathBackendCPU implements MathBackend {
     return out;
   }
 
+  unsortedSegmentSum(x: NDArray, segmentIds: Array1D<"int32">,
+                     numSegments: number): NDArray {
+    throw Error("Not implemented dl/cpu/unsortedSegmentSum");
+  }
+
   private broadcastedBinaryOp<D extends DataType>(
       a: NDArray, b: NDArray, dtype: D,
       op: (a: number, b: number) => number): NDArray<D> {

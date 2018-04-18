@@ -2159,6 +2159,11 @@ export class NDArrayMath implements NDArrayManager {
     });
   }
 
+  unsortedSegmentSum(data: NDArray, segmentIds: Array1D<"int32">,
+                     numSegments: number): NDArray {
+    return this.backend.unsortedSegmentSum(data, segmentIds, numSegments);
+  }
+
   setDiag(input: Array2D, diag: Array1D): Array2D {
     return this.backend.setDiag(input, diag);
   }

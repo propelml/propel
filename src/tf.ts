@@ -605,6 +605,20 @@ export class OpsTF implements types.BackendOps {
     const attrs = poolAttrs(opts, binding.getDType(origInput.handle));
     return execute0("MaxPoolGrad", [origInput, origOutput, grad], attrs);
   }
+
+  unsortedSegmentSum(x: TensorTF, indices: TensorTF,
+                     numSegments: number): TensorTF {
+    const numSegmentsT = int32Small(numSegments);
+    const attrs = [
+      ["T", binding.ATTR_TYPE, dtypePropel2TF(x.dtype)],
+      ["Tindices", binding.ATTR_TYPE, dtypePropel2TF(indices.dtype)],
+      ["Tnumsegments", binding.ATTR_TYPE, binding.TF_INT32],
+    ];
+    const handles = [x.handle, indices.handle, numSegmentsT.handle];
+    const r = binding.execute(ctx, "UnsortedSegmentSum", attrs, handles);
+    assertEqual(r.length, 1);
+    return new TensorTF(r[0]);
+  }
 }
 
 function poolAttrs(opts: types.PoolOpts, dtypeCode: DTypeCode): AttrDef[] {

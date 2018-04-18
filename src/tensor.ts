@@ -861,6 +861,14 @@ export class Tensor implements types.Storage {
     return ops.setDiag(this, this.colocate(diag, this.dtype));
   }
 
+  /** Computes the unsorted segmented sum using segmentIds
+   */
+  unsortedSegmentSum(segmentIds: types.TensorLike, segmentNum = 0): Tensor {
+    const segmentIdsT = this.colocate(segmentIds, "int32");
+    assert(segmentIdsT.rank === 1, "segmentIds must be rank1 int32");
+    return ops.unsortedSegmentSum(this, segmentIdsT, segmentNum);
+  }
+
   /** To rescale a tensor from inScale to outScale.
    * This is often used rescale images from [0, 255] integer
    * range to [-1, 1] range. This function will automatically cast tensors to
