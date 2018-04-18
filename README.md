@@ -49,7 +49,7 @@ to the various packages:
 
 Check out Propel, including its git submodules.
 
-    git clone --recursive https://github.com/propelml/propel.git
+    git clone --recurse-submodules https://github.com/propelml/propel.git
 
 Propel generally bundles its dependencies in the "deps" submodule.
 
