@@ -71,6 +71,16 @@ export function imshow(tensor: Tensor): void {
     console.warn("imshow: no output handler");
     return;
   }
+  if (tensor.rank === 4) {
+    const [n, h, w] = tensor.shape;
+    if (n * h > 2000 || n * w > 2000) {
+      console.log("Truncated imshow, due to size.");
+    }
+    for (let i = 0; i < n; ++i) {
+      imshow(tensor.slice(i, 1).squeeze());
+    }
+    return;
+  }
   const image = toUint8Image(tensor);
   getOutputHandler().imshow(image);
 }
