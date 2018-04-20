@@ -14,11 +14,12 @@
  */
 
 import { test } from "../tools/tester";
+import { zeros } from "./api";
 import { propelURL } from "./fetch";
-import { imread, toUint8Image } from "./im";
+import { imread, imsave, toUint8Image } from "./im";
 import { assertAllEqual } from "./tensor_util";
 import { assertEqual, assertShapesEqual } from "./tensor_util";
-import { IS_NODE } from "./util";
+import { assert, IS_NODE, nodeRequire, randomString, tmpdir } from "./util";
 
 // The tests use these files:
 // fa57d083e48e999ed3f210aefd92e5f7  testdata/sample.png
@@ -115,4 +116,18 @@ test(async function im_toUint8ImageGrayscale() {
   assertAllEqual(getPixel(1, data, 2, 3, true), [255]);
   assertAllEqual(getPixel(1, data, 20, 20, true), [237]);
   assertAllEqual(getPixel(1, data, 62, 3, true), [255]);
+});
+
+test(async function im_imsave() {
+  const image = zeros([4, 32, 32, 3]);
+  if (!IS_NODE) return;
+  const path = nodeRequire("path");
+  const fs = nodeRequire("fs");
+  const tmpDir = path.join(tmpdir(), randomString());
+  fs.mkdirSync(tmpDir);
+  await imsave(image, path.join(tmpDir, "im.png"));
+  assert(fs.existsSync(path.join(tmpDir, "im-0.png")));
+  assert(fs.existsSync(path.join(tmpDir, "im-1.png")));
+  assert(fs.existsSync(path.join(tmpDir, "im-2.png")));
+  assert(fs.existsSync(path.join(tmpDir, "im-3.png")));
 });

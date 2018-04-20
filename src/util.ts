@@ -210,3 +210,17 @@ export function captureStackTrace(error?: Error): string {
   }
   return stack;
 }
+
+export function formatImageName(filename: string, i?: number) {
+  if (typeof filename !== "string") {
+    const random = randomString().substr(0, 6);
+    filename = `propel-${random}`;
+  }
+  // Force a valid file extension at the end of `filename` (default to .png)
+  filename = filename
+    .replace(/\..+[^(png|jpg|jpeg)]$|[^(png|jpg|jpeg)]$/i, "$&.png");
+  if (typeof i === "number") {
+    return filename.replace(/\.(?=png$|jpe?g$).+/ig, `-${i}$&`);
+  }
+  return filename;
+}

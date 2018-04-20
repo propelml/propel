@@ -17,7 +17,8 @@
 
 import { concat, fill, Tensor, tensor } from "./api";
 import { fetchArrayBuffer } from "./fetch";
-import { createResolvable, IS_NODE, nodeRequire } from "./util";
+import { createResolvable, formatImageName,
+  IS_NODE, nodeRequire } from "./util";
 
 // TODO These modules are only used in Node and it is excessive to include them
 // in the browser bundle. However at the moment we only distribute a single
@@ -222,6 +223,14 @@ export async function imread(filename: string, mode: ImageMode = "RGBA")
 export async function imsave(tensor: Tensor,
                              filename: string,
                              handler?: "PNG" | "JPEG"): Promise<void> {
+  if (tensor.rank === 4) {
+    const n = tensor.shape[0];
+    for (let i = 0; i < n; ++i) {
+      await imsave(tensor.slice(i, 1).squeeze(), formatImageName(filename, i));
+    }
+    return;
+  }
+  filename = formatImageName(filename);
   if (IS_NODE) {
     const image = toUint8Image(tensor);
     if (!handler) {

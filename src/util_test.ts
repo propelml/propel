@@ -95,3 +95,18 @@ test(async function util_captureStackTrace() {
   const s = util.captureStackTrace();
   assert(/util_captureStackTrace/.test(s));
 });
+
+test(async function util_formatImageName() {
+  assertEqual(util.formatImageName("a"), "a.png");
+  assertEqual(util.formatImageName("a.png"), "a.png");
+  assertEqual(util.formatImageName("a.jpg"), "a.jpg");
+  assertEqual(util.formatImageName("a.png.jpg"), "a.png.jpg");
+  assertEqual(util.formatImageName("a", 1), "a-1.png");
+  assertEqual(util.formatImageName("a.jpg", 2), "a-2.jpg");
+  assertEqual(util.formatImageName("a.jpeg", 3), "a-3.jpeg");
+  assertEqual(util.formatImageName("name with spaces and /@!#$", 2),
+    "name with spaces and /@!#$-2.png");
+  const name = util.formatImageName(undefined, 5);
+  assert(name.startsWith("propel-"));
+  assert(name.endsWith("-5.png"));
+});
