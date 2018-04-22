@@ -217,10 +217,21 @@ export function formatImageName(filename: string, i?: number) {
     filename = `propel-${random}`;
   }
   // Force a valid file extension at the end of `filename` (default to .png)
-  filename = filename
-    .replace(/\..+[^(png|jpg|jpeg)]$|[^(png|jpg|jpeg)]$/i, "$&.png");
-  if (typeof i === "number") {
-    return filename.replace(/\.(?=png$|jpe?g$).+/ig, `-${i}$&`);
+  const validExtensions = [".png", ".jpg", ".jpeg"];
+  const tmp = filename.toLowerCase();
+  let insert = true;
+  for (const ext of validExtensions) {
+    if (tmp.endsWith(ext)) {
+      insert = false;
+      break;
+    }
   }
+  if (insert) filename += ".png";
+
+  if (typeof i === "number") {
+    const index = filename.lastIndexOf(".");
+    return filename.slice(0, index) + `-${i}` + filename.slice(index);
+  }
+
   return filename;
 }
